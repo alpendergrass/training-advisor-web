@@ -44,6 +44,7 @@ module.exports.init = function init(callback) {
     var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
 
     if (textSched.error > -1) {
+      mailOptions.subject += ': Error';
       mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
       console.log(mailOptions.text);
       smtpTransport.sendMail(mailOptions, function (err) {
@@ -52,6 +53,7 @@ module.exports.init = function init(callback) {
         }
       });
     } else {
+      mailOptions.subject += ': Info';
       mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
       console.log(mailOptions.text);
       smtpTransport.sendMail(mailOptions, function (err) {
@@ -71,6 +73,7 @@ function downloadTP() {
   console.log(new Date() + ' Running scheduled TP download job.');
   downloadTrainingPeaks.batchDownloadActivities(function(err) {
     if (err) {
+      mailOptions.subject += ': Error';
       mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities returned error: ' + JSON.stringify(err);
       console.log(mailOptions.text);
       smtpTransport.sendMail(mailOptions, function (err) {
@@ -79,6 +82,7 @@ function downloadTP() {
         }
       });
     } else {
+      mailOptions.subject += ': Info';
       mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities completed successfully.';
       console.log(mailOptions.text);
       smtpTransport.sendMail(mailOptions, function (err) {

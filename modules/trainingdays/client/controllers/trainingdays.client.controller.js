@@ -131,6 +131,11 @@ angular.module('trainingDays')
         $scope.hasEnd = true;
         $scope.hasToday = false;
 
+        if (calendar) {
+          // Need to clear out data in case a TD has been deleted.
+          MaterialCalendarData.data = {};
+        }
+
         $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
           //not sure why Mongo/Mongoose returns a string for a date field but
           //we need trainingDay.date to be a valid date object for comparision purposes in the view.
