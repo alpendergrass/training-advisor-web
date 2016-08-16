@@ -35,10 +35,8 @@ module.exports = {
     title: defaultEnvConfig.app.title + ' - Development Environment'
   },
   facebook: {
-    //creds for Victory Kit Dev
-    //was using http://staging.victorykit.com/. Changed to localhost:3000 and it works.
-    clientID: process.env.FACEBOOK_ID || '206322394480',
-    clientSecret: process.env.FACEBOOK_SECRET || 'b6b45dc6f926c6d0d97002a9e4af329d',
+    clientID: process.env.FACEBOOK_ID,
+    clientSecret: process.env.FACEBOOK_SECRET,
     callbackURL: '/api/auth/facebook/callback'
   },
   strava: {
