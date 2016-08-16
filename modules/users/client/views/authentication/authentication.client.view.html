@@ -1,0 +1,15 @@
+<section class="row" ng-controller="AuthenticationController">
+  <h3 class="col-md-12 text-center">Sign in using your Strava account</h3>
+  <div class="col-md-12 text-center">
+    <!-- <img ng-click="callOauthProvider('/api/auth/facebook')" ng-src="/modules/users/client/img/buttons/facebook.png"> -->
+    <a class="btn btn-default" href="#" role="button"><img style="width:100%" ng-click="callOauthProvider('/api/auth/strava')" ng-src="/modules/users/client/img/buttons/strava.png"></a>
+<!--     <img ng-click="callOauthProvider('/api/auth/twitter')" ng-src="/modules/users/client/img/buttons/twitter.png">
+    <img ng-click="callOauthProvider('/api/auth/google')" ng-src="/modules/users/client/img/buttons/google.png">
+    <img ng-click="callOauthProvider('/api/auth/linkedin')" ng-src="/modules/users/client/img/buttons/linkedin.png">
+    <img ng-click="callOauthProvider('/api/auth/github')" ng-src="/modules/users/client/img/buttons/github.png">
+    <img ng-click="callOauthProvider('/api/auth/paypal')"  ng-src="/modules/users/client/img/buttons/paypal.png">
+ -->  
+  </div>
+  <div ui-view></div>
+  <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="authSpinner"></div>
+</section>

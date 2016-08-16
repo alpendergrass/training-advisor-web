@@ -1,0 +1,77 @@
+<section ng-controller="TrainingDaysController">
+  <div class="page-header">
+    <h1>Mid-Season True-Up</h1>
+  </div>
+  <form name="trainingDayForm" class="form-horizontal" ng-submit="createStartingPoint(trainingDayForm.$valid, true)" novalidate>
+    <fieldset>
+      <div class="form-group" show-errors>
+        <div class="col-md-12">
+          <label for="name">True-Up Reason</label>
+          <input name="name" type="text" ng-model="name" id="name" class="form-control" placeholder="Reason">
+        </div>
+      </div>
+
+      <div class="form-group" show-errors>
+        <div class="col-md-4">
+          <label for="date">Date *</label>
+          <p class="input-group">
+          <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" max-date="{{maxTrueUpDate}}" datepicker-options="dateOptions" required close-text="Close" >
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+          </span>
+          </p>
+          <div ng-messages="trainingDayForm.date.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Date is required.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" show-errors>
+        <div class="col-md-4">
+          <label for="fitness">Current Fitness (CTL) *</label>
+          <input name="fitness" type="number" min="1" max="199" step="1" ng-model="fitness" id="fitness" class="form-control" placeholder="Current Fitness" required>
+          <div ng-messages="trainingDayForm.fitness.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Fitness value is required.</p>
+          </div>
+          <div ng-messages="trainingDayForm.fitness.$error" role="alert">
+            <p class="help-block error-text" ng-message="min">Current fitness must be between 1 and 199.</p>
+          </div>
+          <div ng-messages="trainingDayForm.fitness.$error" role="alert">
+            <p class="help-block error-text" ng-message="max">Current fitness must be between 1 and 199.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" show-errors>
+        <div class="col-md-4">
+          <label for="fatigue">Current Fatigue (ATL) *</label>
+          <input name="fatigue" type="number" min="1" max="199" step="1" ng-model="fatigue" id="fatigue" class="form-control" placeholder="Current Fatigue" required>
+          <div ng-messages="trainingDayForm.fatigue.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Fatigue value is required.</p>
+          </div>
+          <div ng-messages="trainingDayForm.fatigue.$error" role="alert">
+            <p class="help-block error-text" ng-message="min">Current fatigue must be between 1 and 199.</p>
+          </div>
+          <div ng-messages="trainingDayForm.fatigue.$error" role="alert">
+            <p class="help-block error-text" ng-message="max">Current fatigue must be between 1 and 199.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-md-12">
+          <label for="notes">Notes to Myself</label>
+          <textarea name="notes" ng-model="notes" id="notes" class="form-control" cols="30" rows="5" placeholder="Notes"></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-12">
+          <input type="submit" class="btn btn-default">
+        </div>
+      </div>
+      <div ng-show="error" class="text-danger">
+        <strong ng-bind="error"></strong>
+      </div>
+    </fieldset>
+  </form>
+</section>

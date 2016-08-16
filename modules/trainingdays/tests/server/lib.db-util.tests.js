@@ -1,0 +1,336 @@
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+var should = require('should'),
+  mongoose = require('mongoose'),
+  moment = require('moment'),
+  User = mongoose.model('User'),
+  TrainingDay = mongoose.model('TrainingDay'),
+  testHelpers = require('./util/test-helpers'),
+  dbUtil = require('../../server/lib/db-util');
+
+/**
+ * Globals
+ */
+var user, trainingDate, trainingDay;
+
+describe('db-util Unit Tests:', function () {
+
+  beforeEach(function (done) {
+    testHelpers.createUser(function(err, newUser) {
+      if (err) {
+        return done(err);
+      }
+
+      user = newUser;    
+
+      trainingDate = moment().startOf('day').toDate();
+      trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
+      done();
+    });
+  });
+
+  describe('Method getTrainingDayDocument', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.getTrainingDayDocument(null, null, function (err, trainingDay) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid trainingDate', function (done) {
+      return dbUtil.getTrainingDayDocument(user, null, function (err, trainingDay) {
+        should.exist(err);
+        (err.message).should.match('trainingDate null is not a valid date');
+        done();
+      });
+    });
+
+    it('should return new trainingDay doc if none exists for trainingDate', function (done) {
+      return dbUtil.getTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
+        should.not.exist(err);
+        should.exist(trainingDay);
+        done();
+      });
+    });
+
+    it('should return existing trainingDay doc if one exists for trainingDate', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        return dbUtil.getTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
+          should.not.exist(err);
+          should.exist(trainingDay);
+          //console.log('trainingDay:' + trainingDay);
+          (trainingDay.name).should.match(/Existing trainingDay/);
+          done();
+        });
+      });
+    });
+
+    it('should return error if multiple documents exist for trainingDate', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+          if (err) {
+            console.log('createTrainingDay error: ' + err);
+          }
+
+          return dbUtil.getTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
+            should.exist(err);
+            (err.message).should.containEql('Multiple trainingDay documents returned for date');
+            done();
+          });
+        });
+      });
+    });
+
+  });
+
+  describe('Method getExistingTrainingDayDocument', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.getExistingTrainingDayDocument(null, null, function (err, trainingDay) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid trainingDate', function (done) {
+      return dbUtil.getExistingTrainingDayDocument(user, null, function (err, trainingDay) {
+        should.exist(err);
+        (err.message).should.match('trainingDate null is not a valid date');
+        done();
+      });
+    });
+
+    it('should return null if no trainingDay doc exists for trainingDate', function (done) {
+      return dbUtil.getExistingTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
+        should.not.exist(err);
+        should.not.exist(trainingDay);
+        done();
+      });
+    });
+
+    it('should return existing trainingDay doc if one exists for trainingDate', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        return dbUtil.getExistingTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
+          should.not.exist(err);
+          should.exist(trainingDay);
+          //console.log('trainingDay:' + trainingDay);
+          (trainingDay.name).should.match(/Existing trainingDay/);
+          done();
+        });
+      });
+    });
+
+    it('should return error if multiple documents exist for trainingDate', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+          if (err) {
+            console.log('createTrainingDay error: ' + err);
+          }
+
+          return dbUtil.getExistingTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
+            should.exist(err);
+            (err.message).should.containEql('Multiple trainingDay documents returned for date');
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  describe('Method clearFutureMetricsAndAdvice', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.clearFutureMetricsAndAdvice(null, null, function (err, rawResponse) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid trainingDate', function (done) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, null, function (err, rawResponse) {
+        should.exist(err);
+        (err.message).should.match('trainingDate null is not a valid date');
+        done();
+      });
+    });
+
+    it('should return match count of 0 and modified count of zero if no trainingDay docs exist past trainingDate', function (done) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+        should.not.exist(err);
+        (rawResponse.n).should.equal(0);
+        (rawResponse.nModified).should.equal(0);
+        done();
+      });
+    });
+
+    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists past trainingDate', function (done) {
+      //Not sure why I have to add 1 second for the method (which used $gte on date) to include my created TD. 
+      //If I use .startOf('day') on my trainingDate here and below then $gte included my created TD. 
+      //I'm not going to worry about it right now as it seems to work correctly in real use but it bugs me...
+      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+          should.not.exist(err);
+          (rawResponse.n).should.equal(1);
+          (rawResponse.nModified).should.equal(0);
+          done();
+        });
+      });
+    });
+
+    it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists past trainingDate', function (done) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        futureTrainingDay.fitness = 99;
+
+        testHelpers.updateTrainingDay(futureTrainingDay, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+            should.not.exist(err);
+            (rawResponse.n).should.equal(1);
+            (rawResponse.nModified).should.equal(1);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return match count of 0 and modified count of 0 if one dirty trainingDay exists past trainingDate but is true-up day', function (done) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        futureTrainingDay.fitness = 99;
+        futureTrainingDay.fitnessAndFatigueTrueUp = true;
+
+        testHelpers.updateTrainingDay(futureTrainingDay, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+            should.not.exist(err);
+            (rawResponse.n).should.equal(0);
+            (rawResponse.nModified).should.equal(0);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return match count of 0 and modified count of 0 if one dirty trainingDay exists past trainingDate but is startingPoint day', function (done) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        futureTrainingDay.fitness = 99;
+        futureTrainingDay.startingPoint = true;
+
+        testHelpers.updateTrainingDay(futureTrainingDay, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+            should.not.exist(err);
+            (rawResponse.n).should.equal(0);
+            (rawResponse.nModified).should.equal(0);
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  describe('Method didWeGoHardTheDayBefore', function () {
+    it('should return true if yesterday was a hard day', function (done) {
+      var yesterday = moment(trainingDate).subtract(1, 'days');
+      testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay: ' + err);
+        }
+
+        createdTrainingDay.loadRating = 'hard';
+        testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay, function (err, wentHard) {
+            if (err) {
+              console.log('didWeGoHardTheDayBefore: ' + err);
+            }
+
+            should.not.exist(err);
+            (wentHard).should.match(true);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return false if yesterday was not a hard day', function (done) {
+      var yesterday = moment(trainingDate).subtract(1, 'days');
+      testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay: ' + err);
+        }
+
+        createdTrainingDay.loadRating = 'moderate';
+        testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay, function (err, wentHard) {
+            if (err) {
+              console.log('didWeGoHardTheDayBefore: ' + err);
+            }
+
+            should.not.exist(err);
+            (wentHard).should.match(false);
+            done();
+          });
+        });
+      });
+    });
+
+  });
+
+  afterEach(function (done) {
+    TrainingDay.remove().exec(function () {
+      User.remove().exec(done);
+    });
+  });
+});

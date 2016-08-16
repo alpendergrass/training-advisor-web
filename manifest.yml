@@ -1,0 +1,13 @@
+---
+declared-services:
+  mean-mongo:
+    label: mongodb
+    plan: 100
+applications:
+- name: training-advisor
+  host: training-advisor
+  memory: 128M
+  services:
+  - training-advisor-mongo
+  env:
+    NODE_ENV: cloud-foundry

@@ -1,0 +1,163 @@
+<section ng-controller="TrainingDaysController">
+  <div class="page-header">
+    <h1>New <span ng-show="eventPriorityParm === '1'">Goal </span>Event</h1>
+  </div>
+  <form name="trainingDayForm" class="form-horizontal" ng-submit="createGoalEvent(trainingDayForm.$valid)" novalidate>
+    <fieldset>
+      <div class="form-group" show-errors>
+        <div class="col-md-12">
+          <label for="name">Event Name *</label>
+          <input name="name" type="text" ng-model="name" id="name" class="form-control" placeholder="Name" required>
+          <div ng-messages="trainingDayForm.name.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Event name is required.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" show-errors>
+        <div class="col-md-4">
+          <label for="date">Event Date *</label>
+          <p class="input-group">
+            <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" min-date="{{minGoalDate}}" datepicker-options="dateOptions" required close-text="Close" >
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+          </p>
+          <div ng-messages="trainingDayForm.date.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Event Date is required.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" ng-hide="eventPriorityParm" show-errors>
+        <div class="col-md-12">
+          <label for="eventPriority">Event Priority *</label>
+          <div class="input-group-sm">
+            <div class="radio">
+              <label>
+                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority1" value="1"  required> This is a major goal for me. I want to peak for this event!
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority2" value="2"  required> This is medium priority event. I would like to do well.
+              </label>
+            </div>
+            <div class="radio"">
+              <label>
+                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority3" value="3"  required> This is a training-focused event. Doing well would be a bonus.
+              </label>
+            </div>
+          </div>
+          <div ng-messages="trainingDayForm.eventPriority.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Event Priority is required.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" ng-hide="eventPriorityParm">
+        <div class="col-md-12">
+          <p class="input-group">
+            <label>
+              <input type="checkbox" ng-disabled="!date || !eventPriority || eventPriority === '1'" ng-model="recurs" ng-change="checkRecurrence()"> Repeat
+            </label>
+            <span ng-hide="recurrenceSpec.summary">...</span><span ng-show="recurs && recurrenceSpec.summary && eventPriority !== '1'">: {{recurrenceSpec.summary}}</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group" show-errors>
+        <div class="col-md-4">
+          <label for="estimatedGoalLoad">Estimated Event Load (TSS®)</label>
+          <input name="estimatedGoalLoad" type="number" min="0" max="999" step="10" ng-model="estimatedGoalLoad" id="estimatedGoalLoad" class="form-control" placeholder="Estimated Load" ng-required="eventPriority === '1' || eventPriority === '2'">
+          <div ng-messages="trainingDayForm.estimatedGoalLoad.$error" role="alert">
+            <p class="help-block error-text" ng-message="required">Estimated Load is required for goal or medium priority events.</p>
+          </div>
+          <div ng-messages="trainingDayForm.estimatedGoalLoad.$error" role="alert">
+            <p class="help-block error-text" ng-message="min">Load estimate must be between 0 and 999.</p>
+          </div>
+          <div ng-messages="trainingDayForm.estimatedGoalLoad.$error" role="alert">
+            <p class="help-block error-text" ng-message="max">Load estimate must be between 0 and 999.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-md-12">
+          <label for="notes">Notes to Myself</label>
+          <textarea name="notes" ng-model="notes" id="notes" class="form-control" cols="30" rows="5" placeholder="Notes"></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-12">
+          <input type="submit" class="btn btn-default">
+        </div>
+      </div>
+      <div ng-show="error" class="text-danger">
+        <strong ng-bind="error"></strong>
+      </div>
+    </fieldset>
+  </form>
+  <p>Training Stress Score® and TSS® are registered trademarks of <a href="http://trainingpeaks.com/" class="colored" target="_blank">Peaksware, LLC</a>.</p>
+
+  <script type="text/ng-template" id="recurrance.html">
+      <div class="modal-header">
+          <h4 class="modal-title">Repeats Weekly</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xs-3">
+            <p class="text-right"><strong>Repeat every:</strong></p>
+          </div>
+          <div class="col-xs-2">
+            <select name="everyNTimeUnits" class="form-control" ng-model="recurrenceSpec.everyNTimeUnits" ng-change="formatRepeatSummary()">
+              <option ng-repeat="i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]" value="{{i}}">{{i}}</option>
+            </select> 
+          </div>
+          <div class="col-xs-3">
+            <strong> weeks</strong>
+          </div>
+        </div>
+
+        <div class="row top-buffer">
+          <div class="col-xs-3">
+            <p class="text-right"><strong>Repeat on:</strong></p>
+          </div>
+          <div class="col-xs-9">
+            <span ng-repeat="day in daysOfWeek">
+              <label class="checkbox-inline">
+                <input type="checkbox" name="{{day.title}}" id="{{day.title}}" ng-model="recurrenceSpec.daysOfWeek[day.value]" ng-click="formatRepeatSummary()" title="{{day.title}}">{{day.text}}&nbsp;&nbsp; 
+              </label>
+            </span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-3">
+            <p class="text-right"><strong>Ends on:</strong></p>
+          </div>
+          <div class="col-xs-5">
+            <p class="input-group">
+              <input type="text" id="endsOn" name="endsOn" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="recurrenceSpec.endsOn" is-open="datePickerStatus.opened" min-date="{{minRepeatDate}}" max-date="{{maxRepeatDate}}" datepicker-options="dateOptions" ng-change="formatRepeatSummary()" required close-text="Close" >
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-3">
+            <p class="text-right"><strong>Summary:</strong></p>
+          </div>
+          <div class="col-xs-9">
+            <span>{{recurrenceSpec.summary}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-primary" type="button" ng-disabled="!recurrenceSpec.everyNTimeUnits || !recurrenceSpec.endsOn || noDaysSelected()" ng-click="saveRecurrence()">Done</button>
+          <button class="btn btn-warning" type="button" ng-click="cancelRecurrence()">Cancel</button>
+      </div>
+  </script>
+</section>

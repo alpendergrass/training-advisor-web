@@ -1,0 +1,67 @@
+<section ng-controller="TrainingDaysController" ng-init="list()">
+  <div class="page-header">
+    <h2>
+      My Training Days
+      <div class="pull-right">
+        <a ng-show="hasToday" class="btn btn-default" ng-click="scrollTo('today')">Go to today</a>
+        <a ng-show="hasStart" class="btn btn-default" ui-sref="trainingDays.getAdvice()" title="Get advice">
+          Get Advice
+        </a>
+      </div>
+    </h2>
+  </div>
+  <div class="alert alert-warning text-center" ng-hide="hasStart && hasEnd">
+    <span ng-hide="hasStart">To get started you need to create a <a ui-sref="trainingDays.createStart">Start Day</a>.</span><span ng-hide="hasEnd"> You should specify at least one <a ui-sref="trainingDays.createEvent({'eventPriority': '1'})">Goal Event</a> for the current season to give your training focus.</span>
+  </div>
+  <div class="list-group" infinite-scroll="nextBatch()" infinite-scroll-disabled='nextChunk >= trainingDaysChunked.length'>
+    <div ng-repeat="trainingDay in trainingDays" id="{{trainingDay.htmlID || ''}}" class="{{trainingDay.htmlID || ''}}">
+      <a ui-sref="trainingDays.view({trainingDayId: trainingDay._id})" class="list-group-item">
+        <h4 class="list-group-item-heading">{{trainingDay.date | date:'EEE, MMM d, y'}}<span ng-show="trainingDay.name"> - {{trainingDay.name}}</span></h4>
+        <small>
+        <p class="list-group-item-text"></p>
+        <p class="list-group-item-text text-danger" ng-show="trainingDay.startingPoint">Start Day</p>
+        <p class="list-group-item-text text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">Fitness and Fatigue True Up</p>
+        <div ng-show="trainingDay.eventPriority">
+          <p class="list-group-item-text"><b>
+            <span ng-show="trainingDay.eventPriority === 1">Goal Event!</span>
+            <span ng-show="trainingDay.eventPriority === 2">Medium Priority Event.</span>
+            <span ng-show="trainingDay.eventPriority === 3">Training-Focused Event.</span>
+            </b><span ng-show="trainingDay.estimatedGoalLoad > 0"> Estimated Event Load is {{trainingDay.estimatedGoalLoad}}.</span></p> 
+        </div>
+        <p class="list-group-item-text" ng-show="trainingDay.plannedActivities[0].activityType"><b>Advice: </b>{{trainingDay.plannedActivities[0].advice}} 
+          <span ng-hide="_.includes(['rest', 'test'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad !== 0">
+            Load between <b>{{trainingDay.plannedActivities[0].targetMinLoad}}</b> and <b>{{trainingDay.plannedActivities[0].targetMaxLoad}}</b>.
+          </span>
+        </p>
+        <ul class="list-inline" ng-show="authentication.user.levelOfDetail == 2 && trainingDay.date.getTime() < dayAfterTomorrow">
+          <li>Fitness: {{trainingDay.fitness}}</li> 
+          <li>Fatigue: {{trainingDay.fatigue}}</li> 
+          <li ng-hide="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint">Form: {{trainingDay.form}}</li>
+        </ul>
+        <small>
+          <ul class="list-inline" ng-show="authentication.user.levelOfDetail == 3">
+            <li>Fitness: {{trainingDay.fitness}}</li> 
+            <li>Fatigue: {{trainingDay.fatigue}}</li> 
+            <li>Form: {{trainingDay.form}}</li>
+            <li>7 Day Ramp Rate: {{trainingDay.sevenDayRampRate}}</li> 
+            <li>Target Ramp Rate: {{trainingDay.sevenDayTargetRampRate}}</li> 
+            <li>Rationale: {{trainingDay.plannedActivities[0].rationale}}</li> 
+            <li>Ramp Rate Adjustment Factor: {{trainingDay.rampRateAdjustmentFactor}}</li> 
+            <li>Daily Target Ramp Rate: {{trainingDay.dailyTargetRampRate}}</li> 
+            <li>Target Avg Daily Load: {{trainingDay.targetAvgDailyLoad}}</li> 
+            <li>Period: {{trainingDay.period}}</li>
+            <li>Starting Point: {{trainingDay.startingPoint}}</li>
+            <li>Completed Load Rating:: {{trainingDay.loadRating}}</li>
+            <li>Created <span ng-bind="trainingDay.created | date:'medium'"></span></li>
+          </ul>
+        </small>
+        <div class="" ng-show="trainingDay.completedActivities.length > 0"><u>Rides</u>
+          <div ng-repeat="completedActivity in trainingDay.completedActivities" class="">
+            <span>Load: {{completedActivity.load}}</span>
+          </div>
+        </div>
+        </small>
+      </a>
+    </div>
+  </div>
+</section>

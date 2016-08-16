@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h3 class="modal-title">How did you feel riding {{relativeDay}}?</h3>
+</div>
+<div class="modal-body">
+  <select name="trainingEffortFeedback" class="form-control" ng-model="trainingEffortFeedback">
+    <option value="">Riding {{relativeDay}} I felt...</option>
+    <option ng-repeat="rating in trainingEffortRatings" value="{{rating.value}}">{{rating.text}}</option>
+  </select>
+  <br/>
+  <!-- <tt>option = {{trainingEffortFeedback}}</tt> -->
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" type="button" ng-disabled="trainingEffortFeedback === ''" ng-click="giveFeedback()">Save</button>
+  <button class="btn btn-warning" type="button" ng-click="cancelFeedback()">Cancel</button>
+</div>

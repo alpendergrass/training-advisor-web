@@ -1,0 +1,200 @@
+<section ng-controller="TrainingDaysController" ng-init="findOne()">
+  <div class="page-header">
+    <h4>
+      <small class="text-default">Training Day</small>
+      {{trainingDay.date | date:'EEEE, MMM d, y'}} - <a href="#" editable-textarea="trainingDay.name" e-rows="1" e-cols="26" onbeforesave="update(true)"><small ng-hide="trainingDay.name" class="text-default">training day name</small><span ng-show="trainingDay.name">{{trainingDay.name}}</span></a>
+      <small class="text-danger" ng-show="trainingDay.startingPoint">This is your season start day</small>
+      <small class="text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">This is a Fitness and Fatigue True Up Day</small>
+    </h4>
+  </div>
+  <div class="pull-right" ng-show="authentication.user._id == trainingDay.user._id">
+    <a ng-show="!trainingDay.completedActivities.length > 0 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="getAdvice(true, trainingDay.date)" title="Get advice">
+      Get Advice
+    </a>
+    <a ng-show="authentication.user.levelOfDetail > 2" class="btn btn-default btn-sm" ui-sref="trainingDays.edit({trainingDayId: trainingDay._id})" title="Edit training day">
+      <i class="glyphicon glyphicon-edit"></i>
+    </a>
+    <a class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
+      <i class="glyphicon glyphicon-trash"></i>
+    </a>
+  </div>
+  <div ng-show="trainingDay.eventPriority">
+    <h4>
+      Today is a <a href="#" editable-radiolist="trainingDay.eventPriority" e-ng-options="s.value as s.text for s in ::eventPriorities track by s.value" onbeforesave="updateEventPriority($data)">{{showPriority()}} </a>
+      <span><small>Estimated Load: <a href="#" editable-textarea="trainingDay.estimatedGoalLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedGoalLoad}}</a></small></span>
+    </h4>
+  </div>
+  <div ng-show="trainingDay.plannedActivities[0].activityType">
+    <p>
+      <div>
+        <label>Today's Advice:
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'choice'">You decide. Ride how you feel.</span>
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'rest'">You should rest.</span>
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'easy'">You should go easy.</span>
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'moderate'">You should do a moderate ride.</span>
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'hard'">You should go hard.</span>
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'test'">You should do a threshold power test.</span>
+          <span ng-show="trainingDay.plannedActivities[0].activityType === 'simulation'">You should do a goal event simulation. This is a ride similar to your goal event in load, duration and intensity.</span>
+        </label>
+      </div>
+      <div>
+        {{trainingDay.plannedActivities[0].advice}}
+        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'goal'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad === trainingDay.plannedActivities[0].targetMinLoad">Today's load should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.</span>
+        <span ng-show="trainingDay.plannedActivities[0].activityType === 'goal' && trainingDay.estimatedGoalLoad !== trainingDay.plannedActivities[0].targetMinLoad">If you treat this event as a workout, your load target should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.</span>
+        <span ng-show="_.includes(['rest', 'easy'], trainingDay.plannedActivities[0].activityType)">Keep load below <strong>{{trainingDay.plannedActivities[0].targetMaxLoad}}</strong> TSS®.</span>
+      </div>
+    </p>
+    <p>
+      <div class="form-inline form-group" ng-show="showGetAdvice">
+        <label for="alternativeActivityType">I want to </label>
+        <select name="alternativeActivityType" class="form-control" ng-model="alternateActivity" ng-options="activity.value as activity.text for activity in activityTypes | filter: {value: '!' + trainingDay.plannedActivities[0].activityType }" ng-change="getAdvice(true, trainingDay.date)">
+          <option value="">Pick an alternative</option>
+        </select>
+        <label>instead.</label>
+      </div>
+      <div ng-show="trainingDay.plannedActivities[1]">
+        <span ng-show="trainingDay.plannedActivities[1].activityType !== 'test' && trainingDay.plannedActivities[1].activityType !== 'simulation'">If you do a <strong>{{trainingDay.plannedActivities[1].activityType}} ride</strong> your load should be between <strong><u>{{trainingDay.plannedActivities[1].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[1].targetMaxLoad}}</u></strong> TSS®.</span>
+        <span ng-show="trainingDay.plannedActivities[1].activityType === 'simulation' && trainingDay.plannedActivities[1].targetMinLoad > 0">If you do a <strong>goal event simulation</strong>, your load should be approximately <strong><u>{{trainingDay.plannedActivities[1].targetMinLoad}}</u></strong> TSS®.</span>
+        <span ng-show="trainingDay.plannedActivities[1].activityType === 'simulation' && trainingDay.plannedActivities[1].targetMinLoad === 0">A <strong>goal event simulation</strong> is not possible as no future goal events exist in the current season.</span>
+        <span ng-show="trainingDay.plannedActivities[1].activityType === 'test'">If you do a <strong>threshold power test</strong>, be sure to record your new FTP and test date on your My Profile page.</span>
+      </div>
+    </p>
+    <hr />
+  </div>
+  <div ng-show="(showFormAndFitness && authentication.user.levelOfDetail > 1) || authentication.user.levelOfDetail > 2">
+    <!-- Let's edit in place.  -->
+    <form editable-form name="trainingDayForm" onaftersave="update(true)">
+      <div>
+        <label class="title">Fitness (CTL): </label>
+        <span editable-number="trainingDay.fitness" e-min="0" e-max="199" e-step="0.1" e-name="fitness" e-required>{{ trainingDay.fitness }}</span>
+      </div>
+      <div>
+        <label class="title">Fatigue (ATL): </label>
+        <span editable-number="trainingDay.fatigue" e-min="0" e-max="199" e-step="0.1" e-name="fatigue" e-required>{{ trainingDay.fatigue }}</span>
+      </div>
+      <p>
+        <button type="button" class="btn btn-default btn-xs" ng-click="trainingDayForm.$show()" ng-show="!trainingDayForm.$visible">
+          True up F&F
+        </button>
+        <span ng-show="trainingDayForm.$visible">
+          <button type="submit" class="btn btn-primary btn-xs" ng-disabled="trainingDayForm.$waiting">
+            Save
+          </button>
+          <button type="button" class="btn btn-default btn-xs" ng-disabled="trainingDayForm.$waiting" ng-click="trainingDayForm.$cancel()">
+            Cancel
+          </button>
+        </span>
+      </p>
+    </form>
+    <div ng-show="error" class="text-danger">
+      <strong ng-bind="error"></strong>
+    </div>
+    <p>
+      <label>Form (TSB):</label> {{ trainingDay.form }}
+      <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate - today is <span ng-show="trainingDay.startingPoint">your season start</span><span ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">a true-up day</span></abbr>
+      <span ng-show="trainingDay.sevenDayRampRate !== 0"><br/>Seven Day Fitness Ramp Rate is {{trainingDay.sevenDayRampRate}}. Target Ramp Rate is {{trainingDay.sevenDayTargetRampRate}}.</span>
+    </p>
+  </div>
+  <p>
+    <label>Notes on the Day: </label>
+    <a href="#" editable-textarea="trainingDay.notes" e-rows="7" e-cols="40" onbeforesave="update(true)">
+      <pre>{{ trainingDay.notes || 'no notes' }}</pre>
+    </a>
+  </p>
+  <div ng-show="showCompletedActivities">
+    <div ng-hide="trainingDay.completedActivities.length > 0">
+      <label>No Completed Rides for the Day</label>
+    </div>
+    <div ng-show="trainingDay.completedActivities.length > 0">
+      <p>
+        <label>Completed Rides</label>
+        <table class="table table-bordered table-hover table-condensed">
+          <tr style="font-weight: bold">
+            <!-- <td style="width:10%">Type</td> -->
+            <td style="width:10%">Source</td>
+            <td style="width:10%">Load</td>
+            <!-- <td style="width:10%">Intensity</td> -->
+            <td style="width:50%">Activity Notes</td>
+            <td style="width:20%"></td>
+          </tr>
+          <tr ng-repeat="completedActivity in trainingDay.completedActivities">
+            <!-- <td>
+              <span editable-select="completedActivity.activityType" e-name="activityType" e-form="completedActivityForm" e-ng-options="s.value as s.text for s in activityTypes" e-required>
+                          {{completedActivity.activityType}}
+                      </span>
+            </td> -->
+            <td>
+              <span class="text-capitalize">{{ completedActivity.source }}</span>
+            </td>
+            <td>
+              <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span>
+            </td>
+            <td>
+              <span editable-textarea="completedActivity.notes" e-rows="2" e-cols="70" e-name="notes" e-form="completedActivityForm">
+                {{ completedActivity.notes }}
+              </span>
+            </td>
+            <td style="white-space: nowrap">
+              <!-- form -->
+              <form editable-form name="completedActivityForm" onbeforesave="saveCompletedActivity($data, completedActivity.created)" ng-show="completedActivityForm.$visible" class="form-buttons form-inline" shown="inserted == completedActivity">
+                <button type="submit" ng-disabled="completedActivityForm.$waiting" class="btn btn-primary btn-xs">
+                  save
+                </button>
+                <button type="button" ng-disabled="completedActivityForm.$waiting" ng-click="completedActivityForm.$cancel()" class="btn btn-default btn-xs">
+                  cancel
+                </button>
+              </form>
+              <div class="buttons" ng-show="!completedActivityForm.$visible">
+                <button class="btn btn-default btn-xs" ng-click="completedActivityForm.$show()">edit</button>
+                <button class="btn btn-default btn-xs" ng-click="deleteCompletedActivity($index)">delete</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </p>
+    </div>
+    <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdViewSpinner" style="position: relative"></div>
+    <p ng-show="trainingDay.completedActivities.length > 0">
+      <label>Load Rating: <i>{{trainingDay.loadRating}}</i></label>
+    </p>
+    <p>
+      <!-- only show download option if we have TP creds. -->
+      <a href="#" ng-click="downloadActivities('trainingpeaks')" title="Download workouts from TrainingPeaks®" ng-show="authentication.user.trainingPeaksCredentials.username && authentication.user.trainingPeaksCredentials.password">
+        <!-- TrainingPeaks Download -->
+        <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/trainingpeaks.png">
+      </a>
+      <!-- only show download option if connected to Strava. -->
+      <a href="#" ng-click="downloadActivities('strava')" title="Download activities from Strava" ng-show="isConnectedSocialAccount('strava')">
+        <!-- Strava Download -->
+        <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/strava.png">
+      </a>
+      <button class="btn btn-default" title="Manually add activity" ng-click="addCompletedActivity()">
+        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+      </button>
+    </p>
+    <div ng-show="error" class="text-danger">
+      <strong ng-bind="error"></strong>
+    </div>
+  </div>
+  <div ng-show="authentication.user.levelOfDetail > 2">
+    <small>
+      <div>Date: {{trainingDay.date }}</div>
+      <div>Rationale: {{trainingDay.plannedActivities[0].rationale }}</div>
+      <div>startingPoint: {{trainingDay.startingPoint }}</div> 
+      <div>period: {{trainingDay.period }}</div> 
+      <div>sevenDayRampRate: {{trainingDay.sevenDayRampRate}}</div>
+      <div>sevenDayTargetRampRate: {{trainingDay.sevenDayTargetRampRate}}</div>
+      <div>rampRateAdjustmentFactor: {{trainingDay.rampRateAdjustmentFactor}}</div>
+      <div>dailyTargetRampRate: {{trainingDay.dailyTargetRampRate}}</div>
+      <div>targetAvgDailyLoad: {{trainingDay.targetAvgDailyLoad}}</div>
+      <div>user.fatigueTimeConstant: {{authentication.user.fatigueTimeConstant}}</div>
+      <em class="text-muted">
+        Created
+        <span ng-bind="trainingDay.created | date:'medium'"></span>
+        by
+        <span ng-bind="trainingDay.user.displayName"></span>
+      </em>
+    </small>
+  </div>
+  <p>TrainingPeaks®, Training Stress Score® and TSS® are registered trademarks of <a href="http://trainingpeaks.com/" class="colored" target="_blank">Peaksware, LLC</a>.</p>
+</section>
