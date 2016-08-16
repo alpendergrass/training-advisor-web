@@ -186,7 +186,7 @@ angular.module('trainingDays')
 
       $scope.setDirection = function(direction) {
         $scope.direction = direction;
-        $scope.dayFormat = direction === 'vertical' ? 'EEEE, MMMM d' : 'd';
+        $scope.dayFormat = direction === 'vertical' ? 'EEE, MMM d' : 'd';
       };
 
       $scope.dayClick = function(date) {
@@ -280,8 +280,6 @@ angular.module('trainingDays')
           $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
           return false;
         }
-
-        //console.log('client-side start date: ' + this.date); //start date: Mon Oct 26 2015 00:00:00 GMT-0600 (MDT)
 
         var trainingDay = new TrainingDays({
           startingPoint: !isTrueUp,

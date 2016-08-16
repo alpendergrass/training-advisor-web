@@ -31,9 +31,10 @@ calendar-md md-content.agenda :first-child {
   font-weight: normal !important;
 }
 
-/*calendar-md md-content>md-content.agenda>*>* :not(:first-child) {
-  padding: 12px;
-}*/
+/* To control date column width in agenda view: */
+calendar-md md-content.agenda > div > div > div {
+  width: 100px !important;
+}
 
 .td-calendar-content {
   text-align: left !important;
