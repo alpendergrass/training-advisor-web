@@ -1,1 +1,1 @@
-Read me later after I've been written.
+Tacit Training is an app for cyclists that dispenses training advice that will help you understand what you need to do on a daily basis in order to achieve your cycling objectives. Tacit Training gives you daily advice on what your training day should look like and how much work you should do. The app is structured around a training season with goal events. Your goal can be any date on the calendar that you want to be at your best. 
