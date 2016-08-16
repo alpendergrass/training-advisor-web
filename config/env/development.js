@@ -35,8 +35,8 @@ module.exports = {
     title: defaultEnvConfig.app.title + ' - Development Environment'
   },
   facebook: {
-    clientID: process.env.FACEBOOK_ID,
-    clientSecret: process.env.FACEBOOK_SECRET,
+    clientID: process.env.FACEBOOK_ID || 'APP_ID',
+    clientSecret: process.env.FACEBOOK_SECRET || 'APP_SECRET' ,
     callbackURL: '/api/auth/facebook/callback'
   },
   strava: {
