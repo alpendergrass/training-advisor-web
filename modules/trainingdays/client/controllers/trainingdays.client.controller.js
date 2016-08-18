@@ -201,7 +201,7 @@ angular.module('trainingDays')
       //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
       //We need a callback from the calendar module. Or something.
       angular.element(document).ready(function () {
-        $('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
+        jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
       });
 
       $scope.setDirection = function(direction) {
