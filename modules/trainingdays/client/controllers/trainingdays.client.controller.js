@@ -23,6 +23,8 @@ angular.module('trainingDays')
         toastr[message.type](message.text, message.title);
       });
 
+      //The following is used on the TD list page for the Today button.
+      //This page is no longer available to non-admin users.
       $scope.scrollTo = function(id) {
         var currentPath = $location.hash();
         $location.hash(id);
@@ -88,7 +90,13 @@ angular.module('trainingDays')
 
       var formatDayContent = function(trainingDay) {
         var load = 0,
-          content = '<div class="td-calendar-content">';
+          content = '<div class="td-calendar-content';
+
+        if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
+          content += ' today-on-calendar';
+        }
+
+        content += '">';
 
         content += trainingDay.name ? '<b>' + trainingDay.name + '</b> ' : '';
         content += trainingDay.startingPoint ? '<b class="small text-danger">Season Start</b> ' : '';
@@ -98,7 +106,7 @@ angular.module('trainingDays')
           content += '<small> - ';
           switch (trainingDay.eventPriority) {
             case 1:
-              content += '<b class="text-info">Goal Event!</b>';
+              content += '<b class="text-danger">Goal Event!</b>';
               break;
             case 2:
               content += '<b>Medium Priority</b>';
@@ -188,6 +196,13 @@ angular.module('trainingDays')
           }
         });
       };
+
+      //Highlight today in calendar view
+      //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
+      //We need a callback from the calendar module. Or something.
+      angular.element(document).ready(function () {
+        $('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
+      });
 
       $scope.setDirection = function(direction) {
         $scope.direction = direction;

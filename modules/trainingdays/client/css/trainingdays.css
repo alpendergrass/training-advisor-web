@@ -33,7 +33,7 @@ calendar-md md-content.agenda :first-child {
 
 /* To control date column width in agenda view: */
 calendar-md md-content.agenda > div > div > div {
-  width: 100px !important;
+  width: 120px !important;
 }
 
 .td-calendar-content {
