@@ -9,8 +9,9 @@ angular.module('trainingDays')
 
       //The following makes lodash available in html.
       $scope._ = _;
+
       //Create socket for server-to-client messaging.
-      // Make sure the Socket is connected
+      //Make sure the Socket is connected
       if (!Socket.socket) {
         Socket.connect();
       }
@@ -200,9 +201,9 @@ angular.module('trainingDays')
       //Highlight today in calendar view
       //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
       //We need a callback from the calendar module. Or something.
-      angular.element(document).ready(function () {
-        jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
-      });
+      // angular.element(document).ready(function () {
+      //   jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
+      // });
 
       $scope.setDirection = function(direction) {
         $scope.direction = direction;
