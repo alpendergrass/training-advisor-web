@@ -32,10 +32,10 @@ angular.module('core').controller('AboutController', ['$scope', 'Authentication'
       sectionTitle: 'The Basics',
       questions: [{
         question: 'What equipment do I need in order to use Tacit Training?',
-        answer: 'You need a power meter on your bike and, ideally, a head unit that displays Training Load (typically as TSS®) in real time. Most head units do these days.'
+        answer: 'You need a power meter on your bike and, ideally, a head unit that displays Training Load (typically as TSS® - Training Stress Score®) in real time. Most head units do these days.'
       }, {
         question: 'How do I use Tacit Training on a daily basis?',
-        answer: 'For every workout you need to either download your ride from Strava or manually enter your Training Load for the ride. Then on a daily basis you should ask Tacit Training to give you advice for the day. Tacit Training will advise you if you should ride or not and if so, what kind of ride to do. Tacit Training will also give you a suggested Training Load range for the day. You can monitor your Training Load (TSS®) in real-time on your head unit to stay within those parameters.'
+        answer: 'For every workout you need to either download your ride from Strava or manually enter your Training Load for the ride. Then on a daily basis you should ask Tacit Training to give you advice for the day. Tacit Training will advise you if you should ride or not and if so, what kind of ride to do. Tacit Training will also give you a suggested Training Load range for the day. You can monitor your Training Load (typically shown as TSS® - Training Stress Score®) in real-time on your head unit to stay within those parameters.'
       }, {
         question: 'How do I get started? (Creating an account)',
         answer: 'First you have to create an account. You can do this the regular way by creating a username and password or by linking to your Strava account.'
@@ -89,7 +89,7 @@ angular.module('core').controller('AboutController', ['$scope', 'Authentication'
       sectionTitle: 'Ride Data',
       questions: [{
         question: 'How do I get my workout data into Tacit Training?',
-        answer: 'Tacit Training needs your Training Load for each ride. Ideally you will download your ride from Strava - see below for details. If for some reason you cannot download a ride, on the Training Day page you can manually enter the ride by clicking the + button. You can get Training Load (TSS®) from most head units or you can provide an estimate if actual data is not available.' 
+        answer: 'Tacit Training needs your Training Load for each ride. Ideally you will download your ride from Strava - see below for details. If for some reason you cannot download a ride, on the Training Day page you can manually enter the ride by clicking the + button. You can get Training Load (as TSS® - Training Stress Score®) from most head units or you can provide an estimate if actual data is not available.' 
       }, {
         question: 'How do I download my rides from Strava?',
         answer: 'If you have a Strava account and upload your rides to Strava, you can link your Tacit Training account to your Strava account and download your rides from Strava from within Tacit Training. If you used your Strava account to set up your Tacit Training account, you are already linked. If you created a Tacit Training username and password, you can link your Strava account from the Manage Social Accounts page. Once you link your Strava account a Strava download button will appear on the Training Day page.'

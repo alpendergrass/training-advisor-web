@@ -41,7 +41,7 @@
         {{trainingDay.plannedActivities[0].advice}}
         <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'goal'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad === trainingDay.plannedActivities[0].targetMinLoad">Today's Training Load should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.</span>
         <span ng-show="trainingDay.plannedActivities[0].activityType === 'goal' && trainingDay.estimatedGoalLoad !== trainingDay.plannedActivities[0].targetMinLoad">If you treat this event as a workout, your Training Load target should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.</span>
-        <span ng-show="_.includes(['rest', 'easy'], trainingDay.plannedActivities[0].activityType)">Keep Training Load below <strong>{{trainingDay.plannedActivities[0].targetMaxLoad}}</strong> TSS®.</span>
+        <span ng-show="_.includes(['rest', 'easy'], trainingDay.plannedActivities[0].activityType)">Keep Training Load below <strong>{{trainingDay.plannedActivities[0].targetMaxLoad}}</strong>.</span>
       </div>
     </p>
     <p>
