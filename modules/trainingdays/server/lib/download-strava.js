@@ -90,8 +90,9 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           newActivity.sourceID = stravaActivity.id;
           newActivity.name = stravaActivity.name;
           //newActivity.intensity = intensity;
-          newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
-          newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';
+          newActivity.notes = stravaActivity.name;
+          // newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
+          // newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';
           trainingDay.completedActivities.push(newActivity);
           newActivity = {};         
         }
