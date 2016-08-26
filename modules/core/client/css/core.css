@@ -35,3 +35,15 @@ a:hover .header-profile-image {
 .has-error .help-inline.error-text {
   display: inline;
 }
+
+.navbar-brand {
+  padding-top: 0;
+  padding-left: 0;
+}
+.navbar-nav a {
+  color: black;
+}
+
+.navbar {
+  border-bottom: 1px solid #e5e5e5;
+} 
