@@ -7,7 +7,10 @@ angular.module('core').service('Socket', ['Authentication', '$state', '$timeout'
     this.connect = function () {
       // Connect only when authenticated
       if (Authentication.user) {
+        //I need to use port 4443 for websocket because it does not work over port 80 in Cloud Foundry.
         this.socket = io();
+        //this.socket = io(location.protocol + '//' + location.hostname + ':4443');
+        // this.socket = io(location.protocol + '//' + location.hostname + ':4443', { secure: true });
       }
     };
     this.connect();

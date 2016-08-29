@@ -201,9 +201,9 @@ angular.module('trainingDays')
       //Highlight today in calendar view
       //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
       //We need a callback from the calendar module. Or something.
-      // angular.element(document).ready(function () {
-      //   jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
-      // });
+      angular.element(document).ready(function () {
+        jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
+      });
 
       $scope.setDirection = function(direction) {
         $scope.direction = direction;
@@ -473,7 +473,12 @@ angular.module('trainingDays')
           $scope.checkGiveFeedback(trainingDay);
         }, function(errorResponse) {
           usSpinnerService.stop('tdViewSpinner');
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented activity download.';
+          }
         });
       };
 

@@ -252,6 +252,8 @@ module.exports.init = function (db) {
 
   // Configure Socket.io
   app = this.configureSocketIO(app, db);
+  //when using port 4443 in socket.io.js, no need to create and return a server object.
+  // this.configureSocketIO(db);
 
   return app;
 };
