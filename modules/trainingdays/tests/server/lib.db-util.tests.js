@@ -14,7 +14,7 @@ var should = require('should'),
 /**
  * Globals
  */
-var user, trainingDate, trainingDay;
+var user, trainingDate, endDate, trainingDay;
 
 describe('db-util Unit Tests:', function () {
 
@@ -27,6 +27,7 @@ describe('db-util Unit Tests:', function () {
       user = newUser;    
 
       trainingDate = moment().startOf('day').toDate();
+      endDate = moment().add(2, 'days').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
     });
@@ -155,6 +156,80 @@ describe('db-util Unit Tests:', function () {
         });
       });
     });
+  });
+
+  describe('Method getTrainingDays', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.getTrainingDays(null, null, null, function (err, trainingDays) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid startDate', function (done) {
+      return dbUtil.getTrainingDays(user, null, null, function (err, trainingDays) {
+        should.exist(err);
+        (err.message).should.containEql('startDate');
+        (err.message).should.containEql('is not a valid date');
+        done();
+      });
+    });
+
+    it('should return error if invalid endDate', function (done) {
+      return dbUtil.getTrainingDays(user, trainingDate, null, function (err, trainingDays) {
+        should.exist(err);
+        (err.message).should.containEql('endDate');
+        (err.message).should.containEql('is not a valid date');
+        done();
+      });
+    });
+
+    it('should return three trainingDay docs if no trainingDay exists between startDate and endDate', function (done) {
+      return dbUtil.getTrainingDays(user, trainingDate, endDate, function (err, trainingDays) {
+        should.not.exist(err);
+        should.exist(trainingDays);
+        (trainingDays.length).should.equal(3);
+        done();
+      });
+    });
+
+    it('should return return three trainingDay docs if one exists for startDate', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        return dbUtil.getTrainingDays(user, trainingDate, endDate, function (err, trainingDays) {
+          should.not.exist(err);
+          should.exist(trainingDay);
+          (trainingDays.length).should.equal(3);
+          done();
+        });
+      });
+    });
+
+    it('should return three trainingDay docs if one exists for endDate', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        testHelpers.createTrainingDay(user, endDate, null, function(err) {
+          if (err) {
+            console.log('createTrainingDay error: ' + err);
+          }
+
+          return dbUtil.getTrainingDays(user, trainingDate, endDate, function (err, trainingDays) {
+            should.not.exist(err);
+            should.exist(trainingDay);
+            (trainingDays.length).should.equal(3);
+            done();
+          });
+        });
+      });
+    });
+
   });
 
   describe('Method clearFutureMetricsAndAdvice', function () {
@@ -287,7 +362,7 @@ describe('db-util Unit Tests:', function () {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay, function (err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
@@ -313,7 +388,7 @@ describe('db-util Unit Tests:', function () {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay, function (err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
