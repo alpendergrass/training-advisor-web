@@ -36,7 +36,7 @@ function determinePeriod(user, trainingDay, callback) {
   async.parallel(
     {
       startDate: function(callback) {
-        dbUtil.getStartDay(user, trainingDay, function(err, startDay) {
+        dbUtil.getStartDay(user, trainingDay.date, function(err, startDay) {
           if (err) {
             return callback(err);
           }
@@ -45,7 +45,7 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       nextGoalDate: function(callback) {
-        dbUtil.getNextPriorityDay(user, trainingDay, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
+        dbUtil.getNextPriorityDay(user, trainingDay.date, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
           if (err) {
             return callback(err, null);
           }
@@ -58,7 +58,7 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       nextPriority2Date: function(callback) {
-        dbUtil.getNextPriorityDay(user, trainingDay, 2, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
+        dbUtil.getNextPriorityDay(user, trainingDay.date, 2, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
           if (err) {
             return callback(err, null);
           }
@@ -71,7 +71,7 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       nextPriority3Date: function(callback) {
-        dbUtil.getNextPriorityDay(user, trainingDay, 3, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
+        dbUtil.getNextPriorityDay(user, trainingDay.date, 3, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
           if (err) {
             return callback(err, null);
           }
@@ -84,7 +84,7 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       mostRecentGoalDate: function(callback) {
-        dbUtil.getMostRecentGoalDay(user, trainingDay, function(err, goalDay) {
+        dbUtil.getMostRecentGoalDay(user, trainingDay.date, function(err, goalDay) {
           if (err) {
             return callback(err, null);
           }

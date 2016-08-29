@@ -51,7 +51,7 @@ module.exports.checkModerate = function(user, trainingDay, callback) {
 };
 
 function shouldWeGoModerate(user, trainingDay, callback) {
-  dbUtil.didWeGoHardTheDayBefore(user, trainingDay, function(err, wentHard) {
+  dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function(err, wentHard) {
     if (err) {
       return callback(err, null);
     }

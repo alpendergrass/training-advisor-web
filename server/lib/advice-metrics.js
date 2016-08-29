@@ -18,7 +18,6 @@ var path = require('path'),
 module.exports = {};
 
 module.exports.updateMetrics = function(user, trainingDate, callback) {
-
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
   if (!user) {
@@ -32,11 +31,14 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
   }
 
   //Clear metrics and remove advice for TD's after trainingDate.
-  dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
-    if (err) {
-      return callback(err, null);
-    }
-
+  //When generating a plan we will compute metrics and advice for every day until the end of the plan.
+  //
+  //TODO: Perhaps we should just supress display of advice for future dates.
+  //Or always recompute plan?
+  // dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
+  //   if (err) {
+  //     return callback(err, null);
+  //   }
 
     dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
       if (err) {
@@ -67,7 +69,13 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
         });
       });
     });
-  });
+  // });
+};
+
+module.exports.assignLoadRating = function(trainingDay) {
+  var totalLoad = sumBy(trainingDay.completedActivities, 'load');
+  trainingDay.loadRating = determineLoadRating(trainingDay.targetAvgDailyLoad, totalLoad);
+  return trainingDay;
 };
 
 function updateMetricsForDay(user, currentTrainingDay, callback) {

@@ -49,7 +49,7 @@ module.exports.checkEasy = function(user, trainingDay, callback) {
 };
 
 function shouldWeGoEasy(user, trainingDay, callback) {
-  dbUtil.didWeGoHardTheDayBefore(user, trainingDay, function(err, wentHard) {
+  dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function(err, wentHard) {
     if (err) {
       return callback(err, null, null);
     }

@@ -3,7 +3,8 @@
 /**
  * Module dependencies.
  */
-var _ = require('lodash'),
+var path = require('path'),
+  _ = require('lodash'),
   moment = require('moment'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -17,9 +18,110 @@ var _ = require('lodash'),
   adviceSimulation = require('./advice-simulation'),
   adviceLoad = require('./advice-load'),
   adviceConstants = require('./advice-constants'),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
 
 module.exports = {};
+
+module.exports.generatePlan = function(params, callback) {
+
+  callback = (typeof callback === 'function') ? callback : function(err, data) {};
+
+  if (!params.user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  if (!params.startDate) {
+    err = new TypeError('startDate is required');
+    return callback(err, null);
+  }
+
+  var startDate = new Date(params.startDate),
+    adviceParams = {},
+    statusMessage = {
+      type: '',
+      text: '',
+      title: 'Training Plan Update',
+      created: Date.now(),
+      username: params.user.username
+    };
+
+  dbUtil.getNextPriorityDay(params.user, startDate, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
+    if (err) {
+      return callback(err, null);
+    }
+
+    if (!goalDay) {
+      err = new TypeError('A goal is required in order to compute a plan.');
+      return callback(err, null);
+    }
+
+    dbUtil.clearFutureMetricsAndAdvice(params.user, startDate, function(err, rawResponse) {
+      if (err) {
+        return callback(err, null);
+      }
+
+    //get all training days from today thru goal.
+      dbUtil.getTrainingDays(params.user, startDate, goalDay.date, function(err, trainingDays) {
+        if (err) {
+          return callback(err, null);
+        }
+
+        if (trainingDays.length < 1) {
+          return callback(null, null);
+        }
+
+        //update metrics for today?
+        
+        //if today has a ride, start with tomorrow, else start with today.
+        if (trainingDays[0].completedActivities.length > 0) {
+          trainingDays.shift(); 
+          startDate = moment(startDate).add('1', 'day').toDate();
+        }
+
+        async.eachSeries(trainingDays, function(trainingDay, callback) {
+          adviceParams = {
+            user: params.user,
+            trainingDate: trainingDay.date
+          };
+
+          module.exports.advise(adviceParams, function (err, trainingDay) {
+            if (err) {
+              return callback(err);
+            }
+
+            generateActivityFromAdvice(params.user, trainingDay, function(err, trainingDay) {
+              if (err) {
+                return callback(err);
+              }
+
+              return callback();
+            });
+          });
+        }, 
+          function(err) {
+            if (err) {
+              return callback(err,null);
+            }
+
+            dbUtil.removeFutureCompletedActivities(params.user, startDate, function(err, rawResponse) {
+              if (err) {
+                return callback(err, null);
+              }
+
+
+              statusMessage.text = 'We have updated your training plan.';
+              statusMessage.type = 'success';
+              dbUtil.sendMessageToUser(statusMessage, params.user);
+              return callback(null, true);
+            });
+          }
+        );
+      });
+    });
+  });
+};
 
 module.exports.advise = function(params, callback) {
 
@@ -43,7 +145,7 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
-  //TODO: if this remains series of one, convert to object structure for readability.
+  //TODO: if this remains series of one, perhaps convert to object structure for readability.
   async.series(
     [
       function(callback) {
@@ -65,7 +167,7 @@ module.exports.advise = function(params, callback) {
         plannedActivities;
 
       if (!params.alternateActivity) {
-        //We are suggesting an activity.
+        //We are advising an activity.
         //Replace any existing plannedActivities.
         plannedActivities = [];
         plannedActivities[0] = {};
@@ -117,8 +219,7 @@ module.exports.advise = function(params, callback) {
 };
 
 function generateAdvice(user, trainingDay, callback) {
-  //each method in the waterfall must return all objects used by subsequent methods
-  //even if no changes were made, such as with user.
+  //Each method in the waterfall must return all objects used by subsequent methods.
   async.waterfall([
     async.apply(adviceGoal.checkGoal, user, trainingDay),
     adviceTest.checkTest,
@@ -166,4 +267,23 @@ function generateAdvice(user, trainingDay, callback) {
       });
     }
   );
+}
+
+function generateActivityFromAdvice(user, trainingDay, callback) {
+  var completedActivity = {};
+
+  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'advised') {
+    completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;
+    completedActivity.source = 'plangeneration';
+    trainingDay.completedActivities.push(completedActivity);
+    trainingDay = adviceMetrics.assignLoadRating(trainingDay);
+
+    trainingDay.save(function (err) {
+      if (err) {
+        return callback(err, null);
+      } else {
+        return callback(null, trainingDay);
+      }
+    });
+  }
 }
