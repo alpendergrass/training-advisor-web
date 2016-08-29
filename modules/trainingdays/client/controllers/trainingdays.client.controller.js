@@ -91,6 +91,7 @@ angular.module('trainingDays')
 
       var formatDayContent = function(trainingDay) {
         var load = 0,
+          lengthOfFirstFragment = 33,
           content = '<div class="td-calendar-content';
 
         if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
@@ -105,6 +106,7 @@ angular.module('trainingDays')
         
         if (trainingDay.eventPriority) {
           content += '<small> - ';
+
           switch (trainingDay.eventPriority) {
             case 1:
               content += '<b class="text-danger">Goal Event!</b>';
@@ -118,10 +120,12 @@ angular.module('trainingDays')
             default:
               break;
           }
+
           content += '</small>';
         }
+
         if (trainingDay.completedActivities.length > 0) {
-          content += content.length > 33 ? '<br>' : '';
+          content += content.length > lengthOfFirstFragment ? '<br>' : '';
           content += '<small>Load: ';
           _.forEach(trainingDay.completedActivities, function(activity) {
             load += activity.load;
@@ -130,6 +134,18 @@ angular.module('trainingDays')
           // content = content.substring(0, content.length - 2);
           content += load + ' - ' + trainingDay.loadRating + ' day</small>';
         }
+
+        if (moment(trainingDay.date).isAfter(moment(), 'day')) {
+          content += content.length > lengthOfFirstFragment ? '<br>' : '';
+          content += '<small>Plan: ';
+          if (trainingDay.plannedActivities[0]) {
+            content += ' ' + trainingDay.plannedActivities[0].activityType + ' day';
+          } else {
+            content += ' rest day';
+          }
+          content += '</small>';
+        }
+          
         content += '</div>';
         return content;
       };
@@ -437,8 +453,8 @@ angular.module('trainingDays')
       };
 
       $scope.getAdvice = function(isValid, adviceDate) {
-        var getAdviceDate;
         $scope.error = null;
+        var getAdviceDate;
 
         if (!isValid) {
           $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
@@ -456,6 +472,19 @@ angular.module('trainingDays')
         }, function(response) {
           $scope.trainingDay = response;
           $location.path('trainingDays/' + response._id);
+        }, function(errorResponse) {
+          $scope.error = errorResponse.data.message;
+        });
+      };
+
+      $scope.getPlan = function() {
+        $scope.error = null;
+
+        TrainingDays.getPlan({
+          startDate: $scope.startDate.toISOString()
+        }, function(response) {
+          $scope.trainingDay = response;
+          $location.path('trainingDays');
         }, function(errorResponse) {
           $scope.error = errorResponse.data.message;
         });

@@ -12,6 +12,9 @@
     <md-button ng-hide="smallWindow" ng-click="setDirection('horizontal')">Calendar</md-button>
     <md-button ng-hide="smallWindow" ng-click="setDirection('vertical')">List</md-button>
     <div class="pull-right">
+      <md-button ng-show="hasStart && hasEnd" ng-click="getPlan()">Update Plan</md-button>
+    </div>
+    <div class="pull-right">
       <md-button ng-show="hasStart" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
     </div>
   </div>

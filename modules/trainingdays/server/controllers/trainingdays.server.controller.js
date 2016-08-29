@@ -281,6 +281,22 @@ exports.getAdvice = function (req, res) {
   });
 };
 
+exports.getPlan = function (req, res) {
+  var params = {};
+  params.user = req.user;
+  params.startDate = req.params.startDate;
+  
+  adviceEngine.generatePlan(params, function (err) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    } else {
+      res.json('Plan generated');
+    }
+  });
+};
+
 exports.downloadActivities = function (req, res) {
   //TrainingDay.findById(req.params.trainingDayId).populate('user', 'thresholdPower').exec(function (err, trainingDay) {
   getTrainingDay(req.params.trainingDayId, function(err, trainingDay) {
