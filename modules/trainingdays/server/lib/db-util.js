@@ -230,6 +230,38 @@ module.exports.clearFutureMetricsAndAdvice = function(user, searchDate, callback
   });
 };
 
+module.exports.removeFutureCompletedActivities = function(user, startDate, callback) {
+  //Future CompletedActivities are activities used to generate a plan.
+  //We likely just generated a plan.
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  var start = moment(startDate);
+
+  if (!moment(start).isValid()) {
+    err = new TypeError('startDate ' + startDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  TrainingDay.update({ 
+    date: { $gte: start.toDate() }
+  }, { 
+    $set: { 
+      completedActivities: []
+    }
+  }, { 
+    multi: true 
+  }, function(err, rawResponse) {
+    if (err) {
+      return callback(err, null);
+    }
+    
+    return callback(null, rawResponse);
+  });
+};
+
 module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
   if (!user) {
     err = new TypeError('valid user is required');

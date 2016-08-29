@@ -25,7 +25,7 @@ var periods = {
   message: invalidDataErrorMessage
 };
 var completedActivitySources = {
-  values: 'manual|strava|trainingpeaks'.split('|'),
+  values: 'manual|strava|trainingpeaks|plangeneration'.split('|'),
   message: invalidDataErrorMessage
 };
 // var priorities = {
