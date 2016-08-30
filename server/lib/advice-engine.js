@@ -118,7 +118,7 @@ module.exports.generatePlan = function(params, callback) {
                   return callback(err, null);
                 } 
 
-                statusMessage.text = 'We have updated your training plan.';
+                statusMessage.text = 'We have created your training plan.';
                 statusMessage.type = 'success';
                 dbUtil.sendMessageToUser(statusMessage, params.user);
                 return callback(null, true);
