@@ -54,17 +54,18 @@ module.exports.generatePlan = function(params, callback) {
       return callback(err, null);
     }
 
+    //TODO: do not require a goal.
     if (!goalDay) {
       err = new TypeError('A goal is required in order to compute a plan.');
       return callback(err, null);
     }
 
-    dbUtil.clearFutureMetricsAndAdvice(user, startDate, function(err, rawResponse) {
+    adviceMetrics.updateMetrics(user, startDate, function(err, td) {
       if (err) {
         return callback(err, null);
       }
 
-    //get all training days from startDate thru goal.
+      //get all training days from startDate thru goal.
       dbUtil.getTrainingDays(user, startDate, goalDay.date, function(err, trainingDays) {
         if (err) {
           return callback(err, null);
@@ -74,13 +75,11 @@ module.exports.generatePlan = function(params, callback) {
           return callback(null, null);
         }
 
-        //update metrics for today?
-        
-        // //if today has a ride, start with tomorrow, else start with today.
-        // if (trainingDays[0].completedActivities.length > 0) {
-        //   trainingDays.shift(); 
-        //   startDate = moment(startDate).add('1', 'day').toDate();
-        // }
+        //if today has a ride, start with tomorrow, else start with today.
+        if (trainingDays[0].completedActivities.length > 0) {
+          trainingDays.shift(); 
+          startDate = moment(startDate).add('1', 'day').toDate();
+        }
 
         async.eachSeries(trainingDays, function(trainingDay, callback) {
           adviceParams = {
@@ -108,7 +107,7 @@ module.exports.generatePlan = function(params, callback) {
               return callback(err,null);
             }
 
-            dbUtil.removeFutureCompletedActivities(user, startDate, function(err, rawResponse) {
+            dbUtil.removePlanningActivities(user, startDate, function(err, rawResponse) {
               if (err) {
                 return callback(err, null);
               }
@@ -290,7 +289,13 @@ function generateActivityFromAdvice(user, trainingDay, callback) {
     trainingDay.save(function (err) {
       if (err) {
         return callback(err, null);
-      } else {
+      }
+
+      adviceMetrics.updateMetrics(user, trainingDay.date, function(err, trainingDay) {
+        if (err) {
+          return callback(err, null);
+        }
+
         if (trainingDay.plannedActivities[0].activityType === 'test') {
           //Make it look as if the user tested when recommended.
           user.thresholdPowerTestDate = trainingDay.date; 
@@ -304,7 +309,7 @@ function generateActivityFromAdvice(user, trainingDay, callback) {
         } else {
           return callback(null, trainingDay);
         }
-      }
+      });
     });
   }
 }
