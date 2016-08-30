@@ -478,30 +478,33 @@ angular.module('trainingDays')
       };
 
       $scope.getPlan = function() {
+        usSpinnerService.spin('tdSpinner');
         $scope.error = null;
 
         TrainingDays.getPlan({
           startDate: $scope.startDate.toISOString()
         }, function(response) {
-          $scope.trainingDay = response;
+          usSpinnerService.stop('tdSpinner');
           $location.path('trainingDays');
+          $scope.calendar();
         }, function(errorResponse) {
+          usSpinnerService.stop('tdSpinner');
           $scope.error = errorResponse.data.message;
         });
       };
 
       $scope.downloadActivities = function(provider) {
-        usSpinnerService.spin('tdViewSpinner');
+        usSpinnerService.spin('tdSpinner');
         var trainingDay = $scope.trainingDay;
         // var d = new Date(trainingDay.date);
 
         trainingDay.$downloadActivities({
           provider: provider
         }, function(response) {
-          usSpinnerService.stop('tdViewSpinner');
+          usSpinnerService.stop('tdSpinner');
           $scope.checkGiveFeedback(trainingDay);
         }, function(errorResponse) {
-          usSpinnerService.stop('tdViewSpinner');
+          usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
