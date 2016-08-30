@@ -249,18 +249,18 @@ exports.list = function (req, res) {
   //Call updateMetics for today so that any missing trainingDays will be generated.
   //Note that if user deleted a past training day but we have valid metrics for subsequent days,
   //the deleted day will not be recreated. We will ignore this scenario unless/until it becomes an issue.
-  adviceMetrics.updateMetrics(user, today, function(err, trainingDay) {
-    //ignore any errors. For example if we have not start day we will get an error.
-    TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function (err, trainingDays) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } else {
-        res.json(trainingDays);
-      }
-    });
+//  adviceMetrics.updateMetrics(user, today, false, function(err, trainingDay) {
+  //ignore any errors. For example if we have not start day we will get an error.
+  TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function (err, trainingDays) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    } else {
+      res.json(trainingDays);
+    }
   });
+//  });
 };
 
 exports.getAdvice = function (req, res) {
@@ -277,6 +277,22 @@ exports.getAdvice = function (req, res) {
       });
     } else {
       res.json(trainingDay);
+    }
+  });
+};
+
+exports.getPlan = function (req, res) {
+  var params = {};
+  params.user = req.user;
+  params.startDate = req.params.startDate;
+  
+  adviceEngine.generatePlan(params, function (err) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    } else {
+      res.json('Plan generated');
     }
   });
 };

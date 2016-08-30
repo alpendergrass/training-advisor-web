@@ -2,6 +2,7 @@
 
 var moment = require('moment'),
   _ = require('lodash'),
+  async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   err;
@@ -61,14 +62,55 @@ module.exports.getExistingTrainingDayDocument = function(user, trainingDate, cal
   });
 };
 
-module.exports.getStartDay = function(user, trainingDay, callback) {
+module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
+  //Will return a trainingDay doc for each day betwen startDate and endDate inclusive.
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  if (!moment(startDate).isValid()) {
+    err = new TypeError('getTrainingDays startDate ' + startDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  if (!moment(endDate).isValid()) {
+    err = new TypeError('getTrainingDays endDate ' + endDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  var trainingDays = [],
+    current = moment(startDate).startOf('day'),
+    end = moment(endDate).endOf('day');
+
+  async.whilst(
+    function() { 
+      return current.isSameOrBefore(end); 
+    },
+    function(callback) {
+      module.exports.getTrainingDayDocument(user, current.toDate(), function(err, trainingDay) {
+        if (err) {
+          return callback(err, null);
+        }
+
+        trainingDays.push(trainingDay);
+        callback(null, current.add('1', 'day'));
+      });
+    },
+    function (err, lastDay) {
+      return callback(null, trainingDays);
+    }
+  );
+};
+
+module.exports.getStartDay = function(user, searchDate, callback) {
   //select most recent starting trainingDay.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(trainingDay.date); 
+  var trainingDate = moment(searchDate); 
 
   var query = {
     user: user,
@@ -88,16 +130,16 @@ module.exports.getStartDay = function(user, trainingDay, callback) {
   });
 };
 
-module.exports.getNextPriorityDay = function(user, trainingDay, priority, numberOfDays, callback) {
+module.exports.getNextPriorityDay = function(user, searchDate, priority, numberOfDays, callback) {
   //select next priority n trainingDay.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(trainingDay.date),
+  var trainingDate = moment(searchDate),
     //TODO: shouldn't we be adding numberOfDays to our start date?
-    maxDate = moment(trainingDay.date).add(numberOfDays, 'days'); 
+    maxDate = moment(searchDate).add(numberOfDays, 'days'); 
 
   var query = {
     user: user,
@@ -119,14 +161,14 @@ module.exports.getNextPriorityDay = function(user, trainingDay, priority, number
   });
 };
 
-module.exports.getMostRecentGoalDay = function(user, trainingDay, callback) {
+module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
   //select most recent goal trainingDay before today.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(trainingDay.date); 
+  var trainingDate = moment(searchDate); 
 
   var query = {
     user: user,
@@ -148,21 +190,24 @@ module.exports.getMostRecentGoalDay = function(user, trainingDay, callback) {
   });
 };
 
-module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callback) {
+module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback) {
+  var start;
+
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var searchDate = moment(trainingDate).add('1', 'day');
-
-  if (!moment(searchDate).isValid()) {
-    err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
+  if (!moment(startDate).isValid()) {
+    err = new TypeError('startDate ' + startDate + ' is not a valid date');
     return callback(err, null);
   }
 
+  start = moment(startDate).add('1', 'day');
+
   TrainingDay.update({ 
-    date: { $gte: searchDate.toDate() },
+    user: user,
+    date: { $gte: start },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false
   }, { 
@@ -188,13 +233,43 @@ module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callba
   });
 };
 
-module.exports.didWeGoHardTheDayBefore = function(user, trainingDay, callback) {
+module.exports.removePlanningActivities = function(user, startDate, callback) {
+  //plangeneration CompletedActivities are activities used to generate a plan.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var yesterday = moment(trainingDay.date).subtract(1, 'day');
+  var start = moment(startDate);
+
+  if (!moment(start).isValid()) {
+    err = new TypeError('startDate ' + startDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  TrainingDay.update({ 
+    user: user,
+    date: { $gte: start }
+  }, {
+    $pull: { completedActivities: { source: 'plangeneration' } }
+  }, { 
+    multi: true 
+  }, function(err, rawResponse) {
+    if (err) {
+      return callback(err, null);
+    }
+    
+    return callback(null, rawResponse);
+  });
+};
+
+module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  var yesterday = moment(searchDate).subtract(1, 'day');
   var start = moment(yesterday).startOf('day');
   var end = moment(yesterday).endOf('day');
   var query = TrainingDay

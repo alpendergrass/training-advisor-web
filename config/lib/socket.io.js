@@ -57,8 +57,22 @@ module.exports = function (app, db) {
     // Create a new HTTP server
     server = http.createServer(app);
   }
+
   // Create a new Socket.io server
-  var io = socketio.listen(server);
+  //var io = socketio.listen(server);
+  //The other/default transport is websocket which does not work over port 80 in Cloud Foundry.
+  //It falls back to polling but the clientside JS error caused by the attempt to connect via
+  //websocket prevents my (document).ready() code from running. Have to use port 4443 for websocket - see below.
+  var io = socketio.listen(server, { transports: ['polling'] });
+
+  //TODO: When we start using SSL we will need to figure out how to do secure socket.io. Maybe.
+  //I need to use port 4443 for websocket because it does not work over port 80 in Cloud Foundry.
+  //The following attaches the socketio server to an engine.io instance that is bound to the provided port.
+  //This works locally to I don't need to explicitly create an http ser er and then bind the socketio server to it.
+  //Unfortunatly it does not work in production (Pivotal). 
+  //Apparently it also has to be secure: https://support.run.pivotal.io/entries/80621715-Does-cloudfoundry-allows-the-websocket-requests-on-port-other-than-4443-
+  //Using port 4443 (and WSS) is a requirement to use WebSockets on PWS.  PS does not support WebSockets over port 80 or 443.  It also only support WSS and does not support unencrypted WS.
+  // var io = socketio.listen(4443);
 
   // Create a MongoDB storage object
   var mongoStore = new MongoStore({
@@ -97,8 +111,6 @@ module.exports = function (app, db) {
     });
   });
 
-  //I will use this to keep track of socket IDs by username.
-  global.userSocketIDs = [];
 
   // Add an event listener to the 'connection' event
   io.on('connection', function (socket) {
@@ -107,8 +119,11 @@ module.exports = function (app, db) {
     });
   });
 
+  //I will use this to keep track of socket IDs by username.
+  global.userSocketIDs = [];
+
   //I need access to io to initiate messages to users.
   global.io = io;
 
-  return server;
+  return server; //when using port 4443 above no need to create and return a server object.
 };

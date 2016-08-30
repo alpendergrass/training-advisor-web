@@ -91,10 +91,12 @@ angular.module('trainingDays')
 
       var formatDayContent = function(trainingDay) {
         var load = 0,
-          content = '<div class="td-calendar-content';
+          content = '<div class="td-calendar-content',
+          lengthOfFixedContent = 33;
 
         if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
           content += ' today-on-calendar';
+          lengthOfFixedContent += 18;
         }
 
         content += '">';
@@ -102,9 +104,13 @@ angular.module('trainingDays')
         content += trainingDay.name ? '<b>' + trainingDay.name + '</b> ' : '';
         content += trainingDay.startingPoint ? '<b class="small text-danger">Season Start</b> ' : '';
         content += trainingDay.fitnessAndFatigueTrueUp ? '<b class="small text-danger">Fitness and Fatigue True Up</b> ' : '';
+
+        content += '<small>';
+        lengthOfFixedContent += 7;
         
         if (trainingDay.eventPriority) {
-          content += '<small> - ';
+          content += ' - ';
+
           switch (trainingDay.eventPriority) {
             case 1:
               content += '<b class="text-danger">Goal Event!</b>';
@@ -118,19 +124,29 @@ angular.module('trainingDays')
             default:
               break;
           }
-          content += '</small>';
         }
+
+        if (trainingDay.plannedActivities[0]) {
+          content += content.length > lengthOfFixedContent ? '<br>' : '';
+          if (moment(trainingDay.date).isBefore($scope.tomorrow, 'day')) {
+            content += 'Advice: ' + trainingDay.plannedActivities[0].activityType + ' day';
+          } else {
+            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day</i>';
+          }
+        }
+
         if (trainingDay.completedActivities.length > 0) {
-          content += content.length > 33 ? '<br>' : '';
-          content += '<small>Load: ';
+          content += content.length > lengthOfFixedContent ? '<br>' : '';
+          content += 'Load: ';
           _.forEach(trainingDay.completedActivities, function(activity) {
             load += activity.load;
-            // content += activity.load + ', ';
           });
-          // content = content.substring(0, content.length - 2);
-          content += load + ' - ' + trainingDay.loadRating + ' day</small>';
+          content += load + ' - ' + trainingDay.loadRating + ' day';
         }
-        content += '</div>';
+
+        content += '<br>' + trainingDay.fitness + '/' + trainingDay.fatigue + '/' + trainingDay.form;
+
+        content += '</small></div>';
         return content;
       };
 
@@ -201,9 +217,9 @@ angular.module('trainingDays')
       //Highlight today in calendar view
       //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
       //We need a callback from the calendar module. Or something.
-      // angular.element(document).ready(function () {
-      //   jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
-      // });
+      angular.element(document).ready(function () {
+        jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
+      });
 
       $scope.setDirection = function(direction) {
         $scope.direction = direction;
@@ -437,8 +453,8 @@ angular.module('trainingDays')
       };
 
       $scope.getAdvice = function(isValid, adviceDate) {
-        var getAdviceDate;
         $scope.error = null;
+        var getAdviceDate;
 
         if (!isValid) {
           $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
@@ -461,19 +477,40 @@ angular.module('trainingDays')
         });
       };
 
+      $scope.getPlan = function() {
+        usSpinnerService.spin('tdSpinner');
+        $scope.error = null;
+
+        TrainingDays.getPlan({
+          startDate: $scope.startDate.toISOString()
+        }, function(response) {
+          usSpinnerService.stop('tdSpinner');
+          $location.path('trainingDays');
+          $scope.calendar();
+        }, function(errorResponse) {
+          usSpinnerService.stop('tdSpinner');
+          $scope.error = errorResponse.data.message;
+        });
+      };
+
       $scope.downloadActivities = function(provider) {
-        usSpinnerService.spin('tdViewSpinner');
+        usSpinnerService.spin('tdSpinner');
         var trainingDay = $scope.trainingDay;
         // var d = new Date(trainingDay.date);
 
         trainingDay.$downloadActivities({
           provider: provider
         }, function(response) {
-          usSpinnerService.stop('tdViewSpinner');
+          usSpinnerService.stop('tdSpinner');
           $scope.checkGiveFeedback(trainingDay);
         }, function(errorResponse) {
-          usSpinnerService.stop('tdViewSpinner');
-          $scope.error = errorResponse.data.message;
+          usSpinnerService.stop('tdSpinner');
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented activity download.';
+          }
         });
       };
 
