@@ -349,9 +349,9 @@ describe('db-util Unit Tests:', function () {
   });
 
 
-  describe('Method removeFutureCompletedActivities', function () {
+  describe('Method removePlanningActivities', function () {
     it('should return error if no user', function (done) {
-      return dbUtil.removeFutureCompletedActivities(null, null, function (err, rawResponse) {
+      return dbUtil.removePlanningActivities(null, null, function (err, rawResponse) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
@@ -359,7 +359,7 @@ describe('db-util Unit Tests:', function () {
     });
     
     it('should return error if invalid startDate', function (done) {
-      return dbUtil.removeFutureCompletedActivities(user, null, function (err, rawResponse) {
+      return dbUtil.removePlanningActivities(user, null, function (err, rawResponse) {
         should.exist(err);
         (err.message).should.match('startDate null is not a valid date');
         done();
@@ -372,7 +372,7 @@ describe('db-util Unit Tests:', function () {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.removeFutureCompletedActivities(user, trainingDate, function (err, rawResponse) {
+        return dbUtil.removePlanningActivities(user, trainingDate, function (err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(0);
           (rawResponse.nModified).should.equal(0);
@@ -390,7 +390,7 @@ describe('db-util Unit Tests:', function () {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.removeFutureCompletedActivities(user, trainingDate, function (err, rawResponse) {
+        return dbUtil.removePlanningActivities(user, trainingDate, function (err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -410,7 +410,7 @@ describe('db-util Unit Tests:', function () {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.removeFutureCompletedActivities(user, trainingDate, function (err, rawResponse) {
+        return dbUtil.removePlanningActivities(user, trainingDate, function (err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(1);

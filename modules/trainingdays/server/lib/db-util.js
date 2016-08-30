@@ -235,7 +235,6 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
 
 module.exports.removePlanningActivities = function(user, startDate, callback) {
   //plangeneration CompletedActivities are activities used to generate a plan.
-  //We likely just generated a plan.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
