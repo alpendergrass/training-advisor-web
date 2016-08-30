@@ -188,7 +188,7 @@ exports.update = function (req, res) {
 
       //If a change was made that would affect existing advice, let's recompute.
       if (existingTrainingDay.plannedActivities[0] && existingTrainingDay.plannedActivities[0].advice && 
-        (trainingDay.eventPriority !== existingTrainingDay.eventPriority || trainingDay.estimatedGoalLoad !== existingTrainingDay.estimatedGoalLoad)
+        (trainingDay.eventPriority !== existingTrainingDay.eventPriority || trainingDay.estimatedGoalLoad !== existingTrainingDay.estimatedGoalLoad || trainingDay.completedActivities !== existingTrainingDay.completedActivities)
       ) {
         params.user = req.user;
         params.trainingDate = new Date(trainingDay.date);
@@ -203,7 +203,7 @@ exports.update = function (req, res) {
 
           return res.json(trainingDay);
         });
-      } else if (trainingDay.completedActivities.length > 0) {
+      } else if (trainingDay.completedActivities !== existingTrainingDay.completedActivities) {
         // update metrics for trainingDay in case completedActivities has changed.
         adviceMetrics.updateMetrics(req.user, trainingDay.date, function(err, trainingDay) {
           if (err) {

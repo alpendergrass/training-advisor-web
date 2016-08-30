@@ -154,7 +154,8 @@ angular.module('trainingDays')
         //Initialize these to prevent temp loading of alert at top of TD list.
         $scope.hasStart = true;
         $scope.hasEnd = true;
-        $scope.hasToday = false;
+        $scope.needsPlanGen = false;
+        // $scope.hasToday = false;
 
         if (calendar) {
           // Need to clear out data in case a TD has been deleted.
@@ -167,10 +168,10 @@ angular.module('trainingDays')
           _.forEach($scope.trainingDaysAll, function(td) {
             td.date = new Date(td.date);
 
-            if (moment(td.date).isSame(moment(), 'day')) {
-              td.htmlID = 'today';
-              $scope.hasToday = true;
-            }
+            // if (moment(td.date).isSame(moment(), 'day')) {
+            //   td.htmlID = 'today';
+            //   $scope.hasToday = true;
+            // }
 
             if (calendar) {
               MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
@@ -186,6 +187,10 @@ angular.module('trainingDays')
 
           $scope.hasEnd = _.find($scope.trainingDaysAll, function(td) {
             return td.eventPriority === 1 && moment(td.date).isAfter(moment());
+          });
+
+          $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+            return moment(td.date).isAfter(moment().add('1', 'day')) && td.plannedActivities.length < 1;
           });
 
           if (callback) {
