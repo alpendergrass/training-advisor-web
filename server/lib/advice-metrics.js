@@ -30,46 +30,59 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
     return callback(err, null);
   }
 
-  //Clear metrics and remove advice for TD's after trainingDate.
-  //When generating a plan we will compute metrics and advice for every day until the end of the plan.
-  //
-  //TODO: Perhaps we should just supress display of advice for future dates.
-  //Or always recompute plan?
+  async.waterfall([
+    async.apply(clearRunway, user, trainingDate),
+    unpdateFatigue,
+    updateMetricsForDay
+  ],
+    function(err, trainingDay) {
+      if (err) {
+        return callback(err, null);
+      }
+
+      return callback(null, trainingDay);
+    }
+  );
+
+
+  // //Clear metrics and remove advice for TD's after trainingDate. 
   // dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
   //   if (err) {
   //     return callback(err, null);
   //   }
 
-    dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
-      if (err) {
-        return callback(err, null);
-      }
+  //   dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
+  //     if (err) {
+  //       return callback(err, null);
+  //     }
 
-      //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
-      userUtil.updateFatigueTimeConstant(user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
-        if (err) {
-          return callback(err, null);
-        }
+  //     //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
+  //     userUtil.updateFatigueTimeConstant(user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
+  //       if (err) {
+  //         return callback(err, null);
+  //       }
 
-        user.fatigueTimeConstant = fatigueTimeConstant;
-        if (trainingDay.trainingEffortFeedback !== null) {
-          //We only ask for feedback if trainingEffortFeedback is null.
-          //So if we got here, this means that we have received and applied feedback, 
-          //so we reset it to zero to avoid having the time constant
-          //readjusted if/when updateMetrics is called again.
-          trainingDay.trainingEffortFeedback = 0;
-        }
+  //       user.fatigueTimeConstant = fatigueTimeConstant;
+  //       if (trainingDay.trainingEffortFeedback !== null) {
+  //         //We only ask for feedback if trainingEffortFeedback is null.
+  //         //So if we got here, this means that we have received and applied feedback, 
+  //         //so we reset it to zero to avoid having the time constant
+  //         //readjusted if/when updateMetrics is called again.
+  //         trainingDay.trainingEffortFeedback = 0;
+  //       }
 
-        updateMetricsForDay(user, trainingDay, function(err, updatedTrainingDay) {
-          if (err) {
-            return callback(err, null);
-          }
+  //       updateMetricsForDay(user, trainingDay, function(err, updatedTrainingDay) {
+  //         if (err) {
+  //           return callback(err, null);
+  //         }
 
-          return callback(null, updatedTrainingDay);
-        });
-      });
-    });
+  //         return callback(null, updatedTrainingDay);
+  //       });
+  //     });
+  //   });
   // });
+
+
 };
 
 module.exports.assignLoadRating = function(trainingDay) {
@@ -78,8 +91,43 @@ module.exports.assignLoadRating = function(trainingDay) {
   return trainingDay;
 };
 
-function updateMetricsForDay(user, currentTrainingDay, callback) {
+function clearRunway(user, trainingDate, callback) {
+  dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
+    if (err) {
+      return callback(err, null, null);
+    }
 
+    return callback(null, user, trainingDate);
+  });
+}
+
+function unpdateFatigue(user, trainingDate, callback) {
+  dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
+    if (err) {
+      return callback(err, null, null);
+    }
+
+    //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
+    userUtil.updateFatigueTimeConstant(user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
+      if (err) {
+        return callback(err, null, null);
+      }
+
+      user.fatigueTimeConstant = fatigueTimeConstant;
+      if (trainingDay.trainingEffortFeedback !== null) {
+        //We only ask for feedback if trainingEffortFeedback is null.
+        //So if we got here, this means that we have received and applied feedback, 
+        //so we reset it to zero to avoid having the time constant
+        //readjusted if/when updateMetrics is called again.
+        trainingDay.trainingEffortFeedback = 0;
+      }
+
+      return callback(null, user, trainingDay);
+    });
+  });
+}
+
+function updateMetricsForDay(user, currentTrainingDay, callback) {
   //Compute fitness, fatigue and form.
   //If prior day's fitness and fatigue are not populated, recursively call updateMetricsForDay 
   //until they are, which could go all the way back to our period start date, which should
