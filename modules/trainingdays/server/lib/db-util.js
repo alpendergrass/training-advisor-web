@@ -233,8 +233,8 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
   });
 };
 
-module.exports.removeFutureCompletedActivities = function(user, startDate, callback) {
-  //Future CompletedActivities are activities used to generate a plan.
+module.exports.removePlanningActivities = function(user, startDate, callback) {
+  //plangeneration CompletedActivities are activities used to generate a plan.
   //We likely just generated a plan.
   if (!user) {
     err = new TypeError('valid user is required');
@@ -250,11 +250,9 @@ module.exports.removeFutureCompletedActivities = function(user, startDate, callb
 
   TrainingDay.update({ 
     user: user,
-    date: { $gte: start.toDate() }
-  }, { 
-    $set: { 
-      completedActivities: []
-    }
+    date: { $gte: start }
+  }, {
+    $pull: { completedActivities: { source: 'plangeneration' } }
   }, { 
     multi: true 
   }, function(err, rawResponse) {
