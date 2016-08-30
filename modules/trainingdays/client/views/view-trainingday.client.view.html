@@ -14,7 +14,7 @@
     <a ng-show="authentication.user.levelOfDetail > 2" class="btn btn-default btn-sm" ui-sref="trainingDays.edit({trainingDayId: trainingDay._id})" title="Edit training day">
       <i class="glyphicon glyphicon-edit"></i>
     </a>
-    <a class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
+    <a ng-show="authentication.user.levelOfDetail > 2" class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
       <i class="glyphicon glyphicon-trash"></i>
     </a>
   </div>
@@ -72,7 +72,7 @@
         <label class="title">Fatigue (ATL): </label>
         <span editable-number="trainingDay.fatigue" e-min="0" e-max="199" e-step="0.1" e-name="fatigue" e-required>{{ trainingDay.fatigue }}</span>
       </div>
-      <p>
+      <p ng-show="allowFormAndFitnessTrueUp">
         <button type="button" class="btn btn-default btn-xs" ng-click="trainingDayForm.$show()" ng-show="!trainingDayForm.$visible">
           True up F&F
         </button>
