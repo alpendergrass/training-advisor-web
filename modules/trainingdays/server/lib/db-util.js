@@ -190,21 +190,24 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
   });
 };
 
-module.exports.clearFutureMetricsAndAdvice = function(user, searchDate, callback) {
+module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback) {
+  var start;
+
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(searchDate).add('1', 'day');
-
-  if (!moment(searchDate).isValid()) {
-    err = new TypeError('trainingDate ' + searchDate + ' is not a valid date');
+  if (!moment(startDate).isValid()) {
+    err = new TypeError('startDate ' + startDate + ' is not a valid date');
     return callback(err, null);
   }
 
+  start = moment(startDate).add('1', 'day');
+
   TrainingDay.update({ 
-    date: { $gte: trainingDate.toDate() },
+    user: user,
+    date: { $gte: start },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false
   }, { 
@@ -246,6 +249,7 @@ module.exports.removeFutureCompletedActivities = function(user, startDate, callb
   }
 
   TrainingDay.update({ 
+    user: user,
     date: { $gte: start.toDate() }
   }, { 
     $set: { 

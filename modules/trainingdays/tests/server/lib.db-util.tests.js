@@ -244,7 +244,7 @@ describe('db-util Unit Tests:', function () {
     it('should return error if invalid trainingDate', function (done) {
       return dbUtil.clearFutureMetricsAndAdvice(user, null, function (err, rawResponse) {
         should.exist(err);
-        (err.message).should.match('trainingDate null is not a valid date');
+        (err.message).should.match('startDate null is not a valid date');
         done();
       });
     });

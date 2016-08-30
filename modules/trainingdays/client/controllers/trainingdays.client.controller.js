@@ -91,11 +91,12 @@ angular.module('trainingDays')
 
       var formatDayContent = function(trainingDay) {
         var load = 0,
-          lengthOfFirstFragment = 33,
-          content = '<div class="td-calendar-content';
+          content = '<div class="td-calendar-content',
+          lengthOfFixedContent = 33;
 
         if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
           content += ' today-on-calendar';
+          lengthOfFixedContent += 18;
         }
 
         content += '">';
@@ -103,9 +104,12 @@ angular.module('trainingDays')
         content += trainingDay.name ? '<b>' + trainingDay.name + '</b> ' : '';
         content += trainingDay.startingPoint ? '<b class="small text-danger">Season Start</b> ' : '';
         content += trainingDay.fitnessAndFatigueTrueUp ? '<b class="small text-danger">Fitness and Fatigue True Up</b> ' : '';
+
+        content += '<small>';
+        lengthOfFixedContent += 7;
         
         if (trainingDay.eventPriority) {
-          content += '<small> - ';
+          content += ' - ';
 
           switch (trainingDay.eventPriority) {
             case 1:
@@ -120,33 +124,29 @@ angular.module('trainingDays')
             default:
               break;
           }
+        }
 
-          content += '</small>';
+        if (trainingDay.plannedActivities[0]) {
+          content += content.length > lengthOfFixedContent ? '<br>' : '';
+          if (moment(trainingDay.date).isBefore($scope.tomorrow, 'day')) {
+            content += 'Advice: ' + trainingDay.plannedActivities[0].activityType + ' day';
+          } else {
+            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day</i>';
+          }
         }
 
         if (trainingDay.completedActivities.length > 0) {
-          content += content.length > lengthOfFirstFragment ? '<br>' : '';
-          content += '<small>Load: ';
+          content += content.length > lengthOfFixedContent ? '<br>' : '';
+          content += 'Load: ';
           _.forEach(trainingDay.completedActivities, function(activity) {
             load += activity.load;
-            // content += activity.load + ', ';
           });
-          // content = content.substring(0, content.length - 2);
-          content += load + ' - ' + trainingDay.loadRating + ' day</small>';
+          content += load + ' - ' + trainingDay.loadRating + ' day';
         }
 
-        if (moment(trainingDay.date).isAfter(moment(), 'day')) {
-          content += content.length > lengthOfFirstFragment ? '<br>' : '';
-          content += '<small>Plan: ';
-          if (trainingDay.plannedActivities[0]) {
-            content += ' ' + trainingDay.plannedActivities[0].activityType + ' day';
-          } else {
-            content += ' rest day';
-          }
-          content += '</small>';
-        }
-          
-        content += '</div>';
+        content += '<br>' + trainingDay.fitness + '/' + trainingDay.fatigue + '/' + trainingDay.form;
+
+        content += '</small></div>';
         return content;
       };
 
