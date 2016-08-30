@@ -49,7 +49,7 @@ angular.module('trainingDays')
       //Begin Datepicker stuff.
       $scope.minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.adviceDate;
       $scope.maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-      $scope.maxTrueUpDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
+      // $scope.maxTrueUpDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
       $scope.minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
       $scope.maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.startDate;
       $scope.minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
@@ -126,12 +126,13 @@ angular.module('trainingDays')
           }
         }
 
-        if (trainingDay.plannedActivities[0]) {
+        //Display future advice
+        if (trainingDay.plannedActivities[0] && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
           content += content.length > lengthOfFixedContent ? '<br>' : '';
-          if (moment(trainingDay.date).isBefore($scope.tomorrow, 'day')) {
-            content += 'Advice: ' + trainingDay.plannedActivities[0].activityType + ' day';
+          if (trainingDay.plannedActivities[0].activityType === 'goal') {
+            content += '<i>scheduled event</i>';
           } else {
-            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day</i>';
+            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day planned</i>';
           }
         }
 
@@ -144,7 +145,9 @@ angular.module('trainingDays')
           content += load + ' - ' + trainingDay.loadRating + ' day';
         }
 
-        content += '<br>' + trainingDay.fitness + '/' + trainingDay.fatigue + '/' + trainingDay.form;
+        // if (trainingDay.form !== 0) {
+        //   content += '<br>Form: ' + trainingDay.form;
+        // }
 
         content += '</small></div>';
         return content;
@@ -154,7 +157,8 @@ angular.module('trainingDays')
         //Initialize these to prevent temp loading of alert at top of TD list.
         $scope.hasStart = true;
         $scope.hasEnd = true;
-        $scope.hasToday = false;
+        $scope.needsPlanGen = false;
+        // $scope.hasToday = false;
 
         if (calendar) {
           // Need to clear out data in case a TD has been deleted.
@@ -167,10 +171,10 @@ angular.module('trainingDays')
           _.forEach($scope.trainingDaysAll, function(td) {
             td.date = new Date(td.date);
 
-            if (moment(td.date).isSame(moment(), 'day')) {
-              td.htmlID = 'today';
-              $scope.hasToday = true;
-            }
+            // if (moment(td.date).isSame(moment(), 'day')) {
+            //   td.htmlID = 'today';
+            //   $scope.hasToday = true;
+            // }
 
             if (calendar) {
               MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
@@ -186,6 +190,10 @@ angular.module('trainingDays')
 
           $scope.hasEnd = _.find($scope.trainingDaysAll, function(td) {
             return td.eventPriority === 1 && moment(td.date).isAfter(moment());
+          });
+
+          $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+            return moment(td.date).isAfter(moment().add('1', 'day')) && td.plannedActivities.length < 1;
           });
 
           if (callback) {
@@ -275,7 +283,8 @@ angular.module('trainingDays')
           //to consider it a valid date if the user does not pick a new date.
           trainingDay.date = new Date(trainingDay.date);
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
-          $scope.showFormAndFitness = moment(trainingDay.date).isBefore($scope.dayAfterTomorrow, 'day');
+          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
         });
       };
