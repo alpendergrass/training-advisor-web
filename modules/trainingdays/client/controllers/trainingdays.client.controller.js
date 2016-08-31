@@ -193,6 +193,7 @@ angular.module('trainingDays')
           });
 
           $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+            //TODO: BUG: we could have TD's after next goal which will not have plannedActivities.
             return moment(td.date).isAfter(moment().add('1', 'day')) && td.plannedActivities.length < 1;
           });
 
