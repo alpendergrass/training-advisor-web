@@ -80,8 +80,8 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
   }
 
   var trainingDays = [],
-    current = moment(startDate).startOf('day'),
-    end = moment(endDate).endOf('day');
+    current = moment(startDate), 
+    end = moment(endDate);
 
   async.whilst(
     function() { 
