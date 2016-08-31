@@ -72,7 +72,8 @@ module.exports.generatePlan = function(params, callback) {
         }
 
         if (trainingDays.length < 1) {
-          return callback(null, null);
+          err = new TypeError('No training days returned by getTrainingDays.');
+          return callback(err, null);
         }
 
         //if today has a ride, start with tomorrow, else start with today.
@@ -104,7 +105,7 @@ module.exports.generatePlan = function(params, callback) {
         }, 
           function(err) {
             if (err) {
-              return callback(err,null);
+              return callback(err, null);
             }
 
             dbUtil.removePlanningActivities(user, startDate, function(err, rawResponse) {
