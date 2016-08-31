@@ -190,7 +190,9 @@ angular.module('trainingDays')
 
           //Find first future goal TD if any.
           $scope.hasEnd = _.chain($scope.trainingDaysAll)
-            .filter(['eventPriority', 1])
+            .filter(function(td) {
+              return td.eventPriority === 1 && moment(td.date).isAfter(moment());
+            })
             .sortBy(['date'])
             .head()
             .value();
