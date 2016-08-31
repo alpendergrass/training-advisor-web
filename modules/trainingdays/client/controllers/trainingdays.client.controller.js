@@ -188,14 +188,20 @@ angular.module('trainingDays')
             return td.startingPoint && moment(td.date).isBefore(moment());
           });
 
-          $scope.hasEnd = _.find($scope.trainingDaysAll, function(td) {
-            return td.eventPriority === 1 && moment(td.date).isAfter(moment());
-          });
+          //Find first future goal TD if any.
+          $scope.hasEnd = _.chain($scope.trainingDaysAll)
+            .filter(['eventPriority', 1])
+            .sortBy(['date'])
+            .head()
+            .value();
 
-          $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
-            //TODO: BUG: we could have TD's after next goal which will not have plannedActivities.
-            return moment(td.date).isAfter(moment().add('1', 'day')) && td.plannedActivities.length < 1;
-          });
+          if ($scope.hasEnd) {
+            $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+              //Determine is there are any TDs before next goal which do not have plannedActivities.
+              //If there are we need to offer plan gen.
+              return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
+            });
+          }
 
           if (callback) {
             return callback();
