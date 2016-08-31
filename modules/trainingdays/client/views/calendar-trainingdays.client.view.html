@@ -21,6 +21,9 @@
     </div>
   </div>
   <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
+  <div ng-show="error" class="text-danger">
+    <strong ng-bind="error"></strong>
+  </div>
   <div class="td-calendar bottom-buffer">
     <calendar-md id="tdcalendar" flex layout layout-fill calendar-direction="direction" on-prev-month="prevMonth" on-next-month="nextMonth" on-day-click="dayClick" title-format="'MMMM y'" ng-model='selectedDate' day-format="dayFormat" day-label-format="'EEE'" day-label-tooltip-format="'EEEE'" day-tooltip-format="'fullDate'" week-starts-on="1" tooltips="false" day-content="" disable-future-selection="false"></calendar-md>
   </div>
