@@ -17,6 +17,13 @@ angular.module('trainingDays').config(['$stateProvider',
           roles: ['user', 'admin']
         }
       })
+      .state('trainingDays.season', {
+        url: '/season',
+        templateUrl: 'modules/trainingDays/client/views/season-trainingdays.client.view.html',
+        data: {
+          roles: ['user', 'admin']
+        }
+      })
       .state('trainingDays.list', {
         url: '/list',
         templateUrl: 'modules/trainingDays/client/views/list-trainingdays.client.view.html',

@@ -17,6 +17,12 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
+      title: 'My Season',
+      state: 'trainingDays.season',
+      roles: ['user']
+    });
+
+    Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'Get Advice',
       state: 'trainingDays.getAdvice',
       roles: ['user']

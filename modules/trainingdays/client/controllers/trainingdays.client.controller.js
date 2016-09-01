@@ -184,6 +184,9 @@ angular.module('trainingDays')
           $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
             // moment.isSameOrBefore is only available in versions 2.10.7 but 
             // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
+            //TODO: watch for an updated version of angular-timezone-selector.
+            //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
+            //Supports later version of moment. isSameOrBefore should work now.
             // return td.startingPoint && moment(td.date).isSameOrBefore(moment()); 
             return td.startingPoint && moment(td.date).isBefore(moment());
           });
@@ -263,6 +266,72 @@ angular.module('trainingDays')
             $scope.error = errorResponse.data.message;
           });
         }
+      };
+
+      function extractLoad(td) {
+        var load = 0;
+        // _.forEach(td.completedActivities, function(activity) {
+        //   load += activity.load;
+        // });
+        if (td.completedActivities.length > 0) {
+          load = _.sumBy(td.completedActivities, function(activity) {
+            return activity.load;
+          });
+        } else if (td.plannedActivities.length > 0) {
+          load = (td.plannedActivities[0].targetMinLoad + td.plannedActivities[0].targetMaxLoad) / 2;
+        }
+
+        return load;
+      }
+
+      $scope.chart = function() {
+        var loadArray,
+          formArray,
+          fitnessArray,
+          fatigueArray;
+
+        $scope.error = null;
+        // $scope.chartColors = ['#45b7cd', '#ff6384', '#ff8e72'];
+        $scope.chartDatasetOverride = [
+          {
+            label: 'Load',
+            borderWidth: 1,
+            type: 'bar'
+          },
+          {
+            label: 'Fitness',
+            borderWidth: 3,
+            hoverBackgroundColor: 'rgba(255,99,132,0.4)',
+            hoverBorderColor: 'rgba(255,99,132,1)',
+            type: 'line'
+          },
+          {
+            label: 'Fatigue',
+            borderWidth: 3,
+            hoverBackgroundColor: 'rgba(255,99,132,0.4)',
+            hoverBorderColor: 'rgba(255,99,132,1)',
+            type: 'line'
+          },
+          {
+            label: 'Form',
+            borderWidth: 3,
+            hoverBackgroundColor: 'rgba(255,99,132,0.4)',
+            hoverBorderColor: 'rgba(255,99,132,1)',
+            type: 'line'
+          }
+        ];
+
+        TrainingDays.getSeason(function(response) {
+          loadArray = _.flatMap(response, extractLoad);
+          formArray = _.flatMap(response, function(td) { return td.form; });
+          fitnessArray = _.flatMap(response, function(td) { return td.fitness; });
+          fatigueArray = _.flatMap(response, function(td) { return td.fatigue; });
+          $scope.chartLabels = _.flatMap(response, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
+          $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+          
+        }, function(errorResponse) {
+          $scope.error = errorResponse.data.message;
+        });
       };
 
       $scope.list = function() {
