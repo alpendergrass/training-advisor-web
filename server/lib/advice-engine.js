@@ -93,7 +93,7 @@ module.exports.generatePlan = function(params, callback) {
               return callback(err);
             }
 
-            //TODO: We should only do this for future dates.
+            //TODO: We should only do this for future dates 
             generateActivityFromAdvice(user, trainingDay, function(err, trainingDay) {
               if (err) {
                 return callback(err);
@@ -119,7 +119,7 @@ module.exports.generatePlan = function(params, callback) {
                   return callback(err, null);
                 } 
 
-                statusMessage.text = 'We have created your training plan.';
+                statusMessage.text = 'We have updated your training season.';
                 statusMessage.type = 'success';
                 dbUtil.sendMessageToUser(statusMessage, params.user);
                 return callback(null, true);
@@ -146,7 +146,6 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
-  // var trainingDate = moment(params.trainingDate, moment.ISO_8601, true); 
   var trainingDate = new Date(params.trainingDate); 
 
   if (!moment(trainingDate).isValid()) {
