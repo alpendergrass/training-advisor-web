@@ -348,49 +348,34 @@ describe('db-util Unit Tests:', function () {
     });
   });
 
-
   describe('Method removePlanningActivities', function () {
     it('should return error if no user', function (done) {
-      return dbUtil.removePlanningActivities(null, null, function (err, rawResponse) {
+      return dbUtil.removePlanningActivities(null, function (err, rawResponse) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
       });
     });
     
-    it('should return error if invalid startDate', function (done) {
-      return dbUtil.removePlanningActivities(user, null, function (err, rawResponse) {
-        should.exist(err);
-        (err.message).should.match('startDate null is not a valid date');
+    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function (done) {
+      return dbUtil.removePlanningActivities(user, function (err, rawResponse) {
+        should.not.exist(err);
+        (rawResponse.n).should.equal(0);
+        (rawResponse.nModified).should.equal(0);
         done();
       });
     });
 
-    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past startDate', function (done) {
-      testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
-        if (err) {
-          console.log('createTrainingDay error: ' + err);
-        }
-
-        return dbUtil.removePlanningActivities(user, trainingDate, function (err, rawResponse) {
-          should.not.exist(err);
-          (rawResponse.n).should.equal(0);
-          (rawResponse.nModified).should.equal(0);
-          done();
-        });
-      });
-    });
-
-    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists past startDate', function (done) {
+    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists', function (done) {
       //Not sure why I have to add 1 second for the method (which used $gte on date) to include my created TD. 
       //If I use .startOf('day') on my trainingDate here and below then $gte included my created TD. 
       //I'm not going to worry about it right now as it seems to work correctly in real use but it bugs me...
-      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err, futureTrainingDay) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.removePlanningActivities(user, trainingDate, function (err, rawResponse) {
+        return dbUtil.removePlanningActivities(user, function (err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -399,18 +384,18 @@ describe('db-util Unit Tests:', function () {
       });
     });
 
-    it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists past startDate', function (done) {
+    it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists', function (done) {
       var completedActivities = [{
         load: 999,
         source: 'plangeneration'
       }];
 
-      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), completedActivities, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, futureTrainingDay) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.removePlanningActivities(user, trainingDate, function (err, rawResponse) {
+        return dbUtil.removePlanningActivities(user, function (err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(1);
@@ -420,8 +405,6 @@ describe('db-util Unit Tests:', function () {
     });
 
   });
-
-
 
   describe('Method didWeGoHardTheDayBefore', function () {
     it('should return true if yesterday was a hard day', function (done) {

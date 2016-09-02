@@ -236,6 +236,7 @@ exports.delete = function (req, res) {
 };
 
 exports.list = function (req, res) {
+  //Returns all existing trainingDays.
   var user = req.user,
     today = req.query.clientDate, //need to use current date from client to avoid time zone issues.
     statusMessage = {
@@ -263,8 +264,57 @@ exports.list = function (req, res) {
 //  });
 };
 
+exports.getSeason = function (req, res) {
+  //TODO: allow for retrieval of prior/future seasons.
+  var user = req.user,
+    today = moment().toDate(); 
+
+  dbUtil.getStartDay(user, today, function(err, startDay) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    }
+
+    //TODO: We should call advicePeriod##determineStartDate to get effective start date.
+    if (!startDay) {
+      err = new TypeError('A start day is required in order to display a season.');
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    }
+
+    dbUtil.getNextPriorityDay(user, startDay.date, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      //TODO: do not require a goal(?).
+      //TODO: get thru last goal.
+      if (!goalDay) {
+        err = new TypeError('A goal is required in order to display a season.');
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      dbUtil.getTrainingDays(user, startDay.date, goalDay.date, function(err, trainingDays) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } else {
+          res.json(trainingDays);
+        }
+      });
+    });
+  });
+};
+
 exports.getAdvice = function (req, res) {
-  //Create an advice engine object, request advice for trainingDate and return trainingDay.
+  //Request advice for trainingDate and return trainingDay.
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
@@ -281,7 +331,7 @@ exports.getAdvice = function (req, res) {
   });
 };
 
-exports.getPlan = function (req, res) {
+exports.genPlan = function (req, res) {
   var params = {};
   params.user = req.user;
   params.startDate = req.params.startDate;
@@ -298,7 +348,6 @@ exports.getPlan = function (req, res) {
 };
 
 exports.downloadActivities = function (req, res) {
-  //TrainingDay.findById(req.params.trainingDayId).populate('user', 'thresholdPower').exec(function (err, trainingDay) {
   getTrainingDay(req.params.trainingDayId, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({

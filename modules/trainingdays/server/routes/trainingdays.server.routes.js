@@ -12,6 +12,9 @@ module.exports = function (app) {
     .get(trainingDays.list)
     .post(trainingDays.create);
 
+  app.route('/api/trainingDays/getSeason').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.getSeason);
+
   // Single trainingDay routes
   app.route('/api/trainingDays/:trainingDayId').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.read)
@@ -21,8 +24,8 @@ module.exports = function (app) {
   app.route('/api/trainingDays/getAdvice/:trainingDate').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getAdvice);
 
-  app.route('/api/trainingDays/getPlan/:startDate').all(trainingDaysPolicy.isAllowed)
-    .get(trainingDays.getPlan);
+  app.route('/api/trainingDays/genPlan/:startDate').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.genPlan);
 
   app.route('/api/trainingDays/downloadActivities/:trainingDayId').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.downloadActivities);

@@ -17,9 +17,14 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
         url: 'api/trainingDays/getAdvice/:trainingDate',
         params: { alternateActivity: '' }
       },
-      getPlan: {
+      getSeason: {
         method: 'GET',
-        url: 'api/trainingDays/getPlan/:startDate'
+        url: 'api/trainingDays/getSeason',
+        isArray: true
+      },
+      genPlan: {
+        method: 'GET',
+        url: 'api/trainingDays/genPlan/:startDate'
       },
       downloadActivities: {
         method: 'GET',

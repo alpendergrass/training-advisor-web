@@ -105,6 +105,7 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
 
 module.exports.getStartDay = function(user, searchDate, callback) {
   //select most recent starting trainingDay.
+  //Bug: this does not guarantee most recent.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -233,23 +234,15 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
   });
 };
 
-module.exports.removePlanningActivities = function(user, startDate, callback) {
+module.exports.removePlanningActivities = function(user, callback) {
   //plangeneration CompletedActivities are activities used to generate a plan.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var start = moment(startDate);
-
-  if (!moment(start).isValid()) {
-    err = new TypeError('startDate ' + startDate + ' is not a valid date');
-    return callback(err, null);
-  }
-
   TrainingDay.update({ 
-    user: user,
-    date: { $gte: start }
+    user: user
   }, {
     $pull: { completedActivities: { source: 'plangeneration' } }
   }, { 
