@@ -177,21 +177,10 @@ angular.module('trainingDays')
         return content;
       };
 
-      $scope.calendar = function() {
+      var getSeason = function(callback) {
         $scope.hasStart = true;
         $scope.hasEnd = true;
         $scope.needsPlanGen = false;
-
-        // Need to clear out data in case a TD has been deleted.
-        //TODO: Should not be needed as getSeason should return all TDs in season.
-        MaterialCalendarData.data = {};
-
-        if (jQuery(window).width() < 800) {
-          $scope.setDirection('vertical');
-          $scope.smallWindow = true;
-        } else {
-          $scope.smallWindow = false;
-        }
 
         TrainingDays.getSeason(function(season) {
           _.forEach(season, function(td) {
@@ -199,7 +188,6 @@ angular.module('trainingDays')
             //td.date has to be a date object.
             td.date = new Date(td.date);
 
-            MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
           });
 
           $scope.hasStart = _.find(season, function(td) {
@@ -237,11 +225,29 @@ angular.module('trainingDays')
           if (yesterday) {
             $scope.checkGiveFeedback(yesterday);
           }
-
           $scope.season = season;
+          return callback();
         }, function(errorResponse) {
           $scope.season = null;
           $scope.error = errorResponse.data.message;
+        });
+      };
+
+      $scope.calendar = function() {
+        //Use vertical format if we are in a small window like on a phone.
+        if (jQuery(window).width() < 800) {
+          $scope.setDirection('vertical');
+          $scope.smallWindow = true;
+        } else {
+          $scope.smallWindow = false;
+        }
+
+        getSeason(function() {
+          if ($scope.season) {
+            _.forEach($scope.season, function(td) {
+              MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
+            });
+          }
         });
       };
 
@@ -329,20 +335,19 @@ angular.module('trainingDays')
           }
         ];
 
-        TrainingDays.getSeason(function(season) {
-          loadArray = _.flatMap(season, extractLoad);
-          formArray = _.flatMap(season, function(td) { return td.form; });
-          fitnessArray = _.flatMap(season, function(td) { return td.fitness; });
-          fatigueArray = _.flatMap(season, function(td) { return td.fatigue; });
-          $scope.chartLabels = _.flatMap(season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
-          $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
-          
-        }, function(errorResponse) {
-          $scope.error = errorResponse.data.message;
+        getSeason(function() {
+          if ($scope.season) {
+            loadArray = _.flatMap($scope.season, extractLoad);
+            formArray = _.flatMap($scope.season, function(td) { return td.form; });
+            fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
+            fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
+            $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
+            $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+          }
         });
       };
 
-      $scope.getAllTrainingDays = function(callback) {
+      var getAllTrainingDays = function(callback) {
         //Initialize these to prevent temp loading of alert at top of TD list.
         $scope.hasStart = true;
         $scope.hasEnd = true;
@@ -617,7 +622,7 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.genPlan = function() {
+      $scope.genPlan = function(requestingPage) {
         usSpinnerService.spin('tdSpinner');
         $scope.error = null;
 
@@ -625,8 +630,13 @@ angular.module('trainingDays')
           startDate: $scope.today.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
-          $location.path('trainingDays');
-          $scope.calendar();
+          if (requestingPage === 'season') {
+            $location.path('trainingDays/season');
+            $scope.chart();
+          } else {
+            $location.path('trainingDays');
+            $scope.calendar();
+          }
         }, function(errorResponse) {
           usSpinnerService.stop('tdSpinner');
           $scope.error = errorResponse.data.message;
