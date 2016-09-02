@@ -12,7 +12,7 @@ module.exports = function (app) {
     .get(trainingDays.list)
     .post(trainingDays.create);
 
-  app.route('/api/trainingDays/getSeason').all(trainingDaysPolicy.isAllowed)
+  app.route('/api/trainingDays/getSeason/:today').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getSeason);
 
   // Single trainingDay routes

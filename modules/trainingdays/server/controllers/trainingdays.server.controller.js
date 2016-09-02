@@ -268,10 +268,11 @@ exports.list = function (req, res) {
 exports.getSeason = function (req, res) {
   //TODO: allow for retrieval of prior/future seasons.
   var user = req.user,
-    today = moment().toDate(),
+    today = new Date(req.params.today),
     effectiveStartDate,
     dates = {}; 
 
+  //TODO: do the following gets in async.parallel 
   dbUtil.getStartDay(user, today, function(err, startDay) {
     if (err) {
       return res.status(400).send({
@@ -279,24 +280,10 @@ exports.getSeason = function (req, res) {
       });
     }
 
-    if (!startDay) {
-      err = new TypeError('A start day is required in order to display a season.');
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    }
-
+    //Get next goal day.
+    //TODO: get thru last goal.
     dbUtil.getNextPriorityDay(user, today, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
       if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
-
-      //TODO: do not require a goal(?).
-      //TODO: get thru last goal.
-      if (!goalDay) {
-        err = new TypeError('A goal is required in order to display a season.');
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
@@ -309,17 +296,22 @@ exports.getSeason = function (req, res) {
           });
         }
 
-        dates.mostRecentGoalDate = mostRecentGoalDay? moment(mostRecentGoalDay.date) : null;
-        dates.startDate = moment(startDay.date);
-        dates.nextGoalDate = moment(goalDay.date);
-        effectiveStartDate = advicePeriod.determineEffectiveStartDate(dates);
+        dates.nextGoalDate = goalDay? moment(goalDay.date) : moment(today).add('1', 'day');
 
-        //Let's not confuse the user by using a start date prior to the date they said to start on.
-        if (effectiveStartDate.isBefore(dates.startDate)) {
-          effectiveStartDate = dates.startDate;
+        if (startDay) {
+          dates.startDate = moment(startDay.date);
+          dates.mostRecentGoalDate = mostRecentGoalDay? moment(mostRecentGoalDay.date) : null;
+          effectiveStartDate = advicePeriod.determineEffectiveStartDate(dates);       
+        } else {
+          effectiveStartDate = moment(today).subtract('1', 'day');
         }
 
-        dbUtil.getTrainingDays(user, effectiveStartDate, goalDay.date, function(err, trainingDays) {
+        //Let's not confuse the user by using a start date prior to the date they said to start on.
+        if (startDay && effectiveStartDate.isBefore(startDay.date)) {
+          effectiveStartDate = startDay.date;
+        }
+
+        dbUtil.getTrainingDays(user, effectiveStartDate, dates.nextGoalDate, function(err, trainingDays) {
           if (err) {
             return res.status(400).send({
               message: errorHandler.getErrorMessage(err)

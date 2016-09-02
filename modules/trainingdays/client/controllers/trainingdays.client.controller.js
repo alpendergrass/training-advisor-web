@@ -182,7 +182,9 @@ angular.module('trainingDays')
         $scope.hasEnd = true;
         $scope.needsPlanGen = false;
 
-        TrainingDays.getSeason(function(season) {
+        TrainingDays.getSeason({
+          today: $scope.today.toISOString()
+        }, function(season) {
           _.forEach(season, function(td) {
             //not sure why Mongo/Mongoose returns a string for a date field but
             //td.date has to be a date object.
@@ -394,7 +396,7 @@ angular.module('trainingDays')
       };
 
       $scope.list = function() {
-        $scope.getAllTrainingDays(function() {
+        getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side. 
           //May need to switch to server-side at some point. Or some combo of client and server side.
           $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
