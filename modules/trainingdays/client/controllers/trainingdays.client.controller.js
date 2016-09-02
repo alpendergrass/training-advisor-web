@@ -216,7 +216,7 @@ angular.module('trainingDays')
 
           $scope.season = season;
         }, function(errorResponse) {
-          $scope.season = null
+          $scope.season = null;
           $scope.error = errorResponse.data.message;
         });
       };

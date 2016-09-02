@@ -4,7 +4,10 @@
 .sass-cache/
 npm-debug.log
 node_modules/
-public/lib
+# I need to upload angular-timezone-selector becuase I am using a fork of the bowerfied version.
+!public/lib
+public/lib/*
+!public/lib/angular-timezone-selector
 app/tests/coverage/
 .bower-*/
 .idea/ 
