@@ -28,7 +28,7 @@ angular.module('trainingDays').config(['$stateProvider',
         url: '/list',
         templateUrl: 'modules/trainingDays/client/views/list-trainingdays.client.view.html',
         data: {
-          roles: ['admin']
+          roles: ['user', 'admin']
         }
       })
       .state('trainingDays.createStart', {

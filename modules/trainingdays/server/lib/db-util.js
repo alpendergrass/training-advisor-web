@@ -105,7 +105,8 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
 
 module.exports.getStartDay = function(user, searchDate, callback) {
   //select most recent starting trainingDay.
-  //Bug: this does not guarantee most recent.
+  //Bug: this does not guarantee most recent. It will return the first it finds. 
+  //Is the sort wrong in the query below?
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -123,8 +124,10 @@ module.exports.getStartDay = function(user, searchDate, callback) {
   .exec(function(err, trainingDays) {
     if (err) {
       return callback(err, null);
-    } else if (trainingDays.length === 0) {
-      return callback(new Error('Starting date for current training period was not found.'), null);
+    }  
+
+    if (trainingDays.length === 0) {
+      return callback(null, null);
     } 
     
     return callback(null, trainingDays[0]);

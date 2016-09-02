@@ -19,7 +19,7 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
       },
       getSeason: {
         method: 'GET',
-        url: 'api/trainingDays/getSeason',
+        url: 'api/trainingDays/getSeason/:today',
         isArray: true
       },
       genPlan: {
