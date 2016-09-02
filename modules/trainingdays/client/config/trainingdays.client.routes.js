@@ -68,13 +68,6 @@ angular.module('trainingDays').config(['$stateProvider',
         data: {
           roles: ['user', 'admin']
         }
-      })
-      .state('trainingDays.edit', {
-        url: '/:trainingDayId/edit',
-        templateUrl: 'modules/trainingDays/client/views/edit-trainingday.client.view.html',
-        data: {
-          roles: ['admin']
-        }
       });
   }
 ]);

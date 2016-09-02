@@ -9,7 +9,7 @@
         <div class="col-md-4">
           <label for="adviceDate">Training Date</label>
           <p class="input-group">
-          <input type="text" id="adviceDate" name="adviceDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="adviceDate" init-date="{{adviceDate}}" is-open="datePickerStatus.opened" min-date="{{minAdviceDate}}" max-date="{{maxAdviceDate}}" datepicker-options="dateOptions" required close-text="Close" >
+          <input type="text" id="adviceDate" name="adviceDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="adviceDate" is-open="datePickerStatus.opened" datepicker-options="adviceDateOptions" required close-text="Close" >
           <span class="input-group-btn">
             <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
           </span>

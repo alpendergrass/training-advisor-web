@@ -10,6 +10,7 @@ var path = require('path'),
   downloadTrainingPeaks = require('../lib/download-trainingpeaks'),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
+  advicePeriod = require(path.resolve('./modules/advisor/server/lib/advice-period')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
@@ -267,7 +268,9 @@ exports.list = function (req, res) {
 exports.getSeason = function (req, res) {
   //TODO: allow for retrieval of prior/future seasons.
   var user = req.user,
-    today = moment().toDate(); 
+    today = moment().toDate(),
+    effectiveStartDate,
+    dates = {}; 
 
   dbUtil.getStartDay(user, today, function(err, startDay) {
     if (err) {
@@ -276,7 +279,6 @@ exports.getSeason = function (req, res) {
       });
     }
 
-    //TODO: We should call advicePeriod##determineStartDate to get effective start date.
     if (!startDay) {
       err = new TypeError('A start day is required in order to display a season.');
       return res.status(400).send({
@@ -284,7 +286,7 @@ exports.getSeason = function (req, res) {
       });
     }
 
-    dbUtil.getNextPriorityDay(user, startDay.date, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
+    dbUtil.getNextPriorityDay(user, today, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -300,14 +302,32 @@ exports.getSeason = function (req, res) {
         });
       }
 
-      dbUtil.getTrainingDays(user, startDay.date, goalDay.date, function(err, trainingDays) {
+      dbUtil.getMostRecentGoalDay(user, today, function(err, mostRecentGoalDay) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });
-        } else {
-          res.json(trainingDays);
         }
+
+        dates.mostRecentGoalDate = mostRecentGoalDay? moment(mostRecentGoalDay.date) : null;
+        dates.startDate = moment(startDay.date);
+        dates.nextGoalDate = moment(goalDay.date);
+        effectiveStartDate = advicePeriod.determineEffectiveStartDate(dates);
+
+        //Let's not confuse the user by using a start date prior to the date they said to start on.
+        if (effectiveStartDate.isBefore(dates.startDate)) {
+          effectiveStartDate = dates.startDate;
+        }
+
+        dbUtil.getTrainingDays(user, effectiveStartDate, goalDay.date, function(err, trainingDays) {
+          if (err) {
+            return res.status(400).send({
+              message: errorHandler.getErrorMessage(err)
+            });
+          } else {
+            res.json(trainingDays);
+          }
+        });
       });
     });
   });

@@ -18,7 +18,7 @@
         <div class="col-md-4">
           <label for="date">Event Date *</label>
           <p class="input-group">
-            <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" min-date="{{minGoalDate}}" datepicker-options="dateOptions" required close-text="Close" >
+            <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" datepicker-options="goalDateOptions" required close-text="Close" >
             <span class="input-group-btn">
               <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
             </span>
@@ -138,7 +138,7 @@
           </div>
           <div class="col-xs-5">
             <p class="input-group">
-              <input type="text" id="endsOn" name="endsOn" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="recurrenceSpec.endsOn" is-open="datePickerStatus.opened" min-date="{{minRepeatDate}}" max-date="{{maxRepeatDate}}" datepicker-options="dateOptions" ng-change="formatRepeatSummary()" required close-text="Close" >
+              <input type="text" id="endsOn" name="endsOn" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="recurrenceSpec.endsOn" is-open="datePickerStatus.opened" datepicker-options="repeatDateOptions" ng-change="formatRepeatSummary()" required close-text="Close" >
               <span class="input-group-btn">
                 <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
               </span>

@@ -14,14 +14,14 @@
 
       <div class="form-group" show-errors>
         <div class="col-md-4">
-          <label for="date">Date *</label>
+          <label for="startDate">Date *</label>
           <p class="input-group">
-          <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" max-date="{{maxTrueUpDate}}" datepicker-options="dateOptions" required close-text="Close" >
+          <input type="text" id="startDate" name="startDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="startDate" is-open="datePickerStatus.opened" datepicker-options="trueUpDateOptions" required close-text="Close" >
           <span class="input-group-btn">
             <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
           </span>
           </p>
-          <div ng-messages="trainingDayForm.date.$error" role="alert">
+          <div ng-messages="trainingDayForm.startDate.$error" role="alert">
             <p class="help-block error-text" ng-message="required">Date is required.</p>
           </div>
         </div>
