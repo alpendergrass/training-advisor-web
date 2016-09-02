@@ -7,8 +7,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "~3",
-    "lodash": "4.0.1",
+    "bootstrap": "~3.3",
+    "lodash": "~4.14",
     "angular": "~1.5",
     "angular-resource": "~1.5",
     "angular-animate": "~1.5",
@@ -25,7 +25,9 @@
     "ngInfiniteScroll": "^1.2.2",
     "material-calendar": "^0.2.14",
     "angular-chart.js": "^1.0.2",
-    "moment-timezone": "^0.5"
+    "moment-timezone": "^0.5",
+    "chosen": "^1.6.2",
+    "jstzdetect": "^1.0.6"
   },
   "resolutions": {
     "angular": "~1.5"
