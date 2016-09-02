@@ -44,7 +44,7 @@ angular.module('trainingDays')
 
       //Set default dates.
       $scope.today = moment().startOf('day').toDate();
-      $scope.adviceDate = $scope.today
+      $scope.adviceDate = $scope.today;
 
       //Begin Datepicker stuff.
       var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
