@@ -44,19 +44,43 @@ angular.module('trainingDays')
 
       //Set default dates.
       $scope.today = moment().startOf('day').toDate();
-      $scope.adviceDate = $scope.today;
+      $scope.adviceDate = $scope.today
 
       //Begin Datepicker stuff.
-      $scope.minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-      $scope.maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-      $scope.minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
-      $scope.maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-      $scope.minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
+      var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
+      var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
+      var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
+      var minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
 
-      $scope.dateOptions = {
+      $scope.startDateOptions = {
         formatYear: 'yy',
         startingDay: 1,
-        showWeeks: false
+        showWeeks: false,
+        minDate: minStartDate,
+        maxDate: maxStartDate
+      };
+
+      $scope.goalDateOptions = {
+        formatYear: 'yy',
+        startingDay: 1,
+        showWeeks: false,
+        minDate: minGoalDate
+      };
+
+      $scope.adviceDateOptions = {
+        formatYear: 'yy',
+        startingDay: 1,
+        showWeeks: false,
+        minDate: minAdviceDate,
+        maxDate: maxAdviceDate
+      };
+
+      $scope.trueUpDateOptions = {
+        formatYear: 'yy',
+        startingDay: 1,
+        showWeeks: false,
+        maxDate: maxStartDate
       };
 
       $scope.datePickerStatus = {
@@ -426,7 +450,7 @@ angular.module('trainingDays')
         return $scope.update(true);
       };
 
-      // Create new starting point of a training season.
+      // Create new starting point of a training season or a true-up day.
       $scope.createStartingPoint = function(isValid, isTrueUp) {
         $scope.error = null;
 
@@ -700,14 +724,17 @@ angular.module('trainingDays')
 
             $scope.recurrenceSpec.summary = '';
 
-            $scope.minRepeatDate = moment(eventDate).add(1, 'day').startOf('day').toDate();
-            $scope.maxRepeatDate = moment().add(52, 'weeks').startOf('day').toDate();
+            var minRepeatDate = moment(eventDate).add(1, 'day').startOf('day').toDate();
+            var maxRepeatDate = moment().add(52, 'weeks').startOf('day').toDate();
 
-            $scope.dateOptions = {
+            $scope.repeatDateOptions = {
               formatYear: 'yy',
               startingDay: 1,
-              showWeeks: false
+              showWeeks: false,
+              minDate: minRepeatDate,
+              maxDate: maxRepeatDate
             };
+
 
             $scope.datePickerStatus = {
               opened: false
