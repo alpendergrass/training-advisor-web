@@ -31,6 +31,38 @@ module.exports.getPeriod = function(user, trainingDay, callback) {
   });
 };
 
+module.exports.determineEffectiveStartDate = function (dates) {
+  //Determine effective start date
+  
+  var startDate = dates.nextGoalDate.clone(); //Will be modified or replaced below.
+
+  //no prior goal event was found.
+  //set it to the Unix Epoch.
+  if (!dates.mostRecentGoalDate) {
+    dates.mostRecentGoalDate = moment(0);
+  }
+
+  if (moment(dates.mostRecentGoalDate).isAfter(dates.startDate)) {
+    //Next goal is a subsequent goal in current season 
+    //or no start was set for current season
+    //Default to minimum training duration.
+    startDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
+  } else if (dates.nextGoalDate.diff(dates.startDate, 'days') < adviceConstants.minimumNumberOfTrainingDays) {
+    //Computed training duration is shorter than the minimum.
+    //Use minimum training duration.
+    startDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
+  } else if (dates.nextGoalDate.diff(dates.startDate, 'days') > adviceConstants.maximumNumberOfTrainingDays) {
+    //Computed training duration is longer than the maximum.
+    //Use maximum training duration.
+    startDate.subtract(adviceConstants.maximumNumberOfTrainingDays, 'days');
+  } else {
+    //Training duration using user-supplied start date is within minimum and maximum durations.
+    startDate = dates.startDate.clone();
+  }
+
+  return startDate;
+};
+
 function determinePeriod(user, trainingDay, callback) {
 
   async.parallel(
@@ -98,7 +130,6 @@ function determinePeriod(user, trainingDay, callback) {
     },
     function(err, results) {
       //results is: {startDate: <date>, nextGoalDate: <date>, mostRecentGoalDate: <date>, ...}
-      //console.log('determinePeriod results object: ' + JSON.stringify(results));
 
       if (err) {
         return callback(err, null);
@@ -112,16 +143,8 @@ function determinePeriod(user, trainingDay, callback) {
         peakDaysDiff,
         periodData = {};
 
-      //console.log('determinePeriod trainingDate: ' + trainingDate.toDate());
-
-      if (!results.mostRecentGoalDate) {
-        //no prior goal event was found.
-        //set it to the Unix Epoch.
-        results.mostRecentGoalDate = moment(0);
-      }
-
       if (results.nextGoalDate) {
-        startDate = determineStartDate(results);
+        startDate = module.exports.determineEffectiveStartDate(results);
         //Determine how many days total between start and goal.
         periodData.totalTrainingDays = results.nextGoalDate.diff(startDate, 'days');
 
@@ -183,36 +206,7 @@ function determinePeriod(user, trainingDay, callback) {
         periodData.daysUntilNextPriority3Event = 0;
       }
 
-      //console.log('periodData: ' + JSON.stringify(periodData));
       return callback(null, periodData);
     }
   );
-}
-
-function determineStartDate(results) {
-  //Determine effective start date
-  
-  var startDate = results.nextGoalDate.clone(); //Will be modified or replaced below.
-
-  if (moment(results.mostRecentGoalDate).isAfter(results.startDate)) {
-    //Next goal is a subsequent goal in current season 
-    //or no start was set for current season
-    //Default to minimum training duration.
-    startDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
-  } else if (results.nextGoalDate.diff(results.startDate, 'days') < adviceConstants.minimumNumberOfTrainingDays) {
-    //Computed training duration is shorter than the minimum.
-    //Use minimum training duration.
-    startDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
-  } else if (results.nextGoalDate.diff(results.startDate, 'days') > adviceConstants.maximumNumberOfTrainingDays) {
-    //Computed training duration is longer than the maximum.
-    //Use maximum training duration.
-    startDate.subtract(adviceConstants.maximumNumberOfTrainingDays, 'days');
-  } else {
-    //Training duration using user-supplied start date is within minimum and maximum durations.
-    startDate = results.startDate.clone();
-  }
-
-  //console.log('determineStartDate startDate: ' + startDate.toDate());
-
-  return startDate;
 }
