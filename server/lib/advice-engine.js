@@ -108,7 +108,7 @@ module.exports.generatePlan = function(params, callback) {
               return callback(err, null);
             }
 
-            dbUtil.removePlanningActivities(user, startDate, function(err, rawResponse) {
+            dbUtil.removePlanningActivities(user, function(err, rawResponse) {
               if (err) {
                 return callback(err, null);
               }
