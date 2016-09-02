@@ -564,11 +564,11 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.getPlan = function() {
+      $scope.genPlan = function() {
         usSpinnerService.spin('tdSpinner');
         $scope.error = null;
 
-        TrainingDays.getPlan({
+        TrainingDays.genPlan({
           startDate: $scope.startDate.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');

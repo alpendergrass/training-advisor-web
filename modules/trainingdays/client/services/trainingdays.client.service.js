@@ -22,9 +22,9 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
         url: 'api/trainingDays/getSeason',
         isArray: true
       },
-      getPlan: {
+      genPlan: {
         method: 'GET',
-        url: 'api/trainingDays/getPlan/:startDate'
+        url: 'api/trainingDays/genPlan/:startDate'
       },
       downloadActivities: {
         method: 'GET',

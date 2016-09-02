@@ -291,7 +291,8 @@ exports.getSeason = function (req, res) {
         });
       }
 
-      //TODO: do not require a goal.
+      //TODO: do not require a goal(?).
+      //TODO: get thru last goal.
       if (!goalDay) {
         err = new TypeError('A goal is required in order to display a season.');
         return res.status(400).send({
@@ -330,7 +331,7 @@ exports.getAdvice = function (req, res) {
   });
 };
 
-exports.getPlan = function (req, res) {
+exports.genPlan = function (req, res) {
   //TODO: doesn't really get plan. Should call it genPlan.
   var params = {};
   params.user = req.user;
