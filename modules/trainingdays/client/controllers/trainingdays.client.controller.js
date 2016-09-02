@@ -43,15 +43,14 @@ angular.module('trainingDays')
       }
 
       //Set default dates.
-      $scope.adviceDate = moment().startOf('day').toDate();
-      $scope.startDate = moment().startOf('day').toDate();
+      $scope.today = moment().startOf('day').toDate();
+      $scope.adviceDate = $scope.today;
 
       //Begin Datepicker stuff.
-      $scope.minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.adviceDate;
+      $scope.minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
       $scope.maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-      // $scope.maxTrueUpDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
       $scope.minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
-      $scope.maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.startDate;
+      $scope.maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
       $scope.minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
 
       $scope.dateOptions = {
@@ -94,6 +93,7 @@ angular.module('trainingDays')
           content = '<div class="td-calendar-content',
           lengthOfFixedContent = 33;
 
+        //We want to be able to highlight today.
         if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
           content += ' today-on-calendar';
           lengthOfFixedContent += 18;
@@ -153,35 +153,32 @@ angular.module('trainingDays')
         return content;
       };
 
-      $scope.getAllTrainingDays = function(calendar, callback) {
-        //Initialize these to prevent temp loading of alert at top of TD list.
+      $scope.calendar = function() {
         $scope.hasStart = true;
         $scope.hasEnd = true;
         $scope.needsPlanGen = false;
-        // $scope.hasToday = false;
 
-        if (calendar) {
-          // Need to clear out data in case a TD has been deleted.
-          MaterialCalendarData.data = {};
+        // Need to clear out data in case a TD has been deleted.
+        //TODO: Should not be needed as getSeason should return all TDs in season.
+        MaterialCalendarData.data = {};
+
+        if (jQuery(window).width() < 800) {
+          $scope.setDirection('vertical');
+          $scope.smallWindow = true;
+        } else {
+          $scope.smallWindow = false;
         }
 
-        $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
-          //not sure why Mongo/Mongoose returns a string for a date field but
-          //we need trainingDay.date to be a valid date object for comparision purposes in the view.
-          _.forEach($scope.trainingDaysAll, function(td) {
+        TrainingDays.getSeason(function(season) {
+          _.forEach(season, function(td) {
+            //not sure why Mongo/Mongoose returns a string for a date field but
+            //td.date has to be a date object.
             td.date = new Date(td.date);
 
-            // if (moment(td.date).isSame(moment(), 'day')) {
-            //   td.htmlID = 'today';
-            //   $scope.hasToday = true;
-            // }
-
-            if (calendar) {
-              MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
-            }
+            MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
           });
 
-          $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
+          $scope.hasStart = _.find(season, function(td) {
             // moment.isSameOrBefore is only available in versions 2.10.7 but 
             // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
             //TODO: watch for an updated version of angular-timezone-selector.
@@ -192,7 +189,7 @@ angular.module('trainingDays')
           });
 
           //Find first future goal TD if any.
-          $scope.hasEnd = _.chain($scope.trainingDaysAll)
+          $scope.hasEnd = _.chain(season)
             .filter(function(td) {
               return td.eventPriority === 1 && moment(td.date).isAfter(moment());
             })
@@ -201,36 +198,26 @@ angular.module('trainingDays')
             .value();
 
           if ($scope.hasEnd) {
-            $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+            $scope.needsPlanGen = _.find(season, function(td) {
               //Determine is there are any TDs before next goal which do not have plannedActivities.
               //If there are we need to offer plan gen.
               return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
             });
           }
 
-          if (callback) {
-            return callback();
-          }
-        });
-      };
-
-      $scope.calendar = function() {
-        if (jQuery(window).width() < 800) {
-          $scope.setDirection('vertical');
-          $scope.smallWindow = true;
-        } else {
-          $scope.smallWindow = false;
-        }
-
-        $scope.getAllTrainingDays(true, function() {
           // Get yesterday if it exists.
-          var yesterday = _.find($scope.trainingDaysAll, function(td) {
+          var yesterday = _.find(season, function(td) {
             return moment(td.date).isSame((moment().subtract(1, 'day')), 'day');
           });
 
           if (yesterday) {
             $scope.checkGiveFeedback(yesterday);
           }
+
+          $scope.season = season;
+        }, function(errorResponse) {
+          $scope.season = null
+          $scope.error = errorResponse.data.message;
         });
       };
 
@@ -247,7 +234,7 @@ angular.module('trainingDays')
       };
 
       $scope.dayClick = function(date) {
-        var td = _.find($scope.trainingDaysAll, function(d) {
+        var td = _.find($scope.season, function(d) {
           return (moment(d.date).isSame(moment(date), 'day'));
         });
 
@@ -270,9 +257,6 @@ angular.module('trainingDays')
 
       function extractLoad(td) {
         var load = 0;
-        // _.forEach(td.completedActivities, function(activity) {
-        //   load += activity.load;
-        // });
         if (td.completedActivities.length > 0) {
           load = _.sumBy(td.completedActivities, function(activity) {
             return activity.load;
@@ -321,12 +305,12 @@ angular.module('trainingDays')
           }
         ];
 
-        TrainingDays.getSeason(function(response) {
-          loadArray = _.flatMap(response, extractLoad);
-          formArray = _.flatMap(response, function(td) { return td.form; });
-          fitnessArray = _.flatMap(response, function(td) { return td.fitness; });
-          fatigueArray = _.flatMap(response, function(td) { return td.fatigue; });
-          $scope.chartLabels = _.flatMap(response, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
+        TrainingDays.getSeason(function(season) {
+          loadArray = _.flatMap(season, extractLoad);
+          formArray = _.flatMap(season, function(td) { return td.form; });
+          fitnessArray = _.flatMap(season, function(td) { return td.fitness; });
+          fatigueArray = _.flatMap(season, function(td) { return td.fatigue; });
+          $scope.chartLabels = _.flatMap(season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
           $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
           
         }, function(errorResponse) {
@@ -334,8 +318,54 @@ angular.module('trainingDays')
         });
       };
 
+      $scope.getAllTrainingDays = function(callback) {
+        //Initialize these to prevent temp loading of alert at top of TD list.
+        $scope.hasStart = true;
+        $scope.hasEnd = true;
+        $scope.needsPlanGen = false;
+
+        $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
+          //not sure why Mongo/Mongoose returns a string for a date field but
+          //we need trainingDay.date to be a valid date object for comparision purposes in the view.
+          _.forEach($scope.trainingDaysAll, function(td) {
+            td.date = new Date(td.date);
+          });
+
+          $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
+            // moment.isSameOrBefore is only available in versions 2.10.7 but 
+            // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
+            //TODO: watch for an updated version of angular-timezone-selector.
+            //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
+            //Supports later version of moment. isSameOrBefore should work now.
+            // return td.startingPoint && moment(td.date).isSameOrBefore(moment()); 
+            return td.startingPoint && moment(td.date).isBefore(moment());
+          });
+
+          //Find first future goal TD if any.
+          $scope.hasEnd = _.chain($scope.trainingDaysAll)
+            .filter(function(td) {
+              return td.eventPriority === 1 && moment(td.date).isAfter(moment());
+            })
+            .sortBy(['date'])
+            .head()
+            .value();
+
+          if ($scope.hasEnd) {
+            $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+              //Determine is there are any TDs before next goal which do not have plannedActivities.
+              //If there are we need to offer plan gen.
+              return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
+            });
+          }
+
+          if (callback) {
+            return callback();
+          }
+        });
+      };
+
       $scope.list = function() {
-        $scope.getAllTrainingDays(false, function() {
+        $scope.getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side. 
           //May need to switch to server-side at some point. Or some combo of client and server side.
           $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
@@ -420,7 +450,6 @@ angular.module('trainingDays')
           $location.path('trainingDays');
 
           // Clear form fields
-          $scope.startDate = null;
           $scope.name = '';
           $scope.fitness = 0;
           $scope.fatigue = 0;
@@ -569,7 +598,7 @@ angular.module('trainingDays')
         $scope.error = null;
 
         TrainingDays.genPlan({
-          startDate: $scope.startDate.toISOString()
+          startDate: $scope.today.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
           $location.path('trainingDays');

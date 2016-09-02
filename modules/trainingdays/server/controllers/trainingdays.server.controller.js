@@ -314,7 +314,7 @@ exports.getSeason = function (req, res) {
 };
 
 exports.getAdvice = function (req, res) {
-  //Create an advice engine object, request advice for trainingDate and return trainingDay.
+  //Request advice for trainingDate and return trainingDay.
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
@@ -332,7 +332,6 @@ exports.getAdvice = function (req, res) {
 };
 
 exports.genPlan = function (req, res) {
-  //TODO: doesn't really get plan. Should call it genPlan.
   var params = {};
   params.user = req.user;
   params.startDate = req.params.startDate;
@@ -349,7 +348,6 @@ exports.genPlan = function (req, res) {
 };
 
 exports.downloadActivities = function (req, res) {
-  //TrainingDay.findById(req.params.trainingDayId).populate('user', 'thresholdPower').exec(function (err, trainingDay) {
   getTrainingDay(req.params.trainingDayId, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
