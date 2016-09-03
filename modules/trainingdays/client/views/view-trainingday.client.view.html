@@ -11,7 +11,7 @@
     <a ng-show="!trainingDay.completedActivities.length > 0 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="getAdvice(true, trainingDay.date)" title="Get advice">
       Get Advice
     </a>
-    <a ng-show="authentication.user.levelOfDetail > 2" class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
+    <a ng-show="authentication.user.levelOfDetail > 1" class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
       <i class="glyphicon glyphicon-trash"></i>
     </a>
   </div>
