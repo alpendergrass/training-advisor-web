@@ -49,84 +49,93 @@ module.exports.generatePlan = function(params, callback) {
       username: user.username
     };
 
-  dbUtil.getNextPriorityDay(user, startDate, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
+  //TODO: Make the following a async.series maybe.
+  //As a precaution. If we errored out last time there will be some left over planning activities.
+  dbUtil.removePlanningActivities(user, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
     }
 
-    //TODO: do not require a goal.
-    if (!goalDay) {
-      err = new TypeError('A goal is required in order to compute a plan.');
-      return callback(err, null);
-    }
-
-    adviceMetrics.updateMetrics(user, startDate, function(err, td) {
+    dbUtil.getNextPriorityDay(user, startDate, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
       if (err) {
         return callback(err, null);
       }
 
-      //get all training days from startDate thru goal.
-      dbUtil.getTrainingDays(user, startDate, goalDay.date, function(err, trainingDays) {
+      //TODO: do not require a goal.
+      if (!goalDay) {
+        err = new TypeError('A goal is required in order to compute a plan.');
+        return callback(err, null);
+      }
+
+      adviceMetrics.updateMetrics(user, startDate, function(err, td) {
         if (err) {
           return callback(err, null);
         }
 
-        if (trainingDays.length < 1) {
-          err = new TypeError('No training days returned by getTrainingDays.');
-          return callback(err, null);
-        }
+        //get all training days from startDate thru goal.
+        dbUtil.getTrainingDays(user, startDate, goalDay.date, function(err, trainingDays) {
+          if (err) {
+            return callback(err, null);
+          }
 
-        //if today has a ride, start with tomorrow, else start with today.
-        if (trainingDays[0].completedActivities.length > 0) {
-          trainingDays.shift(); 
-          startDate = moment(startDate).add('1', 'day').toDate();
-        }
+          if (trainingDays.length < 1) {
+            err = new TypeError('No training days returned by getTrainingDays.');
+            return callback(err, null);
+          }
 
-        async.eachSeries(trainingDays, function(trainingDay, callback) {
-          adviceParams = {
-            user: user,
-            trainingDate: trainingDay.date
-          };
+          //if today has a ride, start with tomorrow, else start with today.
+          if (trainingDays[0].completedActivities.length > 0) {
+            trainingDays.shift(); 
+            startDate = moment(startDate).add('1', 'day').toDate();
+          }
 
-          module.exports.advise(adviceParams, function (err, trainingDay) {
-            if (err) {
-              return callback(err);
-            }
+          async.eachSeries(trainingDays, function(trainingDay, callback) {
+            adviceParams = {
+              user: user,
+              trainingDate: trainingDay.date
+            };
 
-            //TODO: We should only do this for future dates 
-            generateActivityFromAdvice(user, trainingDay, function(err, trainingDay) {
+            module.exports.advise(adviceParams, function (err, trainingDay) {
               if (err) {
                 return callback(err);
               }
 
-              return callback();
-            });
-          });
-        }, 
-          function(err) {
-            if (err) {
-              return callback(err, null);
-            }
+              //TODO: We should only do this for future dates 
+              generateActivityFromAdvice(user, trainingDay, function(err, trainingDay) {
+                if (err) {
+                  return callback(err);
+                }
 
-            dbUtil.removePlanningActivities(user, function(err, rawResponse) {
+                return callback();
+              });
+            });
+          }, 
+            function(err) {
               if (err) {
                 return callback(err, null);
               }
 
-              user.thresholdPowerTestDate = savedThresholdPowerTestDate; 
-              user.save(function (err) {
+              dbUtil.removePlanningActivities(user, function(err, rawResponse) {
                 if (err) {
                   return callback(err, null);
-                } 
+                }
 
-                statusMessage.text = 'We have updated your training plan.';
-                statusMessage.type = 'success';
-                dbUtil.sendMessageToUser(statusMessage, params.user);
-                return callback(null, true);
+                user.thresholdPowerTestDate = savedThresholdPowerTestDate; 
+                user.save(function (err) {
+                  if (err) {
+                    return callback(err, null);
+                  } 
+
+                  statusMessage.text = 'We have updated your training plan.';
+                  statusMessage.type = 'success';
+                  dbUtil.sendMessageToUser(statusMessage, params.user);
+                  return callback(null, true);
+                });
               });
-            });
-          }
-        );
+            }
+          );
+
+        });
       });
     });
   });
