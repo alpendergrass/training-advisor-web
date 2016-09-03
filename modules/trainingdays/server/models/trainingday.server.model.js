@@ -1,7 +1,8 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+  Schema = mongoose.Schema,
+  moment = require('moment');
 
 // var ratings = {
 //   values: 'too hard|about right|too easy'.split('|'),
@@ -52,6 +53,10 @@ var TrainingDaySchema = new Schema({
   date: {
     type: Date,
     required: 'Date is required'
+  },
+  dateNumeric: {
+    type: Number,
+    default: 0
   },
   //CTL
   fitness: {
@@ -241,6 +246,12 @@ var TrainingDaySchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   }
+});
+
+TrainingDaySchema.pre('save', function(next) {
+  var dateString = moment(this.get('date')).format('YYYYMMDD');
+  this.dateNumeric = parseInt(dateString, 10);
+  next();
 });
 
 mongoose.model('TrainingDay', TrainingDaySchema);
