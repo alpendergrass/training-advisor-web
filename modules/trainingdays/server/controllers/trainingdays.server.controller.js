@@ -270,9 +270,9 @@ exports.getSeason = function (req, res) {
   var user = req.user,
     today = new Date(req.params.today),
     effectiveStartDate,
+    effectiveGoalDate,
     dates = {}; 
 
-  //TODO: do the following gets in async.parallel 
   dbUtil.getStartDay(user, today, function(err, startDay) {
     if (err) {
       return res.status(400).send({
@@ -280,55 +280,73 @@ exports.getSeason = function (req, res) {
       });
     }
 
-    console.log('getSeason startDay.date: ' + (startDay? startDay.date : 'none'));
+    if (startDay) {
+      effectiveStartDate = startDay.date;
+    } else {
+      effectiveStartDate = moment(today).subtract('1', 'day');
+      // err = new TypeError('A start day is required.');
+      // return res.status(400).send({
+      //   message: errorHandler.getErrorMessage(err)
+      // });
+    }
 
-    //Get next goal day.
+    console.log('getSeason startDay.date: ' + (startDay ? startDay.date : 'none'));
+    console.log('getSeason effectiveStartDate: ' + effectiveStartDate);
+
+    //Get next goal day. Look up to one year out. Seems kind of excessive.
     //TODO: get thru last goal.
-    dbUtil.getNextPriorityDay(user, today, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
+    dbUtil.getNextPriorityDay(user, today, 1, 365, function(err, goalDay) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
       }
 
-      console.log('getSeason goalDay.date: ' + (goalDay? goalDay.date : 'none'));
+      if (goalDay) {
+        effectiveGoalDate = goalDay.date;
+      } else {
+        effectiveGoalDate = moment(today).add('1', 'day');
+      }
 
-      dbUtil.getMostRecentGoalDay(user, today, function(err, mostRecentGoalDay) {
+      console.log('getSeason goalDay.date: ' + (goalDay? goalDay.date : 'none'));
+      console.log('effectiveGoalDate: ' + effectiveGoalDate);
+
+      // dbUtil.getMostRecentGoalDay(user, today, function(err, mostRecentGoalDay) {
+      //   if (err) {
+      //     return res.status(400).send({
+      //       message: errorHandler.getErrorMessage(err)
+      //     });
+      //   }
+
+      //   dates.nextGoalDate = goalDay? moment(goalDay.date) : moment(today).add('1', 'day');
+
+      //   console.log('getSeason dates.nextGoalDate.toDate(): ' + dates.nextGoalDate.toDate());
+
+      //   if (startDay) {
+      //     dates.startDate = moment(startDay.date);
+      //     dates.mostRecentGoalDate = mostRecentGoalDay? moment(mostRecentGoalDay.date) : null;
+      //     effectiveStartDate = advicePeriod.determineEffectiveStartDate(dates);       
+      //   } else {
+      //     effectiveStartDate = moment(today).subtract('1', 'day');
+      //   }
+
+        // //Let's not confuse the user by using a start date prior to the date they said to start on.
+        // if (startDay && effectiveStartDate.isBefore(startDay.date)) {
+        //   effectiveStartDate = moment(startDay.date);
+        // }
+
+        // console.log('getSeason effectiveStartDate.toDate(): ' + effectiveStartDate.toDate());
+
+      dbUtil.getTrainingDays(user, effectiveStartDate, effectiveGoalDate, function(err, trainingDays) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });
-        }
-
-        dates.nextGoalDate = goalDay? moment(goalDay.date) : moment(today).add('1', 'day');
-
-        console.log('getSeason dates.nextGoalDate.toDate(): ' + dates.nextGoalDate.toDate());
-
-        if (startDay) {
-          dates.startDate = moment(startDay.date);
-          dates.mostRecentGoalDate = mostRecentGoalDay? moment(mostRecentGoalDay.date) : null;
-          effectiveStartDate = advicePeriod.determineEffectiveStartDate(dates);       
         } else {
-          effectiveStartDate = moment(today).subtract('1', 'day');
+          res.json(trainingDays);
         }
-
-        //Let's not confuse the user by using a start date prior to the date they said to start on.
-        if (startDay && effectiveStartDate.isBefore(startDay.date)) {
-          effectiveStartDate = moment(startDay.date);
-        }
-
-        console.log('getSeason effectiveStartDate.toDate(): ' + effectiveStartDate.toDate());
-
-        dbUtil.getTrainingDays(user, effectiveStartDate, dates.nextGoalDate, function(err, trainingDays) {
-          if (err) {
-            return res.status(400).send({
-              message: errorHandler.getErrorMessage(err)
-            });
-          } else {
-            res.json(trainingDays);
-          }
-        });
       });
+      // });
     });
   });
 };
