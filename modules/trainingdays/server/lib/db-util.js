@@ -19,11 +19,13 @@ module.exports.getTrainingDayDocument = function(user, trainingDate, callback) {
     } 
     
     if (trainingDays.length < 1) {
-      var newTrainingDay = {};
+      //var newTrainingDay = {};
+      var newTrainingDay = new TrainingDay();
       var newDate = moment(trainingDate).toDate();
       newTrainingDay.date = newDate;
       newTrainingDay.user = user;
-      TrainingDay.create(newTrainingDay, function(err, trainingDay) {
+      // TrainingDay.create(newTrainingDay, function(err, trainingDay) {
+      newTrainingDay.save(function(err, trainingDay) {
         if (err) {
           return callback(err, null);
         }
@@ -80,21 +82,30 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
   }
 
   var trainingDays = [],
-    current = moment(startDate), 
-    end = moment(endDate);
+    // current = moment(startDate), 
+    // end = moment(endDate);
+    currentNumeric = toNumericDate(startDate), 
+    endNumeric = toNumericDate(endDate),
+    currentDate = moment(startDate);
+
+  console.log('getTrainingDays endNumeric: ' + endNumeric);
 
   async.whilst(
     function() { 
-      return current.isSameOrBefore(end); 
+      currentNumeric = toNumericDate(currentDate);
+      console.log('whilst currentNumeric: ' + currentNumeric);
+      console.log('whilst     endNumeric: ' + endNumeric);
+      return currentNumeric <= endNumeric; 
     },
     function(callback) {
-      module.exports.getTrainingDayDocument(user, current.toDate(), function(err, trainingDay) {
+      module.exports.getTrainingDayDocument(user, currentDate.toDate(), function(err, trainingDay) {
         if (err) {
+          console.log('whilst err: ' + err);
           return callback(err, null);
         }
-
+        console.log('whilst trainingDay.date: ' + trainingDay.date);
         trainingDays.push(trainingDay);
-        callback(null, current.add('1', 'day'));
+        callback(null, currentDate.add('1', 'day'));
       });
     },
     function (err, lastDay) {
@@ -304,7 +315,8 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
     return callback(err, null);
   }
 
-  var searchDate = moment(trainingDate);
+  var searchDate = moment(trainingDate),
+    searchDateNumeric;
 
   if (!moment(searchDate).isValid()) {
     err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
@@ -333,11 +345,18 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   //this GMT date resulted in midnight GMT on June 19 6PM in browser local time. The
   //end date was also off by 6 hours. 
 
-  var end = moment(searchDate).add('1', 'day'); //.endOf('day');
+  // var end = moment(searchDate).add('1', 'day'); //.endOf('day');
+
+  // var query = TrainingDay
+  //   .where('user').equals(user)
+  //   .where('date').gte(searchDate).lt(end);
+
+  searchDateNumeric = toNumericDate(searchDate);
+  console.log('getTrainingDaysForDate searchDateNumeric: ' + searchDateNumeric);
 
   var query = TrainingDay
     .where('user').equals(user)
-    .where('date').gte(searchDate).lt(end);
+    .where('dateNumeric').equals(searchDateNumeric);
 
   query.find().populate('user').exec(function(err, trainingDays) {
     if (err) {
@@ -346,4 +365,9 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
     
     return callback(null, trainingDays);
   });
+}
+
+function toNumericDate(date) {
+  var dateString = moment(date).format('YYYYMMDD');
+  return parseInt(dateString, 10);
 }
