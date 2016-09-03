@@ -16,7 +16,7 @@ module.exports = {
         'public/lib/lodash/dist/lodash.js',
         'public/lib/moment/moment.js',
         'public/lib/moment-timezone/builds/moment-timezone-with-data.js',
-        'public/lib/chosen/chosen.jquery.min.js',
+        'public/lib/chosen/chosen.jquery.js',
         'public/lib/angular/angular.js',
         'public/lib/angular-resource/angular-resource.js',
         'public/lib/angular-animate/angular-animate.js',
