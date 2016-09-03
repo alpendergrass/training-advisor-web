@@ -2,7 +2,8 @@
 
 angular.module('core').controller('HeaderController', ['$scope', '$state', 'Authentication', 'Menus',
   function ($scope, $state, Authentication, Menus) {
-    // Expose view variables
+    var jQuery = window.jQuery;
+
     $scope.$state = $state;
     $scope.authentication = Authentication;
 
@@ -11,7 +12,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Auth
 
     // Collapsing the menu after navigation
     $scope.$on('$stateChangeSuccess', function () {
-      $('.navbar-collapse').collapse('hide');
+      jQuery('.navbar-collapse').collapse('hide');
     });
   }
 ]);
