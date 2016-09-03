@@ -2,7 +2,7 @@
   <form name="userForm" ng-submit="updateUserProfile(userForm.$valid)" class="signin" novalidate autocomplete="off">
     <fieldset>
     <div class="row">
-      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-4">
+      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">
         <div class="panel panel-default">
           <div class="panel-heading">
             <label>About You</label>
@@ -37,56 +37,16 @@
                 <p class="help-block error-text" ng-message="required">Username is required.</p>
               </div>
             </div>
-            <!-- <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="birthYear">Birth Year *</label>
-              <input name="birthYear" type="number" min="1900" max="2099" step="1" ng-model="user.birthYear" id="birthYear" class="form-control" placeholder="Birth Year" required>
-              <div ng-messages="userForm.birthYear.$error" role="alert">
-                <p class="help-block error-text" ng-message="required">Birth Year is required.</p>
-              </div>
-              <div ng-messages="userForm.birthYear.$error" role="alert">
-                <p class="help-block error-text" ng-message="min">Birth Year must be between 1900 and 2099.</p>
-              </div>
-              <div ng-messages="userForm.birthYear.$error" role="alert">
-                <p class="help-block error-text" ng-message="max">Birth Year must be between 1900 and 2099.</p>
-              </div>
-            </div> -->
             <div class="form-group input-group-sm">
               <label class="small" for="timezone">Your Timezone *</label>
-              <timezone-selector ng-model="user.timezone" sort-by="offset" show-local="true" set-local="true" width="230px" class="small"></timezone-selector>
-                  
+              <timezone-selector ng-model="user.timezone" sort-by="offset" show-local="true" set-local="true" width="230px" class="small"></timezone-selector>             
            </div>
           </div>
         </div>
 
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <label for="levelOfDetail">Tacit Training Level of Detail</label>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail1" value="1" checked> Show me advice
-                </label>
-              </div>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail2" value="2"> Show me advice and some details
-                </label>
-              </div>
-              <div class="radio" ng-show="user.roles.indexOf('admin') > -1">
-                <label>
-                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail3" value="3"> Show me everything
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        
       </div>
         
-      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-4">        
+      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">        
         <div class="panel panel-default">
           <div class="panel-heading">
             <label>Functional Threshold Power</label>
@@ -116,6 +76,33 @@
         </div>
         <div class="panel panel-default">
           <div class="panel-heading">
+            <label for="levelOfDetail">Tacit Training Level of Detail</label>
+          </div>
+          <div class="panel-body">
+            <div class="form-group input-group-sm" show-errors>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail1" value="1" checked> Show me advice
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail2" value="2"> Show me advice and some details
+                </label>
+              </div>
+              <div class="radio" ng-show="user.roles.indexOf('admin') > -1">
+                <label>
+                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail3" value="3"> Show me everything
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">        
+        <div class="panel panel-default">
+          <div class="panel-heading">
             <label>Day of Week Preferences</label>
           </div>
           <div class="panel-body">
@@ -135,37 +122,9 @@
             </div>
           </div>
         </div>
-
-<!--         <div class="panel panel-default">
-          <div class="panel-heading">
-            <label>TrainingPeaks® Settings</label>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="trainingPeaksCredentials.username">Username</label>
-              <input type="text" id="trainingPeaksCredentials.username" name="trainingPeaksCredentials.username" class="form-control" ng-model="user.trainingPeaksCredentials.username" placeholder="TrainingPeaks® Username">
-            </div>
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="trainingPeaksCredentials.password">Password</label>
-              <input type="password" id="trainingPeaksCredentials.password" name="trainingPeaksCredentials.password" class="form-control" ng-model="user.trainingPeaksCredentials.password" placeholder="TrainingPeaks® Password">
-            </div>
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="trainingPeaksCredentials.accountType">Account Type</label>
-              <br>
-              <select name="trainingPeaksCredentials.accountType" class="form-control" ng-model="user.trainingPeaksCredentials.accountType">
-                <option ng-repeat="option in data.trainingPeaksAccountTypes" value="{{option.id}}" ng-selected="{{option.id == user.trainingPeaksCredentials.accountType}}">{{option.name}}</option>
-              </select>
-            </div>
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small">
-                <input type="checkbox" name="trainingPeaksCredentials.autoDownload" ng-disabled="!user.trainingPeaksCredentials.username || !user.trainingPeaksCredentials.password" ng-model="user.trainingPeaksCredentials.autoDownload"> Download Workouts Offline
-              </label>
-            </div>
-          </div>
-        </div> -->
-
       </div>
     </div>
+
     <div class="'row">  
       <div class="col-xs-11">        
         <div class="text-center form-group">
