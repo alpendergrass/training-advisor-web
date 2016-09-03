@@ -32,7 +32,7 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
 
   async.waterfall([
     async.apply(clearRunway, user, trainingDate),
-    unpdateFatigue,
+    updateFatigue,
     updateMetricsForDay
   ],
     function(err, trainingDay) {
@@ -101,7 +101,7 @@ function clearRunway(user, trainingDate, callback) {
   });
 }
 
-function unpdateFatigue(user, trainingDate, callback) {
+function updateFatigue(user, trainingDate, callback) {
   dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null, null);

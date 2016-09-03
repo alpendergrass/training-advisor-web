@@ -50,7 +50,8 @@ module.exports.generatePlan = function(params, callback) {
     };
 
   //TODO: Make the following a async.series maybe.
-  //As a precaution. If we errored out last time there will be some left over planning activities.
+  //As a precaution we remove all planning activities. 
+  //If we errored out last time there will be some left over planning activities.
   dbUtil.removePlanningActivities(user, function(err, rawResponse) {
     if (err) {
       return callback(err, null);

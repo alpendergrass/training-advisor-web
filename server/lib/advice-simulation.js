@@ -56,8 +56,9 @@ function shouldWeDoSimulation(user, trainingDay, callback) {
   //TODO: we should check our TSB to make sure it is not too low to handle this.
 
   //Assuming our training date is today...
-  var today = moment(trainingDay.date).startOf('day');
-  var todayDayOfWeek = moment(today).day().toString();
+  // var today = moment(trainingDay.date).startOf('day');
+  // var todayDayOfWeek = moment(today).day().toString();
+  var todayDayOfWeek = moment(trainingDay.date).day().toString();
 
   if (trainingDay.period === 'build') {
     trainingDay.plannedActivities[0].rationale += ' We are in a build period.';
