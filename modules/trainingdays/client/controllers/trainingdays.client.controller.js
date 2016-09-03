@@ -243,6 +243,8 @@ angular.module('trainingDays')
         } else {
           $scope.smallWindow = false;
         }
+        // Need to clear out calendar data. Moving goal date can strand some data otherwise.
+        MaterialCalendarData.data = {};
 
         getSeason(function() {
           if ($scope.season) {
