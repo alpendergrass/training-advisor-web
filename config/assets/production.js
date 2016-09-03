@@ -12,6 +12,7 @@ module.exports = {
       ],
       js: [
         'public/lib/jquery/dist/jquery.min.js',
+        'public/lib/bootstrap/dist/js/bootstrap.min.js',
         'public/lib/lodash/dist/lodash.min.js',
         'public/lib/moment/min/moment.min.js',
         'public/lib/moment-timezone/builds/moment-timezone-with-data.min.js',

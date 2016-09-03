@@ -13,6 +13,7 @@ module.exports = {
       ],
       js: [
         'public/lib/jquery/dist/jquery.js',
+        'public/lib/bootstrap/dist/js/bootstrap.js',
         'public/lib/lodash/dist/lodash.js',
         'public/lib/moment/moment.js',
         'public/lib/moment-timezone/builds/moment-timezone-with-data.js',
