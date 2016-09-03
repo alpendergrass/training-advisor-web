@@ -45,7 +45,7 @@ function generateRecurrences(req, callback) {
   //That is, we only schedule events in selected weeks.
 
   var spec = req.body.recurrenceSpec,
-    startDate = moment(req.body.date), //.startOf('day'),
+    startDate = moment(req.body.date),
     nextDate,
     endDate = moment(req.body.recurrenceSpec.endsOn).add(1, 'day'), //.endOf('day'),
     trainingDay;
