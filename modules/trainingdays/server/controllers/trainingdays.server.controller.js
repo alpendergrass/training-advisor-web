@@ -15,6 +15,9 @@ var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 exports.create = function (req, res) {
+  var user = req.user,
+    statusMessage = {};
+
   if (req.body.recurrenceSpec && req.body.recurrenceSpec.endsOn) {
     generateRecurrences(req, function(err, trainingDay) {
       if (err) {
@@ -23,7 +26,26 @@ exports.create = function (req, res) {
         });
       }
 
-      res.json(trainingDay);
+      user.planGenNeeded = true;
+      
+      user.save(function (err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } 
+
+        statusMessage = {
+          type: 'info',
+          text: 'Events have been added. You should update your training plan.',
+          title: 'Training Plan Update',
+          created: Date.now(),
+          username: user.username
+        };
+
+        dbUtil.sendMessageToUser(statusMessage, user);
+        res.json(trainingDay);
+      });
     });
   } else {
     createTrainingDay(req, function(err, trainingDay) {
@@ -33,7 +55,26 @@ exports.create = function (req, res) {
         });
       }
 
-      res.json(trainingDay);
+      user.planGenNeeded = true;
+      
+      user.save(function (err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } 
+
+        statusMessage = {
+          type: 'info',
+          text: 'A training day has been added or updated. You should update your training plan.',
+          title: 'Training Plan Update',
+          created: Date.now(),
+          username: user.username
+        };
+
+        dbUtil.sendMessageToUser(statusMessage, user);
+        res.json(trainingDay);
+      });
     });
   }
 };
@@ -189,7 +230,10 @@ exports.update = function (req, res) {
 
       //If a change was made that would affect existing advice, let's recompute.
       if (existingTrainingDay.plannedActivities[0] && existingTrainingDay.plannedActivities[0].advice && 
-        (trainingDay.eventPriority !== existingTrainingDay.eventPriority || trainingDay.estimatedGoalLoad !== existingTrainingDay.estimatedGoalLoad || trainingDay.completedActivities !== existingTrainingDay.completedActivities)
+        (trainingDay.eventPriority !== existingTrainingDay.eventPriority || 
+          trainingDay.estimatedGoalLoad !== existingTrainingDay.estimatedGoalLoad || 
+          trainingDay.completedActivities !== existingTrainingDay.completedActivities
+        )
       ) {
         params.user = req.user;
         params.trainingDate = new Date(trainingDay.date);
@@ -204,8 +248,8 @@ exports.update = function (req, res) {
 
           return res.json(trainingDay);
         });
-      } else if (trainingDay.completedActivities !== existingTrainingDay.completedActivities) {
-        // update metrics for trainingDay in case completedActivities has changed.
+      } else { // if (trainingDay.completedActivities !== existingTrainingDay.completedActivities) {
+        // update metrics for trainingDay just in case.
         adviceMetrics.updateMetrics(req.user, trainingDay.date, function(err, trainingDay) {
           if (err) {
             return res.status(400).send({
@@ -215,38 +259,52 @@ exports.update = function (req, res) {
 
           return res.json(trainingDay);
         });
-      } else {
-        return res.json(trainingDay);
-      }
+      } // else {
+      //   return res.json(trainingDay);
+      // }
     });
   });
 };
 
 exports.delete = function (req, res) {
-  var trainingDay = req.trainingDay;
+  var trainingDay = req.trainingDay,
+    user = req.user,
+    statusMessage = {};
 
   trainingDay.remove(function (err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
-    } else {
+    } 
+
+    user.planGenNeeded = true;
+    
+    user.save(function (err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
+
+      statusMessage = {
+        type: 'info',
+        text: 'A training day has been removed. You should update your training plan.',
+        title: 'Training Plan Update',
+        created: Date.now(),
+        username: user.username
+      };
+
+      dbUtil.sendMessageToUser(statusMessage, user);
       res.json(trainingDay);
-    }
+    });
   });
 };
 
 exports.list = function (req, res) {
   //Returns all existing trainingDays.
   var user = req.user,
-    today = req.query.clientDate, //need to use current date from client to avoid time zone issues.
-    statusMessage = {
-      type: '',
-      text: '',
-      title: 'List TrainingDays',
-      created: Date.now(),
-      username: user.username
-    };
+    today = req.query.clientDate; //need to use current date from client to avoid time zone issues.
 
   //Call updateMetics for today so that any missing trainingDays will be generated.
   //Note that if user deleted a past training day but we have valid metrics for subsequent days,

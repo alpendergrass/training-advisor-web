@@ -121,6 +121,10 @@ var UserSchema = new Schema({
   timezone: {
     type: String
   },
+  planGenNeeded: {
+    type: Boolean,
+    default: true
+  },
   provider: {
     type: String,
     required: 'Provider is required'
