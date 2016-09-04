@@ -658,7 +658,7 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.genPlan = function(requestingPage) {
+      $scope.genPlan = function() {
         usSpinnerService.spin('tdSpinner');
         $scope.error = null;
 
@@ -666,13 +666,8 @@ angular.module('trainingDays')
           startDate: $scope.today.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
-          if (requestingPage === 'season') {
-            $location.path('trainingDays/season');
-            $scope.chart();
-          } else {
-            $location.path('trainingDays');
-            $scope.calendar();
-          }
+          $location.path('trainingDays/season');
+          $scope.chart();
         }, function(errorResponse) {
           usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {
