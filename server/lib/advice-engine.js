@@ -102,7 +102,7 @@ module.exports.generatePlan = function(params, callback) {
                 return callback(err);
               }
 
-              //TODO: We should only do this for future dates 
+              //TODO: We should only do this for future dates...do not allow past start date?
               generateActivityFromAdvice(user, trainingDay, function(err, trainingDay) {
                 if (err) {
                   return callback(err);
@@ -138,7 +138,6 @@ module.exports.generatePlan = function(params, callback) {
               });
             }
           );
-
         });
       });
     });
@@ -166,6 +165,8 @@ module.exports.advise = function(params, callback) {
     err = new TypeError('trainingDate ' + params.trainingDate + ' is not a valid date');
     return callback(err, null);
   }
+
+  console.log('advising: ' + trainingDate);
 
   //TODO: if this remains series of one, perhaps convert to object structure for readability.
   async.series(
@@ -306,6 +307,8 @@ function generateAdvice(user, trainingDay, callback) {
 
 function generateActivityFromAdvice(user, trainingDay, callback) {
   var completedActivity = {};
+
+  console.log('generating activity: ' + trainingDay.date);
 
   if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'advised') {
     completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;

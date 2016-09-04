@@ -30,6 +30,8 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
     return callback(err, null);
   }
 
+  console.log('updating metrics: ' + trainingDate);
+
   async.waterfall([
     async.apply(clearRunway, user, trainingDate),
     updateFatigue,
@@ -100,6 +102,9 @@ module.exports.assignLoadRating = function(trainingDay) {
 };
 
 function clearRunway(user, trainingDate, callback) {
+  //TODO: not needed if genPlan.
+  console.log('clearRunway: ' + trainingDate);
+
   dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
     if (err) {
       return callback(err, null, null);
@@ -110,6 +115,9 @@ function clearRunway(user, trainingDate, callback) {
 }
 
 function updateFatigue(user, trainingDate, callback) {
+  //TODO: not needed if genPlan.
+  console.log('updateFatigue: ' + trainingDate);
+
   dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null, null);
@@ -144,6 +152,8 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
   //We use yesterday's fitness and fatigue to compute today's form, like TP does it. 
   //This prevents today's form from changing when completed activities are added to today. 
 
+  console.log('updateMetricsForDay: ' + currentTrainingDay.date);
+
   //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
   async.series({
     periodData: function(callback){
@@ -170,6 +180,8 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
       }
 
       var priorDate = moment(currentTrainingDay.date).subtract(1, 'days');
+
+      console.log('getting priorDay: ' + priorDate);
 
       dbUtil.getTrainingDayDocument(user, priorDate, function(err, priorTrainingDay) {
         if (err) {
@@ -296,6 +308,8 @@ function computeSevenDayRampRate(user, trainingDay, callback) {
     yesterday = moment(trainingDay.date).subtract(1, 'days'),
     rampRate;
 
+  console.log('computeSevenDayRampRate: ' + trainingDay.date);
+  
   dbUtil.getExistingTrainingDayDocument(user, yesterday, function(err, yesterdayTrainingDay) {
     if (err) {
       return callback(err, 0);
