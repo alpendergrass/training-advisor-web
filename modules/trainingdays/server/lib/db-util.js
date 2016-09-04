@@ -354,7 +354,8 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   //   .where('date').gte(searchDate).lt(end);
 
   searchDateNumeric = toNumericDate(searchDate);
-  console.log('getTrainingDaysForDate searchDateNumeric: ' + searchDateNumeric);
+
+  console.log('*** getTrainingDaysForDate searchDateNumeric: ' + searchDateNumeric);
 
   var query = TrainingDay
     .where('user').equals(user)
