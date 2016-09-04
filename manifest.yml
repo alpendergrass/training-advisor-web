@@ -6,7 +6,7 @@ declared-services:
 applications:
 - name: training-advisor
   host: training-advisor
-  memory: 128M
+  memory: 2G
   services:
   - training-advisor-mongo
   env:
