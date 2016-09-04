@@ -122,6 +122,8 @@ module.exports.generatePlan = function(params, callback) {
                 }
 
                 user.thresholdPowerTestDate = savedThresholdPowerTestDate; 
+                user.planGenNeeded = false;
+                
                 user.save(function (err) {
                   if (err) {
                     return callback(err, null);
