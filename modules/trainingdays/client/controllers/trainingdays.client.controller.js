@@ -49,7 +49,7 @@ angular.module('trainingDays')
       //Begin Datepicker stuff.
       var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
       var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(7, 'days').startOf('day').toDate();
       var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
       var minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
 

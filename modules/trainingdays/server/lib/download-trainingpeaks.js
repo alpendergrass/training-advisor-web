@@ -167,7 +167,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
               return callback(err, null);
             }
 
-            statusMessage.text = 'We downloaded ' + countPhrase + '.';
+            statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your training plan.';
             statusMessage.type = 'success';
             dbUtil.sendMessageToUser(statusMessage, user);
             return callback(null, trainingDay);
