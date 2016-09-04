@@ -13,7 +13,7 @@
       <md-button ng-show="hasStart" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
     </div>
     <div class="pull-left">
-      <md-button ng-show="hasStart && hasEnd && needsPlanGen" ng-click="genPlan()">Generate Plan</md-button>
+      <md-button class="md-warn md-hue-2" ng-show="hasStart && hasEnd && needsPlanGen" ng-click="genPlan()">Update Plan</md-button>
     </div>
     <div class="pull-right">
       <md-button ng-hide="smallWindow" ng-click="setDirection('horizontal')">Calendar</md-button>

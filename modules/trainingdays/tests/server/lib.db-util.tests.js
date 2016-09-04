@@ -258,16 +258,31 @@ describe('db-util Unit Tests:', function () {
       });
     });
 
-    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists past trainingDate', function (done) {
-      //Not sure why I have to add 1 second for the method (which used $gte on date) to include my created TD. 
-      //If I use .startOf('day') on my trainingDate here and below then $gte included my created TD. 
-      //I'm not going to worry about it right now as it seems to work correctly in real use but it bugs me...
-      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+    it('should return match count of 0 and modified count of 0 if one clean trainingDay exists past today', function (done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+        return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).subtract(1, 'day').toDate(), function (err, rawResponse) {
+          should.not.exist(err);
+          (rawResponse.n).should.equal(1);
+          (rawResponse.nModified).should.equal(0);
+          done();
+        });
+      });
+    });
+
+    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists past trainingDate', function (done) {
+      //Not sure why I have to add 1 second for the method (which used $gte on date) to include my created TD. 
+      //If I use .startOf('day') on my trainingDate here and below then $gte included my created TD. 
+      //I'm not going to worry about it right now as it seems to work correctly in real use but it bugs me...
+      testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, testTD) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).subtract(2, 'days').toDate(), function (err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -277,19 +292,19 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists past trainingDate', function (done) {
-      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        futureTrainingDay.fitness = 99;
+        testTD.fitness = 99;
 
-        testHelpers.updateTrainingDay(futureTrainingDay, function(err) {
+        testHelpers.updateTrainingDay(testTD, function(err) {
           if (err) {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+          return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).subtract(2, 'days').toDate(), function (err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
@@ -300,20 +315,20 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return match count of 0 and modified count of 0 if one dirty trainingDay exists past trainingDate but is true-up day', function (done) {
-      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        futureTrainingDay.fitness = 99;
-        futureTrainingDay.fitnessAndFatigueTrueUp = true;
+        testTD.fitness = 99;
+        testTD.fitnessAndFatigueTrueUp = true;
 
-        testHelpers.updateTrainingDay(futureTrainingDay, function(err) {
+        testHelpers.updateTrainingDay(testTD, function(err) {
           if (err) {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+          return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).subtract(2, 'days').toDate(), function (err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -324,20 +339,20 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return match count of 0 and modified count of 0 if one dirty trainingDay exists past trainingDate but is startingPoint day', function (done) {
-      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day').add(1, 'second').toDate(), null, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        futureTrainingDay.fitness = 99;
-        futureTrainingDay.startingPoint = true;
+        testTD.fitness = 99;
+        testTD.startingPoint = true;
 
-        testHelpers.updateTrainingDay(futureTrainingDay, function(err) {
+        testHelpers.updateTrainingDay(testTD, function(err) {
           if (err) {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+          return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).subtract(2, 'days').toDate(), function (err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -370,7 +385,7 @@ describe('db-util Unit Tests:', function () {
       //Not sure why I have to add 1 second for the method (which used $gte on date) to include my created TD. 
       //If I use .startOf('day') on my trainingDate here and below then $gte included my created TD. 
       //I'm not going to worry about it right now as it seems to work correctly in real use but it bugs me...
-      testHelpers.createTrainingDay(user, trainingDate, null, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
@@ -390,7 +405,7 @@ describe('db-util Unit Tests:', function () {
         source: 'plangeneration'
       }];
 
-      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, futureTrainingDay) {
+      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }

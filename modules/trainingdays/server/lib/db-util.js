@@ -116,8 +116,6 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
 
 module.exports.getStartDay = function(user, searchDate, callback) {
   //select most recent starting trainingDay.
-  //Bug: this does not guarantee most recent. It will return the first it finds. 
-  //Is the sort wrong in the query below?
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -206,7 +204,9 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
 };
 
 module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback) {
-  var start;
+  //Only clear thru today-ish.
+  var start, 
+    end;
 
   if (!user) {
     err = new TypeError('valid user is required');
@@ -219,10 +219,13 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
   }
 
   start = moment(startDate).add('1', 'day');
+  //I recognize doing endOf day on current day server side is not precise.
+  //Close enough I think.
+  end = moment().endOf('day');
 
   TrainingDay.update({ 
     user: user,
-    date: { $gte: start },
+    date: { $gte: start, $lte: end },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false
   }, { 
@@ -276,9 +279,8 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
     return callback(err, null);
   }
 
-  var yesterday = moment(searchDate).subtract(1, 'day');
-  var start = moment(yesterday).startOf('day');
-  var end = moment(yesterday).endOf('day');
+  var start = moment(searchDate).subtract(1, 'day');
+  var end = moment(searchDate); 
   var query = TrainingDay
     .where('user').equals(user)
     .where('date').gte(start).lte(end)

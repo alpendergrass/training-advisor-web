@@ -212,11 +212,7 @@ angular.module('trainingDays')
             .value();
 
           if ($scope.hasEnd) {
-            $scope.needsPlanGen = _.find(season, function(td) {
-              //Determine is there are any TDs before next goal which do not have plannedActivities.
-              //If there are we need to offer plan gen.
-              return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
-            });
+            $scope.needsPlanGen = (season && season[0] && season[0].user && season[0].user.planGenNeeded);
           }
 
           // Get yesterday if it exists.
@@ -227,11 +223,17 @@ angular.module('trainingDays')
           if (yesterday) {
             $scope.checkGiveFeedback(yesterday);
           }
+          
           $scope.season = season;
           return callback();
         }, function(errorResponse) {
           $scope.season = null;
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented season retrieval';
+          }
         });
       };
 
@@ -284,7 +286,12 @@ angular.module('trainingDays')
             $scope.trainingDay = response;
             $location.path('trainingDays/' + response._id);
           }, function(errorResponse) {
-            $scope.error = errorResponse.data.message;
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented trainingDay creation.';
+            }
           });
         }
       };
@@ -440,7 +447,12 @@ angular.module('trainingDays')
         $scope.trainingDay.$update(function() {
           $scope.checkGiveFeedback(trainingDay);
         }, function(errorResponse) {
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented activity save.';
+          }
         });
       };
 
@@ -488,7 +500,12 @@ angular.module('trainingDays')
           $scope.fatigue = 0;
           $scope.notes = '';
         }, function(errorResponse) {
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented starting point creation.';
+          }
         });
       };
 
@@ -522,7 +539,12 @@ angular.module('trainingDays')
           $scope.recurrenceSpec = null;
           $scope.notes = '';
         }, function(errorResponse) {
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented event creation.';
+          }
         });
       };
 
@@ -597,7 +619,12 @@ angular.module('trainingDays')
         }
 
         trainingDay.$update(function() {}, function(errorResponse) {
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented training day update.';
+          }
         });
       };
 
@@ -622,7 +649,12 @@ angular.module('trainingDays')
           $scope.trainingDay = response;
           $location.path('trainingDays/' + response._id);
         }, function(errorResponse) {
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented advice retrieval.';
+          }
         });
       };
 
@@ -643,7 +675,12 @@ angular.module('trainingDays')
           }
         }, function(errorResponse) {
           usSpinnerService.stop('tdSpinner');
-          $scope.error = errorResponse.data.message;
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented plan generation.';
+          }
         });
       };
 
