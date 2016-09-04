@@ -238,6 +238,7 @@ exports.update = function (req, res) {
         params.user = req.user;
         params.trainingDate = new Date(trainingDay.date);
         params.alternateActivity = null;
+        params.alertUser = true;
 
         adviceEngine.advise(params, function (err, trainingDay) {
           if (err) {
@@ -415,6 +416,7 @@ exports.getAdvice = function (req, res) {
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
   params.alternateActivity = req.query.alternateActivity;
+  params.alertUser = true;
   
   adviceEngine.advise(params, function (err, trainingDay) {
     if (err) {
