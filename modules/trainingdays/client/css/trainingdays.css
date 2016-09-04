@@ -41,6 +41,10 @@ calendar-md md-content.agenda > div > div > div {
   width: 120px !important;
 }
 
+.md-button.md-cornered {
+    border-radius: 5px;
+}
+
 .td-calendar-content {
   text-align: left !important;
   width: 100% !important;
