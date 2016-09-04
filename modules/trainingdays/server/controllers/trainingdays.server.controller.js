@@ -260,7 +260,7 @@ exports.update = function (req, res) {
 
           var statusMessage = {
             type: 'info',
-            text: 'Training metrics have been updated. You should update your training plan.',
+            text: 'Your training day has been updated. You should update your training plan.',
             title: 'Training Plan Update',
             created: Date.now(),
             username: req.user.username
@@ -269,9 +269,9 @@ exports.update = function (req, res) {
           dbUtil.sendMessageToUser(statusMessage, req.user);
           return res.json(trainingDay);
         });
-      } // else {
+      // } else {
       //   return res.json(trainingDay);
-      // }
+      }
     });
   });
 };

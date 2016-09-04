@@ -45,7 +45,7 @@
             </div>
             <div class="radio"">
               <label>
-                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority3" value="3"  required> This is a training-focused event. Doing well would be a bonus.
+                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority3" value="3"  required> This is a low priority event. Doing well would be a bonus.
               </label>
             </div>
           </div>
@@ -69,16 +69,7 @@
       <div class="form-group" show-errors>
         <div class="col-md-4">
           <label for="estimatedGoalLoad">Estimated Event Load (TSS®)</label>
-          <input name="estimatedGoalLoad" type="number" min="0" max="999" step="10" ng-model="estimatedGoalLoad" id="estimatedGoalLoad" class="form-control" placeholder="Estimated Load" ng-required="eventPriority === '1' || eventPriority === '2'">
-          <div ng-messages="trainingDayForm.estimatedGoalLoad.$error" role="alert">
-            <p class="help-block error-text" ng-message="required">Estimated Load is required for goal or medium priority events.</p>
-          </div>
-          <div ng-messages="trainingDayForm.estimatedGoalLoad.$error" role="alert">
-            <p class="help-block error-text" ng-message="min">Load estimate must be between 0 and 999.</p>
-          </div>
-          <div ng-messages="trainingDayForm.estimatedGoalLoad.$error" role="alert">
-            <p class="help-block error-text" ng-message="max">Load estimate must be between 0 and 999.</p>
-          </div>
+          <input name="estimatedGoalLoad" type="number" min="0" max="999" step="10" ng-model="estimatedGoalLoad" id="estimatedGoalLoad" class="form-control" placeholder="Estimated Load">
         </div>
       </div>
 

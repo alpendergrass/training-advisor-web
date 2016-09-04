@@ -143,7 +143,7 @@ angular.module('trainingDays')
               content += '<b>Medium Priority</b>';
               break;
             case 3:
-              content += 'Training-Focused';
+              content += 'Low Priority';
               break;
             default:
               break;
@@ -169,9 +169,9 @@ angular.module('trainingDays')
           content += load + ' - ' + trainingDay.loadRating + ' day';
         }
 
-        // if (trainingDay.form !== 0) {
-        //   content += '<br>Form: ' + trainingDay.form;
-        // }
+        if (trainingDay.form !== 0) {
+          content += '<br><i>Form: ' + trainingDay.form + '</i>';
+        }
 
         content += '</small></div>';
         return content;
@@ -568,12 +568,13 @@ angular.module('trainingDays')
       $scope.eventPriorities = [
         { value: 1, text: 'Goal Event!' },
         { value: 2, text: 'Medium Priority Event' },
-        { value: 3, text: 'Training-Focused Event' }
+        { value: 3, text: 'Low Priority Event' },
+        { value: 0, text: 'Regular Training Day' }
       ];
 
       $scope.showPriority = function() {
         var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.eventPriority });
-        return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : 'Not set';
+        return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : 'Regular Training Day';
       };
 
       $scope.updateEventPriority = function(priority) {
@@ -584,11 +585,11 @@ angular.module('trainingDays')
           return;
         }
 
-        if (String(n) === priority && n >= 1 && n <= 3) {
+        if (String(n) === priority && n >= 0 && n <= 3) {
           return $scope.update(true);
         }
 
-        return 'Valid eventPriorities are 1, 2 and 3.';
+        return 'Valid eventPriorities are 0, 1, 2 and 3.';
       };
 
       $scope.updateEstimatedLoad = function(estimate) {

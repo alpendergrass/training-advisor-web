@@ -88,22 +88,16 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
     endNumeric = toNumericDate(endDate),
     currentDate = moment(startDate);
 
-  console.log('getTrainingDays endNumeric: ' + endNumeric);
-
   async.whilst(
     function() { 
       currentNumeric = toNumericDate(currentDate);
-      console.log('whilst currentNumeric: ' + currentNumeric);
-      console.log('whilst     endNumeric: ' + endNumeric);
       return currentNumeric <= endNumeric; 
     },
     function(callback) {
       module.exports.getTrainingDayDocument(user, currentDate.toDate(), function(err, trainingDay) {
         if (err) {
-          console.log('whilst err: ' + err);
           return callback(err, null);
         }
-        console.log('whilst trainingDay.date: ' + trainingDay.date);
         trainingDays.push(trainingDay);
         callback(null, currentDate.add('1', 'day'));
       });
@@ -304,7 +298,7 @@ module.exports.sendMessageToUser = function (message, user) {
   });
 
   if (socketIDlookup) {
-    console.log('Emitting trainingDayMessage "' + message.text + '" to ' + user.username + ' on socketID: ' + socketIDlookup.socketID);
+    console.log('Emitting trainingDayMessage "' + message.text + '" to ' + user.username + ' on socketID ' + socketIDlookup.socketID);
     global.io.to(socketIDlookup.socketID).emit('trainingDayMessage', message);
   } else {
     console.log('socketIDlookup failed for username ' + user.username);
@@ -354,7 +348,6 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   //   .where('date').gte(searchDate).lt(end);
 
   searchDateNumeric = toNumericDate(searchDate);
-  console.log('getTrainingDaysForDate searchDateNumeric: ' + searchDateNumeric);
 
   var query = TrainingDay
     .where('user').equals(user)

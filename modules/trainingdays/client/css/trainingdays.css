@@ -13,6 +13,11 @@
   font-size: 14px;
 }
 
+.editable-wrap .editable-controls,
+.editable-wrap .editable-error {
+  margin-left: 5px;
+}
+
 /* The following will prevent the menu from covering the current day 
 	when the "Go To Today" button on the TD list is clicked. */
 .today::before {
