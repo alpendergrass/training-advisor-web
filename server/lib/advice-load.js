@@ -42,26 +42,32 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
         return callback(err, null);
       }
 
-      //Note that it is possible that no goal exists.
-      if (goalDay) {
+      //Note that it is possible that no goal exists and no estimate was provided.
+      if (goalDay && goalDay.estimatedGoalLoad) {
         latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDay.estimatedGoalLoad);
         latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDay.estimatedGoalLoad);        
+      } else {
+        setTargetLoads(trainingDay);
       }
 
       return callback(null, trainingDay);
     });
   }
   else {
-    trainingDay.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay);
-
-    var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': latestPlannedActivity.activityType });
-
-    latestPlannedActivity.targetMinLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.lowLoadFactor * trainingDay.rampRateAdjustmentFactor);
-    latestPlannedActivity.targetMaxLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.highLoadFactor * trainingDay.rampRateAdjustmentFactor);
-    // trainingDay.targetIntensity = factorSet.intensity;
+    setTargetLoads(trainingDay);
     return callback(null, trainingDay);
   }
 };
+
+function setTargetLoads(trainingDay) {
+  trainingDay.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay);
+
+  var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': latestPlannedActivity.activityType });
+
+  latestPlannedActivity.targetMinLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.lowLoadFactor * trainingDay.rampRateAdjustmentFactor);
+  latestPlannedActivity.targetMaxLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.highLoadFactor * trainingDay.rampRateAdjustmentFactor);
+  // trainingDay.targetIntensity = factorSet.intensity;
+}
 
 function computeRampRateAdjustment(trainingDay) {
   // Adjust advice to bring actual ramp rate towards target ramp rate.

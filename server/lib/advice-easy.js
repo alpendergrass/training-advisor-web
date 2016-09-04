@@ -125,7 +125,7 @@ function isAnEasyDayNeededInPrepForPriority3Event (user, trainingDay, callback) 
 
   if (trainingDay.daysUntilNextPriority3Event === 1) { 
     trainingDay.plannedActivities[0].rationale += ' Easy day recommended as priority 3 event is in one day.';
-    trainingDay.plannedActivities[0].advice += ' An easy day is recommended as you have a training-focused event scheduled for tomorrow.';
+    trainingDay.plannedActivities[0].advice += ' An easy day is recommended as you have a low priority event scheduled for tomorrow.';
     trainingDay.plannedActivities[0].activityType = 'easy';
   } 
 

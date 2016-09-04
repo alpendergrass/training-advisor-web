@@ -88,6 +88,11 @@ module.exports.loadAdviceLookups = [
     highLoadFactor: 1.9
     // intensity:  0.9
   }, {
+    activityType: 'simulation',
+    lowLoadFactor: 1.4,
+    highLoadFactor: 1.9
+    // intensity:  0.9
+  }, {
     activityType: 'test',
     lowLoadFactor: 1,
     highLoadFactor: 1

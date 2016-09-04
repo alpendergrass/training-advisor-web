@@ -100,7 +100,7 @@ describe('advice-goal Unit Tests:', function () {
       });
     });
 
-    it('should return training-focused rationale if today is a priority 3 event', function (done) {
+    it('should return low priority rationale if today is a priority 3 event', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -119,7 +119,7 @@ describe('advice-goal Unit Tests:', function () {
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.match(/goal/);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('training-focused');
+            (trainingDay.plannedActivities[0].rationale).should.containEql('low priority');
             done();
           });
         });

@@ -166,9 +166,6 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
-  console.log('advising: ' + trainingDate);
-
-  //TODO: if this remains series of one, perhaps convert to object structure for readability.
   async.series(
     [
       function(callback) {
@@ -232,7 +229,6 @@ module.exports.advise = function(params, callback) {
         plannedActivity.activityType = params.alternateActivity;
         plannedActivity.source = 'requested';
         plannedActivities.push(plannedActivity);
-        // console.log('trainingDay:' + trainingDay);
         trainingDay.plannedActivities = plannedActivities;
 
         //Determine load. 
@@ -307,8 +303,6 @@ function generateAdvice(user, trainingDay, callback) {
 
 function generateActivityFromAdvice(user, trainingDay, callback) {
   var completedActivity = {};
-
-  console.log('generating activity: ' + trainingDay.date);
 
   if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'advised') {
     completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;

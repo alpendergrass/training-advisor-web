@@ -58,10 +58,10 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
         }
         break;
       case 3:
-        trainingDay.plannedActivities[0].rationale += ' Today is a priority 3 (training-focused) event.';
+        trainingDay.plannedActivities[0].rationale += ' Today is a priority 3 (low priority) event.';
         if (trainingDay.period === 'peak') {
           trainingDay.plannedActivities[0].rationale += ' In peak period. Goal event is ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
-          trainingDay.plannedActivities[0].advice += ' You have a training-focused event scheduled for today.';
+          trainingDay.plannedActivities[0].advice += ' You have a low priority event scheduled for today.';
           trainingDay.plannedActivities[0].advice += ' However, your next goal event is only ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
           if (trainingDay.daysUntilNextGoalEvent < adviceConstants.priority3EventCutOffThreshold) {
             trainingDay.plannedActivities[0].rationale += ' Recommending skipping.';
@@ -71,7 +71,7 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
             trainingDay.plannedActivities[0].advice += ' Only do this event if you feel certain it will help you prepare for your goal event.';
           }
         } else {
-          trainingDay.plannedActivities[0].advice += ' Today is a training-focused event. Your primary objective today is to get a quality, race-pace workout. If you feel good go hard but if not, sit in or drop out. Race results are not important. Remember that your future goals are the reason you are riding today.';
+          trainingDay.plannedActivities[0].advice += ' Today is a low priority event. Your primary objective today is to get a quality, race-pace workout. If you feel good go hard but if not, sit in or drop out. Race results are not important. Remember that your future goals are the reason you are riding today.';
           trainingDay.plannedActivities[0].activityType = 'goal';
         }
         break;

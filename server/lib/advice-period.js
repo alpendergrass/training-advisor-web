@@ -22,8 +22,6 @@ module.exports.getPeriod = function(user, trainingDay, callback) {
     return callback(err, null);
   }
 
-  console.log('getPeriod: ' + trainingDay.date);
-  
   determinePeriod(user, trainingDay, function(err, periodData) {
     if (err) {
       return callback(err, null);

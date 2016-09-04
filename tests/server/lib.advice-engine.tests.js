@@ -101,6 +101,7 @@ describe('advice-engine Unit Tests:', function () {
           params.trainingDate = trainingDate;
           return adviceEngine.advise(params, function (err, trainingDay) {
             should.not.exist(err);
+            console.log('trainingDay: ' + trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match('');
             (trainingDay.plannedActivities[0].source).should.match('advised');
             (trainingDay.plannedActivities[0].targetMinLoad).should.be.above(0);
