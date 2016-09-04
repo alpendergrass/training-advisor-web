@@ -49,7 +49,7 @@ angular.module('trainingDays')
       //Begin Datepicker stuff.
       var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
       var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(7, 'days').startOf('day').toDate();
       var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
       var minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
 
@@ -143,7 +143,7 @@ angular.module('trainingDays')
               content += '<b>Medium Priority</b>';
               break;
             case 3:
-              content += 'Training-Focused';
+              content += 'Low Priority';
               break;
             default:
               break;
@@ -169,9 +169,9 @@ angular.module('trainingDays')
           content += load + ' - ' + trainingDay.loadRating + ' day';
         }
 
-        // if (trainingDay.form !== 0) {
-        //   content += '<br>Form: ' + trainingDay.form;
-        // }
+        if (trainingDay.form !== 0) {
+          content += '<br><i>Form: ' + trainingDay.form + '</i>';
+        }
 
         content += '</small></div>';
         return content;
@@ -568,12 +568,13 @@ angular.module('trainingDays')
       $scope.eventPriorities = [
         { value: 1, text: 'Goal Event!' },
         { value: 2, text: 'Medium Priority Event' },
-        { value: 3, text: 'Training-Focused Event' }
+        { value: 3, text: 'Low Priority Event' },
+        { value: 0, text: 'Regular Training Day' }
       ];
 
       $scope.showPriority = function() {
         var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.eventPriority });
-        return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : 'Not set';
+        return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : 'Regular Training Day';
       };
 
       $scope.updateEventPriority = function(priority) {
@@ -584,11 +585,11 @@ angular.module('trainingDays')
           return;
         }
 
-        if (String(n) === priority && n >= 1 && n <= 3) {
+        if (String(n) === priority && n >= 0 && n <= 3) {
           return $scope.update(true);
         }
 
-        return 'Valid eventPriorities are 1, 2 and 3.';
+        return 'Valid eventPriorities are 0, 1, 2 and 3.';
       };
 
       $scope.updateEstimatedLoad = function(estimate) {
@@ -658,7 +659,7 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.genPlan = function(requestingPage) {
+      $scope.genPlan = function() {
         usSpinnerService.spin('tdSpinner');
         $scope.error = null;
 
@@ -666,13 +667,8 @@ angular.module('trainingDays')
           startDate: $scope.today.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
-          if (requestingPage === 'season') {
-            $location.path('trainingDays/season');
-            $scope.chart();
-          } else {
-            $location.path('trainingDays');
-            $scope.calendar();
-          }
+          $location.path('trainingDays/season');
+          $scope.chart();
         }, function(errorResponse) {
           usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {

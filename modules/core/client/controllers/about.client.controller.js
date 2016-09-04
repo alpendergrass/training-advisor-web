@@ -80,10 +80,10 @@ angular.module('core').controller('AboutController', ['$scope', 'Authentication'
         answer: 'Choose "Schedule Events" from the Training Days menu and specify that it is a goal. You can create as many goal events as you like and we will help you prepare for them. However, we will not warn you (yet) if we think you are being overly ambitious.'
       }, {
         question: 'I have intermediate events that I do not plan to peak for but would like to give them my best shot. How do I set those up?',
-        answer: 'Go to Training Days | Schedule Events to create intermediate events. On this page you can create medium priority events, training-focused (low priority) events as well as additional Goal events.'
+        answer: 'Go to Training Days | Schedule Events to create intermediate events. On this page you can create medium priority events, low priority (low priority) events as well as additional Goal events.'
       }, {
         question: 'I have a club race every Tuesday night from April until September and a team ride every Thursday evening. Can I set these up as recurring/repeating events?',
-        answer: 'Glad you asked! Go to Training Days | Schedule Events. Here you can create recurring medium priority and training-focused (low priority) events. After selecting a date and an event type, you can click the Repeat checkbox to set up your recurring event. Note that you cannot set up recurring Goal events.'
+        answer: 'Glad you asked! Go to Training Days | Schedule Events. Here you can create recurring medium priority and low priority (low priority) events. After selecting a date and an event type, you can click the Repeat checkbox to set up your recurring event. Note that you cannot set up recurring Goal events.'
       }]
     }, {
       sectionTitle: 'Ride Data',

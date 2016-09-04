@@ -16,8 +16,11 @@
       <md-button class="md-warn md-hue-2" ng-show="hasStart && hasEnd && needsPlanGen" ng-click="genPlan()">Update Plan</md-button>
     </div>
     <div class="pull-right">
-      <md-button ng-hide="smallWindow" ng-click="setDirection('horizontal')">Calendar</md-button>
-      <md-button ng-hide="smallWindow" ng-click="setDirection('vertical')">List</md-button>
+      <md-button ng-show="hasStart" ui-sref="trainingDays.season()">Season</md-button>
+    </div>
+    <div class="pull-right">
+      <md-button ng-hide="smallWindow || direction === 'horizontal'" ng-click="setDirection('horizontal')">Calendar</md-button>
+      <md-button ng-hide="smallWindow || direction === 'vertical'" ng-click="setDirection('vertical')">List</md-button>
     </div>
   </div>
   <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
