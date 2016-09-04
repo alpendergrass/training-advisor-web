@@ -43,7 +43,7 @@
           If you treat this event as a workout, your load target should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.
         </span>
         <span ng-show="trainingDay.eventPriority === 1 && trainingDay.estimatedGoalLoad < 1"><br><small>
-          We have no estimated load for this goal event. A hard workout today would be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.<small>
+          We have no estimated load for this goal event. A hard workout today would be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.</small>
         </span>
         <span ng-show="_.includes(['rest', 'easy'], trainingDay.plannedActivities[0].activityType)">
           Keep load below <strong>{{trainingDay.plannedActivities[0].targetMaxLoad}}</strong> TSS®.
