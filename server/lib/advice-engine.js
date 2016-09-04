@@ -93,7 +93,8 @@ module.exports.generatePlan = function(params, callback) {
           async.eachSeries(trainingDays, function(trainingDay, callback) {
             adviceParams = {
               user: user,
-              trainingDate: trainingDay.date
+              trainingDate: trainingDay.date,
+              alertUser: false
             };
 
             module.exports.advise(adviceParams, function (err, trainingDay) {
@@ -158,7 +159,8 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
-  var trainingDate = new Date(params.trainingDate); 
+  var trainingDate = new Date(params.trainingDate),
+    user = params.user; 
 
   if (!moment(trainingDate).isValid()) {
     err = new TypeError('trainingDate ' + params.trainingDate + ' is not a valid date');
@@ -169,7 +171,7 @@ module.exports.advise = function(params, callback) {
   async.series(
     [
       function(callback) {
-        adviceMetrics.updateMetrics(params.user, trainingDate, function(err, trainingDay) {
+        adviceMetrics.updateMetrics(user, trainingDate, function(err, trainingDay) {
           if (err) {
             return callback(err);
           }
@@ -184,7 +186,8 @@ module.exports.advise = function(params, callback) {
       }
       
       var trainingDay = results[0],
-        plannedActivities;
+        plannedActivities,
+        statusMessage = {};
 
       if (!params.alternateActivity) {
         //We are advising an activity.
@@ -195,9 +198,21 @@ module.exports.advise = function(params, callback) {
         plannedActivities[0].source = 'advised';
         trainingDay.plannedActivities = plannedActivities;
 
-        generateAdvice(params.user, trainingDay, function(err, recommendation) {
+        generateAdvice(user, trainingDay, function(err, recommendation) {
           if (err) {
             return callback(err, null);
+          }
+
+          if (params.alertUser) {
+            statusMessage = {
+              type: 'info',
+              text: 'Training metrics have been updated. You should update your training plan.',
+              title: 'Training Plan Update',
+              created: Date.now(),
+              username: user.username
+            };
+
+            dbUtil.sendMessageToUser(statusMessage, user);
           }
 
           return callback(null, recommendation);
@@ -220,7 +235,7 @@ module.exports.advise = function(params, callback) {
         trainingDay.plannedActivities = plannedActivities;
 
         //Determine load. 
-        adviceLoad.setLoadRecommendations(params.user, trainingDay, function(err, recommendation) {
+        adviceLoad.setLoadRecommendations(user, trainingDay, function(err, recommendation) {
           if (err) {
             return callback(err);
           }

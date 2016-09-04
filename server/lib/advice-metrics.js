@@ -47,15 +47,6 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
           return callback(err, null);
         } 
 
-        var statusMessage = {
-          type: 'info',
-          text: 'Training metrics have been updated. You should update your training plan.',
-          title: 'Training Plan Update',
-          created: Date.now(),
-          username: user.username
-        };
-
-        dbUtil.sendMessageToUser(statusMessage, user);
         return callback(null, trainingDay);
       });
     }
