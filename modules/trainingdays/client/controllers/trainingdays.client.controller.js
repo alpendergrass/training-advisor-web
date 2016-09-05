@@ -712,7 +712,7 @@ angular.module('trainingDays')
           templateUrl: '/modules/trainingdays/client/views/partials/feedback-trainingdays.client.view.html',
           size: 'sm',
           controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
-            $scope.relativeDay = (moment(trainingDay.date).isSame(moment(), 'day')) ? 'today' : 'yesterday';
+            $scope.relativeDay = (moment(trainingDay.date).isSame(moment(), 'day')) ? ' today' : '';
             //By setting $scope.trainingEffortFeedback to '' we disable the Save button
             //until the user makes a selection.
             $scope.trainingEffortFeedback = '';
