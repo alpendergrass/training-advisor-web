@@ -29,14 +29,14 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Schedule Events',
-      state: 'trainingDays.createEvent',
+      title: 'Start Season',
+      state: 'trainingDays.createStart',
       roles: ['user']
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Start Season',
-      state: 'trainingDays.createStart',
+      title: 'Schedule Events',
+      state: 'trainingDays.createEvent',
       roles: ['user']
     });
 
