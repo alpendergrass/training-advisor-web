@@ -17,7 +17,7 @@
   </div>
   <div>
     <h4>
-      <a href="#" editable-radiolist="trainingDay.eventPriority" e-ng-options="s.value as s.text for s in ::eventPriorities track by s.value" onbeforesave="updateEventPriority($data)">{{showPriority()}} </a>
+      <a href="#" editable-radiolist="trainingDay.eventPriority" e-ng-options="s.value as s.text for s in ::eventPriorities track by s.value" onbeforesave="updateEventPriority($data)">{{showPriority()}}</a>
       <span ng-show="trainingDay.eventPriority"><small>Estimated Load: <a href="#" editable-textarea="trainingDay.estimatedGoalLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedGoalLoad}}</a></small></span>
     </h4>
   </div>
