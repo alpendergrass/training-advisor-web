@@ -1,4 +1,4 @@
-<section ng-controller="TrainingDaysController" ng-init="findOne()">
+<section ng-controller="TrainingDaysController" ng-init="findOne()" ng-show="authentication.user._id == trainingDay.user._id">
   <div class="page-header">
     <h4>
       <small class="text-default">Training Day</small>
@@ -7,12 +7,18 @@
       <small class="text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">This is a Fitness and Fatigue True Up Day</small>
     </h4>
   </div>
-  <div class="pull-right" ng-show="authentication.user._id == trainingDay.user._id">
+  <div class="pull-right">
     <a ng-show="!trainingDay.completedActivities.length > 0 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="getAdvice(true, trainingDay.date)" title="Get advice">
       Get Advice
     </a>
     <a ng-show="authentication.user.levelOfDetail > 1" class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
       <i class="glyphicon glyphicon-trash"></i>
+    </a>
+    <a class="btn btn-default btn-sm" ui-sref="trainingDays.season()" title="Season">
+      Season
+    </a>
+    <a class="btn btn-default btn-sm" ui-sref="trainingDays.calendar()" title="Calendar">
+      Calendar
     </a>
   </div>
   <div>
