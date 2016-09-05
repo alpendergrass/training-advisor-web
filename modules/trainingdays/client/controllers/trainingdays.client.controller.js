@@ -580,7 +580,7 @@ angular.module('trainingDays')
 
       $scope.showPriority = function() {
         var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.eventPriority }),
-          dayText = $scope.trainingDay.plannedActivities[0]? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day (no event)' : 'No Event';
+          dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0]? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day (no event)' : 'No Event';
         return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : dayText;
       };
 
