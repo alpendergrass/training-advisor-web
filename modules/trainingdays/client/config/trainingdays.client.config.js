@@ -11,14 +11,14 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'My Training Days',
-      state: 'trainingDays.calendar',
+      title: 'My Season',
+      state: 'trainingDays.season',
       roles: ['user']
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'My Season',
-      state: 'trainingDays.season',
+      title: 'My Training Days',
+      state: 'trainingDays.calendar',
       roles: ['user']
     });
 

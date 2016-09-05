@@ -498,7 +498,7 @@ angular.module('trainingDays')
 
         // Redirect after save
         trainingDay.$create(function(response) {
-          $location.path('trainingDays');
+          $location.path('trainingDays/season');
 
           // Clear form fields
           $scope.name = '';
@@ -535,7 +535,7 @@ angular.module('trainingDays')
 
         // Redirect after save
         trainingDay.$create(function(response) {
-          $location.path('trainingDays');
+          $location.path('trainingDays/season');
 
           // Clear form fields
           $scope.name = '';
@@ -566,7 +566,7 @@ angular.module('trainingDays')
           }
         } else {
           $scope.trainingDay.$remove(function() {
-            $location.path('trainingDays');
+            $location.path('trainingDays/season');
           });
         }
       };
@@ -575,12 +575,12 @@ angular.module('trainingDays')
         { value: 1, text: 'Goal Event!' },
         { value: 2, text: 'Medium Priority Event' },
         { value: 3, text: 'Low Priority Event' },
-        { value: 0, text: 'Regular Training Day' }
+        { value: 0, text: 'No Event' }
       ];
 
       $scope.showPriority = function() {
         var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.eventPriority });
-        return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : 'Regular Training Day';
+        return ($scope.trainingDay.eventPriority && selected.length) ? selected[0].text : $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day';
       };
 
       $scope.updateEventPriority = function(priority) {

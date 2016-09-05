@@ -119,7 +119,7 @@ exports.oauthCallback = function (strategy) {
           return res.redirect('/authentication/signin');
         }
 
-        return res.redirect(redirectURL || sessionRedirectURL || '/trainingDays');
+        return res.redirect(redirectURL || sessionRedirectURL || '/trainingDays/season');
       });
     })(req, res, next);
   };
