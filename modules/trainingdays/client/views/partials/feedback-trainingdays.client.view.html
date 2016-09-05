@@ -1,9 +1,9 @@
 <div class="modal-header">
-  <h3 class="modal-title">How did you feel?</h3>
+  <h3 class="modal-title">How did you feel {{relativeDay}}?</h3>
 </div>
 <div class="modal-body">
   <select name="trainingEffortFeedback" class="form-control" ng-model="trainingEffortFeedback">
-    <option value="">Riding{{relativeDay}} I felt...</option>
+    <option value="">Riding {{relativeDay}} I felt...</option>
     <option ng-repeat="rating in trainingEffortRatings" value="{{rating.value}}">{{rating.text}}</option>
   </select>
   <br/>
