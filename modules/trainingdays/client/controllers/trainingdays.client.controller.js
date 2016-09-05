@@ -352,10 +352,16 @@ angular.module('trainingDays')
             formArray = _.flatMap($scope.season, function(td) { return td.form; });
             fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
             fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
+            $scope.tdLookupArray = _.flatMap($scope.season, function(td) { return td._id; });
             $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
             $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
           }
         });
+      };
+
+      $scope.onChartClick = function (points) {
+        var id = $scope.tdLookupArray[points[0]._index];
+        $state.go('trainingDays.view', { trainingDayId: id });
       };
 
       var getAllTrainingDays = function(callback) {
