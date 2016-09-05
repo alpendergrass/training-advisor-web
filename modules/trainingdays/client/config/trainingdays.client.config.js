@@ -17,7 +17,7 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'My Training Days',
+      title: 'My Calendar',
       state: 'trainingDays.calendar',
       roles: ['user']
     });

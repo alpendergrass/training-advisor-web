@@ -33,13 +33,13 @@
             Load between <b>{{trainingDay.plannedActivities[0].targetMinLoad}}</b> and <b>{{trainingDay.plannedActivities[0].targetMaxLoad}}</b>.
           </span>
         </p>
-        <ul class="list-inline" ng-show="authentication.user.levelOfDetail == 2 && trainingDay.date.getTime() < dayAfterTomorrow">
+        <ul class="list-inline">
           <li>Fitness: {{trainingDay.fitness}}</li> 
           <li>Fatigue: {{trainingDay.fatigue}}</li> 
           <li ng-hide="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint">Form: {{trainingDay.form}}</li>
         </ul>
         <small>
-          <ul class="list-inline" ng-show="authentication.user.levelOfDetail == 3">
+          <ul class="list-inline">
             <li>Fitness: {{trainingDay.fitness}}</li> 
             <li>Fatigue: {{trainingDay.fatigue}}</li> 
             <li>Form: {{trainingDay.form}}</li>
