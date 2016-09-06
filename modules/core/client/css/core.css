@@ -45,3 +45,11 @@ a:hover .header-profile-image {
 .navbar {
   border-bottom: 1px solid #e5e5e5;
 } 
+
+.footer  {
+  margin-top: 20px;
+}
+
+.footer .copyright {
+  margin-left: 5px;
+}
