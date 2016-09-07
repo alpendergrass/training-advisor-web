@@ -709,7 +709,7 @@ angular.module('trainingDays')
       };
 
       $scope.checkGiveFeedback = function(trainingDay) {
-        if (trainingDay.loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
+        if (trainingDay.completedActivities.length > 0 && trainingDay.loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
           $scope.openGiveFeedback(trainingDay);
         }
       };
