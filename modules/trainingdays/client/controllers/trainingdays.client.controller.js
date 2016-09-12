@@ -95,6 +95,7 @@ angular.module('trainingDays')
       //For comparision in views, we will use seconds - getTime()
       $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
+      $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate();
 
       $scope.activityTypes = [
         { value: 'easy', text: 'Do an easy ride' },
