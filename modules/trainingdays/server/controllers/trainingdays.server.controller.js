@@ -64,15 +64,17 @@ exports.create = function (req, res) {
           });
         } 
 
-        statusMessage = {
-          type: 'info',
-          text: 'A training day has been added or updated. You should update your training plan.',
-          title: 'Training Plan Update',
-          created: Date.now(),
-          username: user.username
-        };
-
-        dbUtil.sendMessageToUser(statusMessage, user);
+        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.eventPriority) {
+          statusMessage = {
+            type: 'info',
+            text: 'A key training day has been added or updated. You should update your training plan.',
+            title: 'Training Plan Update',
+            created: Date.now(),
+            username: user.username
+          };
+  
+          dbUtil.sendMessageToUser(statusMessage, user);
+        }
         res.json(trainingDay);
       });
     });
