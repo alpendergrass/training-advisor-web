@@ -191,6 +191,18 @@ exports.read = function (req, res) {
   res.json(req.trainingDay);
 };
 
+exports.getDay = function (req, res) {
+  dbUtil.getTrainingDayDocument(req.user, req.params.trainingDate, function(err, trainingDay) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    } 
+
+    res.json(trainingDay);
+  });
+};
+
 exports.update = function (req, res) {
   var trainingDay = req.trainingDay,
     params = {};

@@ -24,6 +24,9 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/getSeason/:today',
       permissions: '*'
     }, {
+      resources: '/api/trainingDays/getDay/:trainingDate',
+      permissions: '*'
+    }, {
       resources: '/api/trainingDays/getAdvice/:trainingDate',
       permissions: '*'
     }, {
@@ -43,6 +46,9 @@ exports.invokeRolesPolicies = function () {
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getSeason/:today',
+      permissions: ['get']
+    }, {
+      resources: '/api/trainingDays/getDay/:trainingDate',
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getAdvice/:trainingDate',

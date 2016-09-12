@@ -21,6 +21,9 @@ module.exports = function (app) {
     .put(trainingDays.update)
     .delete(trainingDays.delete);
 
+  app.route('/api/trainingDays/getDay/:trainingDate').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.getDay);
+
   app.route('/api/trainingDays/getAdvice/:trainingDate').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getAdvice);
 
