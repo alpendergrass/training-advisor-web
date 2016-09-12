@@ -12,6 +12,10 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
       update: {
         method: 'PUT'
       },
+      getDay: {
+        method: 'GET',
+        url: 'api/trainingDays/getDay/:trainingDate'
+      },
       getAdvice: {
         method: 'GET',
         url: 'api/trainingDays/getAdvice/:trainingDate',

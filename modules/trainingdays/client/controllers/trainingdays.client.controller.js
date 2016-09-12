@@ -93,9 +93,8 @@ angular.module('trainingDays')
       //End Datepicker stuff.
 
       //For comparision in views, we will use seconds - getTime()
-      $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate().getTime();
-      $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate().getTime();
-      $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate().getTime();
+      $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
+      $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
 
       $scope.activityTypes = [
         { value: 'easy', text: 'Do an easy ride' },
@@ -432,19 +431,50 @@ angular.module('trainingDays')
         }
       };
 
+      function prepForTDView(trainingDay) {
+        //not sure why Mongo/Mongoose returns a string for a date field
+        //but I have to convert it back to a date to get my date picker
+        //to consider it a valid date if the user does not pick a new date.
+        trainingDay.date = new Date(trainingDay.date);
+        $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').startOf('day').toDate();
+        $scope.nextDay = moment(trainingDay.date).add(1, 'day').startOf('day').toDate();
+        $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
+        $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+        $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
+        $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+        return trainingDay;
+      }
+
       // Find existing TrainingDay
       $scope.findOne = function() {
         $scope.trainingDay = TrainingDays.get({
           trainingDayId: $stateParams.trainingDayId
         }, function(trainingDay) {
-          //not sure why Mongo/Mongoose returns a string for a date field
-          //but I have to convert it back to a date to get my date picker
-          //to consider it a valid date if the user does not pick a new date.
-          trainingDay.date = new Date(trainingDay.date);
-          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
-          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-          $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
-          $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          prepForTDView(trainingDay);
+        }, function(errorResponse) {
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented training day retrieval.';
+          }
+        });
+      };
+
+      $scope.getDay = function(date) {
+        $scope.error = null;
+
+        $scope.trainingDay = TrainingDays.getDay({
+          trainingDate: date.toISOString()
+        }, function(trainingDay) {
+          prepForTDView(trainingDay);
+        }, function(errorResponse) {
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented training day retrieval.';
+          }
         });
       };
 
