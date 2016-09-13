@@ -330,11 +330,6 @@ exports.list = function (req, res) {
   var user = req.user,
     today = req.query.clientDate; //need to use current date from client to avoid time zone issues.
 
-  //Call updateMetics for today so that any missing trainingDays will be generated.
-  //Note that if user deleted a past training day but we have valid metrics for subsequent days,
-  //the deleted day will not be recreated. We will ignore this scenario unless/until it becomes an issue.
-//  adviceMetrics.updateMetrics(user, today, false, function(err, trainingDay) {
-  //ignore any errors. For example if we have not start day we will get an error.
   TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function (err, trainingDays) {
     if (err) {
       return res.status(400).send({
@@ -344,7 +339,6 @@ exports.list = function (req, res) {
       res.json(trainingDays);
     }
   });
-//  });
 };
 
 exports.getSeason = function (req, res) {
@@ -366,23 +360,19 @@ exports.getSeason = function (req, res) {
       effectiveStartDate = startDay.date;
     } else {
       effectiveStartDate = moment(today).subtract('1', 'day');
-      // err = new TypeError('A start day is required.');
-      // return res.status(400).send({
-      //   message: errorHandler.getErrorMessage(err)
-      // });
     }
 
-    //Get next goal day. Look up to one year out. Seems kind of excessive.
-    //TODO: get thru last goal.
-    dbUtil.getNextPriorityDay(user, today, 1, 365, function(err, goalDay) {
+    //Get future goal days to determine end of season. 
+    dbUtil.getFuturePriorityDays(user, today, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
       }
 
-      if (goalDay) {
-        effectiveGoalDate = goalDay.date;
+      if (goalDays.length > 0) {
+        //Use last goal to end season.
+        effectiveGoalDate = goalDays[goalDays.length - 1].date;
       } else {
         effectiveGoalDate = moment(today).add('1', 'day');
       }
@@ -396,13 +386,11 @@ exports.getSeason = function (req, res) {
           res.json(trainingDays);
         }
       });
-      // });
     });
   });
 };
 
 exports.getAdvice = function (req, res) {
-  //Request advice for trainingDate and return trainingDay.
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;

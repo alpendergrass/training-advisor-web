@@ -137,16 +137,15 @@ module.exports.getStartDay = function(user, searchDate, callback) {
   });
 };
 
-module.exports.getNextPriorityDay = function(user, searchDate, priority, numberOfDays, callback) {
-  //select next priority n trainingDay.
+module.exports.getFuturePriorityDays = function(user, searchDate, priority, numberOfDaysOut, callback) {
+  //select future priority n trainingDays.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
   var trainingDate = moment(searchDate),
-    //TODO: shouldn't we be adding numberOfDays to our start date?
-    maxDate = moment(searchDate).add(numberOfDays, 'days'); 
+    maxDate = moment(searchDate).add(numberOfDaysOut, 'days'); 
 
   var query = {
     user: user,
@@ -154,17 +153,13 @@ module.exports.getNextPriorityDay = function(user, searchDate, priority, numberO
     date: { $gt: trainingDate, $lte: maxDate }
   };
 
-  TrainingDay.find(query).sort({ date: 1 }).limit(1)
-  .exec(function(err, trainingDays) {
+  TrainingDay.find(query).sort({ date: 1 })
+  .exec(function(err, priorityDays) {
     if (err) {
       return callback(err, null);
     } 
-
-    if (trainingDays.length === 0) {
-      return callback(null, null);
-    } 
     
-    return callback(null, trainingDays[0]);
+    return callback(null, priorityDays);
   });
 };
 
