@@ -41,6 +41,7 @@ module.exports.generatePlan = function(params, callback) {
     user = params.user,
     adviceParams = {},
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
+    goalDay,
     statusMessage = {
       type: '',
       text: '',
@@ -57,16 +58,19 @@ module.exports.generatePlan = function(params, callback) {
       return callback(err, null);
     }
 
-    dbUtil.getNextPriorityDay(user, startDate, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, goalDay) {
+    dbUtil.getFuturePriorityDays(user, startDate, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
       if (err) {
         return callback(err, null);
       }
 
       //TODO: do not require a goal.
-      if (!goalDay) {
+      if (goalDays.length < 1) {
         err = new TypeError('A goal is required in order to compute a plan.');
         return callback(err, null);
       }
+
+      //Use last goal to generate plan.
+      goalDay = goalDays[goalDays.length - 1];
 
       adviceMetrics.updateMetrics(user, startDate, function(err, td) {
         if (err) {

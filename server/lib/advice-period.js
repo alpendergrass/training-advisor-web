@@ -82,39 +82,39 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       nextGoalDate: function(callback) {
-        dbUtil.getNextPriorityDay(user, trainingDay.date, 1, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.date, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, priorityDays) {
           if (err) {
             return callback(err, null);
           }
 
-          if (priorityDay) {
-            return callback(null, moment(priorityDay.date));
+          if (priorityDays.length > 0) {
+            return callback(null, moment(priorityDays[0].date));
           }
 
           return callback(null, null);
         });
       },
       nextPriority2Date: function(callback) {
-        dbUtil.getNextPriorityDay(user, trainingDay.date, 2, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.date, 2, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, priorityDays) {
           if (err) {
             return callback(err, null);
           }
 
-          if (priorityDay) {
-            return callback(null, moment(priorityDay.date));
+          if (priorityDays.length > 0) {
+            return callback(null, moment(priorityDays[0].date));
           }
 
           return callback(null, null);
         });
       },
       nextPriority3Date: function(callback) {
-        dbUtil.getNextPriorityDay(user, trainingDay.date, 3, adviceConstants.maximumNumberOfTrainingDays, function(err, priorityDay) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.date, 3, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, priorityDays) {
           if (err) {
             return callback(err, null);
           }
 
-          if (priorityDay) {
-            return callback(null, moment(priorityDay.date));
+          if (priorityDays.length > 0) {
+            return callback(null, moment(priorityDays[0].date));
           }
 
           return callback(null, null);

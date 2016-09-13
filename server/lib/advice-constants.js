@@ -8,9 +8,12 @@ module.exports.minimumNumberOfTrainingDays = 112;
 //This is the maximum duration from season start to first goal event: 26 weeks.
 module.exports.maximumNumberOfTrainingDays = 182;
 
+//This is how far out we will look when considering the current season.
+module.exports.maximumNumberOfDaysToLookAhead = 182;
+
 //These should include goal event, i.e., includes first week of race period.
-//with base + build portion = 86% and min training days of 112, computed peak period is 16 days.
-//with max days of 182, is 25 days.
+//with base + build portion = 86% and minimumNumberOfTrainingDays of 112, computed peak period is 16 days.
+//with maximumNumberOfTrainingDays of 182, is 25 days.
 //Friel says peak should be 1-2 weeks. Add a week for the race and we get 21 days.
 module.exports.minimumNumberOfPeakDays = 14; 
 module.exports.maximumNumberOfPeakDays = 21; 
