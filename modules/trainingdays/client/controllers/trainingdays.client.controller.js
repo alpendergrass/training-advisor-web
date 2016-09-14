@@ -112,71 +112,6 @@ angular.module('trainingDays')
         return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
       };
 
-      var formatDayContent = function(trainingDay) {
-        var load = 0,
-          content = '<div class="td-calendar-content',
-          lengthOfFixedContent = 33;
-
-        //We want to be able to highlight today.
-        if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
-          content += ' today-on-calendar';
-          lengthOfFixedContent += 18;
-        }
-
-        content += '">';
-
-        content += trainingDay.name ? '<b>' + trainingDay.name + '</b> ' : '';
-        content += trainingDay.startingPoint ? '<b class="small text-danger">Season Start</b> ' : '';
-        content += trainingDay.fitnessAndFatigueTrueUp ? '<b class="small text-danger">Fitness and Fatigue True Up</b> ' : '';
-
-        content += '<small>';
-        lengthOfFixedContent += 7;
-        
-        if (trainingDay.eventPriority) {
-          content += ' - ';
-
-          switch (trainingDay.eventPriority) {
-            case 1:
-              content += '<b class="text-danger">Goal Event!</b>';
-              break;
-            case 2:
-              content += '<b>Medium Priority</b>';
-              break;
-            case 3:
-              content += 'Low Priority';
-              break;
-            default:
-              break;
-          }
-        }
-
-        //Display future advice
-        if (trainingDay.plannedActivities[0] && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
-          content += content.length > lengthOfFixedContent ? '<br>' : '';
-          if (trainingDay.plannedActivities[0].activityType === 'goal') {
-            content += '<i>scheduled event</i>';
-          } else {
-            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day planned</i>';
-          }
-        }
-
-        if (trainingDay.completedActivities.length > 0) {
-          content += content.length > lengthOfFixedContent ? '<br>' : '';
-          content += 'Load: ';
-          _.forEach(trainingDay.completedActivities, function(activity) {
-            load += activity.load;
-          });
-          content += load + ' - ' + trainingDay.loadRating + ' day';
-        }
-
-        if (trainingDay.form !== 0) {
-          content += '<br><i>Form: ' + trainingDay.form + '</i>';
-        }
-
-        content += '</small></div>';
-        return content;
-      };
-
       var getSeason = function(callback) {
         $scope.hasStart = true;
         $scope.hasEnd = true;
@@ -238,6 +173,67 @@ angular.module('trainingDays')
       };
 
       $scope.calendar = function() {
+        var formatDayContent = function(trainingDay) {
+          var load = 0,
+            content = '<div class="td-calendar-content',
+            lengthOfFixedContent = 33;
+
+          //We want to be able to highlight today.
+          if (trainingDay.htmlID && trainingDay.htmlID === 'today') {
+            content += ' today-on-calendar';
+            lengthOfFixedContent += 18;
+          }
+
+          content += '">';
+
+          content += trainingDay.name ? '<b>' + trainingDay.name + '</b> ' : '';
+          content += trainingDay.startingPoint ? '<b class="small text-danger">Season Start</b> ' : '';
+          content += trainingDay.fitnessAndFatigueTrueUp ? '<b class="small text-danger">Fitness and Fatigue True Up</b> ' : '';
+
+          content += '<small>';
+          lengthOfFixedContent += 7;
+          
+          if (trainingDay.eventPriority) {
+            content += trainingDay.name ? ' - ' : '';
+
+            switch (trainingDay.eventPriority) {
+              case 1:
+                content += '<b class="text-danger">Goal Event!</b>';
+                break;
+              case 2:
+                content += '<b>Medium Priority Event</b>';
+                break;
+              case 3:
+                content += 'Low Priority Event';
+                break;
+              default:
+                break;
+            }
+          }
+
+          //Display future advice
+          if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].activityType !== 'goal' && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
+            content += content.length > lengthOfFixedContent ? '<br>' : '';
+            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day planned</i>';
+          }
+
+          if (trainingDay.completedActivities.length > 0) {
+            content += content.length > lengthOfFixedContent ? '<br>' : '';
+            content += 'Load: ';
+            _.forEach(trainingDay.completedActivities, function(activity) {
+              load += activity.load;
+            });
+            content += load + ' - ' + trainingDay.loadRating + ' day';
+          }
+
+          // if (trainingDay.form !== 0) {
+          //   content += '<br><i>Form: ' + trainingDay.form + '</i>';
+          // }
+
+          content += '</small></div>';
+          return content;
+        };
+
         //Use vertical format if we are in a small window like on a phone.
         if (jQuery(window).width() < 800) {
           $scope.setDirection('vertical');
@@ -247,6 +243,38 @@ angular.module('trainingDays')
         }
         // Need to clear out calendar data. Moving goal date can strand some data otherwise.
         MaterialCalendarData.data = {};
+
+        $scope.setDirection = function(direction) {
+          $scope.direction = direction;
+          $scope.dayFormat = direction === 'vertical' ? 'EEE, MMM d' : 'd';
+        };
+
+        $scope.dayClick = function(date) {
+          var td = _.find($scope.season, function(d) {
+            return (moment(d.date).isSame(moment(date), 'day'));
+          });
+
+          if (td) {
+            $state.go('trainingDays.view', { trainingDayId: td._id });
+          } else {
+            var trainingDay = new TrainingDays({
+              date: date
+            });
+
+            // Redirect after save
+            trainingDay.$create(function(response) {
+              $scope.trainingDay = response;
+              $location.path('trainingDays/' + response._id);
+            }, function(errorResponse) {
+              if (errorResponse.data && errorResponse.data.message) {
+                $scope.error = errorResponse.data.message;
+              } else {
+                //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+                $scope.error = 'Server error prevented trainingDay creation.';
+              }
+            });
+          }
+        };
 
         getSeason(function() {
           if ($scope.season) {
@@ -264,50 +292,6 @@ angular.module('trainingDays')
         jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
       });
 
-      $scope.setDirection = function(direction) {
-        $scope.direction = direction;
-        $scope.dayFormat = direction === 'vertical' ? 'EEE, MMM d' : 'd';
-      };
-
-      $scope.dayClick = function(date) {
-        var td = _.find($scope.season, function(d) {
-          return (moment(d.date).isSame(moment(date), 'day'));
-        });
-
-        if (td) {
-          $state.go('trainingDays.view', { trainingDayId: td._id });
-        } else {
-          var trainingDay = new TrainingDays({
-            date: date
-          });
-
-          // Redirect after save
-          trainingDay.$create(function(response) {
-            $scope.trainingDay = response;
-            $location.path('trainingDays/' + response._id);
-          }, function(errorResponse) {
-            if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
-            } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-              $scope.error = 'Server error prevented trainingDay creation.';
-            }
-          });
-        }
-      };
-
-      function extractLoad(td) {
-        var load = 0;
-        if (td.completedActivities.length > 0) {
-          load = _.sumBy(td.completedActivities, function(activity) {
-            return activity.load;
-          });
-        } else if (td.plannedActivities.length > 0) {
-          load = (td.plannedActivities[0].targetMinLoad + td.plannedActivities[0].targetMaxLoad) / 2;
-        }
-
-        return load;
-      }
 
       $scope.chart = function() {
         var loadArray,
@@ -315,8 +299,69 @@ angular.module('trainingDays')
           fitnessArray,
           fatigueArray;
 
+        var extractLoad = function(td) {
+          var load = 0;
+          if (td.completedActivities.length > 0) {
+            load = _.sumBy(td.completedActivities, function(activity) {
+              return activity.load;
+            });
+          } else if (td.plannedActivities.length > 0) {
+            load = (td.plannedActivities[0].targetMinLoad + td.plannedActivities[0].targetMaxLoad) / 2;
+          }
+
+          return load;
+        };
+
         $scope.error = null;
         // $scope.chartColors = ['#45b7cd', '#ff6384', '#ff8e72'];
+
+        $scope.chartOptions = {
+          legend: { display: true }, 
+          tooltips: {
+            callbacks: {
+              beforeTitle: function(tooltipItems) {
+                return $scope.season[tooltipItems[0].index].name;
+              },
+              afterTitle: function(tooltipItems) {
+                var text = '',
+                  td = $scope.season[tooltipItems[0].index];
+
+                if (td.eventPriority) {
+                  switch (td.eventPriority) {
+                    case 1:
+                      text = 'Goal Event';
+                      break;
+                    case 2:
+                      text = 'Medium Priority Event';
+                      break;
+                    case 3:
+                      text = 'Low Priority Event';
+                      break;
+                  }
+                }
+
+                return text;
+              },
+              footer: function(tooltipItems) {
+                var text = '',
+                  td = $scope.season[tooltipItems[0].index];
+
+                if (td.plannedActivities[0] && moment(td.date).isAfter($scope.yesterday, 'day')) {
+                  //Display future advice
+                  if (td.plannedActivities[0].activityType !== 'goal') {
+                    text = td.plannedActivities[0].activityType + ' day';
+                  }
+                } else {
+                  //Display load rating 
+                  text = td.loadRating + ' day';
+                } 
+
+                return text;
+              }
+            }
+          }
+        };
+
         $scope.chartDatasetOverride = [
           {
             label: 'Load',
@@ -346,6 +391,13 @@ angular.module('trainingDays')
           }
         ];
 
+        $scope.onChartClick = function (points) {
+          if (points.length > 0) {
+            var id = $scope.season[points[0]._index]._id;
+            $state.go('trainingDays.view', { trainingDayId: id });
+          }
+        };
+
         getSeason(function() {
           if ($scope.season) {
             loadArray = _.flatMap($scope.season, extractLoad);
@@ -358,64 +410,60 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.chartOptions = { 
-        legend: { display: true } 
-      };
-
-      $scope.onChartClick = function (points) {
-        if (points.length > 0) {
-          var id = $scope.season[points[0]._index]._id;
-          $state.go('trainingDays.view', { trainingDayId: id });
-        }
-      };
-
-      var getAllTrainingDays = function(callback) {
-        //Initialize these to prevent temp loading of alert at top of TD list.
-        $scope.hasStart = true;
-        $scope.hasEnd = true;
-        $scope.needsPlanGen = false;
-
-        $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
-          //not sure why Mongo/Mongoose returns a string for a date field but
-          //we need trainingDay.date to be a valid date object for comparision purposes in the view.
-          _.forEach($scope.trainingDaysAll, function(td) {
-            td.date = new Date(td.date);
-          });
-
-          $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
-            // moment.isSameOrBefore is only available in versions 2.10.7 but 
-            // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
-            //TODO: watch for an updated version of angular-timezone-selector.
-            //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
-            //Supports later version of moment. isSameOrBefore should work now.
-            // return td.startingPoint && moment(td.date).isSameOrBefore(moment()); 
-            return td.startingPoint && moment(td.date).isBefore(moment());
-          });
-
-          //Find first future goal TD if any.
-          $scope.hasEnd = _.chain($scope.trainingDaysAll)
-            .filter(function(td) {
-              return td.eventPriority === 1 && moment(td.date).isAfter(moment());
-            })
-            .sortBy(['date'])
-            .head()
-            .value();
-
-          if ($scope.hasEnd) {
-            $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
-              //Determine is there are any TDs before next goal which do not have plannedActivities.
-              //If there are we need to offer plan gen.
-              return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
-            });
-          }
-
-          if (callback) {
-            return callback();
-          }
-        });
-      };
-
       $scope.list = function() {
+        var getAllTrainingDays = function(callback) {
+          //Initialize these to prevent temp loading of alert at top of TD list.
+          $scope.hasStart = true;
+          $scope.hasEnd = true;
+          $scope.needsPlanGen = false;
+
+          $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
+            //not sure why Mongo/Mongoose returns a string for a date field but
+            //we need trainingDay.date to be a valid date object for comparision purposes in the view.
+            _.forEach($scope.trainingDaysAll, function(td) {
+              td.date = new Date(td.date);
+            });
+
+            $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
+              // moment.isSameOrBefore is only available in versions 2.10.7 but 
+              // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
+              //TODO: watch for an updated version of angular-timezone-selector.
+              //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
+              //Supports later version of moment. isSameOrBefore should work now.
+              // return td.startingPoint && moment(td.date).isSameOrBefore(moment()); 
+              return td.startingPoint && moment(td.date).isBefore(moment());
+            });
+
+            //Find first future goal TD if any.
+            $scope.hasEnd = _.chain($scope.trainingDaysAll)
+              .filter(function(td) {
+                return td.eventPriority === 1 && moment(td.date).isAfter(moment());
+              })
+              .sortBy(['date'])
+              .head()
+              .value();
+
+            if ($scope.hasEnd) {
+              $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
+                //Determine is there are any TDs before next goal which do not have plannedActivities.
+                //If there are we need to offer plan gen.
+                return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
+              });
+            }
+
+            if (callback) {
+              return callback();
+            }
+          });
+        };
+
+        $scope.nextBatch = function() {
+          if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
+            $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
+            $scope.nextChunk++;
+          }
+        };
+
         getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side. 
           //May need to switch to server-side at some point. Or some combo of client and server side.
@@ -423,13 +471,6 @@ angular.module('trainingDays')
           $scope.trainingDays = $scope.trainingDaysChunked[0];
           $scope.nextChunk = 1;
         });
-      };
-
-      $scope.nextBatch = function() {
-        if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
-          $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
-          $scope.nextChunk++;
-        }
       };
 
       function prepForTDView(trainingDay) {
@@ -500,7 +541,6 @@ angular.module('trainingDays')
 
       $scope.addCompletedActivity = function(data) {
         $scope.inserted = {
-          // activityType: '',
           load: 0,
           //intensity: 0,
           notes: ''
