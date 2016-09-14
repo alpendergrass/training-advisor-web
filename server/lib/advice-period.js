@@ -31,38 +31,6 @@ module.exports.getPeriod = function(user, trainingDay, callback) {
   });
 };
 
-module.exports.determineEffectiveStartDate = function (dates) {
-  
-  //no prior goal event was found.
-  //set it to the Unix Epoch.
-  if (!dates.mostRecentGoalDate) {
-    dates.mostRecentGoalDate = moment(0);
-  }
-
-  var effectiveStartDate = dates.nextGoalDate.clone(); //Will be modified or replaced below.
-
-  if (moment(dates.mostRecentGoalDate).isAfter(dates.startDate)) {
-    //First season goal has already occurred.
-    //Next goal is a subsequent goal in current season 
-    //or no start was set for current season
-    //Default to minimum training duration.
-    effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
-  } else if (dates.nextGoalDate.diff(dates.startDate, 'days') < adviceConstants.minimumNumberOfTrainingDays) {
-    //Computed training duration is shorter than the minimum.
-    //Use minimum training duration.
-    effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
-  } else if (dates.nextGoalDate.diff(dates.startDate, 'days') > adviceConstants.maximumNumberOfTrainingDays) {
-    //Computed training duration is longer than the maximum.
-    //Use maximum training duration.
-    effectiveStartDate.subtract(adviceConstants.maximumNumberOfTrainingDays, 'days');
-  } else {
-    //Training duration using user-supplied start date is within minimum and maximum durations.
-    effectiveStartDate = dates.startDate.clone();
-  }
-
-  return effectiveStartDate;
-};
-
 function determinePeriod(user, trainingDay, callback) {
 
   async.parallel(
@@ -151,7 +119,7 @@ function determinePeriod(user, trainingDay, callback) {
       results.trainingDate = trainingDate;
 
       if (results.nextGoalDate) {
-        startDate = module.exports.determineEffectiveStartDate(results);
+        startDate = determineEffectiveStartDate(results);
         //Determine how many days total between start and goal.
         periodData.totalTrainingDays = results.nextGoalDate.diff(startDate, 'days');
 
@@ -216,4 +184,35 @@ function determinePeriod(user, trainingDay, callback) {
       return callback(null, periodData);
     }
   );
+}
+
+function determineEffectiveStartDate(dates) {
+  if (!dates.mostRecentGoalDate) {
+    //no prior goal event was found.
+    //set it to the Unix Epoch.
+    dates.mostRecentGoalDate = moment(0);
+  }
+
+  var effectiveStartDate = dates.nextGoalDate.clone(); //Will be modified or replaced below.
+
+  if (moment(dates.mostRecentGoalDate).isAfter(dates.startDate)) {
+    //First season goal has already occurred.
+    //Next goal is a subsequent goal in current season 
+    //or no start was set for current season
+    //Default to minimum training duration.
+    effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
+  } else if (dates.nextGoalDate.diff(dates.startDate, 'days') < adviceConstants.minimumNumberOfTrainingDays) {
+    //Computed training duration is shorter than the minimum.
+    //Use minimum training duration.
+    effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
+  } else if (dates.nextGoalDate.diff(dates.startDate, 'days') > adviceConstants.maximumNumberOfTrainingDays) {
+    //Computed training duration is longer than the maximum.
+    //Use maximum training duration.
+    effectiveStartDate.subtract(adviceConstants.maximumNumberOfTrainingDays, 'days');
+  } else {
+    //Training duration using user-supplied start date is within minimum and maximum durations.
+    effectiveStartDate = dates.startDate.clone();
+  }
+
+  return effectiveStartDate;
 }
