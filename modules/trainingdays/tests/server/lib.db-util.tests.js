@@ -93,7 +93,6 @@ describe('db-util Unit Tests:', function () {
         });
       });
     });
-
   });
 
   describe('Method getExistingTrainingDayDocument', function () {
@@ -229,8 +228,186 @@ describe('db-util Unit Tests:', function () {
         });
       });
     });
-
   });
+
+  describe('Method getStartDay', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.getStartDay(null, null, function (err, startDay) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid trainingDate', function (done) {
+      return dbUtil.getStartDay(user, null, function (err, startDay) {
+        should.exist(err);
+        (err.message).should.match('searchDate null is not a valid date');
+        done();
+      });
+    });
+
+    it('should return null if start day does not exist', function (done) {
+      return dbUtil.getStartDay(user, trainingDate, function (err, startDay) {
+        should.not.exist(err);
+        should.equal(startDay, null);
+        done();
+      });
+    });
+  
+    it('should return start day if start day exists', function (done) {
+      testHelpers.createStartingPoint(user, trainingDate, 20, 1, 1, function(err, newStartDay) {
+        if (err) {
+          console.log('createStartingPoint: ' + err);
+        }
+
+        return dbUtil.getStartDay(user, trainingDate, function (err, startDay) {
+          should.not.exist(err);
+          (startDay.date.toString()).should.be.equal(newStartDay.date.toString());
+          done();
+        });
+      });
+    });
+  });
+
+  describe('Method getFuturePriorityDays', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.getFuturePriorityDays(null, null, null, null, function (err, priorityDays) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid trainingDate', function (done) {
+      return dbUtil.getFuturePriorityDays(user, null, null, null, function (err, priorityDays) {
+        should.exist(err);
+        (err.message).should.match('searchDate null is not a valid date');
+        done();
+      });
+    });
+
+    it('should return empty array if no priority days exist', function (done) {
+      return dbUtil.getFuturePriorityDays(user, trainingDate, 1, 10, function (err, priorityDays) {
+        should.not.exist(err);
+        priorityDays.should.have.length(0);
+        done();
+      });
+    });
+  
+    it('should return empty array if no days of requested priority exist', function (done) {
+      testHelpers.createGoalEvent(user, trainingDate, 10, function(err) {
+        if (err) {
+          console.log('createGoalEvent: ' + err);
+        }
+
+        return dbUtil.getFuturePriorityDays(user, trainingDate, 2, 11, function (err, priorityDays) {
+          should.not.exist(err);
+          priorityDays.should.have.length(0);
+          done();
+        });
+      });
+    });
+  
+    it('should return array of one goal day if one goal day exists within time limit', function (done) {
+      testHelpers.createGoalEvent(user, trainingDate, 10, function(err, newGoalDay) {
+        if (err) {
+          console.log('createGoalEvent: ' + err);
+        }
+
+        return dbUtil.getFuturePriorityDays(user, trainingDate, 1, 10, function (err, priorityDays) {
+          should.not.exist(err);
+          priorityDays.should.have.length(1);
+          (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
+          done();
+        });
+      });
+    });
+  
+    it('should return array of two goal days if two goal days exist within time limit', function (done) {
+      testHelpers.createGoalEvent(user, trainingDate, 10, function(err, newGoalDay) {
+        if (err) {
+          console.log('createGoalEvent: ' + err);
+        }
+
+        testHelpers.createGoalEvent(user, trainingDate, 20, function(err, newGoalDay2) {
+          if (err) {
+            console.log('createGoalEvent: ' + err);
+          }
+
+          return dbUtil.getFuturePriorityDays(user, trainingDate, 1, 20, function (err, priorityDays) {
+            should.not.exist(err);
+            priorityDays.should.have.length(2);
+            (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
+            (priorityDays[1].date.toString()).should.be.equal(newGoalDay2.date.toString());
+            done();
+          });
+        });
+      });
+    });
+  });
+  
+  describe('Method getMostRecentGoalDay', function () {
+    it('should return error if no user', function (done) {
+      return dbUtil.getMostRecentGoalDay(null, null, function (err, mostRecentGoalDay) {
+        should.exist(err);
+        (err.message).should.match('valid user is required');
+        done();
+      });
+    });
+    
+    it('should return error if invalid trainingDate', function (done) {
+      return dbUtil.getMostRecentGoalDay(user, null, function (err, mostRecentGoalDay) {
+        should.exist(err);
+        (err.message).should.match('searchDate null is not a valid date');
+        done();
+      });
+    });
+
+    it('should return null if no prior goal days exist', function (done) {
+      return dbUtil.getMostRecentGoalDay(user, trainingDate, function (err, mostRecentGoalDay) {
+        should.not.exist(err);
+        should.equal(mostRecentGoalDay, null);
+        done();
+      });
+    });
+  
+    it('should return goal day if one prior goal day exists', function (done) {
+      testHelpers.createGoalEvent(user, moment(trainingDate).subtract('10', 'days').toDate(), 0, function(err, newGoalDay) {
+        if (err) {
+          console.log('createGoalEvent: ' + err);
+        }
+
+        return dbUtil.getMostRecentGoalDay(user, trainingDate, function (err, mostRecentGoalDay) {
+          should.not.exist(err);
+          (mostRecentGoalDay.date.toString()).should.be.equal(newGoalDay.date.toString());
+          done();
+        });
+      });
+    });
+  
+    it('should return most recent goal day if two prior goal days exist', function (done) {
+      testHelpers.createGoalEvent(user, moment(trainingDate).subtract('10', 'days'), 0, function(err, newGoalDay) {
+        if (err) {
+          console.log('createGoalEvent: ' + err);
+        }
+
+        testHelpers.createGoalEvent(user, moment(trainingDate).subtract('20', 'days'), 0, function(err, newGoalDay2) {
+          if (err) {
+            console.log('createGoalEvent: ' + err);
+          }
+
+          return dbUtil.getMostRecentGoalDay(user, trainingDate, function (err, mostRecentGoalDay) {
+            should.not.exist(err);
+            (mostRecentGoalDay.date.toString()).should.be.equal(newGoalDay.date.toString());
+            done();
+          });
+        });
+      });
+    });
+    
+  });
+
 
   describe('Method clearFutureMetricsAndAdvice', function () {
     it('should return error if no user', function (done) {
@@ -418,7 +595,6 @@ describe('db-util Unit Tests:', function () {
         });
       });
     });
-
   });
 
   describe('Method didWeGoHardTheDayBefore', function () {
