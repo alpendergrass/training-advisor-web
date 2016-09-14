@@ -117,6 +117,11 @@ module.exports.getStartDay = function(user, searchDate, callback) {
 
   var trainingDate = moment(searchDate); 
 
+  if (!trainingDate.isValid()) {
+    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
   var query = {
     user: user,
     startingPoint: true,
@@ -147,6 +152,11 @@ module.exports.getFuturePriorityDays = function(user, searchDate, priority, numb
   var trainingDate = moment(searchDate),
     maxDate = moment(searchDate).add(numberOfDaysOut, 'days'); 
 
+  if (!trainingDate.isValid()) {
+    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
   var query = {
     user: user,
     eventPriority: priority,
@@ -171,6 +181,11 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
   }
 
   var trainingDate = moment(searchDate); 
+
+  if (!trainingDate.isValid()) {
+    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+    return callback(err, null);
+  }
 
   var query = {
     user: user,
