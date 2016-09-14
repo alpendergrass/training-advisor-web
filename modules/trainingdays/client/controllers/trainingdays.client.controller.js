@@ -297,7 +297,8 @@ angular.module('trainingDays')
         var loadArray,
           formArray,
           fitnessArray,
-          fatigueArray;
+          fatigueArray,
+          loadBackgroundColors;
 
         var extractLoad = function(td) {
           var load = 0;
@@ -310,6 +311,10 @@ angular.module('trainingDays')
           }
 
           return load;
+        };
+
+        var setLoadBackgroundColor = function(td) {
+          return td.eventPriority === 1 ? '#D4A1A0' : '#EAF1F5';
         };
 
         $scope.error = null;
@@ -362,34 +367,6 @@ angular.module('trainingDays')
           }
         };
 
-        $scope.chartDatasetOverride = [
-          {
-            label: 'Load',
-            borderWidth: 1,
-            type: 'bar'
-          },
-          {
-            label: 'Fitness',
-            borderWidth: 3,
-            hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-            hoverBorderColor: 'rgba(255,99,132,1)',
-            type: 'line'
-          },
-          {
-            label: 'Fatigue',
-            borderWidth: 3,
-            hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-            hoverBorderColor: 'rgba(255,99,132,1)',
-            type: 'line'
-          },
-          {
-            label: 'Form',
-            borderWidth: 3,
-            hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-            hoverBorderColor: 'rgba(255,99,132,1)',
-            type: 'line'
-          }
-        ];
 
         $scope.onChartClick = function (points) {
           if (points.length > 0) {
@@ -401,11 +378,35 @@ angular.module('trainingDays')
         getSeason(function() {
           if ($scope.season) {
             loadArray = _.flatMap($scope.season, extractLoad);
+            loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
             formArray = _.flatMap($scope.season, function(td) { return td.form; });
             fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
             fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
             $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
             $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+            $scope.chartDatasetOverride = [
+              {
+                label: 'Load',
+                borderWidth: 1,
+                backgroundColor: loadBackgroundColors,
+                type: 'bar'
+              },
+              {
+                label: 'Fitness',
+                borderWidth: 3,
+                type: 'line'
+              },
+              {
+                label: 'Fatigue',
+                borderWidth: 3,
+                type: 'line'
+              },
+              {
+                label: 'Form',
+                borderWidth: 3,
+                type: 'line'
+              }
+            ];
           }
         });
       };
