@@ -59,7 +59,7 @@ describe('advice-load Unit Tests:', function () {
     });
 
     it('should return estimatedGoalLoad for target loads if this is a goal (A) event day and estimate is provided', function (done) {
-      trainingDay.plannedActivities[0].activityType = 'goal';
+      trainingDay.plannedActivities[0].activityType = 'event';
       trainingDay.estimatedGoalLoad = 234;
       trainingDay.targetAvgDailyLoad = 100;
       trainingDay.sevenDayTargetRampRate = 5;
@@ -76,7 +76,7 @@ describe('advice-load Unit Tests:', function () {
     });
     
     it('should return computed target loads if this is a goal event day but no estimate is provided', function (done) {
-      trainingDay.plannedActivities[0].activityType = 'goal';
+      trainingDay.plannedActivities[0].activityType = 'event';
       trainingDay.targetAvgDailyLoad = 100;
       trainingDay.sevenDayTargetRampRate = 6;
       trainingDay.sevenDayRampRate = 6;

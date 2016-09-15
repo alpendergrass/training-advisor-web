@@ -36,7 +36,7 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
       case 1:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 1 (goal) event.';
         trainingDay.plannedActivities[0].advice += ' Today is a goal event. Give it your all. Good luck!';
-        trainingDay.plannedActivities[0].activityType = 'goal';
+        trainingDay.plannedActivities[0].activityType = 'event';
         break;
       case 2:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 2 (medium priority) event.';
@@ -54,7 +54,7 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
         } else {
           trainingDay.plannedActivities[0].advice += ' Today is a medium priority event.';
           trainingDay.plannedActivities[0].advice += ' If you feel good go for the podium but if you do not have the legs, sit in. You do not want to risk your season today.';
-          trainingDay.plannedActivities[0].activityType = 'goal';
+          trainingDay.plannedActivities[0].activityType = 'event';
         }
         break;
       case 3:
@@ -72,7 +72,7 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
           }
         } else {
           trainingDay.plannedActivities[0].advice += ' Today is a low priority event. Your primary objective today is to get a quality, race-pace workout. If you feel good go hard but if not, sit in or drop out. Race results are not important. Remember that your future goals are the reason you are riding today.';
-          trainingDay.plannedActivities[0].activityType = 'goal';
+          trainingDay.plannedActivities[0].activityType = 'event';
         }
         break;
     }

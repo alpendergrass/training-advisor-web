@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
 var path = require('path'),
   should = require('should'),
   mongoose = require('mongoose'),
@@ -12,11 +9,11 @@ var path = require('path'),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
-  adviceGoal = require('../../server/lib/advice-goal');
+  adviceEvent = require('../../server/lib/advice-event');
 
 var user, trainingDate, trainingDay;
 
-describe('advice-goal Unit Tests:', function () {
+describe('advice-event Unit Tests:', function () {
 
   beforeEach(function (done) {
     testHelpers.createUser(function(err, newUser) {
@@ -33,7 +30,7 @@ describe('advice-goal Unit Tests:', function () {
 
   describe('Method checkGoal', function () {
     it('should return error if no user', function (done) {
-      return adviceGoal.checkGoal(null, null, function (err, user, trainingDay) {
+      return adviceEvent.checkGoal(null, null, function (err, user, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
@@ -41,7 +38,7 @@ describe('advice-goal Unit Tests:', function () {
     });
     
     it('should return error if no trainingDay', function (done) {
-      return adviceGoal.checkGoal(user, null, function (err, user, trainingDay) {
+      return adviceEvent.checkGoal(user, null, function (err, user, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid trainingDay is required');
         done();
@@ -61,13 +58,15 @@ describe('advice-goal Unit Tests:', function () {
 
           trainingDay.eventPriority = 1;
 
-          return adviceGoal.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/goal/);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('goal');
+            (trainingDay.plannedActivities[0].activityType).should.match(/event/
+);
+            (trainingDay.plannedActivities[0].rationale).should.containEql('event'
+);
             done();
           });
         });
@@ -87,12 +86,13 @@ describe('advice-goal Unit Tests:', function () {
 
           trainingDay.eventPriority = 2;
 
-          return adviceGoal.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/goal/);
+            (trainingDay.plannedActivities[0].activityType).should.match(/event/
+);
             (trainingDay.plannedActivities[0].rationale).should.containEql('medium priority');
             done();
           });
@@ -113,12 +113,13 @@ describe('advice-goal Unit Tests:', function () {
 
           trainingDay.eventPriority = 3;
 
-          return adviceGoal.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/goal/);
+            (trainingDay.plannedActivities[0].activityType).should.match(/event/
+);
             (trainingDay.plannedActivities[0].rationale).should.containEql('low priority');
             done();
           });
@@ -137,11 +138,12 @@ describe('advice-goal Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          return adviceGoal.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/goal/);
+            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/
+);
             done();
           });
         });
@@ -162,11 +164,12 @@ describe('advice-goal Unit Tests:', function () {
           trainingDay.eventPriority = 2;
           trainingDay.period = 'peak';
 
-          return adviceGoal.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/goal/);
+            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/
+);
             done();
           });
         });
@@ -187,11 +190,12 @@ describe('advice-goal Unit Tests:', function () {
           trainingDay.eventPriority = 3;
           trainingDay.period = 'peak';
 
-          return adviceGoal.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/goal/);
+            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/
+);
             done();
           });
         });

@@ -10,7 +10,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   adviceMetrics = require('./advice-metrics'),
-  adviceGoal = require('./advice-goal'),
+  adviceEvent = require('./advice-event'),
   adviceTest = require('./advice-test'),
   adviceRest = require('./advice-rest'),
   adviceEasy = require('./advice-easy'),
@@ -257,7 +257,7 @@ module.exports.advise = function(params, callback) {
 function generateAdvice(user, trainingDay, callback) {
   //Each method in the waterfall must return all objects used by subsequent methods.
   async.waterfall([
-    async.apply(adviceGoal.checkGoal, user, trainingDay),
+    async.apply(adviceEvent.checkGoal, user, trainingDay),
     adviceTest.checkTest,
     adviceRest.checkRest,
     adviceEasy.checkEasy,

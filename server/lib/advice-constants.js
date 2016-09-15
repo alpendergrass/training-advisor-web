@@ -101,7 +101,8 @@ module.exports.loadAdviceLookups = [
     highLoadFactor: 1
     // intensity:  1.0
   }, {
-    activityType: 'goal',
+    //TODO: modify for off-day events.
+    activityType: 'event',
     lowLoadFactor: 1.4,
     highLoadFactor: 1.9
     // intensity:  0.95
