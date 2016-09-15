@@ -125,6 +125,9 @@ angular.module('trainingDays')
             //td.date has to be a date object.
             td.date = new Date(td.date);
 
+            if (moment(td.date).isSame(moment(), 'day')) {
+              td.htmlID = 'today';
+            }
           });
 
           $scope.hasStart = _.find(season, function(td) {
@@ -314,6 +317,10 @@ angular.module('trainingDays')
         };
 
         var setLoadBackgroundColor = function(td) {
+          if (td.htmlID && td.htmlID === 'today') {
+            return '#97BBCD';
+          }
+          
           return td.eventPriority === 1 ? '#D4A1A0' : '#EAF1F5';
         };
 
