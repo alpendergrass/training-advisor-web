@@ -10,7 +10,7 @@ var mongoose = require('mongoose'),
 // };
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 var plannedActivityTypes = {
-  values: 'goal|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
+  values: 'event|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
   message: invalidDataErrorMessage
 };
 var plannedActivitySources = {

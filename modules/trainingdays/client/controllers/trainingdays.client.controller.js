@@ -209,13 +209,16 @@ angular.module('trainingDays')
               case 3:
                 content += 'Low Priority Event';
                 break;
+              case 99:
+                //Scheduled off day.
+                break;
               default:
                 break;
             }
           }
 
           //Display future advice
-          if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].activityType !== 'goal' && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
+          if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].activityType !== 'event' && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
             content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day planned</i>';
           }
@@ -360,7 +363,8 @@ angular.module('trainingDays')
 
                 if (td.plannedActivities[0] && moment(td.date).isAfter($scope.yesterday, 'day')) {
                   //Display future advice
-                  if (td.plannedActivities[0].activityType !== 'goal') {
+                  if (td.plannedActivities[0].activityType !== 'event'
+) {
                     text = td.plannedActivities[0].activityType + ' day';
                   }
                 } else {

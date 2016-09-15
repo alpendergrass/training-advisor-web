@@ -54,7 +54,7 @@
       // create mock trainingDay
       var plannedActivities = [];
       plannedActivities[0] = {};
-      plannedActivities[0].activityType = 'goal';
+      plannedActivities[0].activityType = 'event';
 
       mockTrainingDay = new TrainingDays({
         _id: '525a8422f6d0f87f0e407a33',
@@ -112,7 +112,7 @@
 
         var plannedActivities = [];
         plannedActivities[0] = {};
-        plannedActivities[0].activityType = 'goal';
+        plannedActivities[0].activityType = 'event';
 
         // Create a sample trainingDay object
         sampleTrainingDayPostData = new TrainingDays({
