@@ -56,17 +56,15 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.eventPriority = 1;
+          trainingDay.scheduledEventType = 1;
 
           return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/event/
-);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('event'
-);
+            (trainingDay.plannedActivities[0].activityType).should.match(/event/);
+            (trainingDay.plannedActivities[0].rationale).should.containEql('event');
             done();
           });
         });
@@ -84,15 +82,14 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.eventPriority = 2;
+          trainingDay.scheduledEventType = 2;
 
           return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/event/
-);
+            (trainingDay.plannedActivities[0].activityType).should.match(/event/);
             (trainingDay.plannedActivities[0].rationale).should.containEql('medium priority');
             done();
           });
@@ -111,15 +108,14 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.eventPriority = 3;
+          trainingDay.scheduledEventType = 3;
 
           return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/event/
-);
+            (trainingDay.plannedActivities[0].activityType).should.match(/event/);
             (trainingDay.plannedActivities[0].rationale).should.containEql('low priority');
             done();
           });
@@ -142,8 +138,7 @@ describe('advice-event Unit Tests:', function () {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/
-);
+            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
             done();
           });
         });
@@ -161,15 +156,14 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.eventPriority = 2;
+          trainingDay.scheduledEventType = 2;
           trainingDay.period = 'peak';
 
           return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/
-);
+            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
             done();
           });
         });
@@ -187,15 +181,14 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.eventPriority = 3;
+          trainingDay.scheduledEventType = 3;
           trainingDay.period = 'peak';
 
           return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/
-);
+            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
             done();
           });
         });

@@ -30,7 +30,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
   //for which we need to compute load.
   latestPlannedActivity = trainingDay.plannedActivities[trainingDay.plannedActivities.length - 1];
 
-  if (latestPlannedActivity.activityType === 'event' && trainingDay.eventPriority === 1 && trainingDay.estimatedGoalLoad > 0) {
+  if (latestPlannedActivity.activityType === 'event' && trainingDay.scheduledEventType === 1 && trainingDay.estimatedGoalLoad > 0) {
     //If an A event, use estimated load for target.
     latestPlannedActivity.targetMinLoad = trainingDay.estimatedGoalLoad;
     latestPlannedActivity.targetMaxLoad = trainingDay.estimatedGoalLoad;

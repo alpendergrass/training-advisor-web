@@ -64,7 +64,7 @@ describe('advice-load Unit Tests:', function () {
       trainingDay.targetAvgDailyLoad = 100;
       trainingDay.sevenDayTargetRampRate = 5;
       trainingDay.sevenDayRampRate = 6;
-      trainingDay.eventPriority = 1; //A event.
+      trainingDay.scheduledEventType = 1; //A event.
 
       return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
         should.not.exist(err);

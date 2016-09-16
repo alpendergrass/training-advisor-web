@@ -31,8 +31,8 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
     return callback(null, user, trainingDay);          
   }
 
-  if (trainingDay.eventPriority > 0) {
-    switch (trainingDay.eventPriority) {
+  if (trainingDay.scheduledEventType > 0) {
+    switch (trainingDay.scheduledEventType) {
       case 1:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 1 (goal) event.';
         trainingDay.plannedActivities[0].advice += ' Today is a goal event. Give it your all. Good luck!';
