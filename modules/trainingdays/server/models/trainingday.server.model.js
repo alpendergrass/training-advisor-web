@@ -96,7 +96,7 @@ var TrainingDaySchema = new Schema({
     type: Number,
     default: 0
   },
-  eventPriority: {
+  scheduledEventType: {
     type: Number,
     min: 0,
     max: 3, 

@@ -68,7 +68,7 @@ module.exports.createGoalEvent = function(user, trainingDate, daysForward, callb
   var trainingDay = new TrainingDay({
     date: moment(trainingDate).add(daysForward, 'days'),
     name: 'Goal trainingDay',
-    eventPriority: 1,
+    scheduledEventType: 1,
     estimatedGoalLoad: 567,
     user: user
   });

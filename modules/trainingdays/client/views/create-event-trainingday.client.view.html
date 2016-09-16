@@ -31,25 +31,25 @@
 
       <div class="form-group" ng-hide="eventPriorityParm" show-errors>
         <div class="col-md-12">
-          <label for="eventPriority">Event Priority *</label>
+          <label for="scheduledEventType">Event Priority *</label>
           <div class="input-group-sm">
             <div class="radio">
               <label>
-                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority1" value="1"  required> This is a major goal for me. I want to peak for this event!
+                <input type="radio" name="scheduledEventType" ng-model="scheduledEventType" id="eventPriority1" value="1"  required> This is a major goal for me. I want to peak for this event!
               </label>
             </div>
             <div class="radio">
               <label>
-                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority2" value="2"  required> This is medium priority event. I would like to do well.
+                <input type="radio" name="scheduledEventType" ng-model="scheduledEventType" id="eventPriority2" value="2"  required> This is medium priority event. I would like to do well.
               </label>
             </div>
             <div class="radio"">
               <label>
-                <input type="radio" name="eventPriority" ng-model="eventPriority" id="eventPriority3" value="3"  required> This is a low priority event. Doing well would be a bonus.
+                <input type="radio" name="scheduledEventType" ng-model="scheduledEventType" id="eventPriority3" value="3"  required> This is a low priority event. Doing well would be a bonus.
               </label>
             </div>
           </div>
-          <div ng-messages="trainingDayForm.eventPriority.$error" role="alert">
+          <div ng-messages="trainingDayForm.scheduledEventType.$error" role="alert">
             <p class="help-block error-text" ng-message="required">Event Priority is required.</p>
           </div>
         </div>
@@ -59,9 +59,9 @@
         <div class="col-md-12">
           <p class="input-group">
             <label>
-              <input type="checkbox" ng-disabled="!date || !eventPriority || eventPriority === '1'" ng-model="recurs" ng-change="checkRecurrence()"> Repeat
+              <input type="checkbox" ng-disabled="!date || !scheduledEventType || scheduledEventType === '1'" ng-model="recurs" ng-change="checkRecurrence()"> Repeat
             </label>
-            <span ng-hide="recurrenceSpec.summary">...</span><span ng-show="recurs && recurrenceSpec.summary && eventPriority !== '1'">: {{recurrenceSpec.summary}}</span>
+            <span ng-hide="recurrenceSpec.summary">...</span><span ng-show="recurs && recurrenceSpec.summary && scheduledEventType !== '1'">: {{recurrenceSpec.summary}}</span>
           </p>
         </div>
       </div>
