@@ -35,11 +35,11 @@ angular.module('trainingDays')
       };
 
       //If the user clicks a Create Goal link we pass in the event prioity so no need to ask.
-      if ($stateParams.scheduledEventType) {
-        $scope.scheduledEventType = $stateParams.scheduledEventType;
-        $scope.eventPriorityParm = $stateParams.scheduledEventType;
+      if ($stateParams.scheduledEventRanking) {
+        $scope.scheduledEventRanking = $stateParams.scheduledEventRanking;
+        $scope.eventRankingParm = $stateParams.scheduledEventRanking;
       } else {
-        $scope.eventPriorityParm = 0;
+        $scope.eventRankingParm = 0;
       }
 
       //Set default dates.
@@ -143,7 +143,7 @@ angular.module('trainingDays')
           //Find first future goal TD if any.
           $scope.hasEnd = _.chain(season)
             .filter(function(td) {
-              return td.scheduledEventType === 1 && moment(td.date).isAfter(moment());
+              return td.scheduledEventRanking === 1 && moment(td.date).isAfter(moment());
             })
             .sortBy(['date'])
             .head()
@@ -196,10 +196,10 @@ angular.module('trainingDays')
           content += '<small>';
           lengthOfFixedContent += 7;
           
-          if (trainingDay.scheduledEventType) {
+          if (trainingDay.scheduledEventRanking) {
             content += trainingDay.name ? ' - ' : '';
 
-            switch (trainingDay.scheduledEventType) {
+            switch (trainingDay.scheduledEventRanking) {
               case 1:
                 content += '<b class="text-danger">Goal Event!</b>';
                 break;
@@ -324,7 +324,7 @@ angular.module('trainingDays')
             return '#97BBCD';
           }
           
-          return td.scheduledEventType === 1 ? '#D4A1A0' : '#EAF1F5';
+          return td.scheduledEventRanking === 1 ? '#D4A1A0' : '#EAF1F5';
         };
 
         $scope.error = null;
@@ -341,8 +341,8 @@ angular.module('trainingDays')
                 var text = '',
                   td = $scope.season[tooltipItems[0].index];
 
-                if (td.scheduledEventType) {
-                  switch (td.scheduledEventType) {
+                if (td.scheduledEventRanking) {
+                  switch (td.scheduledEventRanking) {
                     case 1:
                       text = 'Goal Event';
                       break;
@@ -448,7 +448,7 @@ angular.module('trainingDays')
             //Find first future goal TD if any.
             $scope.hasEnd = _.chain($scope.trainingDaysAll)
               .filter(function(td) {
-                return td.scheduledEventType === 1 && moment(td.date).isAfter(moment());
+                return td.scheduledEventRanking === 1 && moment(td.date).isAfter(moment());
               })
               .sortBy(['date'])
               .head()
@@ -615,7 +615,7 @@ angular.module('trainingDays')
           date: this.date,
           name: this.name,
           estimatedGoalLoad: this.estimatedGoalLoad,
-          scheduledEventType: this.scheduledEventType,
+          scheduledEventRanking: this.scheduledEventRanking,
           recurrenceSpec: this.recurrenceSpec,
           notes: this.notes
         });
@@ -627,7 +627,7 @@ angular.module('trainingDays')
           // Clear form fields
           $scope.name = '';
           $scope.date = null;
-          $scope.scheduledEventType = '0';
+          $scope.scheduledEventRanking = '0';
           $scope.estimatedGoalLoad = 0;
           $scope.recurrenceSpec = null;
           $scope.notes = '';
@@ -666,15 +666,15 @@ angular.module('trainingDays')
       ];
 
       $scope.showPriority = function() {
-        var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.scheduledEventType }),
+        var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.scheduledEventRanking }),
           dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0]? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day (no event)' : 'No Event';
-        return ($scope.trainingDay.scheduledEventType && selected.length) ? selected[0].text : dayText;
+        return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
       };
 
       $scope.updateEventPriority = function(priority) {
         var n = ~~Number(priority);
 
-        if (n === $scope.trainingDay.scheduledEventType) {
+        if (n === $scope.trainingDay.scheduledEventRanking) {
           //no change.
           return;
         }

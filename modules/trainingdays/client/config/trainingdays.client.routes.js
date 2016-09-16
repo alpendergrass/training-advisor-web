@@ -48,7 +48,7 @@ angular.module('trainingDays').config(['$stateProvider',
       .state('trainingDays.createEvent', {
         url: '/createEvent',
         params: {
-          scheduledEventType : null
+          scheduledEventRanking : null
         },
         templateUrl: 'modules/trainingDays/client/views/create-event-trainingday.client.view.html',
         data: {
