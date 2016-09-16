@@ -602,43 +602,51 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.createGoalEvent = function(isValid) {
-        $scope.error = null;
 
-        if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
-
-          return false;
-        }
-
-        var trainingDay = new TrainingDays({
-          date: this.date,
-          name: this.name,
-          estimatedGoalLoad: this.estimatedGoalLoad,
-          scheduledEventRanking: this.scheduledEventRanking,
-          recurrenceSpec: this.recurrenceSpec,
-          notes: this.notes
-        });
-
-        // Redirect after save
-        trainingDay.$create(function(response) {
-          $location.path('trainingDays/season');
-
-          // Clear form fields
-          $scope.name = '';
-          $scope.date = null;
-          $scope.scheduledEventRanking = '0';
-          $scope.estimatedGoalLoad = 0;
-          $scope.recurrenceSpec = null;
-          $scope.notes = '';
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented event creation.';
+      $scope.event = function() {
+        $scope.$watch('scheduledEventRanking', function(ranking) { 
+          if (ranking === '9') {
+            $scope.estimatedGoalLoad = 0;
           }
         });
+
+        $scope.createEvent = function(isValid) {
+          $scope.error = null;
+
+          if (!isValid) {
+            $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
+
+            return false;
+          }
+
+          var trainingDay = new TrainingDays({
+            date: this.date,
+            name: this.name,
+            estimatedGoalLoad: this.estimatedGoalLoad,
+            scheduledEventRanking: this.scheduledEventRanking,
+            recurrenceSpec: this.recurrenceSpec,
+            notes: this.notes
+          });
+
+          trainingDay.$create(function(response) {
+            $location.path('trainingDays/season');
+
+            // Clear form fields
+            $scope.name = '';
+            $scope.date = null;
+            $scope.scheduledEventRanking = '0';
+            $scope.estimatedGoalLoad = 0;
+            $scope.recurrenceSpec = null;
+            $scope.notes = '';
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented event creation.';
+            }
+          });
+        };
       };
 
       // Remove existing TrainingDay

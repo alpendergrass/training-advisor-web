@@ -1,16 +1,13 @@
-<section ng-controller="TrainingDaysController">
+<section ng-controller="TrainingDaysController" ng-init="event()">
   <div class="page-header">
-    <h2>New <span ng-show="eventRankingParm === '1'">Goal </span>Event</h2>
+    <h2>New <span ng-show="eventRankingParm === '1'">Goal </span><span ng-hide="eventRankingParm === '1'">Scheduled </span>Event</h2>
   </div>
-  <form name="trainingDayForm" class="form-horizontal" ng-submit="createGoalEvent(trainingDayForm.$valid)" novalidate>
+  <form name="trainingDayForm" class="form-horizontal" ng-submit="createEvent(trainingDayForm.$valid)" novalidate>
     <fieldset>
       <div class="form-group" show-errors>
         <div class="col-md-12">
-          <label for="name">Event Name *</label>
-          <input name="name" type="text" ng-model="name" id="name" class="form-control" placeholder="Name" required>
-          <div ng-messages="trainingDayForm.name.$error" role="alert">
-            <p class="help-block error-text" ng-message="required">Event name is required.</p>
-          </div>
+          <label for="name">Event Name</label>
+          <input name="name" type="text" ng-model="name" id="name" class="form-control" placeholder="Name">
         </div>
       </div>
 
@@ -31,21 +28,26 @@
 
       <div class="form-group" ng-hide="eventRankingParm" show-errors>
         <div class="col-md-12">
-          <label for="scheduledEventRanking">Event Priority *</label>
+          <label for="scheduledEventRanking">Event Ranking *</label>
           <div class="input-group-sm">
             <div class="radio">
               <label>
-                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventPriority1" value="1"  required> This is a major goal for me. I want to peak for this event!
+                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventRanking1" value="1" required> This is a major goal for me. I want to peak for this event!
               </label>
             </div>
             <div class="radio">
               <label>
-                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventPriority2" value="2"  required> This is medium priority event. I would like to do well.
+                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventRanking2" value="2" required> This is medium priority event. I would like to do well.
               </label>
             </div>
             <div class="radio"">
               <label>
-                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventPriority3" value="3"  required> This is a low priority event. Doing well would be a bonus.
+                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventRanking3" value="3" required> This is a low priority event. Doing well would be a bonus.
+              </label>
+            </div>
+            <div class="radio"">
+              <label>
+                <input type="radio" name="scheduledEventRanking" ng-model="scheduledEventRanking" id="eventRanking9" value="9" required> This is a no-ride day. I'm taking the day off!
               </label>
             </div>
           </div>
@@ -69,7 +71,7 @@
       <div class="form-group" show-errors>
         <div class="col-md-4">
           <label for="estimatedGoalLoad">Estimated Event Load (TSS®)</label>
-          <input name="estimatedGoalLoad" type="number" min="0" max="999" step="10" ng-model="estimatedGoalLoad" id="estimatedGoalLoad" class="form-control" placeholder="Estimated Load">
+          <input name="estimatedGoalLoad" type="number" min="0" max="999" step="10" ng-model="estimatedGoalLoad" ng-disabled="scheduledEventRanking === '9'" id="estimatedGoalLoad" class="form-control" placeholder="Estimated Load">
         </div>
       </div>
 
