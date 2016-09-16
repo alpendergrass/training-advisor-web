@@ -457,7 +457,7 @@ describe('advice-period Unit Tests:', function () {
               console.log('createTrainingDay: ' + err);
             }
 
-            createdTrainingDay.scheduledEventType = 2;
+            createdTrainingDay.scheduledEventRanking = 2;
 
             testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
               if (err) {
@@ -493,7 +493,7 @@ describe('advice-period Unit Tests:', function () {
               console.log('createTrainingDay: ' + err);
             }
 
-            createdTrainingDay.scheduledEventType = 3;
+            createdTrainingDay.scheduledEventRanking = 3;
 
             testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
               if (err) {

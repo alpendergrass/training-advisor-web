@@ -257,7 +257,7 @@ module.exports.advise = function(params, callback) {
 function generateAdvice(user, trainingDay, callback) {
   //Each method in the waterfall must return all objects used by subsequent methods.
   async.waterfall([
-    async.apply(adviceEvent.checkGoal, user, trainingDay),
+    async.apply(adviceEvent.checkEvent, user, trainingDay),
     adviceTest.checkTest,
     adviceRest.checkRest,
     adviceEasy.checkEasy,

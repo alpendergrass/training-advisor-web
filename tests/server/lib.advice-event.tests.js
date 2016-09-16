@@ -28,9 +28,9 @@ describe('advice-event Unit Tests:', function () {
     });
   });
 
-  describe('Method checkGoal', function () {
+  describe('Method checkEvent', function () {
     it('should return error if no user', function (done) {
-      return adviceEvent.checkGoal(null, null, function (err, user, trainingDay) {
+      return adviceEvent.checkEvent(null, null, function (err, user, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
@@ -38,7 +38,7 @@ describe('advice-event Unit Tests:', function () {
     });
     
     it('should return error if no trainingDay', function (done) {
-      return adviceEvent.checkGoal(user, null, function (err, user, trainingDay) {
+      return adviceEvent.checkEvent(user, null, function (err, user, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid trainingDay is required');
         done();
@@ -56,9 +56,9 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.scheduledEventType = 1;
+          trainingDay.scheduledEventRanking = 1;
 
-          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
@@ -82,9 +82,9 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.scheduledEventType = 2;
+          trainingDay.scheduledEventRanking = 2;
 
-          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
@@ -108,9 +108,9 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.scheduledEventType = 3;
+          trainingDay.scheduledEventRanking = 3;
 
-          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
@@ -134,7 +134,7 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
@@ -156,10 +156,10 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.scheduledEventType = 2;
+          trainingDay.scheduledEventRanking = 2;
           trainingDay.period = 'peak';
 
-          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);
@@ -181,10 +181,10 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          trainingDay.scheduledEventType = 3;
+          trainingDay.scheduledEventRanking = 3;
           trainingDay.period = 'peak';
 
-          return adviceEvent.checkGoal(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
             should.not.exist(err);
             should.exist(user);
             should.exist(trainingDay);

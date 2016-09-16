@@ -13,7 +13,7 @@ var path = require('path'),
 
 module.exports = {};
 
-module.exports.checkGoal = function(user, trainingDay, callback) {
+module.exports.checkEvent = function(user, trainingDay, callback) {
 
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
@@ -31,8 +31,8 @@ module.exports.checkGoal = function(user, trainingDay, callback) {
     return callback(null, user, trainingDay);          
   }
 
-  if (trainingDay.scheduledEventType > 0) {
-    switch (trainingDay.scheduledEventType) {
+  if (trainingDay.scheduledEventRanking > 0) {
+    switch (trainingDay.scheduledEventRanking) {
       case 1:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 1 (goal) event.';
         trainingDay.plannedActivities[0].advice += ' Today is a goal event. Give it your all. Good luck!';
