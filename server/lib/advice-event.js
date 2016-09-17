@@ -31,7 +31,7 @@ module.exports.checkEvent = function(user, trainingDay, callback) {
     return callback(null, user, trainingDay);          
   }
 
-  if (trainingDay.scheduledEventRanking > 0) {
+  if (trainingDay.scheduledEventRanking) {
     switch (trainingDay.scheduledEventRanking) {
       case 1:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 1 (goal) event.';
@@ -74,6 +74,11 @@ module.exports.checkEvent = function(user, trainingDay, callback) {
           trainingDay.plannedActivities[0].advice += ' Today is a low priority event. Your primary objective today is to get a quality, race-pace workout. If you feel good go hard but if not, sit in or drop out. Race results are not important. Remember that your future goals are the reason you are riding today.';
           trainingDay.plannedActivities[0].activityType = 'event';
         }
+        break;
+      case 9:
+        trainingDay.plannedActivities[0].rationale += ' Today is a scheduled off day.';
+        trainingDay.plannedActivities[0].advice += ' You have scheduled the day off. Enjoy your day.';
+        trainingDay.plannedActivities[0].activityType = 'event';
         break;
     }
   }

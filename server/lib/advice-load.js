@@ -42,7 +42,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
         return callback(err, null);
       }
 
-      //Note that it is possible that no goal exists and no estimate was provided.
+      //Note that it is possible that no goal exists or that no estimate was provided.
       if (goalDays.length > 0 && goalDays[0].estimatedGoalLoad) {
         latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedGoalLoad);
         latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedGoalLoad);        
@@ -62,7 +62,10 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
 function setTargetLoads(trainingDay) {
   trainingDay.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay);
 
-  var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': latestPlannedActivity.activityType });
+  //We have different factors for diffent activity rankings. E.g., ranking of 1 is a goal event. 9 is an off day.
+  var activityType = latestPlannedActivity.activityType === 'event' ? latestPlannedActivity.activityType + trainingDay.scheduledEventRanking : latestPlannedActivity.activityType;
+
+  var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': activityType });
 
   latestPlannedActivity.targetMinLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.lowLoadFactor * trainingDay.rampRateAdjustmentFactor);
   latestPlannedActivity.targetMaxLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.highLoadFactor * trainingDay.rampRateAdjustmentFactor);
