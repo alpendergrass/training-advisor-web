@@ -1,4 +1,4 @@
-<section ng-controller="TrainingDaysController" ng-init="event()">
+<section ng-controller="TrainingDaysController" ng-init="scheduleEvent()">
   <div class="page-header">
     <h2>New <span ng-show="eventRankingParm === '1'">Goal </span><span ng-hide="eventRankingParm === '1'">Scheduled </span>Event</h2>
   </div>
@@ -15,7 +15,7 @@
         <div class="col-md-4">
           <label for="date">Event Date *</label>
           <p class="input-group">
-            <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" datepicker-options="goalDateOptions" required close-text="Close" >
+            <input type="text" id="date" name="date" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="date" is-open="datePickerStatus.opened" datepicker-options="eventDateOptions" required close-text="Close" >
             <span class="input-group-btn">
               <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
             </span>

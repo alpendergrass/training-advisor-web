@@ -24,65 +24,11 @@ angular.module('trainingDays')
         toastr[message.type](message.text, message.title);
       });
 
-      //The following is used on the TD list page for the Today button.
-      //This page is no longer available to non-admin users.
-      $scope.scrollTo = function(id) {
-        var currentPath = $location.hash();
-        $location.hash(id);
-        $anchorScroll();
-        //reset to currentPath to keep from changing URL in browser.
-        $location.hash(currentPath);
-      };
-
-      //If the user clicks a Create Goal link we pass in the event prioity so no need to ask.
-      if ($stateParams.scheduledEventRanking) {
-        $scope.scheduledEventRanking = $stateParams.scheduledEventRanking;
-        $scope.eventRankingParm = $stateParams.scheduledEventRanking;
-      } else {
-        $scope.eventRankingParm = 0;
-      }
-
       //Set default dates.
       $scope.today = moment().startOf('day').toDate();
       $scope.adviceDate = $scope.today;
 
       //Begin Datepicker stuff.
-      var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-      var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(7, 'days').startOf('day').toDate();
-      var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-      var minGoalDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
-
-      $scope.startDateOptions = {
-        formatYear: 'yy',
-        startingDay: 1,
-        showWeeks: false,
-        minDate: minStartDate,
-        maxDate: maxStartDate
-      };
-
-      $scope.goalDateOptions = {
-        formatYear: 'yy',
-        startingDay: 1,
-        showWeeks: false,
-        minDate: minGoalDate
-      };
-
-      $scope.adviceDateOptions = {
-        formatYear: 'yy',
-        startingDay: 1,
-        showWeeks: false,
-        minDate: minAdviceDate,
-        maxDate: maxAdviceDate
-      };
-
-      $scope.trueUpDateOptions = {
-        formatYear: 'yy',
-        startingDay: 1,
-        showWeeks: false,
-        maxDate: maxStartDate
-      };
-
       $scope.datePickerStatus = {
         opened: false
       };
@@ -92,20 +38,9 @@ angular.module('trainingDays')
       };
       //End Datepicker stuff.
 
-      //For comparision in views, we will use seconds - getTime()
       $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
       $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate();
-
-      $scope.activityTypes = [
-        { value: 'easy', text: 'Do an easy ride' },
-        { value: 'moderate', text: 'Do a moderate ride' },
-        { value: 'hard', text: 'Do a hard ride' },
-        { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
-        { value: 'test', text: 'Do a threshold power test' }
-      ];
-
-      $scope.recurrenceSpec = null;
 
       // Check if provider is already in use with current user
       $scope.isConnectedSocialAccount = function(provider) {
@@ -175,7 +110,7 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.calendar = function() {
+      $scope.viewCalendar = function() {
         var formatDayContent = function(trainingDay) {
           var load = 0,
             content = '<div class="td-calendar-content',
@@ -209,8 +144,8 @@ angular.module('trainingDays')
               case 3:
                 content += 'Low Priority Event';
                 break;
-              case 99:
-                //Scheduled off day.
+              case 9:
+                content += 'Scheduled Off Day';
                 break;
               default:
                 break;
@@ -299,7 +234,7 @@ angular.module('trainingDays')
       });
 
 
-      $scope.chart = function() {
+      $scope.viewSeason = function() {
         var loadArray,
           formArray,
           fitnessArray,
@@ -421,7 +356,7 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.list = function() {
+      $scope.listTrainingDays = function() {
         var getAllTrainingDays = function(callback) {
           //Initialize these to prevent temp loading of alert at top of TD list.
           $scope.hasStart = true;
@@ -475,6 +410,16 @@ angular.module('trainingDays')
           }
         };
 
+        //The following is used on the TD list page for the Today button.
+        //This page is no longer available to non-admin users.
+        $scope.scrollTo = function(id) {
+          var currentPath = $location.hash();
+          $location.hash(id);
+          $anchorScroll();
+          //reset to currentPath to keep from changing URL in browser.
+          $location.hash(currentPath);
+        };
+
         getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side. 
           //May need to switch to server-side at some point. Or some combo of client and server side.
@@ -484,131 +429,195 @@ angular.module('trainingDays')
         });
       };
 
-      function prepForTDView(trainingDay) {
-        //not sure why Mongo/Mongoose returns a string for a date field
-        //but I have to convert it back to a date to get my date picker
-        //to consider it a valid date if the user does not pick a new date.
-        trainingDay.date = new Date(trainingDay.date);
-        $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').startOf('day').toDate();
-        $scope.nextDay = moment(trainingDay.date).add(1, 'day').startOf('day').toDate();
-        $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
-        $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-        $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
-        $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-        return trainingDay;
-      }
+      $scope.setUpStartingPoint = function() {
+        var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(7, 'days').startOf('day').toDate();
+        var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
 
-      // Find existing TrainingDay
-      $scope.findOne = function() {
-        $scope.trainingDay = TrainingDays.get({
-          trainingDayId: $stateParams.trainingDayId
-        }, function(trainingDay) {
-          prepForTDView(trainingDay);
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented training day retrieval.';
-          }
-        });
-      };
-
-      $scope.getDay = function(date) {
-        $scope.error = null;
-
-        $scope.trainingDay = TrainingDays.getDay({
-          trainingDate: date.toISOString()
-        }, function(trainingDay) {
-          prepForTDView(trainingDay);
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented training day retrieval.';
-          }
-        });
-      };
-
-      $scope.saveCompletedActivity = function(data, created) {
-        angular.extend(data, { created: created });
-        var index = _.indexOf($scope.trainingDay.completedActivities, _.find($scope.trainingDay.completedActivities, { created: created }));
-        $scope.trainingDay.completedActivities.splice(index, 1, data);
-
-        var trainingDay = $scope.trainingDay;
-
-        $scope.trainingDay.$update(function() {
-          $scope.checkGiveFeedback(trainingDay);
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented activity save.';
-          }
-        });
-      };
-
-      $scope.addCompletedActivity = function(data) {
-        $scope.inserted = {
-          load: 0,
-          //intensity: 0,
-          notes: ''
+        $scope.startDateOptions = {
+          formatYear: 'yy',
+          startingDay: 1,
+          showWeeks: false,
+          minDate: minStartDate,
+          maxDate: maxStartDate
         };
-        $scope.trainingDay.completedActivities.push($scope.inserted);
+
+        $scope.trueUpDateOptions = {
+          formatYear: 'yy',
+          startingDay: 1,
+          showWeeks: false,
+          maxDate: maxStartDate
+        };
+
+        // Create new starting point of a training season or a true-up day.
+        $scope.createStartingPoint = function(isValid, isTrueUp) {
+          $scope.error = null;
+
+          if (!isValid) {
+            $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
+            return false;
+          }
+
+          var trainingDay = new TrainingDays({
+            startingPoint: !isTrueUp,
+            fitnessAndFatigueTrueUp: isTrueUp,
+            date: this.startDate,
+            name: this.name,
+            fitness: this.fitness,
+            fatigue: this.fatigue,
+            notes: this.notes
+          });
+
+          // Redirect after save
+          trainingDay.$create(function(response) {
+            $location.path('trainingDays/season');
+
+            // Clear form fields
+            $scope.name = '';
+            $scope.fitness = 0;
+            $scope.fatigue = 0;
+            $scope.notes = '';
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented starting point creation.';
+            }
+          });
+        };
       };
 
-      $scope.deleteCompletedActivity = function(index) {
-        $scope.trainingDay.completedActivities.splice(index, 1);
-        return $scope.update(true);
-      };
+      $scope.scheduleEvent = function() {
+        $scope.recurrenceSpec = null;
 
-      // Create new starting point of a training season or a true-up day.
-      $scope.createStartingPoint = function(isValid, isTrueUp) {
-        $scope.error = null;
-
-        if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
-          return false;
+        //If the user clicks a Create Goal link we pass in the event prioity so no need to ask.
+        if ($stateParams.scheduledEventRanking) {
+          $scope.scheduledEventRanking = $stateParams.scheduledEventRanking;
+          $scope.eventRankingParm = $stateParams.scheduledEventRanking;
+        } else {
+          $scope.eventRankingParm = 0;
         }
 
-        var trainingDay = new TrainingDays({
-          startingPoint: !isTrueUp,
-          fitnessAndFatigueTrueUp: isTrueUp,
-          date: this.startDate,
-          name: this.name,
-          fitness: this.fitness,
-          fatigue: this.fatigue,
-          notes: this.notes
-        });
+        var minEventDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().startOf('day').toDate();
 
-        // Redirect after save
-        trainingDay.$create(function(response) {
-          $location.path('trainingDays/season');
+        $scope.eventDateOptions = {
+          formatYear: 'yy',
+          startingDay: 1,
+          showWeeks: false,
+          minDate: minEventDate
+        };
 
-          // Clear form fields
-          $scope.name = '';
-          $scope.fitness = 0;
-          $scope.fatigue = 0;
-          $scope.notes = '';
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented starting point creation.';
-          }
-        });
-      };
-
-
-      $scope.event = function() {
         $scope.$watch('scheduledEventRanking', function(ranking) { 
           if (ranking === '9') {
             $scope.estimatedGoalLoad = 0;
           }
         });
+
+        $scope.checkRecurrence = function() {
+          $scope.recurrenceSpec = null;
+          
+          if ($scope.recurs) {
+            $scope.openRecurrence($scope.date);
+          }
+        };
+
+        $scope.openRecurrence = function(eventDate) {
+          var modalInstance = $uibModal.open({
+            templateUrl: 'recurrance.html',
+            //size: 'sm',
+            controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
+              //By setting $scope.trainingEffortFeedback to '' we disable the Save button
+              //until the user makes a selection.
+
+              $scope.recurrenceSpec = {
+                daysOfWeek: {}
+              };
+
+              $scope.recurrenceSpec.summary = '';
+
+              var minRepeatDate = moment(eventDate).add(1, 'day').startOf('day').toDate();
+              var maxRepeatDate = moment().add(52, 'weeks').startOf('day').toDate();
+
+              $scope.repeatDateOptions = {
+                formatYear: 'yy',
+                startingDay: 1,
+                showWeeks: false,
+                minDate: minRepeatDate,
+                maxDate: maxRepeatDate
+              };
+
+
+              $scope.datePickerStatus = {
+                opened: false
+              };
+
+              $scope.openDatePicker = function($event) {
+                $scope.datePickerStatus.opened = true;
+              };
+
+              $scope.noDaysSelected = function() {
+                return !_.find($scope.recurrenceSpec.daysOfWeek, function(o) {
+                  return o === true;
+                });
+              };
+
+              $scope.formatRepeatSummary = function($event) {
+                var dayOfWeek,
+                  selectedDays = '';
+
+                $scope.recurrenceSpec.summary = '';
+
+                if (parseInt($scope.recurrenceSpec.everyNTimeUnits, 10) === 1) {
+                  $scope.recurrenceSpec.summary = 'Weekly';
+                } else if ($scope.recurrenceSpec.everyNTimeUnits > 1) {
+                  $scope.recurrenceSpec.summary = 'Every ' + $scope.recurrenceSpec.everyNTimeUnits + ' weeks';
+                }
+
+                _.forEach($scope.recurrenceSpec.daysOfWeek, function(value, key) {
+                  if (value) {
+                    dayOfWeek = _.find($scope.daysOfWeek, { 'value': key });
+                    selectedDays += dayOfWeek.title + ', ';
+                  }
+                });
+
+                if (selectedDays) {
+                  $scope.recurrenceSpec.summary += ' on ' + selectedDays.substring(0, selectedDays.length - 2);
+                }
+
+                if ($scope.recurrenceSpec.endsOn) {
+                  $scope.recurrenceSpec.summary += ' until ' + moment($scope.recurrenceSpec.endsOn).format('dddd, MMMM Do YYYY');
+                }
+              };
+
+              $scope.daysOfWeek = [
+                { text: 'S', value: '0', title: 'Sunday' },
+                { text: 'M', value: '1', title: 'Monday' },
+                { text: 'T', value: '2', title: 'Tuesday' },
+                { text: 'W', value: '3', title: 'Wednesday' },
+                { text: 'T', value: '4', title: 'Thursday' },
+                { text: 'F', value: '5', title: 'Friday' },
+                { text: 'S', value: '6', title: 'Saturday' }
+              ];
+
+              $scope.saveRecurrence = function() {
+                $uibModalInstance.close($scope.recurrenceSpec);
+              };
+
+              $scope.cancelRecurrence = function() {
+                $uibModalInstance.dismiss('cancel');
+              };
+            }]
+          });
+
+          modalInstance.result.then(function(recurrenceSpec) {
+            $scope.recurrenceSpec = recurrenceSpec;
+          }, function() {
+            //User cancelled out of dialog.
+            $scope.recurs = false;
+            $scope.recurrenceSpec = null;
+          }).finally(function() {
+          });
+        };
 
         $scope.createEvent = function(isValid) {
           $scope.error = null;
@@ -649,64 +658,189 @@ angular.module('trainingDays')
         };
       };
 
-      // Remove existing TrainingDay
-      $scope.remove = function(trainingDay) {
-        if (trainingDay) {
-          trainingDay.$remove();
+      $scope.requestAdvice = function() {
+        var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
+        var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
 
-          for (var i in $scope.trainingDays) {
-            if ($scope.trainingDays[i] === trainingDay) {
-              $scope.trainingDays.splice(i, 1);
+        $scope.adviceDateOptions = {
+          formatYear: 'yy',
+          startingDay: 1,
+          showWeeks: false,
+          minDate: minAdviceDate,
+          maxDate: maxAdviceDate
+        };
+      }
+
+      $scope.viewTrainingDay = function() {
+        function prepForTDView(trainingDay) {
+          //not sure why Mongo/Mongoose returns a string for a date field
+          //but I have to convert it back to a date to get my date picker
+          //to consider it a valid date if the user does not pick a new date.
+          trainingDay.date = new Date(trainingDay.date);
+          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').startOf('day').toDate();
+          $scope.nextDay = moment(trainingDay.date).add(1, 'day').startOf('day').toDate();
+          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
+          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
+          $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          return trainingDay;
+        }
+
+        $scope.activityTypes = [
+          { value: 'easy', text: 'Do an easy ride' },
+          { value: 'moderate', text: 'Do a moderate ride' },
+          { value: 'hard', text: 'Do a hard ride' },
+          { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
+          { value: 'test', text: 'Do a threshold power test' }
+        ];
+
+        $scope.getDay = function(date) {
+          $scope.error = null;
+
+          $scope.trainingDay = TrainingDays.getDay({
+            trainingDate: date.toISOString()
+          }, function(trainingDay) {
+            prepForTDView(trainingDay);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented training day retrieval.';
             }
-          }
-        } else {
-          $scope.trainingDay.$remove(function() {
-            $location.path('trainingDays/season');
           });
-        }
-      };
+        };
 
-      $scope.eventPriorities = [
-        { value: 1, text: 'Goal Event!' },
-        { value: 2, text: 'Medium Priority Event' },
-        { value: 3, text: 'Low Priority Event' },
-        { value: 0, text: 'No Event' }
-      ];
+        // Remove existing TrainingDay
+        $scope.remove = function(trainingDay) {
+          if (trainingDay) {
+            trainingDay.$remove();
 
-      $scope.showPriority = function() {
-        var selected = $filter('filter')($scope.eventPriorities, { value: $scope.trainingDay.scheduledEventRanking }),
-          dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0]? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day (no event)' : 'No Event';
-        return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
-      };
+            for (var i in $scope.trainingDays) {
+              if ($scope.trainingDays[i] === trainingDay) {
+                $scope.trainingDays.splice(i, 1);
+              }
+            }
+          } else {
+            $scope.trainingDay.$remove(function() {
+              $location.path('trainingDays/season');
+            });
+          }
+        };
 
-      $scope.updateEventPriority = function(priority) {
-        var n = ~~Number(priority);
+        $scope.eventRankings = [
+          { value: 1, text: 'Goal Event!' },
+          { value: 2, text: 'Medium Priority Event' },
+          { value: 3, text: 'Low Priority Event' },
+          { value: 9, text: 'Off Day' },
+          { value: 0, text: 'Nothing To Schedule' }
+        ];
 
-        if (n === $scope.trainingDay.scheduledEventRanking) {
-          //no change.
-          return;
-        }
+        $scope.showRanking = function() {
+          var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
+            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0]
+              ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day (no scheduled event)' 
+              : 'Nothing Planned';
+          return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
+        };
 
-        if (String(n) === priority && n >= 0 && n <= 3) {
+        $scope.updateEventRanking = function(priority) {
+          var n = ~~Number(priority);
+
+          if (n === $scope.trainingDay.scheduledEventRanking) {
+            //no change.
+            return;
+          }
+
+          if (String(n) === priority && (n >= 0 && n <= 3) || n === 9) {
+            return $scope.update(true);
+          }
+
+          return 'Valid eventRankings are 0, 1, 2 and 3. And 9.';
+        };
+
+        $scope.updateEstimatedLoad = function(estimate) {
+          var n = ~~Number(estimate);
+
+          if (n === $scope.trainingDay.estimatedGoalLoad) {
+            //no change.
+            return;
+          }
+
+          if (String(n) === estimate && n >= 0 && n <= 999) {
+            return $scope.update(true);
+          }
+
+          return 'Estimated load must be a positive whole number less than 1000.';
+        };
+
+        $scope.saveCompletedActivity = function(data, created) {
+          angular.extend(data, { created: created });
+          var index = _.indexOf($scope.trainingDay.completedActivities, _.find($scope.trainingDay.completedActivities, { created: created }));
+          $scope.trainingDay.completedActivities.splice(index, 1, data);
+
+          var trainingDay = $scope.trainingDay;
+
+          $scope.trainingDay.$update(function() {
+            $scope.checkGiveFeedback(trainingDay);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented activity save.';
+            }
+          });
+        };
+
+        $scope.addCompletedActivity = function(data) {
+          $scope.inserted = {
+            load: 0,
+            //intensity: 0,
+            notes: ''
+          };
+          $scope.trainingDay.completedActivities.push($scope.inserted);
+        };
+
+        $scope.deleteCompletedActivity = function(index) {
+          $scope.trainingDay.completedActivities.splice(index, 1);
           return $scope.update(true);
-        }
+        };
 
-        return 'Valid eventPriorities are 0, 1, 2 and 3.';
-      };
+        $scope.downloadActivities = function(provider) {
+          usSpinnerService.spin('tdSpinner');
+          var trainingDay = $scope.trainingDay;
+          // var d = new Date(trainingDay.date);
 
-      $scope.updateEstimatedLoad = function(estimate) {
-        var n = ~~Number(estimate);
+          trainingDay.$downloadActivities({
+            provider: provider
+          }, function(response) {
+            usSpinnerService.stop('tdSpinner');
+            $scope.checkGiveFeedback(trainingDay);
+          }, function(errorResponse) {
+            usSpinnerService.stop('tdSpinner');
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented activity download.';
+            }
+          });
+        };
 
-        if (n === $scope.trainingDay.estimatedGoalLoad) {
-          //no change.
-          return;
-        }
-
-        if (String(n) === estimate && n >= 0 && n <= 999) {
-          return $scope.update(true);
-        }
-
-        return 'Estimated load must be a positive whole number less than 1000.';
+        // Find existing TrainingDay
+        $scope.trainingDay = TrainingDays.get({
+          trainingDayId: $stateParams.trainingDayId
+        }, function(trainingDay) {
+          prepForTDView(trainingDay);
+        }, function(errorResponse) {
+          if (errorResponse.data && errorResponse.data.message) {
+            $scope.error = errorResponse.data.message;
+          } else {
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            $scope.error = 'Server error prevented training day retrieval.';
+          }
+        });
       };
 
       $scope.update = function(isValid, trainingDay) {
@@ -770,7 +904,7 @@ angular.module('trainingDays')
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
           $location.path('trainingDays/season');
-          $scope.chart();
+          $scope.viewSeason();
         }, function(errorResponse) {
           usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {
@@ -778,27 +912,6 @@ angular.module('trainingDays')
           } else {
             //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
             $scope.error = 'Server error prevented plan generation.';
-          }
-        });
-      };
-
-      $scope.downloadActivities = function(provider) {
-        usSpinnerService.spin('tdSpinner');
-        var trainingDay = $scope.trainingDay;
-        // var d = new Date(trainingDay.date);
-
-        trainingDay.$downloadActivities({
-          provider: provider
-        }, function(response) {
-          usSpinnerService.stop('tdSpinner');
-          $scope.checkGiveFeedback(trainingDay);
-        }, function(errorResponse) {
-          usSpinnerService.stop('tdSpinner');
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented activity download.';
           }
         });
       };
@@ -856,111 +969,6 @@ angular.module('trainingDays')
           // trainingDay.trainingEffortFeedback = 0;
         }).finally(function() {
           return $scope.update(true, trainingDay);
-        });
-      };
-
-      $scope.checkRecurrence = function() {
-        $scope.recurrenceSpec = null;
-        if ($scope.recurs) {
-          $scope.openRecurrence($scope.date);
-        }
-      };
-
-      $scope.openRecurrence = function(eventDate) {
-        var modalInstance = $uibModal.open({
-          templateUrl: 'recurrance.html',
-          //size: 'sm',
-          controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
-            //By setting $scope.trainingEffortFeedback to '' we disable the Save button
-            //until the user makes a selection.
-
-            $scope.recurrenceSpec = {
-              daysOfWeek: {}
-            };
-
-            $scope.recurrenceSpec.summary = '';
-
-            var minRepeatDate = moment(eventDate).add(1, 'day').startOf('day').toDate();
-            var maxRepeatDate = moment().add(52, 'weeks').startOf('day').toDate();
-
-            $scope.repeatDateOptions = {
-              formatYear: 'yy',
-              startingDay: 1,
-              showWeeks: false,
-              minDate: minRepeatDate,
-              maxDate: maxRepeatDate
-            };
-
-
-            $scope.datePickerStatus = {
-              opened: false
-            };
-
-            $scope.openDatePicker = function($event) {
-              $scope.datePickerStatus.opened = true;
-            };
-
-            $scope.noDaysSelected = function() {
-              return !_.find($scope.recurrenceSpec.daysOfWeek, function(o) {
-                return o === true;
-              });
-            };
-
-            $scope.formatRepeatSummary = function($event) {
-              var dayOfWeek,
-                selectedDays = '';
-
-              $scope.recurrenceSpec.summary = '';
-
-              if (parseInt($scope.recurrenceSpec.everyNTimeUnits, 10) === 1) {
-                $scope.recurrenceSpec.summary = 'Weekly';
-              } else if ($scope.recurrenceSpec.everyNTimeUnits > 1) {
-                $scope.recurrenceSpec.summary = 'Every ' + $scope.recurrenceSpec.everyNTimeUnits + ' weeks';
-              }
-
-              _.forEach($scope.recurrenceSpec.daysOfWeek, function(value, key) {
-                if (value) {
-                  dayOfWeek = _.find($scope.daysOfWeek, { 'value': key });
-                  selectedDays += dayOfWeek.title + ', ';
-                }
-              });
-
-              if (selectedDays) {
-                $scope.recurrenceSpec.summary += ' on ' + selectedDays.substring(0, selectedDays.length - 2);
-              }
-
-              if ($scope.recurrenceSpec.endsOn) {
-                $scope.recurrenceSpec.summary += ' until ' + moment($scope.recurrenceSpec.endsOn).format('dddd, MMMM Do YYYY');
-              }
-            };
-
-            $scope.daysOfWeek = [
-              { text: 'S', value: '0', title: 'Sunday' },
-              { text: 'M', value: '1', title: 'Monday' },
-              { text: 'T', value: '2', title: 'Tuesday' },
-              { text: 'W', value: '3', title: 'Wednesday' },
-              { text: 'T', value: '4', title: 'Thursday' },
-              { text: 'F', value: '5', title: 'Friday' },
-              { text: 'S', value: '6', title: 'Saturday' }
-            ];
-
-            $scope.saveRecurrence = function() {
-              $uibModalInstance.close($scope.recurrenceSpec);
-            };
-
-            $scope.cancelRecurrence = function() {
-              $uibModalInstance.dismiss('cancel');
-            };
-          }]
-        });
-
-        modalInstance.result.then(function(recurrenceSpec) {
-          $scope.recurrenceSpec = recurrenceSpec;
-        }, function() {
-          //User cancelled out of dialog.
-          $scope.recurs = false;
-          $scope.recurrenceSpec = null;
-        }).finally(function() {
         });
       };
     }

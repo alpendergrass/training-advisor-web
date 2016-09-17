@@ -90,7 +90,7 @@
       expect(scope.trainingDays).toEqualData(sampleTrainingDays);
     }));
 
-    it('$scope.findOne() should create an array with one trainingDay object fetched from XHR using a trainingDayId URL parameter', inject(function (TrainingDays) {
+    it('$scope.trainingDay() should create an array with one trainingDay object fetched from XHR using a trainingDayId URL parameter', inject(function (TrainingDays) {
       // Set the URL parameter
       $stateParams.trainingDayId = mockTrainingDay._id;
 
@@ -98,7 +98,7 @@
       $httpBackend.expectGET(/api\/trainingDays\/([0-9a-fA-F]{24})$/).respond(mockTrainingDay);
 
       // Run controller functionality
-      scope.findOne();
+      scope.trainingDay();
       $httpBackend.flush();
 
       // Test scope value

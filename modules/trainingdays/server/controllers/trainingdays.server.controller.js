@@ -162,7 +162,7 @@ function createTrainingDay(req, callback) {
       trainingDay.form = Math.round((req.body.fitness - req.body.fatigue) * 100) / 100;
     } else if (req.body.scheduledEventRanking) {
       trainingDay.name = req.body.name;
-      trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string conversion.
+      trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
       trainingDay.estimatedGoalLoad = req.body.estimatedGoalLoad;
 
       if (req.body.recurrenceSpec) {
