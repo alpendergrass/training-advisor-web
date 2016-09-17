@@ -64,7 +64,7 @@ exports.create = function (req, res) {
           });
         } 
 
-        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.eventPriority) {
+        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
           statusMessage = {
             type: 'info',
             text: 'A key training day has been added or updated. You should update your training plan.',
@@ -160,9 +160,9 @@ function createTrainingDay(req, callback) {
       trainingDay.fatigue = req.body.fatigue;
       //Normally form is calculated using the preceding day's fitness and fatigue but we do not have prior day here.
       trainingDay.form = Math.round((req.body.fitness - req.body.fatigue) * 100) / 100;
-    } else if (req.body.eventPriority) {
+    } else if (req.body.scheduledEventRanking) {
       trainingDay.name = req.body.name;
-      trainingDay.eventPriority = Math.round(req.body.eventPriority); //This will do a string conversion.
+      trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
       trainingDay.estimatedGoalLoad = req.body.estimatedGoalLoad;
 
       if (req.body.recurrenceSpec) {
@@ -213,7 +213,7 @@ exports.update = function (req, res) {
   trainingDay.date = new Date(req.body.date);
   trainingDay.fitness = req.body.fitness;
   trainingDay.fatigue = req.body.fatigue;
-  trainingDay.eventPriority = req.body.eventPriority;
+  trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
   trainingDay.estimatedGoalLoad = req.body.estimatedGoalLoad;
   trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
   trainingDay.notes = req.body.notes;
@@ -244,7 +244,7 @@ exports.update = function (req, res) {
 
       //If a change was made that would affect existing advice, let's recompute.
       if (existingTrainingDay.plannedActivities[0] && existingTrainingDay.plannedActivities[0].advice && 
-        (trainingDay.eventPriority !== existingTrainingDay.eventPriority || 
+        (trainingDay.scheduledEventRanking !== existingTrainingDay.scheduledEventRanking || 
           trainingDay.estimatedGoalLoad !== existingTrainingDay.estimatedGoalLoad || 
           trainingDay.completedActivities !== existingTrainingDay.completedActivities
         )

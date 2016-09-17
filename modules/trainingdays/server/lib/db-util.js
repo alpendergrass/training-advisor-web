@@ -159,7 +159,7 @@ module.exports.getFuturePriorityDays = function(user, searchDate, priority, numb
 
   var query = {
     user: user,
-    eventPriority: priority,
+    scheduledEventRanking: priority,
     date: { $gt: trainingDate, $lte: maxDate }
   };
 
@@ -189,7 +189,7 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
 
   var query = {
     user: user,
-    eventPriority: 1,
+    scheduledEventRanking: 1,
     date: { $lt: trainingDate }
   };
 

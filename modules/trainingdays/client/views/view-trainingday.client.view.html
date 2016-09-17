@@ -1,4 +1,4 @@
-<section ng-controller="TrainingDaysController" ng-init="findOne()" ng-show="authentication.user._id == trainingDay.user._id">
+<section ng-controller="TrainingDaysController" ng-init="viewTrainingDay()" ng-show="authentication.user._id == trainingDay.user._id">
   <div class="page-header">
     <h4>
       <md-button class='md-icon-button' ng-click='getDay(previousDay)' aria-label='Previous day'>
@@ -29,8 +29,8 @@
   </div>
   <div>
     <h4>
-      <a href="#" editable-radiolist="trainingDay.eventPriority" e-ng-options="s.value as s.text for s in ::eventPriorities track by s.value" onbeforesave="updateEventPriority($data)">{{showPriority()}}</a>
-      <span ng-show="trainingDay.eventPriority"><small>Estimated Training Load: <a href="#" editable-textarea="trainingDay.estimatedGoalLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedGoalLoad}}</a></small></span>
+      <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::eventRankings track by s.value" onbeforesave="updateEventRanking($data)">{{showRanking()}}</a>
+      <span ng-show="trainingDay.scheduledEventRanking"><small>Estimated Training Load: <a href="#" editable-textarea="trainingDay.estimatedGoalLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedGoalLoad}}</a></small></span>
     </h4>
   </div>
   <div ng-show="trainingDay.plannedActivities[0].activityType">
@@ -48,13 +48,14 @@
       </div>
       <div>
         {{trainingDay.plannedActivities[0].advice}}
-        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'goal'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad === trainingDay.plannedActivities[0].targetMinLoad">
+
+        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad === trainingDay.plannedActivities[0].targetMinLoad">
           Today's Training Load should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
         </span>
-        <span ng-show="trainingDay.eventPriority > 1 && trainingDay.estimatedGoalLoad !== trainingDay.plannedActivities[0].targetMinLoad">
-          If you treat this event as a workout, your Training Load target should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
+        <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking < 9 && trainingDay.estimatedGoalLoad !== trainingDay.plannedActivities[0].targetMinLoad">
+          If you treat this event as a workout, your load target should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
         </span>
-        <span ng-show="trainingDay.eventPriority === 1 && trainingDay.estimatedGoalLoad < 1"><br><small>
+        <span ng-show="trainingDay.scheduledEventRanking === 1 && trainingDay.estimatedGoalLoad < 1"><br><small>
           We have no estimated load for this goal event. A hard workout today would be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.</small>
         </span>
         <span ng-show="_.includes(['rest', 'easy'], trainingDay.plannedActivities[0].activityType)">

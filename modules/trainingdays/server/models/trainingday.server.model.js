@@ -9,8 +9,9 @@ var mongoose = require('mongoose'),
 //   message: 'The value of `{PATH}` ({VALUE}) is not a valid value.'
 // };
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
+
 var plannedActivityTypes = {
-  values: 'goal|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
+  values: 'event|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
   message: invalidDataErrorMessage
 };
 var plannedActivitySources = {
@@ -96,10 +97,10 @@ var TrainingDaySchema = new Schema({
     type: Number,
     default: 0
   },
-  eventPriority: {
+  scheduledEventRanking: {
     type: Number,
     min: 0,
-    max: 3, 
+    max: 9, 
     default: 0
   },
   eventRecurrenceID: {

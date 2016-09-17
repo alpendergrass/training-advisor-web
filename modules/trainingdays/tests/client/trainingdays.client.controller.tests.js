@@ -54,7 +54,7 @@
       // create mock trainingDay
       var plannedActivities = [];
       plannedActivities[0] = {};
-      plannedActivities[0].activityType = 'goal';
+      plannedActivities[0].activityType = 'event';
 
       mockTrainingDay = new TrainingDays({
         _id: '525a8422f6d0f87f0e407a33',
@@ -90,7 +90,7 @@
       expect(scope.trainingDays).toEqualData(sampleTrainingDays);
     }));
 
-    it('$scope.findOne() should create an array with one trainingDay object fetched from XHR using a trainingDayId URL parameter', inject(function (TrainingDays) {
+    it('$scope.trainingDay() should create an array with one trainingDay object fetched from XHR using a trainingDayId URL parameter', inject(function (TrainingDays) {
       // Set the URL parameter
       $stateParams.trainingDayId = mockTrainingDay._id;
 
@@ -98,7 +98,7 @@
       $httpBackend.expectGET(/api\/trainingDays\/([0-9a-fA-F]{24})$/).respond(mockTrainingDay);
 
       // Run controller functionality
-      scope.findOne();
+      scope.trainingDay();
       $httpBackend.flush();
 
       // Test scope value
@@ -112,7 +112,7 @@
 
         var plannedActivities = [];
         plannedActivities[0] = {};
-        plannedActivities[0].activityType = 'goal';
+        plannedActivities[0].activityType = 'event';
 
         // Create a sample trainingDay object
         sampleTrainingDayPostData = new TrainingDays({
