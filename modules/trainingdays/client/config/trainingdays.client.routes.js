@@ -5,24 +5,24 @@ angular.module('trainingDays').config(['$stateProvider',
   function ($stateProvider) {
     // TrainingDays state routing
     $stateProvider
-      .state('trainingDays', {
-        abstract: true,
-        url: '/trainingDays',
-        template: '<ui-view/>'
-      })
-      .state('trainingDays.calendar', {
-        url: '',
-        templateUrl: 'modules/trainingDays/client/views/calendar-trainingdays.client.view.html',
-        data: {
-          roles: ['user', 'admin']
-        }
-      })
-      .state('trainingDays.season', {
+      .state('season', {
         url: '/season',
         templateUrl: 'modules/trainingDays/client/views/season-trainingdays.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
+      })
+      .state('calendar', {
+        url: '/calendar',
+        templateUrl: 'modules/trainingDays/client/views/calendar-trainingdays.client.view.html',
+        data: {
+          roles: ['user', 'admin']
+        }
+      })
+      .state('trainingDays', {
+        abstract: true,
+        url: '/trainingDays',
+        template: '<ui-view/>'
       })
       .state('trainingDays.list', {
         url: '/list',

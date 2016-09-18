@@ -469,7 +469,7 @@ angular.module('trainingDays')
 
           // Redirect after save
           trainingDay.$create(function(response) {
-            $location.path('trainingDays/season');
+            $location.path('season');
 
             // Clear form fields
             $scope.name = '';
@@ -638,7 +638,7 @@ angular.module('trainingDays')
           });
 
           trainingDay.$create(function(response) {
-            $location.path('trainingDays/season');
+            $location.path('season');
 
             // Clear form fields
             $scope.name = '';
@@ -723,7 +723,7 @@ angular.module('trainingDays')
             }
           } else {
             $scope.trainingDay.$remove(function() {
-              $location.path('trainingDays/season');
+              $location.path('season');
             });
           }
         };
@@ -738,7 +738,7 @@ angular.module('trainingDays')
 
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day (no scheduled event)' : 'Nothing Planned';
+            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
@@ -901,7 +901,7 @@ angular.module('trainingDays')
           startDate: $scope.today.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
-          $location.path('trainingDays/season');
+          $location.path('season');
           $scope.viewSeason();
         }, function(errorResponse) {
           usSpinnerService.stop('tdSpinner');

@@ -4,6 +4,18 @@
 angular.module('trainingDays').run(['Menus',
   function (Menus) {
     Menus.addMenuItem('topbar', {
+      title: 'My Season',
+      state: 'season',
+      roles: ['user']
+    });
+
+    Menus.addMenuItem('topbar', {
+      title: 'My Calendar',
+      state: 'calendar',
+      roles: ['user']
+    });
+
+    Menus.addMenuItem('topbar', {
       title: 'Training Days',
       state: 'trainingDays',
       type: 'dropdown',
@@ -11,14 +23,8 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'My Season',
-      state: 'trainingDays.season',
-      roles: ['user']
-    });
-
-    Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'My Calendar',
-      state: 'trainingDays.calendar',
+      title: 'Schedule Events',
+      state: 'trainingDays.createEvent',
       roles: ['user']
     });
 
@@ -31,12 +37,6 @@ angular.module('trainingDays').run(['Menus',
     Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'Start Season',
       state: 'trainingDays.createStart',
-      roles: ['user']
-    });
-
-    Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Schedule Events',
-      state: 'trainingDays.createEvent',
       roles: ['user']
     });
 
