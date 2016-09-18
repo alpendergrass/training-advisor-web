@@ -51,7 +51,7 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
         $scope.authentication.user = response;
 
         // And redirect to the previous or calendar page
-        $state.go($state.previous.state.name || 'trainingDays.season', $state.previous.params);
+        $state.go($state.previous.state.name || 'season', $state.previous.params);
       }).error(function (response) {
         usSpinnerService.stop('authSpinner');
         $scope.error = response.message;
