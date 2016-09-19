@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var adminPolicy = require('../policies/admin.server.policy'),
   admin = require('../controllers/admin.server.controller');
 

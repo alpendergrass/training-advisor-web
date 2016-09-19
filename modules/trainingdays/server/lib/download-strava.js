@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
@@ -28,7 +26,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       title: 'Strava Download',
       created: Date.now(),
       username: user.username
-    };
+    },
+    params = {};
 
   console.log('trainingDay: ' + moment(trainingDay.date).toDate()); 
   console.log('Strava searchDate: ' + moment.unix(searchDate).toDate()); 
@@ -121,7 +120,12 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       } 
 
       //Update metrics for trainingDay as completedActivities likely has changed.
-      adviceMetrics.updateMetrics(user, trainingDay.date, function(err, trainingDay) {
+      params = {
+        user: user,
+        trainingDate: trainingDay.date
+      };
+
+      adviceMetrics.updateMetrics(params, function(err, trainingDay) {
         if (err) {
           statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
           statusMessage.type = 'warning';

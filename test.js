@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var app;
 
 var path = require('path');

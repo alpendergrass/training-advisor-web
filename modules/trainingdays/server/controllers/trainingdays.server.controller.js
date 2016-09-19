@@ -242,6 +242,9 @@ exports.update = function (req, res) {
         });
       } 
 
+      params.user = req.user;
+      params.trainingDate = new Date(trainingDay.date);
+      
       //If a change was made that would affect existing advice, let's recompute.
       if (existingTrainingDay.plannedActivities[0] && existingTrainingDay.plannedActivities[0].advice && 
         (trainingDay.scheduledEventRanking !== existingTrainingDay.scheduledEventRanking || 
@@ -249,8 +252,6 @@ exports.update = function (req, res) {
           trainingDay.completedActivities !== existingTrainingDay.completedActivities
         )
       ) {
-        params.user = req.user;
-        params.trainingDate = new Date(trainingDay.date);
         params.alternateActivity = null;
         params.alertUser = true;
 
@@ -265,7 +266,7 @@ exports.update = function (req, res) {
         });
       } else { // if (trainingDay.completedActivities !== existingTrainingDay.completedActivities) {
         // update metrics for trainingDay just in case.
-        adviceMetrics.updateMetrics(req.user, trainingDay.date, function(err, trainingDay) {
+        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
           if (err) {
             return res.status(400).send({
               message: errorHandler.getErrorMessage(err)
@@ -411,7 +412,7 @@ exports.getAdvice = function (req, res) {
 exports.genPlan = function (req, res) {
   var params = {};
   params.user = req.user;
-  params.startDate = req.params.startDate;
+  params.trainingDate = req.params.trainingDate;
   
   adviceEngine.generatePlan(params, function (err) {
     if (err) {

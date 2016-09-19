@@ -28,7 +28,7 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
       },
       genPlan: {
         method: 'GET',
-        url: 'api/trainingDays/genPlan/:startDate'
+        url: 'api/trainingDays/genPlan/:trainingDate'
       },
       downloadActivities: {
         method: 'GET',

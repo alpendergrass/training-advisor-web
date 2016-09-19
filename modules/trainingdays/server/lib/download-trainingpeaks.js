@@ -23,7 +23,8 @@ var url = 'http://www.trainingpeaks.com/tpwebservices/service.asmx?WSDL',
   },
   offlineMode,
   err,
-  individualUserErrors;
+  individualUserErrors,
+  params = {};
 
 module.exports = {};
 
@@ -74,7 +75,12 @@ module.exports.batchDownloadActivities = function(callback) {
               return callback();
             } else {
               //update metrics for trainingDay, which should be the latest.
-              adviceMetrics.updateMetrics(user, trainingDay.date, function(err, trainingDay) {
+              params = {
+                user: user,
+                trainingDate: trainingDay.date
+              };
+
+              adviceMetrics.updateMetrics(params, function(err, trainingDay) {
                 if (err) {
                   statusMessage.text = 'We downloaded ' + activityCount + ' new TrainingPeaks workouts but encountered an error when we tried to update metrics.';
                   statusMessage.type = 'warning';
@@ -159,7 +165,12 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           }
 
           //Update metrics for trainingDay as completedActivities likely has changed.
-          adviceMetrics.updateMetrics(user, trainingDay.date, function(err, trainingDay) {
+          params = {
+            user: user,
+            trainingDate: trainingDay.date
+          };
+
+          adviceMetrics.updateMetrics(params, function(err, trainingDay) {
             if (err) {
               statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
               statusMessage.type = 'warning';

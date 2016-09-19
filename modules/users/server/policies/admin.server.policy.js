@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var acl = require('acl');
 
 // Using the memory backend
