@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var acl = require('acl');
 
 // Using the memory backend
@@ -30,7 +28,7 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/getAdvice/:trainingDate',
       permissions: '*'
     }, {
-      resources: '/api/trainingDays/genPlan/:startDate',
+      resources: '/api/trainingDays/genPlan/:trainingDate',
       permissions: '*'
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',
@@ -54,7 +52,7 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/getAdvice/:trainingDate',
       permissions: ['get']
     }, {
-      resources: '/api/trainingDays/genPlan/:startDate',
+      resources: '/api/trainingDays/genPlan/:trainingDate',
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',

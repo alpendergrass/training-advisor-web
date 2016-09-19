@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var passport = require('passport'),
   StravaStrategy = require('passport-strava-oauth2').Strategy,
   users = require('../../controllers/users.server.controller');

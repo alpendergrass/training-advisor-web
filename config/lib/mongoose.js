@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var config = require('../config'),
   chalk = require('chalk'),
   path = require('path'),

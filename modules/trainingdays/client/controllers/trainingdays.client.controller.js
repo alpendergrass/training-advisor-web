@@ -898,7 +898,7 @@ angular.module('trainingDays')
         $scope.error = null;
 
         TrainingDays.genPlan({
-          startDate: $scope.today.toISOString()
+          trainingDate: $scope.today.toISOString()
         }, function(response) {
           usSpinnerService.stop('tdSpinner');
           $location.path('season');
