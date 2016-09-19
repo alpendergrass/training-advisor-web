@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),

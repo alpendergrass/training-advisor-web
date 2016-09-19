@@ -10,7 +10,11 @@ var path = require('path'),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics');
 
-var user, trainingDate, expectedTargetAvgDailyLoad = 50.58, daysUntilGoal = adviceConstants.minimumNumberOfTrainingDays;
+var user, 
+  trainingDate,
+  expectedTargetAvgDailyLoad = 50.58,
+  daysUntilGoal = adviceConstants.minimumNumberOfTrainingDays,
+  params = {};
 
 describe('advice-metrics Unit Tests:', function () {
 
@@ -20,9 +24,11 @@ describe('advice-metrics Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser; 
+      params.user = newUser; 
 
       trainingDate = moment().startOf('day').toDate();
+      params.trainingDate = trainingDate; 
 
       testHelpers.createGoalEvent(user, trainingDate, daysUntilGoal, function(err) {
         if (err) {
@@ -36,18 +42,28 @@ describe('advice-metrics Unit Tests:', function () {
 
   describe('Method updateMetrics', function () {
     it('should return error if no user', function (done) {
-      return adviceMetrics.updateMetrics(null, null, function (err, trainingDay) {
+      params.user = null; 
+      return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
       });
     });
     
-    it('should return error if invalid trainingDate', function (done) {
-      return adviceMetrics.updateMetrics(user, null, function (err, trainingDay) {
+    it('should return error if missing trainingDate', function (done) {
+      params.trainingDate = null;
+      return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
         should.exist(err);
-        (err.message).should.match('trainingDate null is not a valid date');
-        //console.log(err.message);
+        (err.message).should.match('trainingDate is required');
+        done();
+      });
+    });
+
+    it('should return error if invalid trainingDate', function (done) {
+      params.trainingDate = '20161232';
+      return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
+        should.exist(err);
+        (err.message).should.containEql('is not a valid date');
         done();
       });
     });
@@ -58,7 +74,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.exist(err);
           (err.message).should.containEql('should not have fitness and fatigue equal to zero.');
           done();
@@ -72,7 +88,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.exist(err);
           (err.message).should.containEql('should not have fitness and fatigue equal to zero.');
           done();
@@ -86,7 +102,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.exist(err);
           (err.message).should.containEql('should not have fitness and fatigue equal to zero.');
           done();
@@ -100,7 +116,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.form).should.equal(0);
@@ -132,7 +148,7 @@ describe('advice-metrics Unit Tests:', function () {
               console.log('updateTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+            return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               should.exist(err);
               (err.message).should.containEql('should not have fitness and fatigue equal to zero.');
               done();
@@ -166,7 +182,7 @@ describe('advice-metrics Unit Tests:', function () {
               console.log('updateTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+            return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               should.exist(err);
               (err.message).should.containEql('should not have fitness and fatigue equal to zero.');
               done();
@@ -201,7 +217,7 @@ describe('advice-metrics Unit Tests:', function () {
               console.log('updateTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+            return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               should.not.exist(err);
               should.exist(trainingDay);
               (trainingDay.fitness).should.equal(1);
@@ -239,7 +255,7 @@ describe('advice-metrics Unit Tests:', function () {
               console.log('updateTrainingDay: ' + err);
             }
 
-            adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+            adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               if (err) {
                 console.log('updateMetrics: ' + err);
               }
@@ -263,7 +279,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.form).should.be.above(1);
@@ -289,7 +305,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.form).should.be.below(1);
@@ -305,7 +321,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.dailyTargetRampRate).should.equal(1);
@@ -323,9 +339,9 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        trainingDate = moment(trainingDate).add(daysUntilGoal - 1, 'days');
+        params.trainingDate = moment(trainingDate).add(daysUntilGoal - 1, 'days');
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           //console.log('trainingDay: ' + trainingDay);
           should.not.exist(err);
           should.exist(trainingDay);
@@ -345,9 +361,9 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        trainingDate = moment(trainingDate).add(16, 'days');
+        params.trainingDate = moment(trainingDate).add(16, 'days');
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.period).should.equal('base');
@@ -366,9 +382,9 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        trainingDate = moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays * adviceConstants.basePortionOfTotalTrainingDays + 1, 'days');
+        params.trainingDate = moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays * adviceConstants.basePortionOfTotalTrainingDays + 1, 'days');
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.period).should.equal('build');
@@ -397,7 +413,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.sevenDayRampRate).should.be.above(0);
@@ -413,7 +429,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.loadRating).should.equal('rest');
@@ -438,7 +454,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.loadRating).should.equal('easy');
@@ -466,7 +482,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.loadRating).should.equal('easy');
@@ -493,7 +509,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.loadRating).should.equal('moderate');
@@ -522,7 +538,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.loadRating).should.equal('moderate');
@@ -549,7 +565,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.loadRating).should.equal('hard');
@@ -578,7 +594,7 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+          return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.loadRating).should.equal('hard');
@@ -594,7 +610,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+        return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           (trainingDay.daysUntilNextGoalEvent).should.equal(adviceConstants.minimumNumberOfTrainingDays);
           done();
@@ -621,7 +637,7 @@ describe('advice-metrics Unit Tests:', function () {
               console.log('updateTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+            return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               should.not.exist(err);
               (trainingDay.daysUntilNextPriority2Event).should.equal(adviceConstants.minimumNumberOfTrainingDays - 1);
               done();
@@ -649,7 +665,7 @@ describe('advice-metrics Unit Tests:', function () {
               console.log('updateTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, trainingDate, function (err, trainingDay) {
+            return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               should.not.exist(err);
               (trainingDay.daysUntilNextPriority3Event).should.equal(1);
               done();

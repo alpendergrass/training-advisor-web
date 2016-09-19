@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
@@ -17,21 +14,26 @@ var path = require('path'),
 
 module.exports = {};
 
-module.exports.updateMetrics = function(user, trainingDate, callback) {
+module.exports.updateMetrics = function(params, callback) {
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
-  if (!user) {
+  if (!params.user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  if (!moment(trainingDate).isValid()) {
-    err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
+  if (!params.trainingDate) {
+    err = new TypeError('trainingDate is required');
+    return callback(err, null);
+  }
+
+  if (!moment(params.trainingDate).isValid()) {
+    err = new TypeError('trainingDate ' + params.trainingDate + ' is not a valid date');
     return callback(err, null);
   }
 
   async.waterfall([
-    async.apply(clearRunway, user, trainingDate),
+    async.apply(clearRunway, params),
     updateFatigue,
     updateMetricsForDay
   ],
@@ -40,9 +42,9 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
         return callback(err, null);
       }
 
-      user.planGenNeeded = true;
+      params.user.planGenNeeded = true;
       
-      user.save(function (err) {
+      params.user.save(function (err) {
         if (err) {
           return callback(err, null);
         } 
@@ -51,46 +53,6 @@ module.exports.updateMetrics = function(user, trainingDate, callback) {
       });
     }
   );
-
-
-  // //Clear metrics and remove advice for TD's after trainingDate. 
-  // dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
-  //   if (err) {
-  //     return callback(err, null);
-  //   }
-
-  //   dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
-  //     if (err) {
-  //       return callback(err, null);
-  //     }
-
-  //     //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
-  //     userUtil.updateFatigueTimeConstant(user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
-  //       if (err) {
-  //         return callback(err, null);
-  //       }
-
-  //       user.fatigueTimeConstant = fatigueTimeConstant;
-  //       if (trainingDay.trainingEffortFeedback !== null) {
-  //         //We only ask for feedback if trainingEffortFeedback is null.
-  //         //So if we got here, this means that we have received and applied feedback, 
-  //         //so we reset it to zero to avoid having the time constant
-  //         //readjusted if/when updateMetrics is called again.
-  //         trainingDay.trainingEffortFeedback = 0;
-  //       }
-
-  //       updateMetricsForDay(user, trainingDay, function(err, updatedTrainingDay) {
-  //         if (err) {
-  //           return callback(err, null);
-  //         }
-
-  //         return callback(null, updatedTrainingDay);
-  //       });
-  //     });
-  //   });
-  // });
-
-
 };
 
 module.exports.assignLoadRating = function(trainingDay) {
@@ -99,33 +61,39 @@ module.exports.assignLoadRating = function(trainingDay) {
   return trainingDay;
 };
 
-function clearRunway(user, trainingDate, callback) {
-  //TODO: not needed if genPlan.
+function clearRunway(params, callback) {
+  //not needed if we are generating plan.
+  if (params.genPlan) {
+    return callback(null, params);
+  }
 
-  dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function(err, rawResponse) {
+  dbUtil.clearFutureMetricsAndAdvice(params.user, params.trainingDate, function(err, rawResponse) {
     if (err) {
-      return callback(err, null, null);
+      return callback(err, null);
     }
 
-    return callback(null, user, trainingDate);
+    return callback(null, params);
   });
 }
 
-function updateFatigue(user, trainingDate, callback) {
-  //TODO: not needed if genPlan.
-
-  dbUtil.getTrainingDayDocument(user, trainingDate, function(err, trainingDay) {
+function updateFatigue(params, callback) {
+  dbUtil.getTrainingDayDocument(params.user, params.trainingDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null, null);
     }
 
+    //not needed if we are generating plan.
+    if (params.genPlan) {
+      return callback(null, params.user, trainingDay);
+    }
+    
     //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
-    userUtil.updateFatigueTimeConstant(user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
+    userUtil.updateFatigueTimeConstant(params.user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
       if (err) {
         return callback(err, null, null);
       }
 
-      user.fatigueTimeConstant = fatigueTimeConstant;
+      params.user.fatigueTimeConstant = fatigueTimeConstant;
       if (trainingDay.trainingEffortFeedback !== null) {
         //We only ask for feedback if trainingEffortFeedback is null.
         //So if we got here, this means that we have received and applied feedback, 
@@ -134,7 +102,7 @@ function updateFatigue(user, trainingDate, callback) {
         trainingDay.trainingEffortFeedback = 0;
       }
 
-      return callback(null, user, trainingDay);
+      return callback(null, params.user, trainingDay);
     });
   });
 }
@@ -247,7 +215,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     currentTrainingDay.targetAvgDailyLoad = Math.round(((adviceConstants.defaultFitnessTimeConstant * currentTrainingDay.dailyTargetRampRate) + priorDayFitness) * 100) / 100;
 
     //Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
-    //Note that Strava using today's F&F to compute today's form. I believe the Coggan way is more realistic.
+    //Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
     //currentTrainingDay.form = Math.round((currentTrainingDay.fitness - currentTrainingDay.fatigue) * 100) / 100;
     currentTrainingDay.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
     currentTrainingDay.loadRating = determineLoadRating(currentTrainingDay.targetAvgDailyLoad, currentTrainingDayTotalLoad);

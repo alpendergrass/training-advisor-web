@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var path = require('path'),
   should = require('should'),
   mongoose = require('mongoose'),
@@ -14,7 +12,10 @@ var path = require('path'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
   adviceModerate = require('../../server/lib/advice-moderate');
 
-var user, trainingDate, trainingDay;
+var user, 
+  trainingDate, 
+  trainingDay, 
+  params = {};
 
 describe('advice-moderate Unit Tests:', function () {
 
@@ -24,7 +25,8 @@ describe('advice-moderate Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser;
+      params.user = user;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
@@ -114,7 +116,9 @@ describe('advice-moderate Unit Tests:', function () {
               console.log('createTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, yesterday, function (err, metricizedTrainingDay) {
+            params.trainingDate = yesterday;
+            
+            return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
@@ -157,7 +161,9 @@ describe('advice-moderate Unit Tests:', function () {
               console.log('createTrainingDay: ' + err);
             }
 
-            return adviceMetrics.updateMetrics(user, yesterday, function (err, metricizedTrainingDay) {
+            params.trainingDate = yesterday;
+
+            return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);

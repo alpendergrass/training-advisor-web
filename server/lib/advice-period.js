@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var path = require('path'),
   moment = require('moment'),
   async = require('async'),

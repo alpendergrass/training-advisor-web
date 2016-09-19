@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var moment = require('moment'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),

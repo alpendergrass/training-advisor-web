@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
+
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
@@ -32,12 +30,13 @@ module.exports.generatePlan = function(params, callback) {
     return callback(err, null);
   }
 
-  if (!params.startDate) {
-    err = new TypeError('startDate is required');
+  //Start date should be the current day in the user's time zone.
+  if (!params.trainingDate) {
+    err = new TypeError('trainingDate is required');
     return callback(err, null);
   }
 
-  var startDate = new Date(params.startDate),
+  var trainingDate = new Date(params.trainingDate),
     user = params.user,
     adviceParams = {},
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
@@ -50,7 +49,7 @@ module.exports.generatePlan = function(params, callback) {
       username: user.username
     };
 
-  //TODO: Make the following a async.series maybe.
+  //TODO: Make the following a async.series. maybe.
   //As a precaution we remove all planning activities. 
   //If we errored out last time there will be some left over planning activities.
   dbUtil.removePlanningActivities(user, function(err, rawResponse) {
@@ -58,12 +57,11 @@ module.exports.generatePlan = function(params, callback) {
       return callback(err, null);
     }
 
-    dbUtil.getFuturePriorityDays(user, startDate, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
+    dbUtil.getFuturePriorityDays(user, trainingDate, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
       if (err) {
         return callback(err, null);
       }
 
-      //TODO: do not require a goal.
       if (goalDays.length < 1) {
         err = new TypeError('A goal is required in order to compute a plan.');
         return callback(err, null);
@@ -72,13 +70,13 @@ module.exports.generatePlan = function(params, callback) {
       //Use last goal to generate plan.
       goalDay = goalDays[goalDays.length - 1];
 
-      adviceMetrics.updateMetrics(user, startDate, function(err, td) {
+      adviceMetrics.updateMetrics(params, function(err, td) {
         if (err) {
           return callback(err, null);
         }
 
-        //get all training days from startDate thru goal.
-        dbUtil.getTrainingDays(user, startDate, goalDay.date, function(err, trainingDays) {
+        //get all training days from trainingDate thru goal.
+        dbUtil.getTrainingDays(user, trainingDate, goalDay.date, function(err, trainingDays) {
           if (err) {
             return callback(err, null);
           }
@@ -91,14 +89,14 @@ module.exports.generatePlan = function(params, callback) {
           //if today has a ride, start with tomorrow, else start with today.
           if (trainingDays[0].completedActivities.length > 0) {
             trainingDays.shift(); 
-            startDate = moment(startDate).add('1', 'day').toDate();
           }
 
           async.eachSeries(trainingDays, function(trainingDay, callback) {
             adviceParams = {
               user: user,
               trainingDate: trainingDay.date,
-              alertUser: false
+              alertUser: false,
+              genPlan: true
             };
 
             module.exports.advise(adviceParams, function (err, trainingDay) {
@@ -106,8 +104,9 @@ module.exports.generatePlan = function(params, callback) {
                 return callback(err);
               }
 
-              //TODO: We should only do this for future dates...do not allow past start date?
-              generateActivityFromAdvice(user, trainingDay, function(err, trainingDay) {
+              adviceParams.trainingDay = trainingDay;
+
+              generateActivityFromAdvice(adviceParams, function(err, trainingDay) {
                 if (err) {
                   return callback(err);
                 }
@@ -173,7 +172,7 @@ module.exports.advise = function(params, callback) {
   async.series(
     [
       function(callback) {
-        adviceMetrics.updateMetrics(user, trainingDate, function(err, trainingDay) {
+        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
           if (err) {
             return callback(err);
           }
@@ -305,8 +304,10 @@ function generateAdvice(user, trainingDay, callback) {
   );
 }
 
-function generateActivityFromAdvice(user, trainingDay, callback) {
-  var completedActivity = {};
+function generateActivityFromAdvice(params, callback) {
+  var completedActivity = {},
+    trainingDay = params.trainingDay,
+    user = params.user;
 
   if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'advised') {
     completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;
@@ -319,7 +320,7 @@ function generateActivityFromAdvice(user, trainingDay, callback) {
         return callback(err, null);
       }
 
-      adviceMetrics.updateMetrics(user, trainingDay.date, function(err, trainingDay) {
+      adviceMetrics.updateMetrics(params, function(err, trainingDay) {
         if (err) {
           return callback(err, null);
         }
