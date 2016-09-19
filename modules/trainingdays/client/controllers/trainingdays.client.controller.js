@@ -239,6 +239,8 @@ angular.module('trainingDays')
           formArray,
           fitnessArray,
           fatigueArray,
+          formPointBorderColors,
+          formPointRadius,
           loadBackgroundColors;
 
         var extractLoad = function(td) {
@@ -256,10 +258,30 @@ angular.module('trainingDays')
 
         var setLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
+            // Highlight today by making it stand out a bit.
             return '#97BBCD';
           }
           
+          // Highlight goal days.
           return td.scheduledEventRanking === 1 ? '#D4A1A0' : '#EAF1F5';
+        };
+
+        var setFormPointColor = function(td) {
+          if (td.htmlID && td.htmlID === 'today') {
+            // Highlight today by making it stand out a bit.
+            return '#98D8E2';
+          }
+          
+          return '#FFFFFF';
+        };
+
+        var setFormPointRadius = function(td) {
+          if (td.htmlID && td.htmlID === 'today') {
+            // Highlight today by making it stand out a bit.
+            return 6;
+          }
+          
+          return 3;
         };
 
         $scope.error = null;
@@ -324,6 +346,8 @@ angular.module('trainingDays')
           if ($scope.season) {
             loadArray = _.flatMap($scope.season, extractLoad);
             loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
+            formPointRadius = _.flatMap($scope.season, setFormPointRadius);
+            formPointBorderColors = _.flatMap($scope.season, setFormPointColor);
             formArray = _.flatMap($scope.season, function(td) { return td.form; });
             fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
             fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
@@ -349,6 +373,8 @@ angular.module('trainingDays')
               {
                 label: 'Form',
                 borderWidth: 3,
+                pointRadius: formPointRadius,
+                pointBorderColor:  formPointBorderColors,
                 type: 'line'
               }
             ];
