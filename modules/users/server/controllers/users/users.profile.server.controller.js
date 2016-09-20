@@ -20,6 +20,9 @@ exports.update = function (req, res) {
     user = _.extend(user, req.body);
     user.updated = Date.now();
     user.displayName = user.firstName + ' ' + user.lastName;
+    //Let's take the shotgun approach and suggest plan re-gen for any profile change
+    //even only some changes could affect advice.
+    user.planGenNeeded = true;
 
     user.save(function (err) {
       if (err) {
