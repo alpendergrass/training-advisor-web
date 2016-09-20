@@ -110,7 +110,7 @@
     <p>
       <label>Form (TSB):</label> {{ trainingDay.form }}
       <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate - today is <span ng-show="trainingDay.startingPoint">your season start</span><span ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">a true-up day</span></abbr>
-      <span ng-show="trainingDay.sevenDayRampRate !== 0"><br/>Seven Day Fitness Ramp Rate is {{trainingDay.sevenDayRampRate}}. Target Ramp Rate is {{trainingDay.sevenDayTargetRampRate}}.</span>
+      <span ng-show="authentication.user.levelOfDetail > 2"><br/>Seven Day Fitness Ramp Rate is {{trainingDay.sevenDayRampRate}}. Target Ramp Rate is {{trainingDay.sevenDayTargetRampRate}}.</span>
     </p>
   </div>
   <p>
