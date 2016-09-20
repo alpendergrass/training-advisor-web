@@ -73,6 +73,14 @@ function setTargetLoads(trainingDay) {
 }
 
 function computeRampRateAdjustment(trainingDay) {
+  // 9/20/16: mucking with the ramp rate the way we were below is causing some weirdness in the advice,
+  // at least when looking at the season chart for future days. We were getting some hard days with much lower target loads than
+  // the other hard days around them. I think these were the only days where we were not tweaking the ramp rates.
+  // I'm going to turn off the adjusting until I have higher confidence in doing this.
+  // Perhaps we should only adjust ramp rates when computing current advice, not when doing planGen.
+  // I think we also need to compute ramp rates over a longer period as 7 day ramp rate is very sensitive. 
+  // Use 14 days to compute? Maybe go back to the last rest period if we can figure out what that was.
+
   // Adjust advice to bring actual ramp rate towards target ramp rate.
   // If below, increase daily targets by % of difference.
   // If above, decrease daily targets by % of difference.  
@@ -81,21 +89,21 @@ function computeRampRateAdjustment(trainingDay) {
   var adjustmentFactor = 1;
 
   //sevenDayRampRate of zero probably means we do not have a prior week to use to compute.
-  if (trainingDay.sevenDayRampRate !== 0 && (latestPlannedActivity.activityType === 'hard' || latestPlannedActivity.activityType === 'moderate')) {
-    adjustmentFactor = Math.abs((trainingDay.sevenDayTargetRampRate - trainingDay.sevenDayRampRate) / trainingDay.sevenDayTargetRampRate);
+  // if (trainingDay.sevenDayRampRate !== 0 && (latestPlannedActivity.activityType === 'hard' || latestPlannedActivity.activityType === 'moderate')) {
+  //   adjustmentFactor = Math.abs((trainingDay.sevenDayTargetRampRate - trainingDay.sevenDayRampRate) / trainingDay.sevenDayTargetRampRate);
 
-    // Cap adjustment at limit.
-    if (adjustmentFactor > adviceConstants.rampRateAdjustmentLimit) {
-      adjustmentFactor = adviceConstants.rampRateAdjustmentLimit;
-    }
+  //   // Cap adjustment at limit.
+  //   if (adjustmentFactor > adviceConstants.rampRateAdjustmentLimit) {
+  //     adjustmentFactor = adviceConstants.rampRateAdjustmentLimit;
+  //   }
 
-    // If actual rate > target rate, we want to dial it back a bit.
-    if (trainingDay.sevenDayRampRate > trainingDay.sevenDayTargetRampRate) {
-      adjustmentFactor = 1 - adjustmentFactor;
-    } else {
-      adjustmentFactor = 1 + adjustmentFactor;
-    }
-  }
+  //   // If actual rate > target rate, we want to dial it back a bit.
+  //   if (trainingDay.sevenDayRampRate > trainingDay.sevenDayTargetRampRate) {
+  //     adjustmentFactor = 1 - adjustmentFactor;
+  //   } else {
+  //     adjustmentFactor = 1 + adjustmentFactor;
+  //   }
+  // }
 
   return adjustmentFactor;
 }
