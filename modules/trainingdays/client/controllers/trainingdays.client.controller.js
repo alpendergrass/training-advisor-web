@@ -535,7 +535,7 @@ angular.module('trainingDays')
 
         $scope.$watch('scheduledEventRanking', function(ranking) { 
           if (ranking === '9') {
-            $scope.estimatedGoalLoad = 0;
+            $scope.estimatedLoad = 0;
           }
         });
 
@@ -657,7 +657,7 @@ angular.module('trainingDays')
           var trainingDay = new TrainingDays({
             date: this.date,
             name: this.name,
-            estimatedGoalLoad: this.estimatedGoalLoad,
+            estimatedLoad: this.estimatedLoad,
             scheduledEventRanking: this.scheduledEventRanking,
             recurrenceSpec: this.recurrenceSpec,
             notes: this.notes
@@ -670,7 +670,7 @@ angular.module('trainingDays')
             $scope.name = '';
             $scope.date = null;
             $scope.scheduledEventRanking = '0';
-            $scope.estimatedGoalLoad = 0;
+            $scope.estimatedLoad = 0;
             $scope.recurrenceSpec = null;
             $scope.notes = '';
           }, function(errorResponse) {
@@ -698,6 +698,22 @@ angular.module('trainingDays')
       };
 
       $scope.viewTrainingDay = function() {
+        $scope.activityTypes = [
+          { value: 'easy', text: 'Do an easy ride' },
+          { value: 'moderate', text: 'Do a moderate ride' },
+          { value: 'hard', text: 'Do a hard ride' },
+          { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
+          { value: 'test', text: 'Do a threshold power test' }
+        ];
+
+        $scope.eventRankings = [
+          { value: 1, text: 'Goal Event!' },
+          { value: 2, text: 'Medium Priority Event' },
+          { value: 3, text: 'Low Priority Event' },
+          { value: 9, text: 'Off Day' },
+          { value: 0, text: 'Nothing To Schedule' }
+        ];
+
         function prepForTDView(trainingDay) {
           //not sure why Mongo/Mongoose returns a string for a date field
           //but I have to convert it back to a date to get my date picker
@@ -711,14 +727,6 @@ angular.module('trainingDays')
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           return trainingDay;
         }
-
-        $scope.activityTypes = [
-          { value: 'easy', text: 'Do an easy ride' },
-          { value: 'moderate', text: 'Do a moderate ride' },
-          { value: 'hard', text: 'Do a hard ride' },
-          { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
-          { value: 'test', text: 'Do a threshold power test' }
-        ];
 
         $scope.getDay = function(date) {
           $scope.error = null;
@@ -754,14 +762,6 @@ angular.module('trainingDays')
           }
         };
 
-        $scope.eventRankings = [
-          { value: 1, text: 'Goal Event!' },
-          { value: 2, text: 'Medium Priority Event' },
-          { value: 3, text: 'Low Priority Event' },
-          { value: 9, text: 'Off Day' },
-          { value: 0, text: 'Nothing To Schedule' }
-        ];
-
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
             dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
@@ -769,6 +769,7 @@ angular.module('trainingDays')
         };
 
         $scope.updateEventRanking = function(priority) {
+          //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
           var n = ~~Number(priority);
 
           if (n === $scope.trainingDay.scheduledEventRanking) {
@@ -783,10 +784,17 @@ angular.module('trainingDays')
           return 'Valid eventRankings are 0, 1, 2 and 3. And 9.';
         };
 
+        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+          // If off day or a not a scheduled event, zero out estimate.
+          if (ranking === 9 || ranking === 0) {
+            $scope.trainingDay.estimatedLoad = 0;
+          }
+        });
+
         $scope.updateEstimatedLoad = function(estimate) {
           var n = ~~Number(estimate);
 
-          if (n === $scope.trainingDay.estimatedGoalLoad) {
+          if (n === $scope.trainingDay.estimatedLoad) {
             //no change.
             return;
           }

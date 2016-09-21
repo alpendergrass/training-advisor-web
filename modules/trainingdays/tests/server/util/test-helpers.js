@@ -69,7 +69,7 @@ module.exports.createGoalEvent = function(user, trainingDate, daysForward, callb
     date: moment(trainingDate).add(daysForward, 'days'),
     name: 'Goal trainingDay',
     scheduledEventRanking: 1,
-    estimatedGoalLoad: 567,
+    estimatedLoad: 567,
     user: user
   });
 

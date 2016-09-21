@@ -163,7 +163,7 @@ function createTrainingDay(req, callback) {
     } else if (req.body.scheduledEventRanking) {
       trainingDay.name = req.body.name;
       trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
-      trainingDay.estimatedGoalLoad = req.body.estimatedGoalLoad;
+      trainingDay.estimatedLoad = req.body.estimatedLoad;
 
       if (req.body.recurrenceSpec) {
         trainingDay.recurrenceSpec = req.body.recurrenceSpec;
@@ -214,7 +214,7 @@ exports.update = function (req, res) {
   trainingDay.fitness = req.body.fitness;
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
-  trainingDay.estimatedGoalLoad = req.body.estimatedGoalLoad;
+  trainingDay.estimatedLoad = req.body.estimatedLoad;
   trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
   trainingDay.notes = req.body.notes;
   trainingDay.completedActivities = req.body.completedActivities;
@@ -248,7 +248,7 @@ exports.update = function (req, res) {
       //If a change was made that would affect existing advice, let's recompute.
       if (existingTrainingDay.plannedActivities[0] && existingTrainingDay.plannedActivities[0].advice && 
         (trainingDay.scheduledEventRanking !== existingTrainingDay.scheduledEventRanking || 
-          trainingDay.estimatedGoalLoad !== existingTrainingDay.estimatedGoalLoad || 
+          trainingDay.estimatedLoad !== existingTrainingDay.estimatedLoad || 
           trainingDay.completedActivities !== existingTrainingDay.completedActivities
         )
       ) {
