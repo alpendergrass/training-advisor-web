@@ -56,13 +56,13 @@ describe('advice-load Unit Tests:', function () {
       });
     });
 
-    it('should return estimatedGoalLoad for target loads if this is a goal event day and estimate is provided', function (done) {
+    it('should return estimatedGoalLoad for target loads if this is an event day and estimate is provided', function (done) {
       trainingDay.plannedActivities[0].activityType = 'event';
       trainingDay.estimatedGoalLoad = 234;
       trainingDay.targetAvgDailyLoad = 100;
       trainingDay.sevenDayTargetRampRate = 5;
       trainingDay.sevenDayRampRate = 6;
-      trainingDay.scheduledEventRanking = 1; //A event.
+      trainingDay.scheduledEventRanking = 2; 
 
       return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
         should.not.exist(err);
@@ -73,7 +73,7 @@ describe('advice-load Unit Tests:', function () {
       });
     });
     
-    it('should return computed target loads if this is a goal event day but no estimate is provided', function (done) {
+    it('should return computed target loads if this is an event day but no estimate is provided', function (done) {
       trainingDay.scheduledEventRanking = 1;
       trainingDay.plannedActivities[0].activityType = 'event';
       trainingDay.targetAvgDailyLoad = 100;

@@ -184,9 +184,10 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     if (results.priorTrainingDay) {
       currentTrainingDay.fitness = Math.round((results.priorTrainingDay.fitness + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
       currentTrainingDay.fatigue = Math.round((results.priorTrainingDay.fatigue + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fatigue) / fatigueTimeConstant)) * 10) / 10;
-      //TODO: We may use age as a factor in computing ATL for masters. This will cause TSB to drop faster 
+      //TODO: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster 
       //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So: 
       //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7) 
+      //Our adjustment of fatigueTimeConstant in theory should achieve the same thing but may not be sensitive enough.
       priorDayFitness = results.priorTrainingDay.fitness;
       priorDayFatigue = results.priorTrainingDay.fatigue;
     } else {
