@@ -93,7 +93,7 @@ var TrainingDaySchema = new Schema({
     default: '',
     trim: true
   },
-  estimatedGoalLoad: {
+  estimatedLoad: {
     type: Number,
     default: 0
   },

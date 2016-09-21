@@ -26,10 +26,10 @@
             <span ng-show="trainingDay.scheduledEventRanking === 1">Goal Event!</span>
             <span ng-show="trainingDay.scheduledEventRanking === 2">Medium Priority Event.</span>
             <span ng-show="trainingDay.scheduledEventRanking === 3">Low Priority Event.</span>
-            </b><span ng-show="trainingDay.estimatedGoalLoad > 0"> Estimated Event Load is {{trainingDay.estimatedGoalLoad}}.</span></p> 
+            </b><span ng-show="trainingDay.estimatedLoad > 0"> Estimated Event Load is {{trainingDay.estimatedLoad}}.</span></p> 
         </div>
         <p class="list-group-item-text" ng-show="trainingDay.plannedActivities[0].activityType"><b>Advice: </b>{{trainingDay.plannedActivities[0].advice}} 
-          <span ng-hide="_.includes(['rest', 'test'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad !== 0">
+          <span ng-hide="_.includes(['rest', 'test'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedLoad !== 0">
             Load between <b>{{trainingDay.plannedActivities[0].targetMinLoad}}</b> and <b>{{trainingDay.plannedActivities[0].targetMaxLoad}}</b>.
           </span>
         </p>

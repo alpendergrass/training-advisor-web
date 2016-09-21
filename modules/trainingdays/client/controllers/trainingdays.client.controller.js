@@ -535,7 +535,7 @@ angular.module('trainingDays')
 
         $scope.$watch('scheduledEventRanking', function(ranking) { 
           if (ranking === '9') {
-            $scope.estimatedGoalLoad = 0;
+            $scope.estimatedLoad = 0;
           }
         });
 
@@ -657,7 +657,7 @@ angular.module('trainingDays')
           var trainingDay = new TrainingDays({
             date: this.date,
             name: this.name,
-            estimatedGoalLoad: this.estimatedGoalLoad,
+            estimatedLoad: this.estimatedLoad,
             scheduledEventRanking: this.scheduledEventRanking,
             recurrenceSpec: this.recurrenceSpec,
             notes: this.notes
@@ -670,7 +670,7 @@ angular.module('trainingDays')
             $scope.name = '';
             $scope.date = null;
             $scope.scheduledEventRanking = '0';
-            $scope.estimatedGoalLoad = 0;
+            $scope.estimatedLoad = 0;
             $scope.recurrenceSpec = null;
             $scope.notes = '';
           }, function(errorResponse) {
@@ -787,14 +787,14 @@ angular.module('trainingDays')
         $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
           // If off day or a not a scheduled event, zero out estimate.
           if (ranking === 9 || ranking === 0) {
-            $scope.trainingDay.estimatedGoalLoad = 0;
+            $scope.trainingDay.estimatedLoad = 0;
           }
         });
 
         $scope.updateEstimatedLoad = function(estimate) {
           var n = ~~Number(estimate);
 
-          if (n === $scope.trainingDay.estimatedGoalLoad) {
+          if (n === $scope.trainingDay.estimatedLoad) {
             //no change.
             return;
           }

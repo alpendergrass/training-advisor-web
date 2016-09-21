@@ -30,7 +30,7 @@
   <div>
     <h4>
       <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::eventRankings track by s.value" onbeforesave="updateEventRanking($data)">{{showRanking()}}</a>
-      <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9"><small>Estimated Load: <a href="#" editable-textarea="trainingDay.estimatedGoalLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedGoalLoad}}</a></small></span>
+      <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9"><small>Estimated Load: <a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedLoad}}</a></small></span>
     </h4>
   </div>
   <div ng-show="trainingDay.plannedActivities[0].activityType">
@@ -48,14 +48,14 @@
       </div>
       <div>
         {{trainingDay.plannedActivities[0].advice}}
-        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedGoalLoad === trainingDay.plannedActivities[0].targetMinLoad">
+        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedLoad === trainingDay.plannedActivities[0].targetMinLoad">
           Today's load should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.
         </span>
-         <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking < 9 && trainingDay.estimatedGoalLoad < 1">
+         <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking < 9 && trainingDay.estimatedLoad < 1">
           You provided no load estimate for this event. Our load recommendation for today is between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong> TSS®.
         </span>
-         <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking < 9 && trainingDay.estimatedGoalLoad">
-          Your load estimate for this event is <strong><u>{{trainingDay.estimatedGoalLoad}}</u></strong> TSS®.
+         <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking < 9 && trainingDay.estimatedLoad">
+          Your load estimate for this event is <strong><u>{{trainingDay.estimatedLoad}}</u></strong> TSS®.
         </span>
         <span ng-show="_.includes(['rest', 'easy'], trainingDay.plannedActivities[0].activityType)">
           Keep load below <strong>{{trainingDay.plannedActivities[0].targetMaxLoad}}</strong> TSS®.
