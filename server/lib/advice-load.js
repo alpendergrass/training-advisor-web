@@ -30,10 +30,10 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
   //for which we need to compute load.
   latestPlannedActivity = trainingDay.plannedActivities[trainingDay.plannedActivities.length - 1];
 
-  if (latestPlannedActivity.activityType === 'event' && trainingDay.estimatedGoalLoad > 0) {
+  if (latestPlannedActivity.activityType === 'event' && trainingDay.estimatedLoad > 0) {
     //If an event, use estimated load, if provided, for target.
-    latestPlannedActivity.targetMinLoad = trainingDay.estimatedGoalLoad;
-    latestPlannedActivity.targetMaxLoad = trainingDay.estimatedGoalLoad;
+    latestPlannedActivity.targetMinLoad = trainingDay.estimatedLoad;
+    latestPlannedActivity.targetMaxLoad = trainingDay.estimatedLoad;
     return callback(null, trainingDay);
   } else if (latestPlannedActivity.activityType === 'simulation') {
     //We use the goal event estimate for simulations. We have to go find the next goal day.
@@ -43,9 +43,9 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
       }
 
       //Note that it is possible that no goal exists or that no estimate was provided.
-      if (goalDays.length > 0 && goalDays[0].estimatedGoalLoad) {
-        latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedGoalLoad);
-        latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedGoalLoad);        
+      if (goalDays.length > 0 && goalDays[0].estimatedLoad) {
+        latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
+        latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);        
       } else {
         setTargetLoads(trainingDay);
       }

@@ -56,9 +56,9 @@ describe('advice-load Unit Tests:', function () {
       });
     });
 
-    it('should return estimatedGoalLoad for target loads if this is an event day and estimate is provided', function (done) {
+    it('should return estimatedLoad for target loads if this is an event day and estimate is provided', function (done) {
       trainingDay.plannedActivities[0].activityType = 'event';
-      trainingDay.estimatedGoalLoad = 234;
+      trainingDay.estimatedLoad = 234;
       trainingDay.targetAvgDailyLoad = 100;
       trainingDay.sevenDayTargetRampRate = 5;
       trainingDay.sevenDayRampRate = 6;
@@ -105,7 +105,7 @@ describe('advice-load Unit Tests:', function () {
       });
     });
     
-    it('should return estimatedGoalLoad from goal event +/- 5% for target loads if recommending simulation', function (done) {
+    it('should return estimatedLoad from goal event +/- 5% for target loads if recommending simulation', function (done) {
       testHelpers.createGoalEvent(user, new Date(), 2, function(err) {
         if (err) {
           console.log('createGoalEvent: ' + err);
