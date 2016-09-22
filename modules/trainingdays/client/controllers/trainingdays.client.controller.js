@@ -334,12 +334,58 @@ angular.module('trainingDays')
           }
         };
 
-
-        $scope.onChartClick = function (points) {
+        $scope.onChartClick = function(points) {
           if (points.length > 0) {
             var id = $scope.season[points[0]._index]._id;
-            $state.go('trainingDays.view', { trainingDayId: id });
+            if ($scope.simMode) {
+              // alert('simMode for TD ' + id);
+              //Apparently we are outside the Angular context here.
+              $scope.$apply(function() {
+                $scope.simInProgress = true;
+                $scope.openSimDay(id);
+              });
+            } else {
+              $state.go('trainingDays.view', { trainingDayId: id });
+            }         
           }
+        };
+
+        $scope.initSimFlags = function() {
+          $scope.simMode = false;
+          $scope.simInProgress = false; //will be set to true once user changes a TD.
+          $scope.simHasRan = false;          
+        };
+
+        $scope.initSimFlags();
+
+        $scope.startSim = function () {
+          //enable sim controls, disable others.
+          $scope.simMode = true;
+        };
+
+        $scope.runSim = function () {
+          //genPlan using sim days.
+          $scope.simInProgress = false; 
+          $scope.simHasRan = true;
+          $scope.genPlan();
+        };
+
+        $scope.commitSim = function () {
+          //Make sim days permanent and delete saved originals.
+          $scope.initSimFlags();
+        };
+
+        $scope.revertSim = function () {
+          //Remove sim days and restore saved originals.
+          $scope.initSimFlags();
+        };
+
+        $scope.cancelSim = function () {
+          //confirm revert if simInProgress
+          //if confirmed, revertSim()
+          // $scope.revertSim();
+          //otherwise, reset flags.
+          $scope.initSimFlags();
         };
 
         getSeason(function() {
@@ -380,6 +426,76 @@ angular.module('trainingDays')
             ];
           }
         });
+
+        $scope.openSimDay = function(id) {
+          var modalInstance = $uibModal.open({
+            templateUrl: 'simDay.html',
+            //size: 'lg',
+            //scope: $scope,
+            controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
+              $scope.trainingDay = TrainingDays.get({
+                trainingDayId: id
+              },
+                function(trainingDay) {},
+                function(errorResponse) {
+                  if (errorResponse.data && errorResponse.data.message) {
+                    $scope.error = errorResponse.data.message;
+                  } else {
+                    $scope.error = 'Server error prevented training day retrieval.';
+                  }
+                }
+              );
+              $scope.eventRankings = [
+                { value: 0, text: 'Training Day' },
+                { value: 1, text: 'Goal Event' },
+                { value: 2, text: 'Medium Priority Event' },
+                { value: 3, text: 'Low Priority Event' },
+                { value: 9, text: 'Off Day' }
+              ];
+
+              $scope.showRanking = function() {
+                var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking });
+                return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : 'Training Day';
+              };
+
+              $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+                // If off day or a not a scheduled event, zero out estimate.
+                if (String(ranking) === '9') {
+                  $scope.trainingDay.estimatedLoad = 0;
+                }
+              });
+
+              $scope.saveSimDay = function() {
+                $uibModalInstance.close($scope.trainingDay);
+              };
+
+              $scope.cancelSimDay = function() {
+                $uibModalInstance.dismiss('cancel');
+              };
+            }],
+            resolve: {
+              trainingDay: function() {
+                return $scope.trainingDay;
+              },
+              eventRankings: function() {
+                return $scope.eventRankings;
+              },
+              showRanking: function() {
+                return $scope.showRanking;
+              }
+            }
+          });
+
+          modalInstance.result.then(function(trainingDay) {
+            $scope.update(true, trainingDay);
+            //getSeason(function() {});
+          }, function() {
+            //User cancelled out of dialog.
+          }).finally(function() {
+            return;
+          });
+        };
+
       };
 
       $scope.listTrainingDays = function() {
@@ -707,12 +823,25 @@ angular.module('trainingDays')
         ];
 
         $scope.eventRankings = [
-          { value: 1, text: 'Goal Event!' },
+          { value: 1, text: 'Goal Event' },
           { value: 2, text: 'Medium Priority Event' },
           { value: 3, text: 'Low Priority Event' },
           { value: 9, text: 'Off Day' },
-          { value: 0, text: 'Nothing To Schedule' }
+          { value: 0, text: 'Training Day' }
         ];
+
+        $scope.showRanking = function() {
+          var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
+            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
+          return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
+        };
+
+        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+          // If off day or a not a scheduled event, zero out estimate.
+          if (ranking === 9) {
+            $scope.trainingDay.estimatedLoad = 0;
+          }
+        });
 
         function prepForTDView(trainingDay) {
           //not sure why Mongo/Mongoose returns a string for a date field
@@ -762,12 +891,6 @@ angular.module('trainingDays')
           }
         };
 
-        $scope.showRanking = function() {
-          var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
-          return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
-        };
-
         $scope.updateEventRanking = function(priority) {
           //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
           var n = ~~Number(priority);
@@ -783,13 +906,6 @@ angular.module('trainingDays')
 
           return 'Valid eventRankings are 0, 1, 2 and 3. And 9.';
         };
-
-        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
-          // If off day or a not a scheduled event, zero out estimate.
-          if (ranking === 9 || ranking === 0) {
-            $scope.trainingDay.estimatedLoad = 0;
-          }
-        });
 
         $scope.updateEstimatedLoad = function(estimate) {
           var n = ~~Number(estimate);
