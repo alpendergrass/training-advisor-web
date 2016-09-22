@@ -495,7 +495,6 @@ angular.module('trainingDays')
             return;
           });
         };
-
       };
 
       $scope.listTrainingDays = function() {

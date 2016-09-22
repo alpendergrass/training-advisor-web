@@ -45,7 +45,9 @@ module.exports = {
       tests: ['public/lib/angular-mocks/angular-mocks.js']
     },
     css: [
-      'modules/*/client/css/*.css'
+      'modules/*/client/css/*.css',
+      //let's ignore our overridden bootstrap css produced by our TD less file.
+      '!modules/trainingdays/client/css/bootstrap.css'
     ],
     less: [
       'modules/*/client/less/*.less'

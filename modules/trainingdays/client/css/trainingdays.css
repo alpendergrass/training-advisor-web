@@ -18,13 +18,15 @@
   margin-left: 5px;
 }
 
+
 /* The following will prevent the menu from covering the current day 
-	when the "Go To Today" button on the TD list is clicked. */
+  when the "Go To Today" button on the TD list is clicked. */
+
 .today::before {
   content: "";
   display: block;
-  height: 70px;  /* fixed header height*/
-  margin: -70px 0 0;  /* negative fixed header height */
+  height: 70px; /* fixed header height*/
+  margin: -70px 0 0; /* negative fixed header height */
 }
 
 .td-calendar {
@@ -32,17 +34,18 @@
   margin-bottom: 55px;
 }
 
-calendar-md md-content.agenda :first-child {
+calendar-md md-content.agenda:first-child {
   font-weight: normal !important;
 }
 
 /* To control date column width in agenda view: */
+
 calendar-md md-content.agenda > div > div > div {
   width: 120px !important;
 }
 
 .md-button.md-cornered {
-    border-radius: 5px;
+  border-radius: 5px;
 }
 
 .td-calendar-content {
@@ -50,14 +53,14 @@ calendar-md md-content.agenda > div > div > div {
   width: 100% !important;
 }
 
-.td-calendar-content *{ 
+.td-calendar-content * {
   padding: 0 !important;
 }
 
 .toast-success {
-  background-color: rgb(63,81,181);
+  background-color: rgb(63, 81, 181);
 }
 
 .toast-info {
-  background-color: rgb(63,81,181);
+  background-color: rgb(63, 81, 181);
 }
