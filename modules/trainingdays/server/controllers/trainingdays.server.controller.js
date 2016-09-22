@@ -205,6 +205,33 @@ exports.getDay = function (req, res) {
   });
 };
 
+exports.getSimDay = function (req, res) {
+  // We save a clone of TD before returning a what-if day. 
+  var trainingDay = req.trainingDay,
+    cloneTD = new TrainingDay(trainingDay);
+
+  cloneTD._id = mongoose.Types.ObjectId();
+  cloneTD.cloneOfId = trainingDay._id;
+  cloneTD.save(function (err) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    } 
+
+    trainingDay.isSimDay = true;
+    trainingDay.save(function (err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
+
+      res.json(trainingDay);
+    });
+  });
+};
+
 exports.update = function (req, res) {
   var trainingDay = req.trainingDay,
     recomputeAdvice = false,

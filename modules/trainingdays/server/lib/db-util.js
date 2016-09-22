@@ -19,12 +19,9 @@ module.exports.getTrainingDayDocument = function(user, trainingDate, callback) {
     } 
     
     if (trainingDays.length < 1) {
-      //var newTrainingDay = {};
       var newTrainingDay = new TrainingDay();
-      var newDate = moment(trainingDate).toDate();
-      newTrainingDay.date = newDate;
+      newTrainingDay.date = moment(trainingDate).toDate();
       newTrainingDay.user = user;
-      // TrainingDay.create(newTrainingDay, function(err, trainingDay) {
       newTrainingDay.save(function(err, trainingDay) {
         if (err) {
           return callback(err, null);
@@ -361,7 +358,8 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
 
   var query = TrainingDay
     .where('user').equals(user)
-    .where('dateNumeric').equals(searchDateNumeric);
+    .where('dateNumeric').equals(searchDateNumeric)
+    .where('cloneOfId').equals(null);
 
   query.find().populate('user').exec(function(err, trainingDays) {
     if (err) {

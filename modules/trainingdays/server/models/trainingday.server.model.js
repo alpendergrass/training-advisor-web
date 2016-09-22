@@ -51,6 +51,14 @@ var TrainingDaySchema = new Schema({
     type: Number,
     default: 0
   },
+  cloneOfId: {
+    type: Schema.Types.ObjectId,
+    default: null 
+  },
+  isSimDay: {
+    type: Boolean,
+    default: false
+  },
   //CTL
   fitness: {
     type: Number,

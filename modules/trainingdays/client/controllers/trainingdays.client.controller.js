@@ -433,7 +433,7 @@ angular.module('trainingDays')
             //size: 'lg',
             //scope: $scope,
             controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
-              $scope.trainingDay = TrainingDays.get({
+              $scope.trainingDay = TrainingDays.getSimDay({
                 trainingDayId: id
               },
                 function(trainingDay) {},
