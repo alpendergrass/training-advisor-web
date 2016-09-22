@@ -34,19 +34,19 @@
     </div>
     <div class="md-toolbar-tools">
       <h4>
-        <span>Run What-If Simulations</span>
+        Run What-If Simulations
       </h4>
-      <span flex="5"></span>
+      <span flex="4"></span>
       <md-button ng-disabled="simMode" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
         Start
       </md-button>
-      <md-button ng-disabled="!simInProgress" ng-click="runSim()" aria-label="Run Sim">
+      <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run Sim">
         Run Sim
       </md-button>
-      <md-button ng-disabled="!simApplied" ng-click="commitSim()" aria-label="Commit">
+      <md-button ng-disabled="!simHasRun" ng-click="commitSim()" aria-label="Commit">
         Commit
       </md-button>
-      <md-button ng-disabled="!simApplied" ng-click="revertSim()" aria-label="Revert">
+      <md-button ng-disabled="!simHasRun" ng-click="revertSim()" aria-label="Revert">
         Revert
       </md-button>
       <md-button ng-disabled="!simMode" ng-click="cancelSim()" aria-label="Cancel">
