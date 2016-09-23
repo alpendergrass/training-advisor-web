@@ -204,7 +204,7 @@ module.exports.advise = function(params, callback) {
             return callback(err, null);
           }
 
-          if (params.alertUser) {
+          if (params.alertUser && !trainingDay.isSimDay) {
             statusMessage = {
               type: 'info',
               text: 'Training metrics have been updated. You should update your training plan.',
