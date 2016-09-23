@@ -436,7 +436,7 @@ angular.module('trainingDays')
 
         $scope.commitSim = function() {
           TrainingDays.finalizeSim({
-            commit: true
+            commit: 'yes'
           }, function(response) {
             $scope.initSimFlags();
           }, function(errorResponse) {
@@ -449,8 +449,18 @@ angular.module('trainingDays')
         };
 
         $scope.revertSim = function() {
-          //Remove sim days and restore saved originals.
-          $scope.initSimFlags();
+          TrainingDays.finalizeSim({
+            commit: 'no'
+          }, function(response) {
+            $scope.initSimFlags();
+            $scope.genPlan();
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented revert of simulation.';
+            }
+          });
         };
 
         $scope.cancelSim = function() {

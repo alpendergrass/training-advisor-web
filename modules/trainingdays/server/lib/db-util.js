@@ -252,29 +252,67 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
   });
 };
 
-module.exports.removeSimDayClones = function(user, callback) {
-  if (!user) {
-    err = new TypeError('valid user is required');
-    return callback(err, null);
-  }
+// module.exports.removeSimDayClones = function(user, callback) {
+//   if (!user) {
+//     err = new TypeError('valid user is required');
+//     return callback(err, null);
+//   }
 
-  TrainingDay.remove({ 
-    user: user,
-    cloneOfId: { $ne : null }
-  }, function(err) {
-    if (err) {
-      return callback(err);
-    }
+//   TrainingDay.remove({ 
+//     user: user,
+//     cloneOfId: { $ne : null }
+//   }, function(err) {
+//     if (err) {
+//       return callback(err);
+//     }
     
-    return callback(null);
+//     return callback(null);
+//   });
+// };
+
+// module.exports.removeSimDays = function(user, callback) {
+//   if (!user) {
+//     err = new TypeError('valid user is required');
+//     return callback(err, null);
+//   }
+
+//   TrainingDay.remove({ 
+//     user: user,
+//     isSimDay: true
+//   }, function(err) {
+//     if (err) {
+//       return callback(err);
+//     }
+    
+//     return callback(null);
+//   });
+// };
+
+module.exports.makeSimDay = function(trainingDay, callback) {
+  var cloneTD = new TrainingDay(trainingDay);
+
+  cloneTD._id = mongoose.Types.ObjectId();
+  cloneTD.cloneOfId = trainingDay._id;
+  cloneTD.isSimDay = false;
+
+  cloneTD.save(function(err) {
+    if (err) {
+      return callback(err, null);
+    } 
+
+    trainingDay.isSimDay = true;
+    trainingDay.save(function(err) {
+      if (err) {
+        return callback(err, null);
+      } 
+
+      return callback(null, trainingDay);
+    });
   });
 };
 
-module.exports.commitSimDays = function(user, callback) {
-  //Make sim days permanent and delete saved originals.
-  var start, 
-    end;
-
+module.exports.commitSimulation = function(user, callback) {
+  //Make sim days permanent and delete clones of originals.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -294,11 +332,48 @@ module.exports.commitSimDays = function(user, callback) {
       return callback(err);
     }
     
-    module.exports.removeSimDayClones(user, function() {
+    TrainingDay.remove({ 
+      user: user,
+      cloneOfId: { $ne : null }
+    }, function(err) {
       if (err) {
         return callback(err);
       }
+      
+      return callback(null);
+    });
+  });
+};
 
+module.exports.revertSimulation = function(user, callback) {
+  // Remove sim days and restore the backups.
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  TrainingDay.update({ 
+    user: user,
+    cloneOfId: { $ne : null }
+  }, { 
+    $set: { 
+      cloneOfId: null
+    }
+  }, { 
+    multi: true 
+  }, function(err, rawResponse) {
+    if (err) {
+      return callback(err);
+    }
+    
+    TrainingDay.remove({ 
+      user: user,
+      isSimDay: true
+    }, function(err) {
+      if (err) {
+        return callback(err);
+      }
+      
       return callback(null);
     });
   });

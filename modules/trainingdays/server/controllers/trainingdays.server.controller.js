@@ -416,36 +416,30 @@ exports.genPlan = function(req, res) {
 };
 
 exports.getSimDay = function(req, res) {
-  // We save a clone of TD before returning a what-if day. 
-  var trainingDay = req.trainingDay,
-    cloneTD = new TrainingDay(trainingDay);
+  // We save a clone of TD before returning a what-if day 
+  // unless a clone already exists.
 
-  cloneTD._id = mongoose.Types.ObjectId();
-  cloneTD.cloneOfId = trainingDay._id;
-  cloneTD.isSimDay = false;
-  cloneTD.save(function(err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } 
+  var trainingDay = req.trainingDay;
 
-    trainingDay.isSimDay = true;
-    trainingDay.save(function(err) {
+  if (trainingDay.isSimDay) {
+    // This day has aready been simmed.
+    res.json(trainingDay);    
+  } else {
+    dbUtil.makeSimDay(trainingDay, function(err, simDay) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
       } 
 
-      res.json(trainingDay);
+      res.json(simDay);
     });
-  });
+  }
 };
 
 exports.finalizeSim = function(req, res) {
-  if (req.params.commit) {
-    dbUtil.commitSimDays(req.user, function(err) {
+  if (req.params.commit == 'yes') {
+    dbUtil.commitSimulation(req.user, function(err) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -455,7 +449,15 @@ exports.finalizeSim = function(req, res) {
       res.json('Simulation committed');
     });
   } else {
-    res.json('nuthin');    
+    dbUtil.revertSimulation(req.user, function(err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
+
+      res.json('Simulation reverted');
+    });
   }
 };
 
