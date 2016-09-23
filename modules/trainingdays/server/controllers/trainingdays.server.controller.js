@@ -333,7 +333,6 @@ exports.list = function(req, res) {
 };
 
 exports.getSeason = function(req, res) {
-  //TODO: allow for retrieval of prior/future seasons.
   var user = req.user,
     today = new Date(req.params.today),
     effectiveStartDate,
@@ -438,7 +437,7 @@ exports.getSimDay = function(req, res) {
 };
 
 exports.finalizeSim = function(req, res) {
-  if (req.params.commit == 'yes') {
+  if (req.params.commit === 'yes') {
     dbUtil.commitSimulation(req.user, function(err) {
       if (err) {
         return res.status(400).send({

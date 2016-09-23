@@ -175,15 +175,36 @@ angular.module('trainingDays')
           return content;
         };
 
-        //Use vertical format if we are in a small window like on a phone.
-        if (jQuery(window).width() < 800) {
-          $scope.setDirection('vertical');
-          $scope.smallWindow = true;
-        } else {
-          $scope.smallWindow = false;
-        }
-        // Need to clear out calendar data. Moving goal date can strand some data otherwise.
-        MaterialCalendarData.data = {};
+        var initCalendar = function() {
+          //Use vertical format if we are in a small window like on a phone.
+          if (jQuery(window).width() < 800) {
+            $scope.setDirection('vertical');
+            $scope.smallWindow = true;
+          } else {
+            $scope.smallWindow = false;
+          }
+          // Need to clear out calendar data. Moving goal date can strand some data otherwise.
+          MaterialCalendarData.data = {};
+
+          //We need to clean up any potential left over sim days.
+          TrainingDays.finalizeSim({
+            commit: 'no'
+          }, function(response) {
+            getSeason(function() {
+              if ($scope.season) {
+                _.forEach($scope.season, function(td) {
+                  MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
+                });
+              }
+            });
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented simulation clean-up.';
+            }
+          });
+        };
 
         $scope.setDirection = function(direction) {
           $scope.direction = direction;
@@ -217,13 +238,7 @@ angular.module('trainingDays')
           }
         };
 
-        getSeason(function() {
-          if ($scope.season) {
-            _.forEach($scope.season, function(td) {
-              MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
-            });
-          }
-        });
+        initCalendar();
       };
 
       //Highlight today in calendar view
@@ -325,9 +340,26 @@ angular.module('trainingDays')
           });
         };
 
+        var initSimFlags = function() {
+          $scope.simMode = false;
+          $scope.simConfigUnderway = false; //will be set to true once user changes a TD.
+          $scope.simHasRun = false;          
+        };
+
         var initPage = function(argument) {
-          $scope.initSimFlags();
-          loadChart();
+          //We need to clean up any potential left over sim days.
+          TrainingDays.finalizeSim({
+            commit: 'no'
+          }, function(response) {
+            initSimFlags();
+            loadChart();
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented simulation clean-up.';
+            }
+          });
         };
 
         $scope.error = null;
@@ -416,12 +448,6 @@ angular.module('trainingDays')
           });
         };
 
-        $scope.initSimFlags = function() {
-          $scope.simMode = false;
-          $scope.simConfigUnderway = false; //will be set to true once user changes a TD.
-          $scope.simHasRun = false;          
-        };
-
         $scope.startSim = function() {
           //enable sim controls, disable others.
           $scope.simMode = true;
@@ -438,7 +464,7 @@ angular.module('trainingDays')
           TrainingDays.finalizeSim({
             commit: 'yes'
           }, function(response) {
-            $scope.initSimFlags();
+            initSimFlags();
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -452,7 +478,7 @@ angular.module('trainingDays')
           TrainingDays.finalizeSim({
             commit: 'no'
           }, function(response) {
-            $scope.initSimFlags();
+            initSimFlags();
             $scope.genPlan();
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -468,7 +494,7 @@ angular.module('trainingDays')
           //if confirmed, revertSim()
           // $scope.revertSim();
           //otherwise, reset flags.
-          $scope.initSimFlags();
+          initSimFlags();
         };
 
         $scope.openSimDay = function(id) {

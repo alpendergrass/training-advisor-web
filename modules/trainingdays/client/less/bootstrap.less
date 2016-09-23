@@ -1,10 +1,12 @@
 // We are overriding some bootstrap defaults here.
 
-@import "public/lib/bootstrap/less/bootstrap.less";
-
 @state-warning-text:             orangered;
 @state-warning-bg:               orange;
-@state-warning-border:           darken(spin(@state-warning-bg, 10), 5%);
+@state-warning-border:           darken(spin(@state-warning-text, 10), 5%);
+
+.panel-warning {
+  border-color: @state-warning-border;
+}
 
 .panel-warning > .panel-body {
   background-color: lighten(@state-warning-bg, 45%);
@@ -13,4 +15,5 @@
 .panel-warning > .panel-heading { 
   background-color: lighten(@state-warning-bg, 35%);
   background-image: none;
+  color: @state-warning-text;
 }

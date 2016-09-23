@@ -46,8 +46,6 @@ module.exports = {
     },
     css: [
       'modules/*/client/css/*.css',
-      //let's ignore our overridden bootstrap css produced by our TD less file.
-      '!modules/trainingdays/client/css/bootstrap.css'
     ],
     less: [
       'modules/*/client/less/*.less'

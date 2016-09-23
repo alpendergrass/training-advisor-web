@@ -21,7 +21,7 @@
         <p class="list-group-item-text"></p>
         <p class="list-group-item-text text-danger" ng-show="trainingDay.startingPoint">Start Day</p>
         <p class="list-group-item-text text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp">Fitness and Fatigue True Up</p>
-        <p class="list-group-item-text text-danger" ng-show="trainingDay.simDay">Simulation Day: {{trainingDay._id}}</p>
+        <p class="list-group-item-text text-danger" ng-show="trainingDay.isSimDay">Simulation Day: {{trainingDay._id}}</p>
         <p class="list-group-item-text text-danger" ng-show="trainingDay.cloneOfId">Simulation Clone: {{trainingDay.cloneOfId}}</p>
         <div ng-show="trainingDay.scheduledEventRanking">
           <p class="list-group-item-text"><b>
