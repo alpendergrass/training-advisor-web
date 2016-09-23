@@ -14,7 +14,7 @@ var path = require('path'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
-exports.create = function (req, res) {
+exports.create = function(req, res) {
   var user = req.user,
     statusMessage = {};
 
@@ -28,7 +28,7 @@ exports.create = function (req, res) {
 
       user.planGenNeeded = true;
       
-      user.save(function (err) {
+      user.save(function(err) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
@@ -57,7 +57,7 @@ exports.create = function (req, res) {
 
       user.planGenNeeded = true;
       
-      user.save(function (err) {
+      user.save(function(err) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
@@ -100,7 +100,7 @@ function generateRecurrences(req, callback) {
     function() {
       return startDate.isSameOrBefore(endDate);
     },
-    function (callback) {
+    function(callback) {
       async.forEachOfSeries(spec.daysOfWeek, function(value, key, callback) { 
         if (value) {
           //set nextDate to day of week in week of startDate.
@@ -178,7 +178,7 @@ function createTrainingDay(req, callback) {
     trainingDay.dailyTargetRampRate = 0;
     trainingDay.targetAvgDailyLoad = 0;
 
-    trainingDay.save(function (err) {
+    trainingDay.save(function(err) {
       if (err) {
         return callback(err, null);
       } 
@@ -189,11 +189,11 @@ function createTrainingDay(req, callback) {
 }
 
 // Return the current trainingDay retrieved in trainingDayByID().
-exports.read = function (req, res) {
+exports.read = function(req, res) {
   res.json(req.trainingDay);
 };
 
-exports.getDay = function (req, res) {
+exports.getDay = function(req, res) {
   dbUtil.getTrainingDayDocument(req.user, req.params.trainingDate, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
@@ -205,34 +205,7 @@ exports.getDay = function (req, res) {
   });
 };
 
-exports.getSimDay = function (req, res) {
-  // We save a clone of TD before returning a what-if day. 
-  var trainingDay = req.trainingDay,
-    cloneTD = new TrainingDay(trainingDay);
-
-  cloneTD._id = mongoose.Types.ObjectId();
-  cloneTD.cloneOfId = trainingDay._id;
-  cloneTD.save(function (err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } 
-
-    trainingDay.isSimDay = true;
-    trainingDay.save(function (err) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } 
-
-      res.json(trainingDay);
-    });
-  });
-};
-
-exports.update = function (req, res) {
+exports.update = function(req, res) {
   var trainingDay = req.trainingDay,
     recomputeAdvice = false,
     params = {};
@@ -262,7 +235,7 @@ exports.update = function (req, res) {
   trainingDay.notes = req.body.notes;
   trainingDay.completedActivities = req.body.completedActivities;
 
-  trainingDay.save(function (err) {
+  trainingDay.save(function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -276,7 +249,7 @@ exports.update = function (req, res) {
       params.alternateActivity = null;
       params.alertUser = true;
 
-      adviceEngine.advise(params, function (err, trainingDay) {
+      adviceEngine.advise(params, function(err, trainingDay) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
@@ -309,12 +282,12 @@ exports.update = function (req, res) {
   });
 };
 
-exports.delete = function (req, res) {
+exports.delete = function(req, res) {
   var trainingDay = req.trainingDay,
     user = req.user,
     statusMessage = {};
 
-  trainingDay.remove(function (err) {
+  trainingDay.remove(function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -322,8 +295,7 @@ exports.delete = function (req, res) {
     } 
 
     user.planGenNeeded = true;
-    
-    user.save(function (err) {
+    user.save(function(err) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -344,12 +316,12 @@ exports.delete = function (req, res) {
   });
 };
 
-exports.list = function (req, res) {
+exports.list = function(req, res) {
   //Returns all existing trainingDays.
   var user = req.user,
     today = req.query.clientDate; //need to use current date from client to avoid time zone issues.
 
-  TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function (err, trainingDays) {
+  TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function(err, trainingDays) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -360,7 +332,7 @@ exports.list = function (req, res) {
   });
 };
 
-exports.getSeason = function (req, res) {
+exports.getSeason = function(req, res) {
   //TODO: allow for retrieval of prior/future seasons.
   var user = req.user,
     today = new Date(req.params.today),
@@ -409,14 +381,14 @@ exports.getSeason = function (req, res) {
   });
 };
 
-exports.getAdvice = function (req, res) {
+exports.getAdvice = function(req, res) {
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
   params.alternateActivity = req.query.alternateActivity;
   params.alertUser = true;
   
-  adviceEngine.advise(params, function (err, trainingDay) {
+  adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -427,12 +399,12 @@ exports.getAdvice = function (req, res) {
   });
 };
 
-exports.genPlan = function (req, res) {
+exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
   
-  adviceEngine.generatePlan(params, function (err) {
+  adviceEngine.generatePlan(params, function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -443,11 +415,55 @@ exports.genPlan = function (req, res) {
   });
 };
 
-exports.downloadActivities = function (req, res) {
+exports.getSimDay = function(req, res) {
+  // We save a clone of TD before returning a what-if day. 
+  var trainingDay = req.trainingDay,
+    cloneTD = new TrainingDay(trainingDay);
+
+  cloneTD._id = mongoose.Types.ObjectId();
+  cloneTD.cloneOfId = trainingDay._id;
+  cloneTD.isSimDay = false;
+  cloneTD.save(function(err) {
+    if (err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    } 
+
+    trainingDay.isSimDay = true;
+    trainingDay.save(function(err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
+
+      res.json(trainingDay);
+    });
+  });
+};
+
+exports.finalizeSim = function(req, res) {
+  if (req.params.commit) {
+    dbUtil.commitSimDays(req.user, function(err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
+
+      res.json('Simulation committed');
+    });
+  } else {
+    res.json('nuthin');    
+  }
+};
+
+exports.downloadActivities = function(req, res) {
   var trainingDay = req.trainingDay;
 
   if (req.query.provider === 'strava') {
-    downloadStrava.downloadActivities(req.user, trainingDay, function (err, trainingDay) {
+    downloadStrava.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -459,7 +475,7 @@ exports.downloadActivities = function (req, res) {
   }
 
   if (req.query.provider === 'trainingpeaks') {
-    downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function (err, trainingDay) {
+    downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -472,7 +488,7 @@ exports.downloadActivities = function (req, res) {
 };
 
 //TrainingDay middleware
-exports.trainingDayByID = function (req, res, next, id) {
+exports.trainingDayByID = function(req, res, next, id) {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).send({
@@ -495,7 +511,7 @@ exports.trainingDayByID = function (req, res, next, id) {
 };
 
 function getTrainingDay(id, callback) {
-  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function (err, trainingDay) {
+  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
     if (err) {
       return callback(err, null);
     } 

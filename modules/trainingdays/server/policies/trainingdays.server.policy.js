@@ -25,6 +25,9 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/getSimDay/:trainingDayId',
       permissions: '*'
     }, {
+      resources: '/api/trainingDays/finalizeSim/:commit',
+      permissions: '*'
+    }, {
       resources: '/api/trainingDays/getDay/:trainingDate',
       permissions: '*'
     }, {
@@ -50,6 +53,9 @@ exports.invokeRolesPolicies = function () {
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getSimDay/:trainingDayId',
+      permissions: ['get']
+    }, {
+      resources: '/api/trainingDays/finalizeSim/:commit',
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getDay/:trainingDate',

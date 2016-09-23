@@ -252,6 +252,58 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
   });
 };
 
+module.exports.removeSimDayClones = function(user, callback) {
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  TrainingDay.remove({ 
+    user: user,
+    cloneOfId: { $ne : null }
+  }, function(err) {
+    if (err) {
+      return callback(err);
+    }
+    
+    return callback(null);
+  });
+};
+
+module.exports.commitSimDays = function(user, callback) {
+  //Make sim days permanent and delete saved originals.
+  var start, 
+    end;
+
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  TrainingDay.update({ 
+    user: user,
+    isSimDay: true
+  }, { 
+    $set: { 
+      isSimDay: false
+    }
+  }, { 
+    multi: true 
+  }, function(err, rawResponse) {
+    if (err) {
+      return callback(err);
+    }
+    
+    module.exports.removeSimDayClones(user, function() {
+      if (err) {
+        return callback(err);
+      }
+
+      return callback(null);
+    });
+  });
+};
+
 module.exports.removePlanningActivities = function(user, callback) {
   //plangeneration CompletedActivities are activities used to generate a plan.
   if (!user) {

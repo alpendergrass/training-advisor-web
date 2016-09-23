@@ -328,7 +328,7 @@ angular.module('trainingDays')
         var initPage = function(argument) {
           $scope.initSimFlags();
           loadChart();
-        }
+        };
 
         $scope.error = null;
         // $scope.chartColors = ['#45b7cd', '#ff6384', '#ff8e72'];
@@ -435,8 +435,17 @@ angular.module('trainingDays')
         };
 
         $scope.commitSim = function() {
-          //Make sim days permanent and delete saved originals.
-          $scope.initSimFlags();
+          TrainingDays.finalizeSim({
+            commit: true
+          }, function(response) {
+            $scope.initSimFlags();
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented commit of simulation.';
+            }
+          });
         };
 
         $scope.revertSim = function() {
