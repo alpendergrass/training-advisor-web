@@ -10,24 +10,136 @@
   </div>
   <div>
     <div class="pull-left">
-      <md-button ng-show="hasStart" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
+      <md-button ng-show="hasStart" ng-disabled="simMode" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
     </div>
     <div class="pull-left">
-      <md-button class="md-warn md-hue-2" ng-show="hasStart && hasEnd && needsPlanGen" ng-click="genPlan()">Update Plan</md-button>
+      <md-button class="md-warn md-hue-1" ng-show="hasStart && hasEnd && needsPlanGen" ng-disabled="simMode" ng-click="genPlan()">Update Plan</md-button>
       <!-- ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" -->
     </div>
     <div class="pull-right">
-      <md-button ui-sref="calendar()">Calendar</md-button>
+      <md-button ng-disabled="simMode" ui-sref="calendar()">Calendar</md-button>
     </div>
   </div>
   <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
   <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
     <strong ng-bind="error"></strong>
   </div>
-  <div class="panel panel-default">
+  <div class="panel panel-default" ng-class="{'panel-warning' : simMode}">
+    <div class="panel-heading" ng-show="simMode">
+      <h1 class="panel-title text-center">SIMULATION MODE</h1>
+    </div>
     <div class="panel-body">
       <canvas id="base" class="chart chart-bar" chart-options="chartOptions" chart-data="chartData" chart-labels="chartLabels" chart-dataset-override="chartDatasetOverride" chart-click="onChartClick">
       </canvas>
     </div>
+    <div class="md-toolbar-tools">
+      <span flex="4"></span>
+      <md-button ng-disabled="simMode" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
+        What If?
+      </md-button>
+      <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run">
+        Run
+      </md-button>
+      <md-button ng-disabled="!simHasRun" ng-click="commitSim()" aria-label="Commit">
+        Commit
+      </md-button>
+      <md-button ng-disabled="!simHasRun" ng-click="revertSim()" aria-label="Revert">
+        Revert
+      </md-button>
+      <md-button ng-disabled="!simMode" ng-click="cancelSim()" aria-label="Cancel">
+        Cancel
+      </md-button>
+      <span flex=""></span>
+      <md-button aria-label="What-If Help" data-toggle="modal" data-target="#simHelp">
+        Simulation Help
+      </md-button>
+    </div>
   </div>
+
+  <div class="modal fade" id="simHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Running "What-If" Simulations</h4>
+        </div>
+        <div class="modal-body">
+          <p><strong>The What-If Simulator allows you to see how your season would be affected by
+          doing events that are not currently on your calendar without changing your calendar.</strong></p>
+          <p>You can also see what would happen if you remove or change events that are already on your calendar. You can even see what happens if you take one or more days off.</p>
+          <p><strong>To run the simulator:</strong></p>
+          <ol>
+            <li>Click the "What If?" button to enter simulation mode.</li>
+            <li>Click on the day on the graph you want to change.</li>
+            <li>Set up the day to reflect the expected demands of the event.</li>
+            <li>Click the Run button to see how your plan would be affected if you do the event.</li>
+            <li>If you want to apply the changes you made to your plan click Commit.</li>
+            <li>To discard the changes click Revert.</li>
+          </ol>
+          <p>Note that you can change as many days as you like before running the simulation. You can also run the simulator as many times as you need before keeping or discarding your changes.</p> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/ng-template" id="simDay.html">
+    <div class="modal-header">
+        <h2 class="modal-title">Enter What-If</h2>
+    </div>
+
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
+            <strong ng-bind="error"></strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-5">
+          <h4 class="text-right">{{trainingDay.date | date:'EEEE, MMM d, y'}}</h4>
+        </div>
+        <div class="col-xs-7">
+          <h4>
+            <a href="#" editable-textarea="trainingDay.name" e-rows="1" e-cols="20"><span ng-hide="trainingDay.name" class="text-default">training day name (optional)</span><span ng-show="trainingDay.name">{{trainingDay.name}}</span></a>
+          </h4>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-xs-5">
+          <h4 class="text-right">Scheduled</h4>
+        </div>
+        <div class="col-xs-7">
+          <h4>
+              <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::eventRankings track by s.value">{{showRanking()}}</a>
+          </h4>
+        </div>
+      </div>
+
+      <div class="row" ng-show="trainingDay.scheduledEventRanking != 0 && trainingDay.scheduledEventRanking != 9">
+        <div class="col-xs-5">
+          <h4 class="text-right">Estimated Load:</h4>
+        </div>
+        <div class="col-xs-7">
+          <h4>
+              <span><a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5">{{trainingDay.estimatedLoad}}</a></span>
+          </h4>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="saveSimDay()">Done</button>
+        <button class="btn btn-warning" type="button" ng-click="cancelSimDay()">Cancel</button>
+    </div>
+  </script>
+
+
 </section>

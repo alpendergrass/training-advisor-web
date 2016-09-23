@@ -19,6 +19,12 @@ module.exports = function (app) {
     .put(trainingDays.update)
     .delete(trainingDays.delete);
 
+  app.route('/api/trainingDays/getSimDay/:trainingDayId').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.getSimDay);
+
+  app.route('/api/trainingDays/finalizeSim/:commit').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.finalizeSim);
+
   app.route('/api/trainingDays/getDay/:trainingDate').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getDay);
 

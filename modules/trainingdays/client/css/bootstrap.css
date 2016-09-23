@@ -1,0 +1,11 @@
+.panel-warning {
+  border-color: #e66400;
+}
+.panel-warning > .panel-body {
+  background-color: #fff6e5;
+}
+.panel-warning > .panel-heading {
+  background-color: #ffe4b3;
+  background-image: none;
+  color: orangered;
+}

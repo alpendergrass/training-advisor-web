@@ -4,10 +4,6 @@ var mongoose = require('mongoose'),
   Schema = mongoose.Schema,
   moment = require('moment');
 
-// var ratings = {
-//   values: 'too hard|about right|too easy'.split('|'),
-//   message: 'The value of `{PATH}` ({VALUE}) is not a valid value.'
-// };
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
 var plannedActivityTypes = {
@@ -30,10 +26,6 @@ var completedActivitySources = {
   values: 'manual|strava|trainingpeaks|plangeneration'.split('|'),
   message: invalidDataErrorMessage
 };
-// var priorities = {
-//   values: 'A|B|C|'.split('|'),
-//   message: invalidDataErrorMessage
-// };
 
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
@@ -58,6 +50,14 @@ var TrainingDaySchema = new Schema({
   dateNumeric: {
     type: Number,
     default: 0
+  },
+  cloneOfId: {
+    type: Schema.Types.ObjectId,
+    default: null 
+  },
+  isSimDay: {
+    type: Boolean,
+    default: false
   },
   //CTL
   fitness: {

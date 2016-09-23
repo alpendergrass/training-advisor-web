@@ -14,72 +14,15 @@ var path = require('path'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
-exports.create = function (req, res) {
-  var user = req.user,
-    statusMessage = {};
+function getTrainingDay(id, callback) {
+  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
+    if (err) {
+      return callback(err, null);
+    } 
 
-  if (req.body.recurrenceSpec && req.body.recurrenceSpec.endsOn) {
-    generateRecurrences(req, function(err, trainingDay) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
-
-      user.planGenNeeded = true;
-      
-      user.save(function (err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } 
-
-        statusMessage = {
-          type: 'info',
-          text: 'Events have been added. You should update your training plan.',
-          title: 'Training Plan Update',
-          created: Date.now(),
-          username: user.username
-        };
-
-        dbUtil.sendMessageToUser(statusMessage, user);
-        res.json(trainingDay);
-      });
-    });
-  } else {
-    createTrainingDay(req, function(err, trainingDay) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
-
-      user.planGenNeeded = true;
-      
-      user.save(function (err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } 
-
-        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
-          statusMessage = {
-            type: 'info',
-            text: 'A key training day has been added or updated. You should update your training plan.',
-            title: 'Training Plan Update',
-            created: Date.now(),
-            username: user.username
-          };
-  
-          dbUtil.sendMessageToUser(statusMessage, user);
-        }
-        res.json(trainingDay);
-      });
-    });
-  }
-};
+    return callback(null, trainingDay); 
+  });
+}
 
 function generateRecurrences(req, callback) {
   //Our first event will be on current day is current day is a selected day of week.
@@ -100,7 +43,7 @@ function generateRecurrences(req, callback) {
     function() {
       return startDate.isSameOrBefore(endDate);
     },
-    function (callback) {
+    function(callback) {
       async.forEachOfSeries(spec.daysOfWeek, function(value, key, callback) { 
         if (value) {
           //set nextDate to day of week in week of startDate.
@@ -178,7 +121,7 @@ function createTrainingDay(req, callback) {
     trainingDay.dailyTargetRampRate = 0;
     trainingDay.targetAvgDailyLoad = 0;
 
-    trainingDay.save(function (err) {
+    trainingDay.save(function(err) {
       if (err) {
         return callback(err, null);
       } 
@@ -188,12 +131,79 @@ function createTrainingDay(req, callback) {
   });
 }
 
-// Show the current trainingDay
-exports.read = function (req, res) {
+exports.create = function(req, res) {
+  var user = req.user,
+    statusMessage = {};
+
+  if (req.body.recurrenceSpec && req.body.recurrenceSpec.endsOn) {
+    generateRecurrences(req, function(err, trainingDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      user.planGenNeeded = true;
+      
+      user.save(function(err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } 
+
+        statusMessage = {
+          type: 'info',
+          text: 'Events have been added. You should update your training plan.',
+          title: 'Training Plan Update',
+          created: Date.now(),
+          username: user.username
+        };
+
+        dbUtil.sendMessageToUser(statusMessage, user);
+        res.json(trainingDay);
+      });
+    });
+  } else {
+    createTrainingDay(req, function(err, trainingDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      user.planGenNeeded = true;
+      
+      user.save(function(err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } 
+
+        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
+          statusMessage = {
+            type: 'info',
+            text: 'A key training day has been added or updated. You should update your training plan.',
+            title: 'Training Plan Update',
+            created: Date.now(),
+            username: user.username
+          };
+  
+          dbUtil.sendMessageToUser(statusMessage, user);
+        }
+        res.json(trainingDay);
+      });
+    });
+  }
+};
+
+exports.read = function(req, res) {
+  // Return the current trainingDay retrieved in trainingDayByID().
   res.json(req.trainingDay);
 };
 
-exports.getDay = function (req, res) {
+exports.getDay = function(req, res) {
   dbUtil.getTrainingDayDocument(req.user, req.params.trainingDate, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
@@ -205,9 +215,25 @@ exports.getDay = function (req, res) {
   });
 };
 
-exports.update = function (req, res) {
+exports.update = function(req, res) {
   var trainingDay = req.trainingDay,
+    recomputeAdvice = false,
     params = {};
+
+  if (req.body.fitness !== trainingDay.fitness || req.body.fatigue !== trainingDay.fatigue) {
+    //user has updated F&F, which should only be done in a F&F true-up.
+    trainingDay.fitnessAndFatigueTrueUp = true;
+  }
+
+  //If a change was made that would affect existing advice, let's recompute.
+  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].advice && 
+    (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking || 
+      trainingDay.estimatedLoad !== req.body.estimatedLoad || 
+      trainingDay.completedActivities !== req.body.completedActivities
+    )
+  ) {
+    recomputeAdvice = true;
+  }
 
   trainingDay.name = req.body.name;
   trainingDay.date = new Date(req.body.date);
@@ -219,84 +245,59 @@ exports.update = function (req, res) {
   trainingDay.notes = req.body.notes;
   trainingDay.completedActivities = req.body.completedActivities;
 
-  getTrainingDay(trainingDay.id, function(err, existingTrainingDay) {
+  trainingDay.save(function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
-    } else if (!existingTrainingDay) {
-      return res.status(404).send({
-        message: 'No existingTrainingDay with that identifier has been found to update'
+    } 
+
+    params.user = req.user;
+    params.trainingDate = new Date(trainingDay.date);
+
+    if (recomputeAdvice) {
+      params.alternateActivity = null;
+      params.alertUser = true;
+
+      adviceEngine.advise(params, function(err, trainingDay) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        }
+
+        return res.json(trainingDay);
+      });
+    } else { 
+      // update metrics for trainingDay just in case.
+      adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        }
+
+        var statusMessage = {
+          type: 'info',
+          text: 'Your training day has been updated. You should update your training plan.',
+          title: 'Training Plan Update',
+          created: Date.now(),
+          username: req.user.username
+        };
+
+        dbUtil.sendMessageToUser(statusMessage, req.user);
+        return res.json(trainingDay);
       });
     }
-    
-    if (existingTrainingDay.fitness !== trainingDay.fitness || existingTrainingDay.fatigue !== trainingDay.fatigue) {
-      //user has updated F&F, which should only be done in a F&F true-up.
-      trainingDay.fitnessAndFatigueTrueUp = true;
-    }
-
-    trainingDay.save(function (err) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } 
-
-      params.user = req.user;
-      params.trainingDate = new Date(trainingDay.date);
-      
-      //If a change was made that would affect existing advice, let's recompute.
-      if (existingTrainingDay.plannedActivities[0] && existingTrainingDay.plannedActivities[0].advice && 
-        (trainingDay.scheduledEventRanking !== existingTrainingDay.scheduledEventRanking || 
-          trainingDay.estimatedLoad !== existingTrainingDay.estimatedLoad || 
-          trainingDay.completedActivities !== existingTrainingDay.completedActivities
-        )
-      ) {
-        params.alternateActivity = null;
-        params.alertUser = true;
-
-        adviceEngine.advise(params, function (err, trainingDay) {
-          if (err) {
-            return res.status(400).send({
-              message: errorHandler.getErrorMessage(err)
-            });
-          }
-
-          return res.json(trainingDay);
-        });
-      } else { // if (trainingDay.completedActivities !== existingTrainingDay.completedActivities) {
-        // update metrics for trainingDay just in case.
-        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-          if (err) {
-            return res.status(400).send({
-              message: errorHandler.getErrorMessage(err)
-            });
-          }
-
-          var statusMessage = {
-            type: 'info',
-            text: 'Your training day has been updated. You should update your training plan.',
-            title: 'Training Plan Update',
-            created: Date.now(),
-            username: req.user.username
-          };
-
-          dbUtil.sendMessageToUser(statusMessage, req.user);
-          return res.json(trainingDay);
-        });
-      // } else {
-      //   return res.json(trainingDay);
-      }
-    });
   });
 };
 
-exports.delete = function (req, res) {
+exports.delete = function(req, res) {
   var trainingDay = req.trainingDay,
     user = req.user,
     statusMessage = {};
 
-  trainingDay.remove(function (err) {
+  trainingDay.remove(function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -304,8 +305,7 @@ exports.delete = function (req, res) {
     } 
 
     user.planGenNeeded = true;
-    
-    user.save(function (err) {
+    user.save(function(err) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -326,12 +326,13 @@ exports.delete = function (req, res) {
   });
 };
 
-exports.list = function (req, res) {
+exports.list = function(req, res) {
   //Returns all existing trainingDays.
+  //Note that this will include sim clone days so there could be dups for some days.
   var user = req.user,
     today = req.query.clientDate; //need to use current date from client to avoid time zone issues.
 
-  TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function (err, trainingDays) {
+  TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function(err, trainingDays) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -342,8 +343,7 @@ exports.list = function (req, res) {
   });
 };
 
-exports.getSeason = function (req, res) {
-  //TODO: allow for retrieval of prior/future seasons.
+exports.getSeason = function(req, res) {
   var user = req.user,
     today = new Date(req.params.today),
     effectiveStartDate,
@@ -391,14 +391,14 @@ exports.getSeason = function (req, res) {
   });
 };
 
-exports.getAdvice = function (req, res) {
+exports.getAdvice = function(req, res) {
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
   params.alternateActivity = req.query.alternateActivity;
   params.alertUser = true;
   
-  adviceEngine.advise(params, function (err, trainingDay) {
+  adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -409,12 +409,12 @@ exports.getAdvice = function (req, res) {
   });
 };
 
-exports.genPlan = function (req, res) {
+exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
   
-  adviceEngine.generatePlan(params, function (err) {
+  adviceEngine.generatePlan(params, function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -425,49 +425,82 @@ exports.genPlan = function (req, res) {
   });
 };
 
-exports.downloadActivities = function (req, res) {
-  getTrainingDay(req.params.trainingDayId, function(err, trainingDay) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } 
+exports.getSimDay = function(req, res) {
+  // We save a clone of TD before returning a what-if day 
+  // unless a clone already exists.
 
-    if (!trainingDay) {
-      return res.status(404).send({
-        message: 'No trainingDay with that identifier has been found'
-      });
-    }
+  var trainingDay = req.trainingDay;
 
-    if (req.query.provider === 'strava') {
-      downloadStrava.downloadActivities(req.user, trainingDay, function (err, trainingDay) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        }
+  if (trainingDay.isSimDay) {
+    // This day has aready been simmed.
+    res.json(trainingDay);    
+  } else {
+    dbUtil.makeSimDay(trainingDay, function(err, simDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
 
-        return res.json(trainingDay);
-      });
-    }
+      res.json(simDay);
+    });
+  }
+};
 
-    if (req.query.provider === 'trainingpeaks') {
-      downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function (err, trainingDay) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        }
+exports.finalizeSim = function(req, res) {
+  if (req.params.commit === 'yes') {
+    dbUtil.commitSimulation(req.user, function(err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
 
-        return res.json(trainingDay);
-      });
-    }
+      res.json('Simulation committed');
+    });
+  } else {
+    dbUtil.revertSimulation(req.user, function(err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } 
 
-  });
+      res.json('Simulation reverted');
+    });
+  }
+};
+
+exports.downloadActivities = function(req, res) {
+  var trainingDay = req.trainingDay;
+
+  if (req.query.provider === 'strava') {
+    downloadStrava.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      return res.json(trainingDay);
+    });
+  }
+
+  if (req.query.provider === 'trainingpeaks') {
+    downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      return res.json(trainingDay);
+    });
+  }
 };
 
 //TrainingDay middleware
-exports.trainingDayByID = function (req, res, next, id) {
+exports.trainingDayByID = function(req, res, next, id) {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).send({
@@ -488,13 +521,3 @@ exports.trainingDayByID = function (req, res, next, id) {
     next();
   });
 };
-
-function getTrainingDay(id, callback) {
-  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function (err, trainingDay) {
-    if (err) {
-      return callback(err, null);
-    } 
-
-    return callback(null, trainingDay); 
-  });
-}  

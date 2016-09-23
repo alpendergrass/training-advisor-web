@@ -175,15 +175,36 @@ angular.module('trainingDays')
           return content;
         };
 
-        //Use vertical format if we are in a small window like on a phone.
-        if (jQuery(window).width() < 800) {
-          $scope.setDirection('vertical');
-          $scope.smallWindow = true;
-        } else {
-          $scope.smallWindow = false;
-        }
-        // Need to clear out calendar data. Moving goal date can strand some data otherwise.
-        MaterialCalendarData.data = {};
+        var initCalendar = function() {
+          //Use vertical format if we are in a small window like on a phone.
+          if (jQuery(window).width() < 800) {
+            $scope.setDirection('vertical');
+            $scope.smallWindow = true;
+          } else {
+            $scope.smallWindow = false;
+          }
+          // Need to clear out calendar data. Moving goal date can strand some data otherwise.
+          MaterialCalendarData.data = {};
+
+          //We need to clean up any potential left over sim days.
+          TrainingDays.finalizeSim({
+            commit: 'no'
+          }, function(response) {
+            getSeason(function() {
+              if ($scope.season) {
+                _.forEach($scope.season, function(td) {
+                  MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
+                });
+              }
+            });
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented simulation clean-up.';
+            }
+          });
+        };
 
         $scope.setDirection = function(direction) {
           $scope.direction = direction;
@@ -217,19 +238,13 @@ angular.module('trainingDays')
           }
         };
 
-        getSeason(function() {
-          if ($scope.season) {
-            _.forEach($scope.season, function(td) {
-              MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
-            });
-          }
-        });
+        initCalendar();
       };
 
       //Highlight today in calendar view
       //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
       //We need a callback from the calendar module. Or something.
-      angular.element(document).ready(function () {
+      angular.element(document).ready(function() {
         jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
       });
 
@@ -262,6 +277,11 @@ angular.module('trainingDays')
             return '#97BBCD';
           }
           
+          if (td.isSimDay) {
+            // Highlight sim days.
+            return '#ffe4b3';            
+          }
+
           // Highlight goal days.
           return td.scheduledEventRanking === 1 ? '#D4A1A0' : '#EAF1F5';
         };
@@ -282,6 +302,69 @@ angular.module('trainingDays')
           }
           
           return 3;
+        };
+
+        var loadChart = function(argument) {
+          getSeason(function() {
+            if ($scope.season) {
+              loadArray = _.flatMap($scope.season, extractLoad);
+              loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
+              formPointRadius = _.flatMap($scope.season, setFormPointRadius);
+              formPointBorderColors = _.flatMap($scope.season, setFormPointColor);
+              formArray = _.flatMap($scope.season, function(td) { return td.form; });
+              fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
+              fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
+              $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
+              $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+              $scope.chartDatasetOverride = [
+                {
+                  label: 'Load',
+                  borderWidth: 1,
+                  backgroundColor: loadBackgroundColors,
+                  type: 'bar'
+                },
+                {
+                  label: 'Fitness',
+                  borderWidth: 3,
+                  type: 'line'
+                },
+                {
+                  label: 'Fatigue',
+                  borderWidth: 3,
+                  type: 'line'
+                },
+                {
+                  label: 'Form',
+                  borderWidth: 3,
+                  pointRadius: formPointRadius,
+                  pointBorderColor:  formPointBorderColors,
+                  type: 'line'
+                }
+              ];
+            }
+          });
+        };
+
+        var initSimFlags = function() {
+          $scope.simMode = false;
+          $scope.simConfigUnderway = false; //will be set to true once user changes a TD.
+          $scope.simHasRun = false;          
+        };
+
+        var initPage = function(argument) {
+          //We need to clean up any potential left over sim days.
+          TrainingDays.finalizeSim({
+            commit: 'no'
+          }, function(response) {
+            initSimFlags();
+            loadChart();
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented simulation clean-up.';
+            }
+          });
         };
 
         $scope.error = null;
@@ -334,52 +417,163 @@ angular.module('trainingDays')
           }
         };
 
-
-        $scope.onChartClick = function (points) {
+        $scope.onChartClick = function(points) {
           if (points.length > 0) {
-            var id = $scope.season[points[0]._index]._id;
-            $state.go('trainingDays.view', { trainingDayId: id });
+            var td = $scope.season[points[0]._index];
+            if ($scope.simMode) {
+              if (moment(td.date).isSameOrAfter(moment().startOf('day'))) {
+                //Only allow update of today or after.
+                //Apparently we are outside the Angular context here.
+                $scope.$apply(function() {
+                  $scope.openSimDay(td._id);
+                });                
+              }
+            } else {
+              $state.go('trainingDays.view', { trainingDayId: td._id });
+            }         
           }
         };
 
-        getSeason(function() {
-          if ($scope.season) {
-            loadArray = _.flatMap($scope.season, extractLoad);
-            loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
-            formPointRadius = _.flatMap($scope.season, setFormPointRadius);
-            formPointBorderColors = _.flatMap($scope.season, setFormPointColor);
-            formArray = _.flatMap($scope.season, function(td) { return td.form; });
-            fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
-            fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
-            $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
-            $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
-            $scope.chartDatasetOverride = [
-              {
-                label: 'Load',
-                borderWidth: 1,
-                backgroundColor: loadBackgroundColors,
-                type: 'bar'
+        $scope.genPlan = function() {
+          usSpinnerService.spin('tdSpinner');
+          $scope.error = null;
+
+          TrainingDays.genPlan({
+            trainingDate: $scope.today.toISOString()
+          }, function(response) {
+            usSpinnerService.stop('tdSpinner');
+            $location.path('season');
+            loadChart();
+          }, function(errorResponse) {
+            usSpinnerService.stop('tdSpinner');
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented plan generation.';
+            }
+          });
+        };
+
+        $scope.startSim = function() {
+          //enable sim controls, disable others.
+          $scope.simMode = true;
+        };
+
+        $scope.runSim = function() {
+          //genPlan using sim days.
+          $scope.simConfigUnderway = false; 
+          $scope.simHasRun = true;
+          $scope.genPlan();
+        };
+
+        $scope.commitSim = function() {
+          TrainingDays.finalizeSim({
+            commit: 'yes'
+          }, function(response) {
+            initSimFlags();
+            loadChart();
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented commit of simulation.';
+            }
+          });
+        };
+
+        $scope.revertSim = function() {
+          TrainingDays.finalizeSim({
+            commit: 'no'
+          }, function(response) {
+            initSimFlags();
+            $scope.genPlan();
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              $scope.error = 'Server error prevented revert of simulation.';
+            }
+          });
+        };
+
+        $scope.cancelSim = function() {
+          //confirm revert if simConfigUnderway
+          //if confirmed, revertSim()
+          // $scope.revertSim();
+          //otherwise, reset flags.
+          initSimFlags();
+        };
+
+        $scope.openSimDay = function(id) {
+          var modalInstance = $uibModal.open({
+            templateUrl: 'simDay.html',
+            controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
+              $scope.trainingDay = TrainingDays.getSimDay({
+                trainingDayId: id
               },
-              {
-                label: 'Fitness',
-                borderWidth: 3,
-                type: 'line'
+                function(trainingDay) {},
+                function(errorResponse) {
+                  if (errorResponse.data && errorResponse.data.message) {
+                    $scope.error = errorResponse.data.message;
+                  } else {
+                    $scope.error = 'Server error prevented training day retrieval.';
+                  }
+                }
+              );
+              $scope.eventRankings = [
+                { value: 0, text: 'Training Day' },
+                { value: 1, text: 'Goal Event' },
+                { value: 2, text: 'Medium Priority Event' },
+                { value: 3, text: 'Low Priority Event' },
+                { value: 9, text: 'Off Day' }
+              ];
+
+              $scope.showRanking = function() {
+                var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking });
+                return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : 'Training Day';
+              };
+
+              $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+                // If off day or a not a scheduled event, zero out estimate.
+                if (String(ranking) === '9' || String(ranking) === '0') {
+                  $scope.trainingDay.estimatedLoad = 0;
+                }
+              });
+
+              $scope.saveSimDay = function() {
+                $uibModalInstance.close($scope.trainingDay);
+              };
+
+              $scope.cancelSimDay = function() {
+                $uibModalInstance.dismiss('cancel');
+              };
+            }],
+            resolve: {
+              trainingDay: function() {
+                return $scope.trainingDay;
               },
-              {
-                label: 'Fatigue',
-                borderWidth: 3,
-                type: 'line'
+              eventRankings: function() {
+                return $scope.eventRankings;
               },
-              {
-                label: 'Form',
-                borderWidth: 3,
-                pointRadius: formPointRadius,
-                pointBorderColor:  formPointBorderColors,
-                type: 'line'
+              showRanking: function() {
+                return $scope.showRanking;
               }
-            ];
-          }
-        });
+            }
+          });
+
+          modalInstance.result.then(function(trainingDay) {
+            $scope.update(true, trainingDay);
+            loadChart();
+            $scope.simConfigUnderway = true;
+          }, function() {
+            //User cancelled out of dialog.
+          }).finally(function() {
+            return;
+          });
+        };
+
+        initPage();
       };
 
       $scope.listTrainingDays = function() {
@@ -707,12 +901,25 @@ angular.module('trainingDays')
         ];
 
         $scope.eventRankings = [
-          { value: 1, text: 'Goal Event!' },
+          { value: 1, text: 'Goal Event' },
           { value: 2, text: 'Medium Priority Event' },
           { value: 3, text: 'Low Priority Event' },
           { value: 9, text: 'Off Day' },
-          { value: 0, text: 'Nothing To Schedule' }
+          { value: 0, text: 'Training Day' }
         ];
+
+        $scope.showRanking = function() {
+          var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
+            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
+          return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
+        };
+
+        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+          // If off day or a not a scheduled event, zero out estimate.
+          if (ranking === 9) {
+            $scope.trainingDay.estimatedLoad = 0;
+          }
+        });
 
         function prepForTDView(trainingDay) {
           //not sure why Mongo/Mongoose returns a string for a date field
@@ -762,12 +969,6 @@ angular.module('trainingDays')
           }
         };
 
-        $scope.showRanking = function() {
-          var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
-          return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
-        };
-
         $scope.updateEventRanking = function(priority) {
           //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
           var n = ~~Number(priority);
@@ -783,13 +984,6 @@ angular.module('trainingDays')
 
           return 'Valid eventRankings are 0, 1, 2 and 3. And 9.';
         };
-
-        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
-          // If off day or a not a scheduled event, zero out estimate.
-          if (ranking === 9 || ranking === 0) {
-            $scope.trainingDay.estimatedLoad = 0;
-          }
-        });
 
         $scope.updateEstimatedLoad = function(estimate) {
           var n = ~~Number(estimate);
@@ -923,27 +1117,6 @@ angular.module('trainingDays')
           } else {
             //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
             $scope.error = 'Server error prevented advice retrieval.';
-          }
-        });
-      };
-
-      $scope.genPlan = function() {
-        usSpinnerService.spin('tdSpinner');
-        $scope.error = null;
-
-        TrainingDays.genPlan({
-          trainingDate: $scope.today.toISOString()
-        }, function(response) {
-          usSpinnerService.stop('tdSpinner');
-          $location.path('season');
-          $scope.viewSeason();
-        }, function(errorResponse) {
-          usSpinnerService.stop('tdSpinner');
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented plan generation.';
           }
         });
       };

@@ -1,0 +1,19 @@
+// We are overriding some bootstrap defaults here.
+
+@state-warning-text:             orangered;
+@state-warning-bg:               orange;
+@state-warning-border:           darken(spin(@state-warning-text, 10), 5%);
+
+.panel-warning {
+  border-color: @state-warning-border;
+}
+
+.panel-warning > .panel-body {
+  background-color: lighten(@state-warning-bg, 45%);
+}
+
+.panel-warning > .panel-heading { 
+  background-color: lighten(@state-warning-bg, 35%);
+  background-image: none;
+  color: @state-warning-text;
+}
