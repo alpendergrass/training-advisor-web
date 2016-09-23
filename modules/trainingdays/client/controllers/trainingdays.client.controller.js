@@ -277,6 +277,11 @@ angular.module('trainingDays')
             return '#97BBCD';
           }
           
+          if (td.isSimDay) {
+            // Highlight sim days.
+            return '#ffe4b3';            
+          }
+
           // Highlight goal days.
           return td.scheduledEventRanking === 1 ? '#D4A1A0' : '#EAF1F5';
         };
@@ -414,15 +419,17 @@ angular.module('trainingDays')
 
         $scope.onChartClick = function(points) {
           if (points.length > 0) {
-            var id = $scope.season[points[0]._index]._id;
+            var td = $scope.season[points[0]._index];
             if ($scope.simMode) {
-              // alert('simMode for TD ' + id);
-              //Apparently we are outside the Angular context here.
-              $scope.$apply(function() {
-                $scope.openSimDay(id);
-              });
+              if (moment(td.date).isSameOrAfter(moment().startOf('day'))) {
+                //Only allow update of today or after.
+                //Apparently we are outside the Angular context here.
+                $scope.$apply(function() {
+                  $scope.openSimDay(td._id);
+                });                
+              }
             } else {
-              $state.go('trainingDays.view', { trainingDayId: id });
+              $state.go('trainingDays.view', { trainingDayId: td._id });
             }         
           }
         };
@@ -465,6 +472,7 @@ angular.module('trainingDays')
             commit: 'yes'
           }, function(response) {
             initSimFlags();
+            loadChart();
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -500,8 +508,6 @@ angular.module('trainingDays')
         $scope.openSimDay = function(id) {
           var modalInstance = $uibModal.open({
             templateUrl: 'simDay.html',
-            //size: 'lg',
-            //scope: $scope,
             controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
               $scope.trainingDay = TrainingDays.getSimDay({
                 trainingDayId: id
@@ -530,7 +536,7 @@ angular.module('trainingDays')
 
               $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
                 // If off day or a not a scheduled event, zero out estimate.
-                if (String(ranking) === '9') {
+                if (String(ranking) === '9' || String(ranking) === '0') {
                   $scope.trainingDay.estimatedLoad = 0;
                 }
               });
@@ -558,6 +564,7 @@ angular.module('trainingDays')
 
           modalInstance.result.then(function(trainingDay) {
             $scope.update(true, trainingDay);
+            loadChart();
             $scope.simConfigUnderway = true;
           }, function() {
             //User cancelled out of dialog.

@@ -122,7 +122,8 @@ module.exports.getStartDay = function(user, searchDate, callback) {
   var query = {
     user: user,
     startingPoint: true,
-    date: { $lte: trainingDate }
+    date: { $lte: trainingDate },
+    cloneOfId: null 
   };
 
   TrainingDay.find(query).sort({ date: -1 }).limit(1)
@@ -157,7 +158,8 @@ module.exports.getFuturePriorityDays = function(user, searchDate, priority, numb
   var query = {
     user: user,
     scheduledEventRanking: priority,
-    date: { $gt: trainingDate, $lte: maxDate }
+    date: { $gt: trainingDate, $lte: maxDate },
+    cloneOfId: null 
   };
 
   TrainingDay.find(query).sort({ date: 1 })
@@ -187,7 +189,8 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
   var query = {
     user: user,
     scheduledEventRanking: 1,
-    date: { $lt: trainingDate }
+    date: { $lt: trainingDate },
+    cloneOfId: null 
   };
 
   TrainingDay.find(query).sort({ date: -1 }).limit(1)
@@ -228,7 +231,8 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
     user: user,
     date: { $gte: start, $lte: end },
     fitnessAndFatigueTrueUp: false,
-    startingPoint: false
+    startingPoint: false,
+    cloneOfId: null 
   }, { 
     $set: { 
       fitness: 0,
@@ -411,6 +415,7 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
   var end = moment(searchDate); 
   var query = TrainingDay
     .where('user').equals(user)
+    .where('cloneOfId').equals(null)
     .where('date').gte(start).lte(end)
     .where('loadRating').in(['simulation', 'hard']);
 

@@ -14,72 +14,15 @@ var path = require('path'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
-exports.create = function(req, res) {
-  var user = req.user,
-    statusMessage = {};
+function getTrainingDay(id, callback) {
+  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
+    if (err) {
+      return callback(err, null);
+    } 
 
-  if (req.body.recurrenceSpec && req.body.recurrenceSpec.endsOn) {
-    generateRecurrences(req, function(err, trainingDay) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
-
-      user.planGenNeeded = true;
-      
-      user.save(function(err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } 
-
-        statusMessage = {
-          type: 'info',
-          text: 'Events have been added. You should update your training plan.',
-          title: 'Training Plan Update',
-          created: Date.now(),
-          username: user.username
-        };
-
-        dbUtil.sendMessageToUser(statusMessage, user);
-        res.json(trainingDay);
-      });
-    });
-  } else {
-    createTrainingDay(req, function(err, trainingDay) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
-
-      user.planGenNeeded = true;
-      
-      user.save(function(err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } 
-
-        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
-          statusMessage = {
-            type: 'info',
-            text: 'A key training day has been added or updated. You should update your training plan.',
-            title: 'Training Plan Update',
-            created: Date.now(),
-            username: user.username
-          };
-  
-          dbUtil.sendMessageToUser(statusMessage, user);
-        }
-        res.json(trainingDay);
-      });
-    });
-  }
-};
+    return callback(null, trainingDay); 
+  });
+}
 
 function generateRecurrences(req, callback) {
   //Our first event will be on current day is current day is a selected day of week.
@@ -188,8 +131,75 @@ function createTrainingDay(req, callback) {
   });
 }
 
-// Return the current trainingDay retrieved in trainingDayByID().
+exports.create = function(req, res) {
+  var user = req.user,
+    statusMessage = {};
+
+  if (req.body.recurrenceSpec && req.body.recurrenceSpec.endsOn) {
+    generateRecurrences(req, function(err, trainingDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      user.planGenNeeded = true;
+      
+      user.save(function(err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } 
+
+        statusMessage = {
+          type: 'info',
+          text: 'Events have been added. You should update your training plan.',
+          title: 'Training Plan Update',
+          created: Date.now(),
+          username: user.username
+        };
+
+        dbUtil.sendMessageToUser(statusMessage, user);
+        res.json(trainingDay);
+      });
+    });
+  } else {
+    createTrainingDay(req, function(err, trainingDay) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+
+      user.planGenNeeded = true;
+      
+      user.save(function(err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } 
+
+        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
+          statusMessage = {
+            type: 'info',
+            text: 'A key training day has been added or updated. You should update your training plan.',
+            title: 'Training Plan Update',
+            created: Date.now(),
+            username: user.username
+          };
+  
+          dbUtil.sendMessageToUser(statusMessage, user);
+        }
+        res.json(trainingDay);
+      });
+    });
+  }
+};
+
 exports.read = function(req, res) {
+  // Return the current trainingDay retrieved in trainingDayByID().
   res.json(req.trainingDay);
 };
 
@@ -318,6 +328,7 @@ exports.delete = function(req, res) {
 
 exports.list = function(req, res) {
   //Returns all existing trainingDays.
+  //Note that this will include sim clone days so there could be dups for some days.
   var user = req.user,
     today = req.query.clientDate; //need to use current date from client to avoid time zone issues.
 
@@ -510,13 +521,3 @@ exports.trainingDayByID = function(req, res, next, id) {
     next();
   });
 };
-
-function getTrainingDay(id, callback) {
-  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
-    if (err) {
-      return callback(err, null);
-    } 
-
-    return callback(null, trainingDay); 
-  });
-}  
