@@ -66,12 +66,12 @@ angular.module('trainingDays')
           });
 
           $scope.hasStart = _.find(season, function(td) {
-            // moment.isSameOrBefore is only available in versions 2.10.7 but 
-            // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
+            // moment.isSameOrBefore is only available in versions 2.10.7 but
+            // I'm using a component (angular-timezone-selector) that currently specifies an earlier version.
             //TODO: watch for an updated version of angular-timezone-selector.
             //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
             //Supports later version of moment. isSameOrBefore should work now.
-            // return td.startingPoint && moment(td.date).isSameOrBefore(moment()); 
+            // return td.startingPoint && moment(td.date).isSameOrBefore(moment());
             return td.startingPoint && moment(td.date).isBefore(moment());
           });
 
@@ -96,7 +96,7 @@ angular.module('trainingDays')
           if (yesterday) {
             $scope.checkGiveFeedback(yesterday);
           }
-          
+
           $scope.season = season;
           return callback();
         }, function(errorResponse) {
@@ -130,7 +130,7 @@ angular.module('trainingDays')
 
           content += '<small>';
           lengthOfFixedContent += 7;
-          
+
           if (trainingDay.scheduledEventRanking) {
             content += trainingDay.name ? ' - ' : '';
 
@@ -276,10 +276,10 @@ angular.module('trainingDays')
             // Highlight today by making it stand out a bit.
             return '#97BBCD';
           }
-          
+
           if (td.isSimDay) {
             // Highlight sim days.
-            return '#ffe4b3';            
+            return '#ffe4b3';
           }
 
           // Highlight goal days.
@@ -291,7 +291,7 @@ angular.module('trainingDays')
             // Highlight today by making it stand out a bit.
             return '#98D8E2';
           }
-          
+
           return '#FFFFFF';
         };
 
@@ -300,7 +300,7 @@ angular.module('trainingDays')
             // Highlight today by making it stand out a bit.
             return 6;
           }
-          
+
           return 3;
         };
 
@@ -348,7 +348,7 @@ angular.module('trainingDays')
         var initSimFlags = function() {
           $scope.simMode = false;
           $scope.simConfigUnderway = false; //will be set to true once user changes a TD.
-          $scope.simHasRun = false;          
+          $scope.simHasRun = false;
         };
 
         var initPage = function(argument) {
@@ -371,7 +371,7 @@ angular.module('trainingDays')
         // $scope.chartColors = ['#45b7cd', '#ff6384', '#ff8e72'];
 
         $scope.chartOptions = {
-          legend: { display: true }, 
+          legend: { display: true },
           tooltips: {
             callbacks: {
               beforeTitle: function(tooltipItems) {
@@ -407,9 +407,9 @@ angular.module('trainingDays')
                     text = td.plannedActivities[0].activityType + ' day';
                   }
                 } else {
-                  //Display load rating 
+                  //Display load rating
                   text = td.loadRating + ' day';
-                } 
+                }
 
                 return text;
               }
@@ -426,11 +426,11 @@ angular.module('trainingDays')
                 //Apparently we are outside the Angular context here.
                 $scope.$apply(function() {
                   $scope.openSimDay(td._id);
-                });                
+                });
               }
             } else {
               $state.go('trainingDays.view', { trainingDayId: td._id });
-            }         
+            }
           }
         };
 
@@ -462,7 +462,7 @@ angular.module('trainingDays')
 
         $scope.runSim = function() {
           //genPlan using sim days.
-          $scope.simConfigUnderway = false; 
+          $scope.simConfigUnderway = false;
           $scope.simHasRun = true;
           $scope.genPlan();
         };
@@ -534,7 +534,7 @@ angular.module('trainingDays')
                 return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : 'Training Day';
               };
 
-              $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+              $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
                 // If off day or a not a scheduled event, zero out estimate.
                 if (String(ranking) === '9' || String(ranking) === '0') {
                   $scope.trainingDay.estimatedLoad = 0;
@@ -591,12 +591,12 @@ angular.module('trainingDays')
             });
 
             $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
-              // moment.isSameOrBefore is only available in versions 2.10.7 but 
-              // I'm using a component (angular-timezone-selector) that currently specifies an earlier version. 
+              // moment.isSameOrBefore is only available in versions 2.10.7 but
+              // I'm using a component (angular-timezone-selector) that currently specifies an earlier version.
               //TODO: watch for an updated version of angular-timezone-selector.
               //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
               //Supports later version of moment. isSameOrBefore should work now.
-              // return td.startingPoint && moment(td.date).isSameOrBefore(moment()); 
+              // return td.startingPoint && moment(td.date).isSameOrBefore(moment());
               return td.startingPoint && moment(td.date).isBefore(moment());
             });
 
@@ -641,7 +641,7 @@ angular.module('trainingDays')
         };
 
         getAllTrainingDays(function() {
-          //Doing infinite scrolling all client-side. 
+          //Doing infinite scrolling all client-side.
           //May need to switch to server-side at some point. Or some combo of client and server side.
           $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
           $scope.trainingDays = $scope.trainingDaysChunked[0];
@@ -727,7 +727,7 @@ angular.module('trainingDays')
           minDate: minEventDate
         };
 
-        $scope.$watch('scheduledEventRanking', function(ranking) { 
+        $scope.$watch('scheduledEventRanking', function(ranking) {
           if (ranking === '9') {
             $scope.estimatedLoad = 0;
           }
@@ -735,7 +735,7 @@ angular.module('trainingDays')
 
         $scope.checkRecurrence = function() {
           $scope.recurrenceSpec = null;
-          
+
           if ($scope.recurs) {
             $scope.openRecurrence($scope.date);
           }
@@ -914,7 +914,7 @@ angular.module('trainingDays')
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
-        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) { 
+        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
           // If off day or a not a scheduled event, zero out estimate.
           if (ranking === 9) {
             $scope.trainingDay.estimatedLoad = 0;

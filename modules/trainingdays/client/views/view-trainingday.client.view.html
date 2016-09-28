@@ -136,37 +136,39 @@
             <td style="width:20%"></td>
           </tr>
           <tr ng-repeat="completedActivity in trainingDay.completedActivities">
-            <!-- <td>
-              <span editable-select="completedActivity.activityType" e-name="activityType" e-form="completedActivityForm" e-ng-options="s.value as s.text for s in activityTypes" e-required>
-                          {{completedActivity.activityType}}
-                      </span>
-            </td> -->
-            <td>
-              <span class="text-capitalize">{{ completedActivity.source }}</span>
-            </td>
-            <td>
-              <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span>
-            </td>
-            <td>
-              <span editable-textarea="completedActivity.notes" e-rows="2" e-cols="70" e-name="notes" e-form="completedActivityForm">
-                {{ completedActivity.notes }}
-              </span>
-            </td>
-            <td style="white-space: nowrap">
-              <!-- form -->
-              <form editable-form name="completedActivityForm" onbeforesave="saveCompletedActivity($data, completedActivity.created)" ng-show="completedActivityForm.$visible" class="form-buttons form-inline" shown="inserted == completedActivity">
-                <button type="submit" ng-disabled="completedActivityForm.$waiting" class="btn btn-primary btn-xs">
-                  save
-                </button>
-                <button type="button" ng-disabled="completedActivityForm.$waiting" ng-click="completedActivityForm.$cancel()" class="btn btn-default btn-xs">
-                  cancel
-                </button>
-              </form>
-              <div class="buttons" ng-show="!completedActivityForm.$visible">
-                <button class="btn btn-default btn-xs" ng-click="completedActivityForm.$show()">edit</button>
-                <button class="btn btn-default btn-xs" ng-click="deleteCompletedActivity($index)">delete</button>
-              </div>
-            </td>
+              <!-- <td>
+                <span editable-select="completedActivity.activityType" e-name="activityType" e-form="completedActivityForm" e-ng-options="s.value as s.text for s in activityTypes" e-required>
+                            {{completedActivity.activityType}}
+                        </span>
+              </td> -->
+              <td>
+                <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link">View on Strava</a></span>
+                <span ng-if="completedActivity.source !== 'strava'">{{ completedActivity.source }}</span>
+              </td>
+              <td>
+                <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span>
+              </td>
+              <td>
+                <span editable-textarea="completedActivity.notes" e-rows="2" e-cols="70" e-name="notes" e-form="completedActivityForm">
+                  {{ completedActivity.notes }}
+                </span>
+              </td>
+              <td style="white-space: nowrap">
+                <form editable-form name="completedActivityForm" ng-show="completedActivityForm.$visible" onbeforesave="saveCompletedActivity($data, completedActivity.created)" class="form-buttons form-inline" shown="inserted == completedActivity">
+                  <div class="buttons">
+                    <button type="submit" ng-disabled="completedActivityForm.$waiting" class="btn btn-primary btn-xs">
+                      save
+                    </button>
+                    <button type="button" ng-disabled="completedActivityForm.$waiting" ng-click="completedActivityForm.$cancel()" class="btn btn-default btn-xs">
+                      cancel
+                    </button>
+                  </div>
+                </form>
+                <div class="buttons" ng-show="!completedActivityForm.$visible">
+                  <button class="btn btn-default btn-xs" ng-click="completedActivityForm.$show()">edit</button>
+                  <button class="btn btn-default btn-xs" ng-click="deleteCompletedActivity($index)">delete</button>
+                </div>
+              </td>
           </tr>
         </table>
       </p>
@@ -198,8 +200,8 @@
     <small>
       <div>Date: {{trainingDay.date }}</div>
       <div>Rationale: {{trainingDay.plannedActivities[0].rationale }}</div>
-      <div>startingPoint: {{trainingDay.startingPoint }}</div> 
-      <div>period: {{trainingDay.period }}</div> 
+      <div>startingPoint: {{trainingDay.startingPoint }}</div>
+      <div>period: {{trainingDay.period }}</div>
       <div>sevenDayRampRate: {{trainingDay.sevenDayRampRate}}</div>
       <div>sevenDayTargetRampRate: {{trainingDay.sevenDayTargetRampRate}}</div>
       <div>rampRateAdjustmentFactor: {{trainingDay.rampRateAdjustmentFactor}}</div>
