@@ -66,9 +66,9 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       console.log('stravaActivity.start_date: ' + stravaActivity.start_date);
       console.log('stravaActivity.start_date_local: ' + stravaActivity.start_date_local);
 
-      if (stravaActivity.id && moment(trainingDay.date).isSame(stravaActivity.start_date_local, 'day')) {
-        //Do not save manual entries nor previously downloaded activity.
-        if (!stravaActivity.manual && !_.find(trainingDay.completedActivities, 'sourceID', stravaActivity.id.toString())) {
+      // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
+      if (stravaActivity.id && stravaActivity.weighted_average_watts && moment(trainingDay.date).isSame(stravaActivity.start_date_local, 'day')) {
+        if (!_.find(trainingDay.completedActivities, 'sourceID', stravaActivity.id.toString())) {
           activityCount++;
           //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
           fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
@@ -99,7 +99,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     });
 
     if (activityCount < 1) {
-      statusMessage.text = 'We found no new Strava activities for the day. Note that manually created Strava activities are not downloaded.';
+      statusMessage.text = 'We found no new Strava activities for the day. Note that activities without power data are not downloaded.';
       statusMessage.type = 'info';
       dbUtil.sendMessageToUser(statusMessage, user);
       return callback(null, trainingDay);
