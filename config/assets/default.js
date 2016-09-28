@@ -1,5 +1,7 @@
 'use strict';
 
+// Note: be sure to add corresponding minified assets to production.js and cloud-foundry.js.
+
 module.exports = {
   client: {
     lib: {
