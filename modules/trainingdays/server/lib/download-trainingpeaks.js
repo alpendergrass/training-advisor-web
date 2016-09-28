@@ -137,7 +137,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         var countPhrase = '';
 
         if (err) {
-          dbUtil.sendMessageToUser(statusMessage, user);            
+          dbUtil.sendMessageToUser(statusMessage, user);
           return callback(err, null);
         }
 
@@ -146,7 +146,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
             statusMessage.text = 'We found no new TrainingPeaks workouts for the day.';
             statusMessage.type = 'info';
           }
-          dbUtil.sendMessageToUser(statusMessage, user);            
+          dbUtil.sendMessageToUser(statusMessage, user);
           return callback(null, trainingDay);
         }
 
@@ -178,7 +178,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
               return callback(err, null);
             }
 
-            statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your training plan.';
+            statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your season.';
             statusMessage.type = 'success';
             dbUtil.sendMessageToUser(statusMessage, user);
             return callback(null, trainingDay);
@@ -209,7 +209,7 @@ function getAthlete(user, trainingDay, client, callback) {
       if (payload.GetAccessibleAthletesResult && payload.GetAccessibleAthletesResult.PersonBase) {
         console.log('TrainingPeaks athletes returned: ' + payload.GetAccessibleAthletesResult.PersonBase.length);
         console.log('payload.GetAccessibleAthletesResult.PersonBase[0].PersonId: ' + payload.GetAccessibleAthletesResult.PersonBase[0].PersonId);
-        return callback(null, user, trainingDay, client, payload.GetAccessibleAthletesResult.PersonBase[0].PersonId);        
+        return callback(null, user, trainingDay, client, payload.GetAccessibleAthletesResult.PersonBase[0].PersonId);
       } else {
         console.log('TrainingPeaks access failed for ' + args.username + ' - GetAccessibleAthletes: suspected invalid account type.');
         statusMessage.username = user.username;
@@ -236,7 +236,7 @@ function getWorkouts(user, trainingDay, client, personId, callback) {
     return callback(null, user, trainingDay, null, null, null);
   }
 
-  if (trainingDay) {  
+  if (trainingDay) {
     //Get workouts for the day.
     startDate = moment(trainingDay.date).format('YYYY-MM-DD');
     endDate = startDate;
@@ -332,7 +332,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
         return callback(err);
       });
     }
-  }, 
+  },
     function(err) {
       if (err) {
         return callback(err, user, null);
@@ -341,7 +341,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
       return callback(null, user, trainingDay);
     }
   );
-}    
+}
 
 function processWorkout(client, args, trainingDay, callback) {
   var newActivity = {};

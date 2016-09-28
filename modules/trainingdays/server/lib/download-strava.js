@@ -133,7 +133,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           return callback(err, null);
         }
 
-        statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your training plan.';
+        statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your season.';
         statusMessage.type = 'success';
         dbUtil.sendMessageToUser(statusMessage, user);
         return callback(null, trainingDay);

@@ -450,7 +450,7 @@ angular.module('trainingDays')
               $scope.error = errorResponse.data.message;
             } else {
               //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-              $scope.error = 'Server error prevented plan generation.';
+              $scope.error = 'Server error prevented season update.';
             }
           });
         };
@@ -650,7 +650,7 @@ angular.module('trainingDays')
       };
 
       $scope.setUpStartingPoint = function() {
-        var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(7, 'days').startOf('day').toDate();
+        var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
         var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
 
         $scope.startDateOptions = {
