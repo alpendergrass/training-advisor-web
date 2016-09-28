@@ -18,9 +18,9 @@ function getTrainingDay(id, callback) {
   TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
     if (err) {
       return callback(err, null);
-    } 
+    }
 
-    return callback(null, trainingDay); 
+    return callback(null, trainingDay);
   });
 }
 
@@ -44,37 +44,37 @@ function generateRecurrences(req, callback) {
       return startDate.isSameOrBefore(endDate);
     },
     function(callback) {
-      async.forEachOfSeries(spec.daysOfWeek, function(value, key, callback) { 
+      async.forEachOfSeries(spec.daysOfWeek, function(value, key, callback) {
         if (value) {
           //set nextDate to day of week in week of startDate.
           nextDate = moment(startDate).day(parseInt(key, 10));
 
           if (nextDate.isSameOrAfter(startDate) && nextDate.isBefore(endDate)) {
-            req.body.date = nextDate.toDate();   
+            req.body.date = nextDate.toDate();
             createTrainingDay(req, function(err, createdTrainingDay) {
               if (err) {
                 return callback(err);
-              } 
+              }
               trainingDay = createdTrainingDay;
-              return callback(); 
+              return callback();
             });
           } else {
-            return callback();             
+            return callback();
           }
         } else {
-          return callback();             
+          return callback();
         }
-      }, function(err) { 
+      }, function(err) {
         if (err) {
           return callback(err);
         }
 
-        //startDate.add(spec.everyNTimeUnits, 'weeks').startOf('week'); 
+        //startDate.add(spec.everyNTimeUnits, 'weeks').startOf('week');
         //this is where an error is introduced.
         //startOfWeek() takes us to midnight Sunday in the server time zone  - we lose our local offset.
         //Go to Sunday of next recurrence week. This does not affect time of day.
-        startDate.add(spec.everyNTimeUnits, 'weeks').day(0); 
-        return callback(null); 
+        startDate.add(spec.everyNTimeUnits, 'weeks').day(0);
+        return callback(null);
       });
     },
     function(err) {
@@ -83,9 +83,9 @@ function generateRecurrences(req, callback) {
       }
 
       //return the last trainingDay created.
-      return callback(null, trainingDay); 
+      return callback(null, trainingDay);
     });
-}  
+}
 
 function createTrainingDay(req, callback) {
   //It is possible that a document already exists for this day in which case we will update.
@@ -112,7 +112,7 @@ function createTrainingDay(req, callback) {
         trainingDay.recurrenceSpec = req.body.recurrenceSpec;
         trainingDay.eventRecurrenceID = req.body.eventRecurrenceID;
       }
-    } 
+    }
 
     trainingDay.notes = req.body.notes || '';
     trainingDay.period = '';
@@ -124,7 +124,7 @@ function createTrainingDay(req, callback) {
     trainingDay.save(function(err) {
       if (err) {
         return callback(err, null);
-      } 
+      }
 
       return callback(null, trainingDay);
     });
@@ -144,18 +144,18 @@ exports.create = function(req, res) {
       }
 
       user.planGenNeeded = true;
-      
+
       user.save(function(err) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });
-        } 
+        }
 
         statusMessage = {
           type: 'info',
-          text: 'Events have been added. You should update your training plan.',
-          title: 'Training Plan Update',
+          text: 'Events have been added. You should update your season.',
+          title: 'Season Update',
           created: Date.now(),
           username: user.username
         };
@@ -173,23 +173,23 @@ exports.create = function(req, res) {
       }
 
       user.planGenNeeded = true;
-      
+
       user.save(function(err) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });
-        } 
+        }
 
         if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
           statusMessage = {
             type: 'info',
-            text: 'A key training day has been added or updated. You should update your training plan.',
-            title: 'Training Plan Update',
+            text: 'A key training day has been added or updated. You should update your season.',
+            title: 'Season Update',
             created: Date.now(),
             username: user.username
           };
-  
+
           dbUtil.sendMessageToUser(statusMessage, user);
         }
         res.json(trainingDay);
@@ -209,7 +209,7 @@ exports.getDay = function(req, res) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
-    } 
+    }
 
     res.json(trainingDay);
   });
@@ -226,9 +226,9 @@ exports.update = function(req, res) {
   }
 
   //If a change was made that would affect existing advice, let's recompute.
-  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].advice && 
-    (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking || 
-      trainingDay.estimatedLoad !== req.body.estimatedLoad || 
+  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].advice &&
+    (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
+      trainingDay.estimatedLoad !== req.body.estimatedLoad ||
       trainingDay.completedActivities !== req.body.completedActivities
     )
   ) {
@@ -250,7 +250,7 @@ exports.update = function(req, res) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
-    } 
+    }
 
     params.user = req.user;
     params.trainingDate = new Date(trainingDay.date);
@@ -268,7 +268,7 @@ exports.update = function(req, res) {
 
         return res.json(trainingDay);
       });
-    } else { 
+    } else {
       // update metrics for trainingDay just in case.
       adviceMetrics.updateMetrics(params, function(err, trainingDay) {
         if (err) {
@@ -279,8 +279,8 @@ exports.update = function(req, res) {
 
         var statusMessage = {
           type: 'info',
-          text: 'Your training day has been updated. You should update your training plan.',
-          title: 'Training Plan Update',
+          text: 'Your training day has been updated. You should update your season.',
+          title: 'Season Update',
           created: Date.now(),
           username: req.user.username
         };
@@ -302,7 +302,7 @@ exports.delete = function(req, res) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
-    } 
+    }
 
     user.planGenNeeded = true;
     user.save(function(err) {
@@ -310,12 +310,12 @@ exports.delete = function(req, res) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      } 
+      }
 
       statusMessage = {
         type: 'info',
-        text: 'A training day has been removed. You should update your training plan.',
-        title: 'Training Plan Update',
+        text: 'A training day has been removed. You should update your season.',
+        title: 'Season Update',
         created: Date.now(),
         username: user.username
       };
@@ -348,7 +348,7 @@ exports.getSeason = function(req, res) {
     today = new Date(req.params.today),
     effectiveStartDate,
     effectiveGoalDate,
-    dates = {}; 
+    dates = {};
 
   dbUtil.getStartDay(user, today, function(err, startDay) {
     if (err) {
@@ -363,7 +363,7 @@ exports.getSeason = function(req, res) {
       effectiveStartDate = moment(today).subtract('1', 'day');
     }
 
-    //Get future goal days to determine end of season. 
+    //Get future goal days to determine end of season.
     dbUtil.getFuturePriorityDays(user, today, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
       if (err) {
         return res.status(400).send({
@@ -397,7 +397,7 @@ exports.getAdvice = function(req, res) {
   params.trainingDate = req.params.trainingDate;
   params.alternateActivity = req.query.alternateActivity;
   params.alertUser = true;
-  
+
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
@@ -413,7 +413,7 @@ exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
-  
+
   adviceEngine.generatePlan(params, function(err) {
     if (err) {
       return res.status(400).send({
@@ -426,21 +426,21 @@ exports.genPlan = function(req, res) {
 };
 
 exports.getSimDay = function(req, res) {
-  // We save a clone of TD before returning a what-if day 
+  // We save a clone of TD before returning a what-if day
   // unless a clone already exists.
 
   var trainingDay = req.trainingDay;
 
   if (trainingDay.isSimDay) {
     // This day has aready been simmed.
-    res.json(trainingDay);    
+    res.json(trainingDay);
   } else {
     dbUtil.makeSimDay(trainingDay, function(err, simDay) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      } 
+      }
 
       res.json(simDay);
     });
@@ -454,7 +454,7 @@ exports.finalizeSim = function(req, res) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      } 
+      }
 
       res.json('Simulation committed');
     });
@@ -464,7 +464,7 @@ exports.finalizeSim = function(req, res) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      } 
+      }
 
       res.json('Simulation reverted');
     });

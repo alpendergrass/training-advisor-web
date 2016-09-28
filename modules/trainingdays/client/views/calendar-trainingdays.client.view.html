@@ -6,15 +6,12 @@
   </div>
   <div class="alert alert-warning text-center" ng-hide="hasStart && hasEnd">
     <span ng-hide="hasStart">To get started you need to create a <a ui-sref="trainingDays.createStart">Start Day</a>.</span>
-    <span ng-hide="hasEnd"> You must specify at least one <a ui-sref="trainingDays.createEvent({'scheduledEventRanking': '1'})">Goal Event</a> for the current season to generate a training plan.</span>
+    <span ng-hide="hasEnd"> You must specify at least one <a ui-sref="trainingDays.createEvent({'scheduledEventRanking': '1'})">Goal Event</a> for the current season to generate a meaningful season view.</span>
   </div>
   <div>
     <div class="pull-left">
       <md-button ng-show="hasStart" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
     </div>
-    <!-- <div class="pull-left">
-      <md-button class="md-warn md-hue-2" ng-show="hasStart && hasEnd && needsPlanGen" ng-click="genPlan()">Update Plan</md-button>
-    </div> -->
     <div class="pull-right">
       <md-button ng-show="hasStart" ui-sref="season()">Season</md-button>
     </div>
