@@ -4,7 +4,7 @@
 var ApplicationConfiguration = (function () {
   // Init module configuration options
   var applicationModuleName = 'training-advisor';
-  var applicationModuleVendorDependencies = ['ngResource', 'ngAnimate', 'ngMessages', 'ui.router', 'ui.bootstrap', 'ui.utils', 'xeditable', 'toastr', 'angularSpinner', 'infinite-scroll', 'angular-timezone-selector', 'ngMaterial', 'materialCalendar', 'chart.js'];
+  var applicationModuleVendorDependencies = ['ngResource', 'ngAnimate', 'ngMessages', 'ngSanitize', 'ui.router', 'ui.bootstrap', 'ui.utils', 'xeditable', 'toastr', 'angularSpinner', 'infinite-scroll', 'angular-timezone-selector', 'ngMaterial', 'materialCalendar', 'chart.js'];
   //angularFileUpload is only used to upload profile picture and is not compatible with later version of angular.
   //var applicationModuleVendorDependencies = ['ngResource', 'ngAnimate', 'ngMessages', 'ui.router', 'ui.bootstrap', 'ui.utils', 'angularFileUpload', 'xeditable', 'toastr'];
 
