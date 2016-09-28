@@ -29,8 +29,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     },
     params = {};
 
-  console.log('trainingDay: ' + moment(trainingDay.date).toDate()); 
-  console.log('Strava searchDate: ' + moment.unix(searchDate).toDate()); 
+  console.log('trainingDay: ' + moment(trainingDay.date).toDate());
+  console.log('Strava searchDate: ' + moment.unix(searchDate).toDate());
 
 
   accessToken = user.provider ==='strava'? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
@@ -74,7 +74,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
           // IF = NP/FTP
           intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
-          // TSS = [(s x W x IF) / (FTP x 3600)] x 100 
+          // TSS = [(s x W x IF) / (FTP x 3600)] x 100
           // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
           newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
           console.log('===> We found a keeper...');
@@ -93,7 +93,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           // newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
           // newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';
           trainingDay.completedActivities.push(newActivity);
-          newActivity = {};         
+          newActivity = {};
         }
       }
     });
@@ -117,7 +117,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         statusMessage.type = 'error';
         dbUtil.sendMessageToUser(statusMessage, user);
         return callback(err, null);
-      } 
+      }
 
       //Update metrics for trainingDay as completedActivities likely has changed.
       params = {

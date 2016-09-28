@@ -19,7 +19,7 @@
 }
 
 
-/* The following will prevent the menu from covering the current day 
+/* The following will prevent the menu from covering the current day
   when the "Go To Today" button on the TD list is clicked. */
 
 .today::before {
@@ -63,4 +63,8 @@ calendar-md md-content.agenda > div > div > div {
 
 .toast-info {
   background-color: rgb(63, 81, 181);
+}
+
+.strava-link {
+  color: #FC4C02;
 }
