@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = {
   client: {
     lib: {
@@ -32,7 +33,7 @@ module.exports = {
         'public/lib/angular-spinner/angular-spinner.min.js',
         'public/lib/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
         'public/lib/jstzdetect/jstz.min.js',
-        'public/lib/angular-timezone-selector/dist/angular-timezone-selector.min.js', 
+        'public/lib/angular-timezone-selector/dist/angular-timezone-selector.min.js',
         'public/lib/angular-aria/angular-aria.min.js',
         'public/lib/angular-sanitize/angular-sanitize.min.js',
         'public/lib/angular-material/angular-material.min.js',
