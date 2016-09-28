@@ -1,0 +1,20 @@
+<section ng-controller="FAQController">
+  <div class="container">
+    <div class="page-header">
+      <h2>Frequently Asked Questions</h2>
+    </div>
+
+    <div class="container">
+      <div ng-repeat="section in FAQ">
+        <h3>{{section.sectionTitle}}</h3>
+        <uib-accordion>
+          <div uib-accordion-group class="panel-default" heading="{{q.question}}" ng-repeat="q in section.questions">
+            {{q.answer}}
+          </div>
+        </uib-accordion>
+      </div>
+    </div>
+
+      <p>TrainingPeaks®, Training Stress Score® and TSS® are registered trademarks of <a href="http://trainingpeaks.com/" class="colored" target="_blank">Peaksware, LLC</a>.</p>
+  </div>
+</section>

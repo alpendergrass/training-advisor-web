@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('core').controller('AboutController', ['$scope', 'Authentication',
+angular.module('core').controller('FAQController', ['$scope', 'Authentication',
   function($scope, Authentication) {
     // This provides Authentication context.
     $scope.authentication = Authentication;

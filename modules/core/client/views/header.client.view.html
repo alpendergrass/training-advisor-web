@@ -9,6 +9,7 @@
       </button>
       <a ui-sref="home" class="navbar-brand"><img ng-src="/modules/core/client/img/brand/logo.png"></a>
     </div>
+
     <div class="navbar-collapse collapse" id="navbar-collapse-1" role="navigation" ng-disabled="true">
       <ul class="nav navbar-nav" ng-if="menu.shouldRender(authentication.user);">
         <li ng-repeat="item in menu.items | orderBy: 'position'" ng-if="item.shouldRender(authentication.user);" ng-switch="item.type" ng-class="{ active: $state.includes(item.state), dropdown: item.type === 'dropdown' }" class="{{item.class}}" uib-dropdown="item.type === 'dropdown'">
@@ -21,11 +22,23 @@
           <a ng-switch-default ui-sref="{{item.state}}" ng-bind="item.title"></a>
         </li>
       </ul>
+
       <ul class="nav navbar-nav">
-        <li ui-sref-active="active">
-          <a ui-sref="about">About</a>
+        <li class="dropdown" uib-dropdown>
+          <a class="dropdown-toggle" uib-dropdown-toggle role="button">
+            About<b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+            <li ui-sref-active="active">
+              <a ui-sref="faq">FAQ</a>
+            </li>
+            <li ui-sref-active="active">
+              <a ui-sref="contact">Contact Us</a>
+            </li>
+          </ul>
         </li>
       </ul>
+
       <ul class="nav navbar-nav navbar-right" ng-hide="authentication.user">
         <li ui-sref-active="active">
           <a ui-sref="authentication.signup">Sign Up</a>
@@ -62,6 +75,7 @@
           </ul>
         </li>
       </ul>
+
     </div>
   </div>
 </nav>
