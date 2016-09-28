@@ -89,7 +89,7 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
       sectionTitle: 'Ride Data',
       questions: [{
         question: 'How do I get my workout data into Tacit Training?',
-        answer: 'Tacit Training needs your Training Load for each ride. Ideally you will download your ride from Strava - see below for details. If for some reason you cannot download a ride, on the Training Day page you can manually enter the ride by clicking the + button. You can get Training Load (as TSS® - Training Stress Score®) from most head units or you can provide an estimate if actual data is not available.' 
+        answer: 'Tacit Training needs your Training Load for each ride. Ideally you will download your ride from Strava - see below for details. If for some reason you cannot download a ride, on the Training Day page you can manually enter the ride by clicking the + button. You can get Training Load (as TSS® - Training Stress Score®) from most head units or you can provide an estimate if actual data is not available.'
       }, {
         question: 'How do I download my rides from Strava?',
         answer: 'Because your Tacit Training account is linked to your Strava account, you are set up to download your rides from Strava from within Tacit Training. Click the Strava download button on the Training Day page.'
