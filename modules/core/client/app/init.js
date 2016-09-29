@@ -15,7 +15,6 @@ angular.module(ApplicationConfiguration.applicationModuleName).config(['$locatio
     $httpProvider.interceptors.push('authInterceptor');
 
     angular.extend(toastrConfig, {
-      positionClass: 'toast-top-center',
       timeOut: 3000,
     });
   }
