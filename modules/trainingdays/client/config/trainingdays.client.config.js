@@ -1,6 +1,5 @@
 'use strict';
 
-// Configuring the TrainingDays module
 angular.module('trainingDays').run(['Menus',
   function (Menus) {
     Menus.addMenuItem('topbar', {

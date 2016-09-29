@@ -6,19 +6,24 @@ angular.module(ApplicationConfiguration.applicationModuleName, ApplicationConfig
 //make lodash and moment available in angular.
 angular.module(ApplicationConfiguration.applicationModuleName).constant('_', window._);
 angular.module(ApplicationConfiguration.applicationModuleName).constant('moment', window.moment);
-  
+
 // Setting HTML5 Location Mode
-angular.module(ApplicationConfiguration.applicationModuleName).config(['$locationProvider', '$httpProvider',
-  function ($locationProvider, $httpProvider) {
+angular.module(ApplicationConfiguration.applicationModuleName).config(['$locationProvider', '$httpProvider', 'toastrConfig',
+  function ($locationProvider, $httpProvider, toastrConfig) {
     $locationProvider.html5Mode(true).hashPrefix('!');
 
     $httpProvider.interceptors.push('authInterceptor');
+
+    angular.extend(toastrConfig, {
+      positionClass: 'toast-top-center',
+      timeOut: 3000,
+    });
   }
 ]);
 
 angular.module(ApplicationConfiguration.applicationModuleName).run(function ($rootScope, $state, Authentication, editableOptions) {
   editableOptions.theme = 'bs3';
-  
+
   // Check authentication before changing state
   $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
     if (toState.data && toState.data.roles && toState.data.roles.length > 0) {
@@ -50,7 +55,7 @@ angular.module(ApplicationConfiguration.applicationModuleName).run(function ($ro
 
   // Store previous state
   function storePreviousState(state, params) {
-    // only store this state if it shouldn't be ignored 
+    // only store this state if it shouldn't be ignored
     if (!state.data || !state.data.ignoreState) {
       $state.previous = {
         state: state,
