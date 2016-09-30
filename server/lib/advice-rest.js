@@ -120,17 +120,11 @@ function isRestNeededInPrepForTesting (user, trainingDay, callback) {
     return callback(null, user, trainingDay);
   }
 
-  adviceUtil.isTestingDue(user, trainingDay, function (err, testingDue) {
-    if (err) {
-      return callback(err, null, null);
-    }
+  if (adviceUtil.isTestingDue(user, trainingDay) && trainingDay.form <= adviceConstants.restNeededForTestingThreshold) {
+    trainingDay.plannedActivities[0].rationale += ' Rest recommended in preparation for testing.';
+    trainingDay.plannedActivities[0].rationale += ' Rest is needed in preparation for testing, so rest today.';
+    trainingDay.plannedActivities[0].activityType = 'rest';
+  }
 
-    if (testingDue && trainingDay.form <= adviceConstants.restNeededForTestingThreshold) {
-      trainingDay.plannedActivities[0].rationale += ' Rest recommended in preparation for testing.';
-      trainingDay.plannedActivities[0].rationale += ' Rest is needed in preparation for testing, so rest today.';
-      trainingDay.plannedActivities[0].activityType = 'rest';
-    }
-
-    return callback(null, user, trainingDay);
-  });
+  return callback(null, user, trainingDay);
 }

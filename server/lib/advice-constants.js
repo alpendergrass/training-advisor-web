@@ -32,8 +32,8 @@ module.exports.TPAutoDownloadLookbackNumberOfDays = '3';
 
 //Skip lesser event if within this many days of goal event.
 //TODO: maybe just no 2/3 events in race period?
-module.exports.priority2EventCutOffThreshold = 7;
-module.exports.priority3EventCutOffThreshold = 11;
+module.exports.priority2EventCutOffThreshold = 5;
+module.exports.priority3EventCutOffThreshold = 9;
 
 //If it has been this many days since FTP was updated, start nagging user to test.
 module.exports.testingNagDayCount = 21;

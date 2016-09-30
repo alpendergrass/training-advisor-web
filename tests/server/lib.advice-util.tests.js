@@ -21,7 +21,7 @@ describe('advice-util Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser;
 
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
@@ -32,30 +32,14 @@ describe('advice-util Unit Tests:', function () {
   describe('Method isTestingDue', function () {
     it('should return true if testing is due', function (done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
-
-      return adviceUtil.isTestingDue(user, trainingDay, function (err, testingIsDue) {
-        if (err) {
-          console.log('isTestingDue: ' + err);
-        }
-
-        should.not.exist(err);
-        (testingIsDue).should.match(true);
-        done();
-      });
+      (adviceUtil.isTestingDue(user, trainingDay)).should.match(true);
+      done();
     });
 
     it('should return false if testing is not due', function (done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
-
-      return adviceUtil.isTestingDue(user, trainingDay, function (err, testingIsDue) {
-        if (err) {
-          console.log('isTestingDue: ' + err);
-        }
-
-        should.not.exist(err);
-        (testingIsDue).should.match(false);
-        done();
-      });
+      (adviceUtil.isTestingDue(user, trainingDay)).should.match(false);
+      done();
     });
 
   });

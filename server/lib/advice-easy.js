@@ -143,17 +143,11 @@ function isAnEasyDayNeededInPrepForTesting (user, trainingDay, callback) {
     return callback(null, user, trainingDay);
   }
 
-  adviceUtil.isTestingDue(user, trainingDay, function (err, testingDue) {
-    if (err) {
-      return callback(err, null, null);
-    }
+  if (adviceUtil.isTestingDue(user, trainingDay) && trainingDay.form <= adviceConstants.testingEligibleFormThreshold) {
+    trainingDay.plannedActivities[0].rationale += ' Recommending easy in preparation for testing.';
+    trainingDay.plannedActivities[0].advice += ' An easy day or rest is needed in preparation for testing. Intensity should be below 0.75.';
+    trainingDay.plannedActivities[0].activityType = 'easy';
+  }
 
-    if (testingDue && trainingDay.form <= adviceConstants.testingEligibleFormThreshold) {
-      trainingDay.plannedActivities[0].rationale += ' Recommending easy in preparation for testing.';
-      trainingDay.plannedActivities[0].advice += ' An easy day or rest is needed in preparation for testing. Intensity should be below 0.75.';
-      trainingDay.plannedActivities[0].activityType = 'easy';
-    }
-
-    return callback(null, user, trainingDay);
-  });
+  return callback(null, user, trainingDay);
 }

@@ -48,18 +48,12 @@ module.exports.checkTest = function(user, trainingDay, callback) {
 };
 
 function checkIsTestingDue (user, trainingDay, callback) {
-  adviceUtil.isTestingDue(user, trainingDay, function (err, testingDue) {
-    if (err) {
-      return callback(err, null, null);
-    }
+  if (adviceUtil.isTestingDue(user, trainingDay)) {
+    trainingDay.plannedActivities[0].rationale += ' Testing is due.';
+    trainingDay.plannedActivities[0].activityType = 'test';
+  }
 
-    if (testingDue) {
-      trainingDay.plannedActivities[0].rationale += ' Testing is due.';
-      trainingDay.plannedActivities[0].activityType = 'test';
-    }
-
-    return callback(null, user, trainingDay);
-  });
+  return callback(null, user, trainingDay);
 }
 
 function isFormRecovered (user, trainingDay, callback) {
