@@ -27,12 +27,12 @@ module.exports.checkModerate = function(user, trainingDay, callback) {
   }
 
   if (trainingDay.plannedActivities[0].activityType !== '') {
-    return callback(null, user, trainingDay);          
+    return callback(null, user, trainingDay);
   }
 
-  if (trainingDay.period === 'peak') {
+  if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
     //Never do a moderate ride when peaking.
-    return callback(null, user, trainingDay);          
+    return callback(null, user, trainingDay);
   }
 
   shouldWeGoModerate(user, trainingDay, function(err, shouldGoModerate) {
@@ -64,18 +64,18 @@ function shouldWeGoModerate(user, trainingDay, callback) {
         if (trainingDay.period === 'base' || trainingDay.period === 'transition') {
           trainingDay.plannedActivities[0].rationale += ' We are in ' + trainingDay.period + ' so recommending endurance ride.';
           trainingDay.plannedActivities[0].advice += ' do an endurance ride today.';
-          trainingDay.plannedActivities[0].advice += ' Intensity should be around 0.80.';   
+          trainingDay.plannedActivities[0].advice += ' Intensity should be around 0.80.';
         } else {
           trainingDay.plannedActivities[0].rationale += ' We are in build so recommending tempo ride.';
           trainingDay.plannedActivities[0].advice += ' ride tempo today.';
-          trainingDay.plannedActivities[0].advice += ' Intensity should be around 0.85.';   
+          trainingDay.plannedActivities[0].advice += ' Intensity should be around 0.85.';
         }
         return callback(null, true);
-      } 
+      }
 
       //We will likely be recommending rest tomorrow.
       return callback(null, false);
-    } 
+    }
 
     return callback(null, false);
   });

@@ -101,7 +101,6 @@ function determinePeriod(user, trainingDay, callback) {
     },
     function(err, results) {
       //results is: {startDate: <date>, mostRecentGoalDate: <date>, ...}
-
       if (err) {
         return callback(err, null);
       }
@@ -143,17 +142,16 @@ function determinePeriod(user, trainingDay, callback) {
         return callback(null, periodData);
       }
 
-      dbUtil.getPriorPriorityDays(user, results.futureGoalDays[0].date, 1, adviceConstants.maximumNumberOfRaceDays, function(err, priorityDays) {
+      dbUtil.getPriorPriorityDays(user, results.futureGoalDays[0].date, 1, adviceConstants.maximumNumberOfRaceDays, function(err, priorGoalDays) {
         if (err) {
           return callback(err, null);
         }
 
-        if (priorityDays.length > 0) {
-          firstGoalDateInRacePeriod = moment(priorityDays[0].date);
+        if (priorGoalDays.length > 0) {
+          firstGoalDateInRacePeriod = moment(priorGoalDays[0].date);
         } else {
           firstGoalDateInRacePeriod = moment(results.futureGoalDays[0].date);
         }
-
         results.endOfTrainingPeriod = moment(firstGoalDateInRacePeriod).subtract(7, 'days');
 
         determineEffectiveStartDate(results, function(err, startDate) {
@@ -227,7 +225,6 @@ function determinePeriod(user, trainingDay, callback) {
 
           periodData.daysUntilNextGoalEvent = moment(results.futureGoalDays[0].date).diff(trainingDate, 'days');
 
-          // console.log('periodData: ', periodData);
           return callback(null, periodData);
         });
       });

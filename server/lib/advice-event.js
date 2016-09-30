@@ -25,8 +25,8 @@ module.exports.checkEvent = function(user, trainingDay, callback) {
     return callback(err, null, null);
   }
 
-  if (trainingDay.plannedActivities[0].activityType !== ''){  
-    return callback(null, user, trainingDay);          
+  if (trainingDay.plannedActivities[0].activityType !== ''){
+    return callback(null, user, trainingDay);
   }
 
   if (trainingDay.scheduledEventRanking) {
@@ -38,8 +38,8 @@ module.exports.checkEvent = function(user, trainingDay, callback) {
         break;
       case 2:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 2 (medium priority) event.';
-        if (trainingDay.period === 'peak') {
-          trainingDay.plannedActivities[0].rationale += ' In peak period. Goal event is ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
+        if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
+          trainingDay.plannedActivities[0].rationale += ' In ' + trainingDay.period + ' period. Goal event is ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
           trainingDay.plannedActivities[0].advice += ' You have a medium priority event scheduled for today.';
           trainingDay.plannedActivities[0].advice += ' However, your next goal event is only ' + trainingDay.daysUntilNextGoalEvent + ' days away. ';
           if (trainingDay.daysUntilNextGoalEvent < adviceConstants.priority2EventCutOffThreshold) {
@@ -57,8 +57,8 @@ module.exports.checkEvent = function(user, trainingDay, callback) {
         break;
       case 3:
         trainingDay.plannedActivities[0].rationale += ' Today is a priority 3 (low priority) event.';
-        if (trainingDay.period === 'peak') {
-          trainingDay.plannedActivities[0].rationale += ' In peak period. Goal event is ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
+        if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
+          trainingDay.plannedActivities[0].rationale += ' In ' + trainingDay.period + ' period. Goal event is ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
           trainingDay.plannedActivities[0].advice += ' You have a low priority event scheduled for today.';
           trainingDay.plannedActivities[0].advice += ' However, your next goal event is only ' + trainingDay.daysUntilNextGoalEvent + ' days away.';
           if (trainingDay.daysUntilNextGoalEvent < adviceConstants.priority3EventCutOffThreshold) {
@@ -80,6 +80,6 @@ module.exports.checkEvent = function(user, trainingDay, callback) {
         break;
     }
   }
-  
-  return callback(null, user, trainingDay);          
+
+  return callback(null, user, trainingDay);
 };

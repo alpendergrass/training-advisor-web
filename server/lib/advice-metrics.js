@@ -199,9 +199,9 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
     //and decrease (linearly) to 3 by the end of build.
     //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
-    //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat. Use ??? for daily ramp rate.
+    //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
 
-    if (currentTrainingDay.period === 'peak' || currentTrainingDay.period === 'transition'){
+    if (currentTrainingDay.period === 'peak' || currentTrainingDay.period === 'race' || currentTrainingDay.period === 'transition'){
       //In essence, a zero ramp.
       currentTrainingDay.dailyTargetRampRate = 0.001;
     } else {

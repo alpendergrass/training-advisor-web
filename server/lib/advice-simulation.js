@@ -24,12 +24,12 @@ module.exports.checkSimulation = function(user, trainingDay, callback) {
   }
 
   if (trainingDay.plannedActivities[0].activityType !== '') {
-    return callback(null, user, trainingDay);          
+    return callback(null, user, trainingDay);
   }
 
-  if (trainingDay.period === 'peak') {
-    //No simulations when peaking.
-    return callback(null, user, trainingDay);          
+  if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
+    //No simulations when peaking or racing.
+    return callback(null, user, trainingDay);
   }
 
   shouldWeDoSimulation(user, trainingDay, function(err, shouldSimulate) {
@@ -46,11 +46,11 @@ module.exports.checkSimulation = function(user, trainingDay, callback) {
 };
 
 function shouldWeDoSimulation(user, trainingDay, callback) {
-  //Are we in a build period and is it the preferred day for a 
-  //simulation (if preference set)? 
-  //or have we not done a race simulation in the last seven days (?)? 
-  //TODO: we should not rely on the user telling us if they did a simulation. 
-  //we should figure out how to classify a workout as a simulation. 
+  //Are we in a build period and is it the preferred day for a
+  //simulation (if preference set)?
+  //or have we not done a race simulation in the last seven days (?)?
+  //TODO: we should not rely on the user telling us if they did a simulation.
+  //we should figure out how to classify a workout as a simulation.
   //TODO: we should check our TSB to make sure it is not too low to handle this.
 
   //Assuming our training date is today...
@@ -85,13 +85,13 @@ function shouldWeDoSimulation(user, trainingDay, callback) {
   } else {
     trainingDay.plannedActivities[0].rationale += ' We are not in a build period.';
   }
-  
+
   return callback(null, false);
 }
 
 // function isSimulationOverdue(today, trainingDay, callback) {
 //   //Assuming our training date is today,
-//   //have we not done a race simulation in the last seven days (?)  
+//   //have we not done a race simulation in the last seven days (?)
 //   var aWeekAgo = moment(today).subtract(7, 'days');
 
 //   var countQuery = TrainingDay

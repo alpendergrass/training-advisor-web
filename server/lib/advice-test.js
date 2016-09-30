@@ -23,14 +23,14 @@ module.exports.checkTest = function(user, trainingDay, callback) {
     err = new TypeError('valid trainingDay is required');
     return callback(err, null, null);
   }
-    
+
   if (trainingDay.plannedActivities[0].activityType !== '') {
-    return callback(null, user, trainingDay);          
+    return callback(null, user, trainingDay);
   }
 
-  if (trainingDay.period === 'peak' || trainingDay.period === 'transition') {
-    //No testing when peaking or in transition.
-    return callback(null, user, trainingDay);          
+  if (trainingDay.period === 'peak' || trainingDay.period === 'race' || trainingDay.period === 'transition') {
+    //No testing when peaking, race or in transition.
+    return callback(null, user, trainingDay);
   }
 
   async.waterfall([
@@ -51,12 +51,12 @@ function checkIsTestingDue (user, trainingDay, callback) {
   adviceUtil.isTestingDue(user, trainingDay, function (err, testingDue) {
     if (err) {
       return callback(err, null, null);
-    } 
+    }
 
     if (testingDue) {
       trainingDay.plannedActivities[0].rationale += ' Testing is due.';
       trainingDay.plannedActivities[0].activityType = 'test';
-    } 
+    }
 
     return callback(null, user, trainingDay);
   });
@@ -70,7 +70,7 @@ function isFormRecovered (user, trainingDay, callback) {
 
   //TSB is recovered if greater than threshold.
   if (trainingDay.form > adviceConstants.testingEligibleFormThreshold) {
-    trainingDay.plannedActivities[0].rationale += ' Form is sufficiently recovered for testing.';   
+    trainingDay.plannedActivities[0].rationale += ' Form is sufficiently recovered for testing.';
     trainingDay.plannedActivities[0].advice += ' Testing is due and form is sufficiently recovered for testing. Do a functional threshold power (FTP) test.';
     trainingDay.plannedActivities[0].advice += ' Be sure to update your Tacit Training profile with your new threshold and the date you did the test.';
   } else {

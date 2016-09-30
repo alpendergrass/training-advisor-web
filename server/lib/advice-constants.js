@@ -32,9 +32,8 @@ module.exports.TPAutoDownloadLookbackNumberOfDays = '3';
 
 //Skip lesser event if within this many days of goal event.
 //TODO: maybe just no 2/3 events in race period?
-module.exports.priority2EventCutOffThreshold = 5;
-module.exports.priority3EventCutOffThreshold = 7;
-
+module.exports.priority2EventCutOffThreshold = 7;
+module.exports.priority3EventCutOffThreshold = 11;
 
 //If it has been this many days since FTP was updated, start nagging user to test.
 module.exports.testingNagDayCount = 21;
@@ -46,15 +45,17 @@ module.exports.testingEligibleFormThreshold = -7.5;
 module.exports.easyDaytNeededThreshold = -10;
 
 //If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -30;
+module.exports.restNeededThreshold = -25;
+
+//If testing is due and form is less than or equal to this, we recommend rest.
+module.exports.restNeededForTestingThreshold = -11;
 
 //If form is less than or equal to this during peak period, we recommend rest.
 //I made it one less than restNeededForTestingThreshold to get unit tests to work.
 //If we find it needs to be greater then we may need to modify or remove a test.
-module.exports.restNeededForPeakingThreshold = -21;
+module.exports.restNeededForPeakingThreshold = -16;
 
-//If testing is due and form is less than or equal to this, we recommend rest.
-module.exports.restNeededForTestingThreshold = -20;
+module.exports.restNeededForRacingThreshold = -12;
 
 //We apply this factor to make the NP (weighted_average_watts) reported by Strava
 //to more closely match Garmin/TP.

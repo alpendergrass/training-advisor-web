@@ -170,8 +170,20 @@ module.exports.advise = function(params, callback) {
   }
 
   async.series(
+    //series of one.
     [
       function(callback) {
+        //updateMetrics not needed if we are generating plan as updateMetrics was called in generateActivityFromAdvice for prior day.
+        //Wait, it sees it is...though I don't know why.
+        // if (params.genPlan) {
+        //   dbUtil.getTrainingDayDocument(params.user, params.trainingDate, function(err, trainingDay) {
+        //     if (err) {
+        //       return callback(err, null);
+        //     }
+
+        //     return callback(null, trainingDay);
+        //   });
+        // } else {
         adviceMetrics.updateMetrics(params, function(err, trainingDay) {
           if (err) {
             return callback(err);
@@ -180,6 +192,7 @@ module.exports.advise = function(params, callback) {
           return callback(null, trainingDay);
         });
       }
+      // }
     ],
     function(err, results) {
       if (err) {
@@ -274,10 +287,10 @@ function generateAdvice(user, trainingDay, callback) {
           trainingDay.plannedActivities[0].activityType = 'choice';
           trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
           trainingDay.plannedActivities[0].advice += ' You are in transition. You should take a break from training. Now is a good time for cross-training. If you ride, keep it mellow and fun.';
-        } else if (trainingDay.period === 'peak') {
+        } else if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
           trainingDay.plannedActivities[0].activityType = 'hard';
-          trainingDay.plannedActivities[0].rationale += ' Is peak period, recommending hard ride but load will be smaller than typical hard ride.';
-          trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a short but intense ride today.';
+          trainingDay.plannedActivities[0].rationale += ' Is ' + trainingDay.period + ' period, recommending hard ride but load will be smaller than typical hard ride.';
+          trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
         } else {
           //Default is a hard workout.
           trainingDay.plannedActivities[0].activityType = 'hard';

@@ -12,9 +12,9 @@ var path = require('path'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
   adviceEasy = require('../../server/lib/advice-easy');
 
-var user, 
-  trainingDate, 
-  trainingDay, 
+var user,
+  trainingDate,
+  trainingDay,
   params = {};
 
 describe('advice-easy Unit Tests:', function () {
@@ -25,8 +25,8 @@ describe('advice-easy Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;   
-      params.user = user; 
+      user = newUser;
+      params.user = user;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
@@ -41,7 +41,7 @@ describe('advice-easy Unit Tests:', function () {
         done();
       });
     });
-    
+
     it('should return error if no trainingDay', function (done) {
       return adviceEasy.checkEasy(user, null, function (err, user, trainingDay) {
         should.exist(err);
@@ -116,7 +116,7 @@ describe('advice-easy Unit Tests:', function () {
               console.log('createTrainingDay: ' + err);
             }
             params.trainingDate = yesterday;
-            
+
             return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
               //we have to update metrics in order for yesrday's loadRating to be assigned.
               if (err) {
@@ -161,9 +161,9 @@ describe('advice-easy Unit Tests:', function () {
             }
 
             params.trainingDate = yesterday;
-            
+
             return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
-              //we have to update metrics in order for yesrday's loadRating to be assigned.
+              //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
               }

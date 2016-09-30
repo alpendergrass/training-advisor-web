@@ -62,7 +62,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
 function setTargetLoads(trainingDay) {
   trainingDay.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay);
 
-  //We have different factors for diffent activity rankings. E.g., ranking of 1 is a goal event. 9 is an off day.
+  //We have different factors for different activity rankings. E.g., ranking of 1 is a goal event. 9 is an off day.
   var activityType = latestPlannedActivity.activityType === 'event' ? latestPlannedActivity.activityType + trainingDay.scheduledEventRanking : latestPlannedActivity.activityType;
 
   var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': activityType });
