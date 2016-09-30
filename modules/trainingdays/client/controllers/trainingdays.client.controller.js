@@ -289,16 +289,16 @@ angular.module('trainingDays')
             return '#BD7E7D';
           }
 
+          if (td.plannedActivities[0] && td.plannedActivities[0].activityType === 'test') {
+            return '#B2DBDA';
+          }
+
           if (td.scheduledEventRanking === 2) {
             return '#D1A2A1';
           }
 
           if (td.scheduledEventRanking === 3) {
             return '#EBD1D1';
-          }
-
-          if (td.plannedActivities[0] && td.plannedActivities[0].activityType === 'test') {
-            return '#B2DBDA';
           }
 
           return '#EAF1F5';
