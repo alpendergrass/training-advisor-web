@@ -171,6 +171,8 @@ angular.module('trainingDays')
           //   content += '<br><i>Form: ' + trainingDay.form + '</i>';
           // }
 
+          content += '<br><i>Period: ' + trainingDay.period + '</i>';
+
           content += '</small></div>';
           return content;
         };
@@ -282,8 +284,24 @@ angular.module('trainingDays')
             return '#ffe4b3';
           }
 
-          // Highlight goal days.
-          return td.scheduledEventRanking === 1 ? '#D4A1A0' : '#EAF1F5';
+          // Highlight event days.
+          if (td.scheduledEventRanking === 1) {
+            return '#BD7E7D';
+          }
+
+          if (td.plannedActivities[0] && td.plannedActivities[0].activityType === 'test') {
+            return '#B2DBDA';
+          }
+
+          if (td.scheduledEventRanking === 2) {
+            return '#D1A2A1';
+          }
+
+          if (td.scheduledEventRanking === 3) {
+            return '#EBD1D1';
+          }
+
+          return '#EAF1F5';
         };
 
         var setFormPointColor = function(td) {
@@ -613,7 +631,7 @@ angular.module('trainingDays')
               $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
                 //Determine is there are any TDs before next goal which do not have plannedActivities.
                 //If there are we need to offer plan gen.
-                return moment(td.date).isAfter(moment().add('1', 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add('1', 'day')) && td.plannedActivities.length < 1;
+                return moment(td.date).isAfter(moment().add(1, 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add(1, 'day')) && td.plannedActivities.length < 1;
               });
             }
 

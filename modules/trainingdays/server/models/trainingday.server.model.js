@@ -19,7 +19,7 @@ var loadRatings = {
   message: invalidDataErrorMessage
 };
 var periods = {
-  values: 'peak|build|base|transition|'.split('|'),
+  values: 'race|peak|build|base|transition|'.split('|'),
   message: invalidDataErrorMessage
 };
 var completedActivitySources = {
@@ -36,7 +36,7 @@ var maxLoadValue = [999, maxMessage];
 var minDurationValue = [0, minMessage];
 var maxDurationValue = [9999, maxMessage];
 var minTrainingEffortFeedback = [-2, minMessage];
-var maxTrainingEffortFeedback = [2, maxMessage]; 
+var maxTrainingEffortFeedback = [2, maxMessage];
 
 var TrainingDaySchema = new Schema({
   created: {
@@ -53,7 +53,7 @@ var TrainingDaySchema = new Schema({
   },
   cloneOfId: {
     type: Schema.Types.ObjectId,
-    default: null 
+    default: null
   },
   isSimDay: {
     type: Boolean,
@@ -63,14 +63,14 @@ var TrainingDaySchema = new Schema({
   fitness: {
     type: Number,
     min: minFitnessOrFatigueValue,
-    max: maxFitnessOrFatigueValue, 
+    max: maxFitnessOrFatigueValue,
     default: 0
   },
   //ATL
   fatigue: {
     type: Number,
     min: minFitnessOrFatigueValue,
-    max: maxFitnessOrFatigueValue, 
+    max: maxFitnessOrFatigueValue,
     default: 0
   },
   //TSB
@@ -100,7 +100,7 @@ var TrainingDaySchema = new Schema({
   scheduledEventRanking: {
     type: Number,
     min: 0,
-    max: 9, 
+    max: 9,
     default: 0
   },
   eventRecurrenceID: {
@@ -165,7 +165,7 @@ var TrainingDaySchema = new Schema({
   trainingEffortFeedback: {
     type: Number,
     min: minTrainingEffortFeedback,
-    max: maxTrainingEffortFeedback, 
+    max: maxTrainingEffortFeedback,
     default: null
   },
   notes: {
@@ -191,7 +191,7 @@ var TrainingDaySchema = new Schema({
     targetMinLoad: {
       type: Number,
       min: minLoadValue,
-      max: maxLoadValue, 
+      max: maxLoadValue,
       default: 0
     },
     targetMaxLoad: {
@@ -224,7 +224,7 @@ var TrainingDaySchema = new Schema({
     sourceID: {
       type: String,
       default: '',
-      trim: true      
+      trim: true
     },
     name: {
       type: String,

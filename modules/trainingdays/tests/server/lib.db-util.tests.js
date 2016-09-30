@@ -462,7 +462,7 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return goal day if one prior goal day exists', function (done) {
-      testHelpers.createGoalEvent(user, moment(trainingDate).subtract('10', 'days').toDate(), 0, function(err, newGoalDay) {
+      testHelpers.createGoalEvent(user, moment(trainingDate).subtract(10, 'days').toDate(), 0, function(err, newGoalDay) {
         if (err) {
           console.log('createGoalEvent: ' + err);
         }
@@ -476,7 +476,7 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return sim goal day if one prior goal day and a clone exist', function (done) {
-      testHelpers.createGoalEvent(user, moment(trainingDate).subtract('10', 'days').toDate(), 0, function(err, newGoalDay) {
+      testHelpers.createGoalEvent(user, moment(trainingDate).subtract(10, 'days').toDate(), 0, function(err, newGoalDay) {
         if (err) {
           console.log('createGoalEvent: ' + err);
         }
@@ -498,12 +498,12 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return most recent goal day if two prior goal days exist', function (done) {
-      testHelpers.createGoalEvent(user, moment(trainingDate).subtract('10', 'days'), 0, function(err, newGoalDay) {
+      testHelpers.createGoalEvent(user, moment(trainingDate).subtract(10, 'days'), 0, function(err, newGoalDay) {
         if (err) {
           console.log('createGoalEvent: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, moment(trainingDate).subtract('20', 'days'), 0, function(err, newGoalDay2) {
+        testHelpers.createGoalEvent(user, moment(trainingDate).subtract(20, 'days'), 0, function(err, newGoalDay2) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
