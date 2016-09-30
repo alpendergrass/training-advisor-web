@@ -62,7 +62,7 @@ module.exports.getExistingTrainingDayDocument = function(user, trainingDate, cal
 };
 
 module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
-  //Will return a trainingDay doc for each day betwen startDate and endDate inclusive.
+  //Will return a trainingDay doc for each day between startDate and endDate inclusive.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -79,8 +79,6 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
   }
 
   var trainingDays = [],
-    // current = moment(startDate),
-    // end = moment(endDate);
     currentNumeric = toNumericDate(startDate),
     endNumeric = toNumericDate(endDate),
     currentDate = moment(startDate);
@@ -96,7 +94,7 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
           return callback(err, null);
         }
         trainingDays.push(trainingDay);
-        callback(null, currentDate.add('1', 'day'));
+        callback(null, currentDate.add(1, 'day'));
       });
     },
     function (err, lastDay) {
@@ -141,7 +139,7 @@ module.exports.getStartDay = function(user, searchDate, callback) {
 };
 
 module.exports.getFuturePriorityDays = function(user, searchDate, priority, numberOfDaysOut, callback) {
-  //select future priority n trainingDays.
+  //select priority n trainingDays after searchDate. Include searchDate
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -158,7 +156,39 @@ module.exports.getFuturePriorityDays = function(user, searchDate, priority, numb
   var query = {
     user: user,
     scheduledEventRanking: priority,
-    date: { $gt: trainingDate, $lte: maxDate },
+    date: { $gte: trainingDate, $lte: maxDate },
+    cloneOfId: null
+  };
+
+  TrainingDay.find(query).sort({ date: 1 })
+  .exec(function(err, priorityDays) {
+    if (err) {
+      return callback(err, null);
+    }
+
+    return callback(null, priorityDays);
+  });
+};
+
+module.exports.getPriorPriorityDays = function(user, searchDate, priority, numberOfDaysBack, callback) {
+  //select priority n trainingDays before searchDate.
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  var trainingDate = moment(searchDate),
+    minDate = moment(searchDate).add(numberOfDaysBack, 'days');
+
+  if (!trainingDate.isValid()) {
+    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  var query = {
+    user: user,
+    scheduledEventRanking: priority,
+    date: { $lt: trainingDate, $gte: minDate },
     cloneOfId: null
   };
 
@@ -222,7 +252,7 @@ module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback)
     return callback(err, null);
   }
 
-  start = moment(startDate).add('1', 'day');
+  start = moment(startDate).add(1, 'day');
   //I recognize doing endOf day on current day server side is not precise.
   //Close enough I think.
   end = moment().endOf('day');
@@ -444,7 +474,7 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   //this GMT date resulted in midnight GMT on June 19 6PM in browser local time. The
   //end date was also off by 6 hours.
 
-  // var end = moment(searchDate).add('1', 'day'); //.endOf('day');
+  // var end = moment(searchDate).add(1, 'day'); //.endOf('day');
 
   // var query = TrainingDay
   //   .where('user').equals(user)

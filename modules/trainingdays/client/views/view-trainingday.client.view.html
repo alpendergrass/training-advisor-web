@@ -8,7 +8,7 @@
       {{trainingDay.date | date:'EEEE, MMM d, y'}} - <a href="#" editable-textarea="trainingDay.name" e-rows="1" e-cols="26" onbeforesave="update(true)"><small ng-hide="trainingDay.name" class="text-default">training day name</small><span ng-show="trainingDay.name">{{trainingDay.name}}</span></a>
       <small class="text-danger" ng-show="trainingDay.startingPoint">This is your season start day</small>
       <small class="text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">This is a Fitness and Fatigue True Up Day</small>
-      <md-button class='md-icon-button' ng-click='getDay(nextDay)' aria-label='Previous day'>
+      <md-button class='md-icon-button pull-right' ng-click='getDay(nextDay)' aria-label='Previous day'>
         <md-icon md-svg-src="/modules/trainingdays/client/img/svg/chevron-right.svg"></md-icon>
       </md-button>
     </h4>

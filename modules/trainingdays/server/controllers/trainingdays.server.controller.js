@@ -360,11 +360,11 @@ exports.getSeason = function(req, res) {
     if (startDay) {
       effectiveStartDate = startDay.date;
     } else {
-      effectiveStartDate = moment(today).subtract('1', 'day');
+      effectiveStartDate = moment(today).subtract(1, 'day');
     }
 
     //Get future goal days to determine end of season.
-    dbUtil.getFuturePriorityDays(user, today, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
+    dbUtil.getFuturePriorityDays(user, today, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -375,7 +375,7 @@ exports.getSeason = function(req, res) {
         //Use last goal to end season.
         effectiveGoalDate = goalDays[goalDays.length - 1].date;
       } else {
-        effectiveGoalDate = moment(today).add('1', 'day');
+        effectiveGoalDate = moment(today).add(1, 'day');
       }
 
       dbUtil.getTrainingDays(user, effectiveStartDate, effectiveGoalDate, function(err, trainingDays) {
