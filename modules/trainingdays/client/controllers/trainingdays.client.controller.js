@@ -284,8 +284,24 @@ angular.module('trainingDays')
             return '#ffe4b3';
           }
 
-          // Highlight goal days.
-          return td.scheduledEventRanking === 1 ? '#D4A1A0' : '#EAF1F5';
+          // Highlight event days.
+          if (td.scheduledEventRanking === 1) {
+            return '#BD7E7D';
+          }
+
+          if (td.scheduledEventRanking === 2) {
+            return '#D1A2A1';
+          }
+
+          if (td.scheduledEventRanking === 3) {
+            return '#EBD1D1';
+          }
+
+          if (td.plannedActivities[0] && td.plannedActivities[0].activityType === 'test') {
+            return '#B2DBDA';
+          }
+
+          return '#EAF1F5';
         };
 
         var setFormPointColor = function(td) {
