@@ -85,18 +85,18 @@ function determinePeriod(user, trainingDay, callback) {
 
           return callback(null, null);
         });
-      // },
-      // mostRecentGoalDate: function(callback) {
-      //   dbUtil.getMostRecentGoalDay(user, trainingDay.date, function(err, goalDay) {
-      //     if (err) {
-      //       return callback(err, null);
-      //     }
-      //     if (goalDay) {
-      //       return callback(null, moment(goalDay.date));
-      //     }
+      },
+      mostRecentGoalDate: function(callback) {
+        dbUtil.getMostRecentGoalDay(user, trainingDay.date, function(err, goalDay) {
+          if (err) {
+            return callback(err, null);
+          }
+          if (goalDay) {
+            return callback(null, moment(goalDay.date));
+          }
 
-      //     return callback(null, null);
-      //   });
+          return callback(null, null);
+        });
       }
     },
     function(err, results) {
@@ -113,7 +113,6 @@ function determinePeriod(user, trainingDay, callback) {
         buildPeriodStart,
         peakPeriodStart,
         racePeriodStart,
-        transitionPeriodStart,
         daysDiff,
         basePeriodAdjustment,
         lastRaceSearchDate,
@@ -170,7 +169,6 @@ function determinePeriod(user, trainingDay, callback) {
           periodData.buildPeriodDays = Math.round(periodData.totalTrainingDays * adviceConstants.buildPortionOfTotalTrainingDays);
           periodData.peakPeriodDays = periodData.totalTrainingDays - (periodData.basePeriodDays + periodData.buildPeriodDays);
 
-          // console.log('periodData: ', periodData);
           //Adjust peak period duration by reallocating days from/to base and build periods if required.
           if (periodData.peakPeriodDays < adviceConstants.minimumNumberOfPeakDays) {
             daysDiff = adviceConstants.minimumNumberOfPeakDays - periodData.peakPeriodDays;
@@ -205,22 +203,26 @@ function determinePeriod(user, trainingDay, callback) {
           buildPeriodStart = periodData.basePeriodDays + 1;
           peakPeriodStart = periodData.basePeriodDays + periodData.buildPeriodDays + 1;
           racePeriodStart = periodData.basePeriodDays + periodData.buildPeriodDays + periodData.peakPeriodDays + 1;
-          transitionPeriodStart = periodData.basePeriodDays + periodData.buildPeriodDays + periodData.peakPeriodDays + periodData.racePeriodDays + 1;
-          // console.log('transitionPeriodStart: ', transitionPeriodStart);
+
           //Determine how many days we are into training.
-          periodData.trainingDayCount = trainingDate.diff(startDate, 'days');
+          periodData.currentDayCount = trainingDate.diff(startDate, 'days');
 
           //Assign period.
-          if (periodData.trainingDayCount >= transitionPeriodStart) {
-            periodData.period = 'transition';
-          } else if (periodData.trainingDayCount >= racePeriodStart) {
+          if (periodData.currentDayCount >= racePeriodStart) {
             periodData.period = 'race';
-          } else if (periodData.trainingDayCount >= peakPeriodStart) {
+          } else if (periodData.currentDayCount >= peakPeriodStart) {
             periodData.period = 'peak';
-          } else if (periodData.trainingDayCount >= buildPeriodStart) {
+          } else if (periodData.currentDayCount >= buildPeriodStart) {
             periodData.period = 'build';
           } else {
             periodData.period = 'base';
+          }
+
+          //If base or build and last goal was less than midSeasonTransitionNumberOfDays ago, reset period to transition.
+          if (periodData.period === 'base' || periodData.period === 'build') {
+            if (trainingDate.diff(results.mostRecentGoalDate, 'days') <= adviceConstants.midSeasonTransitionNumberOfDays) {
+              periodData.period = 'transition';
+            }
           }
 
           periodData.daysUntilNextGoalEvent = moment(results.futureGoalDays[0].date).diff(trainingDate, 'days');

@@ -273,7 +273,7 @@ function generateAdvice(user, trainingDay, callback) {
         if (trainingDay.period === 'transition') {
           trainingDay.plannedActivities[0].activityType = 'choice';
           trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
-          trainingDay.plannedActivities[0].advice += ' You are in transition. You goal for your ride today should be to have fun. Go hard or mellow, your call.';
+          trainingDay.plannedActivities[0].advice += ' You are in transition. You should take a break from training. Now is a good time for cross-training. If you ride, keep it mellow and fun.';
         } else if (trainingDay.period === 'peak') {
           trainingDay.plannedActivities[0].activityType = 'hard';
           trainingDay.plannedActivities[0].rationale += ' Is peak period, recommending hard ride but load will be smaller than typical hard ride.';

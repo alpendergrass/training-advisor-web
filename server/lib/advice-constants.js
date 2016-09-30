@@ -23,6 +23,8 @@ module.exports.maximumNumberOfPeakDays = 14;
 module.exports.minimumNumberOfRaceDays = 7;
 module.exports.maximumNumberOfRaceDays = 21;
 
+module.exports.midSeasonTransitionNumberOfDays = 5;
+
 module.exports.maxDaysToLookAheadForFutureGoals = module.exports.maximumNumberOfTrainingDays + module.exports.maximumNumberOfRaceDays;
 module.exports.maxDaysToLookAheadForSeasonEnd = 366;
 
@@ -74,8 +76,8 @@ module.exports.maximumFatigueTimeConstant = 9;
 module.exports.loadAdviceLookups = [
   {
     activityType: 'choice',
-    lowLoadFactor: 0.3,
-    highLoadFactor: 1.9
+    lowLoadFactor: 0.0,
+    highLoadFactor: 0.4
     // intensity:  0.8
   }, {
     activityType: 'rest',

@@ -43,11 +43,11 @@ module.exports.updateMetrics = function(params, callback) {
       }
 
       params.user.planGenNeeded = true;
-      
+
       params.user.save(function (err) {
         if (err) {
           return callback(err, null);
-        } 
+        }
 
         return callback(null, trainingDay);
       });
@@ -86,7 +86,7 @@ function updateFatigue(params, callback) {
     if (params.genPlan) {
       return callback(null, params.user, trainingDay);
     }
-    
+
     //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
     userUtil.updateFatigueTimeConstant(params.user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
       if (err) {
@@ -96,7 +96,7 @@ function updateFatigue(params, callback) {
       params.user.fatigueTimeConstant = fatigueTimeConstant;
       if (trainingDay.trainingEffortFeedback !== null) {
         //We only ask for feedback if trainingEffortFeedback is null.
-        //So if we got here, this means that we have received and applied feedback, 
+        //So if we got here, this means that we have received and applied feedback,
         //so we reset it to zero to avoid having the time constant
         //readjusted if/when updateMetrics is called again.
         trainingDay.trainingEffortFeedback = 0;
@@ -109,12 +109,12 @@ function updateFatigue(params, callback) {
 
 function updateMetricsForDay(user, currentTrainingDay, callback) {
   //Compute fitness, fatigue and form.
-  //If prior day's fitness and fatigue are not populated, recursively call updateMetricsForDay 
+  //If prior day's fitness and fatigue are not populated, recursively call updateMetricsForDay
   //until they are, which could go all the way back to our period start date, which should
-  //have non-zero fitness and fatigue. 
+  //have non-zero fitness and fatigue.
 
-  //We use yesterday's fitness and fatigue to compute today's form, like TP does it. 
-  //This prevents today's form from changing when completed activities are added to today. 
+  //We use yesterday's fitness and fatigue to compute today's form, like TP does it.
+  //This prevents today's form from changing when completed activities are added to today.
 
   //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
   async.series({
@@ -129,7 +129,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     },
     priorTrainingDay: function(callback) {
       if (currentTrainingDay.startingPoint || currentTrainingDay.fitnessAndFatigueTrueUp) {
-        //Special cases: 
+        //Special cases:
         //1. If called with the first trainingDay of the training period, no point in looking for prior day.
         //2. User is done a F&F trueup: she has manually entered these values and we do not want to recompute them.
         //We will return null for prior day and check for null prior day below.
@@ -179,24 +179,24 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     fatigueTimeConstant = user.fatigueTimeConstant || adviceConstants.defaultFatigueTimeConstant;
 
     //Compute fitness and fatigue for current trainingDay.
-    //If priorTrainingDay does not exist, currentTrainingDay is our starting day or is a F&F trueup and 
+    //If priorTrainingDay does not exist, currentTrainingDay is our starting day or is a F&F trueup and
     //fitness and fatigue would have been supplied by the user.
     if (results.priorTrainingDay) {
       currentTrainingDay.fitness = Math.round((results.priorTrainingDay.fitness + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
       currentTrainingDay.fatigue = Math.round((results.priorTrainingDay.fatigue + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fatigue) / fatigueTimeConstant)) * 10) / 10;
-      //TODO: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster 
-      //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So: 
-      //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7) 
+      //TODO: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
+      //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So:
+      //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7)
       //Our adjustment of fatigueTimeConstant in theory should achieve the same thing but may not be sensitive enough.
       priorDayFitness = results.priorTrainingDay.fitness;
       priorDayFatigue = results.priorTrainingDay.fatigue;
     } else {
       //We need something to use below in computing form and targetAvgDailyLoad
-      priorDayFitness = currentTrainingDay.fitness;      
-      priorDayFatigue = currentTrainingDay.fatigue;      
+      priorDayFitness = currentTrainingDay.fitness;
+      priorDayFatigue = currentTrainingDay.fatigue;
     }
 
-    //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training 
+    //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
     //and decrease (linearly) to 3 by the end of build.
     //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
     //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat. Use ??? for daily ramp rate.
@@ -207,9 +207,9 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     } else {
       //Let's break it down to make it easier to understand when I come back to it a year from now.
       totalBaseAndBuildDays = results.periodData.basePeriodDays + results.periodData.buildPeriodDays;
-      percentageOfTrainingTimeRemaining = (totalBaseAndBuildDays - results.periodData.trainingDayCount) / totalBaseAndBuildDays;
+      percentageOfTrainingTimeRemaining = (totalBaseAndBuildDays - results.periodData.currentDayCount) / totalBaseAndBuildDays;
       currentTrainingDay.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
-      currentTrainingDay.dailyTargetRampRate = Math.round((currentTrainingDay.sevenDayTargetRampRate / 7) * 100) / 100;      
+      currentTrainingDay.dailyTargetRampRate = Math.round((currentTrainingDay.sevenDayTargetRampRate / 7) * 100) / 100;
     }
 
     //Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
@@ -248,7 +248,7 @@ function sumBy(items, prop){
 
 function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
   //classify today's load: rest, easy, moderate, hard
-  //TODO: we should figure out how to classify a workout as a simulation. 
+  //TODO: we should figure out how to classify a workout as a simulation.
   //perhaps by comparing a hard workout with the expected demands of the goal event.
 
   var maxLoadForRating;
