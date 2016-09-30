@@ -178,7 +178,7 @@ module.exports.getPriorPriorityDays = function(user, searchDate, priority, numbe
   }
 
   var trainingDate = moment(searchDate),
-    minDate = moment(searchDate).add(numberOfDaysBack, 'days');
+    minDate = moment(searchDate).subtract(numberOfDaysBack, 'days');
 
   if (!trainingDate.isValid()) {
     err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
