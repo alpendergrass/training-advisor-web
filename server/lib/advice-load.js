@@ -26,7 +26,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
     return callback(err, null, null);
   }
 
-  //We are assuming that the last item in the plannedActivities array is the newest and the one 
+  //We are assuming that the last item in the plannedActivities array is the newest and the one
   //for which we need to compute load.
   latestPlannedActivity = trainingDay.plannedActivities[trainingDay.plannedActivities.length - 1];
 
@@ -37,7 +37,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
     return callback(null, trainingDay);
   } else if (latestPlannedActivity.activityType === 'simulation') {
     //We use the goal event estimate for simulations. We have to go find the next goal day.
-    dbUtil.getFuturePriorityDays(user, trainingDay.date, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
+    dbUtil.getFuturePriorityDays(user, trainingDay.date, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, goalDays) {
       if (err) {
         return callback(err, null);
       }
@@ -45,7 +45,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
       //Note that it is possible that no goal exists or that no estimate was provided.
       if (goalDays.length > 0 && goalDays[0].estimatedLoad) {
         latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
-        latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);        
+        latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);
       } else {
         setTargetLoads(trainingDay);
       }
@@ -78,12 +78,12 @@ function computeRampRateAdjustment(trainingDay) {
   // the other hard days around them. I think these were the only days where we were not tweaking the ramp rates.
   // I'm going to turn off the adjusting until I have higher confidence in doing this.
   // Perhaps we should only adjust ramp rates when computing current advice, not when doing planGen.
-  // I think we also need to compute ramp rates over a longer period as 7 day ramp rate is very sensitive. 
+  // I think we also need to compute ramp rates over a longer period as 7 day ramp rate is very sensitive.
   // Use 14 days to compute? Maybe go back to the last rest period if we can figure out what that was.
 
   // Adjust advice to bring actual ramp rate towards target ramp rate.
   // If below, increase daily targets by % of difference.
-  // If above, decrease daily targets by % of difference.  
+  // If above, decrease daily targets by % of difference.
   // Only adjust hard or moderate days.
 
   var adjustmentFactor = 1;

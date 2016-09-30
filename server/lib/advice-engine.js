@@ -44,26 +44,26 @@ module.exports.generatePlan = function(params, callback) {
     statusMessage = {
       type: '',
       text: '',
-      title: 'Training Plan Update',
+      title: 'Season Update',
       created: Date.now(),
       username: user.username
     };
 
   //TODO: Make the following a async.series. maybe.
-  //As a precaution we remove all planning activities. 
+  //As a precaution we remove all planning activities.
   //If we errored out last time there will be some left over planning activities.
   dbUtil.removePlanningActivities(user, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
     }
 
-    dbUtil.getFuturePriorityDays(user, trainingDate, 1, adviceConstants.maximumNumberOfDaysToLookAhead, function(err, goalDays) {
+    dbUtil.getFuturePriorityDays(user, trainingDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
       if (err) {
         return callback(err, null);
       }
 
       if (goalDays.length < 1) {
-        err = new TypeError('A goal is required in order to compute a plan.');
+        err = new TypeError('A goal is required in order to generate a season view.');
         return callback(err, null);
       }
 
@@ -88,7 +88,7 @@ module.exports.generatePlan = function(params, callback) {
 
           //if today has a ride, start with tomorrow, else start with today.
           if (trainingDays[0].completedActivities.length > 0) {
-            trainingDays.shift(); 
+            trainingDays.shift();
           }
 
           async.eachSeries(trainingDays, function(trainingDay, callback) {
@@ -114,7 +114,7 @@ module.exports.generatePlan = function(params, callback) {
                 return callback();
               });
             });
-          }, 
+          },
             function(err) {
               if (err) {
                 return callback(err, null);
@@ -125,15 +125,15 @@ module.exports.generatePlan = function(params, callback) {
                   return callback(err, null);
                 }
 
-                user.thresholdPowerTestDate = savedThresholdPowerTestDate; 
+                user.thresholdPowerTestDate = savedThresholdPowerTestDate;
                 user.planGenNeeded = false;
-                
+
                 user.save(function (err) {
                   if (err) {
                     return callback(err, null);
-                  } 
+                  }
 
-                  statusMessage.text = 'We have updated your training plan.';
+                  statusMessage.text = 'We have updated your season.';
                   statusMessage.type = 'success';
                   dbUtil.sendMessageToUser(statusMessage, params.user);
                   return callback(null, true);
@@ -162,7 +162,7 @@ module.exports.advise = function(params, callback) {
   }
 
   var trainingDate = new Date(params.trainingDate),
-    user = params.user; 
+    user = params.user;
 
   if (!moment(trainingDate).isValid()) {
     err = new TypeError('trainingDate ' + params.trainingDate + ' is not a valid date');
@@ -185,7 +185,7 @@ module.exports.advise = function(params, callback) {
       if (err) {
         return callback(err, null);
       }
-      
+
       var trainingDay = results[0],
         plannedActivities,
         statusMessage = {};
@@ -207,8 +207,8 @@ module.exports.advise = function(params, callback) {
           if (params.alertUser && !trainingDay.isSimDay) {
             statusMessage = {
               type: 'info',
-              text: 'Training metrics have been updated. You should update your training plan.',
-              title: 'Training Plan Update',
+              text: 'Training metrics have been updated. You should update your season.',
+              title: 'Season Update',
               created: Date.now(),
               username: user.username
             };
@@ -217,11 +217,11 @@ module.exports.advise = function(params, callback) {
           }
 
           return callback(null, recommendation);
-        });        
+        });
       } else {
         //User has requested advice for a specific activity type.
         //We just need to compute load for the requested activity.
-        
+
         //Remove any previously requested specific activity advice.
         plannedActivities = _.filter(trainingDay.plannedActivities, function(activity) {
           return activity.source !== 'requested';
@@ -234,7 +234,7 @@ module.exports.advise = function(params, callback) {
         plannedActivities.push(plannedActivity);
         trainingDay.plannedActivities = plannedActivities;
 
-        //Determine load. 
+        //Determine load.
         adviceLoad.setLoadRecommendations(user, trainingDay, function(err, recommendation) {
           if (err) {
             return callback(err);
@@ -243,11 +243,11 @@ module.exports.advise = function(params, callback) {
           recommendation.save(function (err) {
             if (err) {
               return callback(err, null);
-            } 
+            }
 
             return callback(null, recommendation);
           });
-        });        
+        });
       }
     }
   );
@@ -272,18 +272,18 @@ function generateAdvice(user, trainingDay, callback) {
 
         if (trainingDay.period === 'transition') {
           trainingDay.plannedActivities[0].activityType = 'choice';
-          trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';             
-          trainingDay.plannedActivities[0].advice += ' You are in transition. You goal for your ride today should be to have fun. Go hard or mellow, your call.';   
+          trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
+          trainingDay.plannedActivities[0].advice += ' You are in transition. You goal for your ride today should be to have fun. Go hard or mellow, your call.';
         } else if (trainingDay.period === 'peak') {
           trainingDay.plannedActivities[0].activityType = 'hard';
-          trainingDay.plannedActivities[0].rationale += ' Is peak period, recommending hard ride but load will be smaller than typical hard ride.';             
-          trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a short but intense ride today.';   
+          trainingDay.plannedActivities[0].rationale += ' Is peak period, recommending hard ride but load will be smaller than typical hard ride.';
+          trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a short but intense ride today.';
         } else {
           //Default is a hard workout.
           trainingDay.plannedActivities[0].activityType = 'hard';
           trainingDay.plannedActivities[0].rationale += ' No other recommendation, so hard.';
-          trainingDay.plannedActivities[0].advice += ' If you feel up to it you should go hard today. You appear to be sufficiently rested.';   
-          trainingDay.plannedActivities[0].advice += ' Intensity should be high but will vary based on ride duration.';             
+          trainingDay.plannedActivities[0].advice += ' If you feel up to it you should go hard today. You appear to be sufficiently rested.';
+          trainingDay.plannedActivities[0].advice += ' Intensity should be high but will vary based on ride duration.';
         }
       }
 
@@ -327,11 +327,11 @@ function generateActivityFromAdvice(params, callback) {
 
         if (trainingDay.plannedActivities[0].activityType === 'test') {
           //Make it look as if the user tested when recommended.
-          user.thresholdPowerTestDate = trainingDay.date; 
+          user.thresholdPowerTestDate = trainingDay.date;
           user.save(function (err) {
             if (err) {
               return callback(err, null);
-            } 
+            }
 
             return callback(null, trainingDay);
           });
