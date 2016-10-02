@@ -32,7 +32,6 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
   console.log('trainingDay: ' + moment(trainingDay.date).toDate());
   console.log('Strava searchDate: ' + moment.unix(searchDate).toDate());
 
-
   accessToken = user.provider ==='strava'? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
   //retrieve activities from strava
   strava.athlete.listActivities({ 'access_token': accessToken, 'after': searchDate },function(err, payload) {
@@ -63,11 +62,19 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
     _.forEach(payload, function(stravaActivity) {
       console.log('stravaActivity.id: ' + stravaActivity.id);
-      console.log('stravaActivity.start_date: ' + stravaActivity.start_date);
-      console.log('stravaActivity.start_date_local: ' + stravaActivity.start_date_local);
+      console.log('stravaActivity.start_date: ' + stravaActivity.start_date); //2016-10-01T18:31:47Z
+      console.log('stravaActivity.start_date moment: ' + moment(stravaActivity.start_date).toDate());
+      console.log('stravaActivity.start_date_local: ' + stravaActivity.start_date_local); //looks like UTC: 2016-10-01T12:31:47Z
+      console.log('stravaActivity.start_date_local moment: ' + moment(stravaActivity.start_date_local).toDate());
+      console.log('endDate: ', moment(trainingDay.date).add(1, 'day').toDate());
 
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
-      if (stravaActivity.id && stravaActivity.weighted_average_watts && moment(trainingDay.date).isSame(stravaActivity.start_date_local, 'day')) {
+      // We use stravaActivity.start_date which is UTC as is our trainingDay.date. We check within a day's span
+      // because trainingDay.date UTC could be the day before the Strava activity date.
+      if (stravaActivity.id && stravaActivity.weighted_average_watts &&
+        moment(trainingDay.date).isSameOrBefore(stravaActivity.start_date, 'day') &&
+        moment(trainingDay.date).add(1, 'day').isSameOrAfter(stravaActivity.start_date, 'day')
+        ) {
         if (!_.find(trainingDay.completedActivities, 'sourceID', stravaActivity.id.toString())) {
           activityCount++;
           //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
