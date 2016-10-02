@@ -11,6 +11,7 @@ module.exports = {};
 
 module.exports.getTrainingDayDocument = function(user, trainingDate, callback) {
   //If requested training day does not exist it will be created and returned.
+  //This should be the only place in the app where a new training day is created from scratch.
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
   getTrainingDaysForDate(user, trainingDate, function(err, trainingDays) {
@@ -479,6 +480,9 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   // var query = TrainingDay
   //   .where('user').equals(user)
   //   .where('date').gte(searchDate).lt(end);
+
+  //No longer using dates in query. Using dateNumeric which is an integer derived from 'YYYYMMDD'.
+  //This is a step in simplifying date queries by removing the time component.
 
   searchDateNumeric = toNumericDate(searchDate);
 

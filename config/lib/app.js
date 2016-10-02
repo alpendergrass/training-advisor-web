@@ -36,7 +36,11 @@ module.exports.init = function init(callback) {
   mongoose.connect(function (db) {
     // Initialize express
     var app = express.init(db);
-    
+
+    if (process.env.TZ) {
+      console.log('***** Server timezone manually set to: ', process.env.TZ);
+    }
+
     //Schedule workout download job.
     // var textSched = later.parse.text('every 1 min'); //time is GMT
     var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT

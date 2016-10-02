@@ -250,6 +250,8 @@ var TrainingDaySchema = new Schema({
 });
 
 TrainingDaySchema.pre('save', function(next) {
+  // Note that date and therefore dateNumeric are server date - UTC.
+  // That date could be a different day than on the client, a day before or a day after.
   var dateString = moment(this.get('date')).format('YYYYMMDD');
   this.dateNumeric = parseInt(dateString, 10);
   next();
