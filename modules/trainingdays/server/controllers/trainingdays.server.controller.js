@@ -518,6 +518,13 @@ exports.trainingDayByID = function(req, res, next, id) {
     }
 
     req.trainingDay = trainingDay;
+    // console.log('trainingDay.date: ', trainingDay.date);
+    // console.log('req.user.timezone: ', req.user.timezone);
+    // var localDay = moment.tz(trainingDay.date, req.user.timezone);
+    // console.log('localDay: ', localDay.format('dddd'));
+    // localDay = moment.tz(trainingDay.date, req.user.timezone).day().toString();
+    // console.log('localDay day: ', localDay);
+
     next();
   });
 };
