@@ -107,7 +107,6 @@ function updateFatigue(params, callback) {
 }
 
 function updateMetricsForDay(user, currentTrainingDay, callback) {
-  console.log('updateMetricsForDay: ', currentTrainingDay.date);
   //Compute fitness, fatigue and form.
   //If prior day's fitness and fatigue are not populated, recursively call updateMetricsForDay
   //until they are, which could go all the way back to our period start date, which should
