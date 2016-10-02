@@ -42,6 +42,11 @@ module.exports.updateMetrics = function(params, callback) {
         return callback(err, null);
       }
 
+      if (params.genPlan) {
+        // No need to set planGenNeeded since that is what we are doing now.
+        return callback(null, trainingDay);
+      }
+
       params.user.planGenNeeded = true;
 
       params.user.save(function (err) {
@@ -53,12 +58,6 @@ module.exports.updateMetrics = function(params, callback) {
       });
     }
   );
-};
-
-module.exports.assignLoadRating = function(trainingDay) {
-  var totalLoad = sumBy(trainingDay.completedActivities, 'load');
-  trainingDay.loadRating = determineLoadRating(trainingDay.targetAvgDailyLoad, totalLoad);
-  return trainingDay;
 };
 
 function clearRunway(params, callback) {
@@ -108,6 +107,7 @@ function updateFatigue(params, callback) {
 }
 
 function updateMetricsForDay(user, currentTrainingDay, callback) {
+  console.log('updateMetricsForDay: ', currentTrainingDay.date);
   //Compute fitness, fatigue and form.
   //If prior day's fitness and fatigue are not populated, recursively call updateMetricsForDay
   //until they are, which could go all the way back to our period start date, which should
@@ -225,18 +225,20 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     currentTrainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
     currentTrainingDay.daysUntilNextPriority3Event = results.periodData.daysUntilNextPriority3Event;
 
-    computeSevenDayRampRate(user, currentTrainingDay, function (err, rampRate) {
+    // computeSevenDayRampRate(user, currentTrainingDay, function (err, rampRate) {
       //ignore error...for now at least.
-      currentTrainingDay.sevenDayRampRate = rampRate;
+    //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
+    // currentTrainingDay.sevenDayRampRate = rampRate;
+    currentTrainingDay.sevenDayRampRate = 0;
 
-      currentTrainingDay.save(function (err) {
-        if (err) {
-          return callback(err, null);
-        } else {
-          return callback(null, currentTrainingDay);
-        }
-      });
+    currentTrainingDay.save(function (err) {
+      if (err) {
+        return callback(err, null);
+      } else {
+        return callback(null, currentTrainingDay);
+      }
     });
+    // });
   });
 }
 
@@ -248,8 +250,6 @@ function sumBy(items, prop){
 
 function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
   //classify today's load: rest, easy, moderate, hard
-  //TODO: we should figure out how to classify a workout as a simulation.
-  //perhaps by comparing a hard workout with the expected demands of the goal event.
 
   var maxLoadForRating;
 
@@ -264,6 +264,7 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 }
 
 function computeSevenDayRampRate(user, trainingDay, callback) {
+  //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
   var priorDate = moment(trainingDay.date).subtract(8, 'days'),
     yesterday = moment(trainingDay.date).subtract(1, 'days'),

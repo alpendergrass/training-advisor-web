@@ -49,9 +49,10 @@ module.exports.generatePlan = function(params, callback) {
       username: user.username
     };
 
-  //TODO: Make the following a async.series. maybe.
+  //TODO: Make the following a async.series or something to clean it up. Yuck.
+
   //As a precaution we remove all planning activities.
-  //If we errored out last time there will be some left over planning activities.
+  //If we errored out last time there could be some left over planning activities.
   dbUtil.removePlanningActivities(user, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
@@ -70,6 +71,8 @@ module.exports.generatePlan = function(params, callback) {
       //Use last goal to generate plan.
       goalDay = goalDays[goalDays.length - 1];
 
+      //I don't think we should have to call updateMetrics here.
+      //But we will just in case.
       adviceMetrics.updateMetrics(params, function(err, td) {
         if (err) {
           return callback(err, null);
@@ -125,18 +128,28 @@ module.exports.generatePlan = function(params, callback) {
                   return callback(err, null);
                 }
 
-                user.thresholdPowerTestDate = savedThresholdPowerTestDate;
-                user.planGenNeeded = false;
+                //We need to update metrics for last day as it will not be up to date otherwise.
+                adviceParams.trainingDate = trainingDays[trainingDays.length - 1].date;
+                adviceParams.trainingDay = null;
 
-                user.save(function (err) {
+                adviceMetrics.updateMetrics(adviceParams, function(err, td) {
                   if (err) {
                     return callback(err, null);
                   }
 
-                  statusMessage.text = 'We have updated your season.';
-                  statusMessage.type = 'success';
-                  dbUtil.sendMessageToUser(statusMessage, params.user);
-                  return callback(null, true);
+                  user.thresholdPowerTestDate = savedThresholdPowerTestDate;
+                  user.planGenNeeded = false;
+
+                  user.save(function (err) {
+                    if (err) {
+                      return callback(err, null);
+                    }
+
+                    statusMessage.text = 'We have updated your season.';
+                    statusMessage.type = 'success';
+                    dbUtil.sendMessageToUser(statusMessage, params.user);
+                    return callback(null, true);
+                  });
                 });
               });
             }
@@ -173,17 +186,6 @@ module.exports.advise = function(params, callback) {
     //series of one.
     [
       function(callback) {
-        //updateMetrics not needed if we are generating plan as updateMetrics was called in generateActivityFromAdvice for prior day.
-        //Wait, it sees it is...though I don't know why.
-        // if (params.genPlan) {
-        //   dbUtil.getTrainingDayDocument(params.user, params.trainingDate, function(err, trainingDay) {
-        //     if (err) {
-        //       return callback(err, null);
-        //     }
-
-        //     return callback(null, trainingDay);
-        //   });
-        // } else {
         adviceMetrics.updateMetrics(params, function(err, trainingDay) {
           if (err) {
             return callback(err);
@@ -192,7 +194,6 @@ module.exports.advise = function(params, callback) {
           return callback(null, trainingDay);
         });
       }
-      // }
     ],
     function(err, results) {
       if (err) {
@@ -318,6 +319,9 @@ function generateAdvice(user, trainingDay, callback) {
 }
 
 function generateActivityFromAdvice(params, callback) {
+  //We do this to allow us to generate a plan.
+  //The assumption is that the user will execute the advice to the letter.
+
   var completedActivity = {},
     trainingDay = params.trainingDay,
     user = params.user;
@@ -326,32 +330,30 @@ function generateActivityFromAdvice(params, callback) {
     completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
-    trainingDay = adviceMetrics.assignLoadRating(trainingDay);
+
+    //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
+    //when updateMetrics is called for the following day.
+    trainingDay.fitness = 0;
+    trainingDay.fatigue = 0;
 
     trainingDay.save(function (err) {
       if (err) {
         return callback(err, null);
       }
 
-      adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-        if (err) {
-          return callback(err, null);
-        }
+      if (trainingDay.plannedActivities[0].activityType === 'test') {
+        //Make it look as if the user tested when recommended.
+        user.thresholdPowerTestDate = trainingDay.date;
+        user.save(function (err) {
+          if (err) {
+            return callback(err, null);
+          }
 
-        if (trainingDay.plannedActivities[0].activityType === 'test') {
-          //Make it look as if the user tested when recommended.
-          user.thresholdPowerTestDate = trainingDay.date;
-          user.save(function (err) {
-            if (err) {
-              return callback(err, null);
-            }
-
-            return callback(null, trainingDay);
-          });
-        } else {
           return callback(null, trainingDay);
-        }
-      });
+        });
+      } else {
+        return callback(null, trainingDay);
+      }
     });
   }
 }
