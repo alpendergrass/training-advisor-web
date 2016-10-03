@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('users').controller('AuthenticationController', ['$scope', '$state', '$http', '$location', '$window', 'Authentication', 'PasswordValidator', 'usSpinnerService',
-  function ($scope, $state, $http, $location, $window, Authentication, PasswordValidator, usSpinnerService) {
+angular.module('users').controller('AuthenticationController', ['$scope', '$state', '$http', '$location', '$window', 'Authentication', 'PasswordValidator', 'Site', 'usSpinnerService',
+  function ($scope, $state, $http, $location, $window, Authentication, PasswordValidator, Site, usSpinnerService) {
     $scope.authentication = Authentication;
     $scope.popoverMsg = PasswordValidator.getPopoverMsg();
 
@@ -12,6 +12,16 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
     if ($scope.authentication.user) {
       $location.path('/');
     }
+
+    Site.get({}, function(site) {
+      $scope.allowRegistrations = site.allowRegistrations;
+    }, function(errorResponse) {
+      if (errorResponse.data && errorResponse.data.message) {
+        $scope.error = errorResponse.data.message;
+      } else {
+        $scope.error = 'Server error prevented Site model retrieval.';
+      }
+    });
 
     $scope.signup = function (isValid) {
       $scope.error = null;

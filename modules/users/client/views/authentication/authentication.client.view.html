@@ -1,14 +1,37 @@
-<section class="row" ng-controller="AuthenticationController">
-  <h3 class="col-md-12 text-center">Sign in using your Strava account</h3>
-  <div class="col-md-12 text-center">
-    <!-- <img ng-click="callOauthProvider('/api/auth/facebook')" ng-src="/modules/users/client/img/buttons/facebook.png"> -->
-    <a class="btn btn-default" href="#" role="button"><img style="width:100%" ng-click="callOauthProvider('/api/auth/strava')" ng-src="/modules/users/client/img/buttons/strava.png"></a>
-<!--     <img ng-click="callOauthProvider('/api/auth/twitter')" ng-src="/modules/users/client/img/buttons/twitter.png">
+<section ng-controller="AuthenticationController">
+  <div class="row">
+    <div class="col-md-offset-3 col-md-7" ng-show="!allowRegistrations">
+      <h3 class="page-header">
+      Wait-Listing for New Users is in Effect
+    </h3>
+      <p class="lead">
+        Due to high demand we have created a wait-list for new users.
+      </p>
+      <p>
+        <strong>If you already have a Tacit Training account, this does not affect you. You can log in normally.</strong>
+      </p>
+      <p>
+        However, if you are new here, we have to ask you to be patient. If you would like to be be placed in queue and be notified when we are ready for you, please click <strong>Connect With Strava</strong>.
+      </p>
+      <p>
+        <strong>Sorry for the wait!</strong> <a ui-sref="waitlist">More about wait-listing.</a>
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <h3 class="col-md-12 text-center">Sign up or sign in using your Strava account</h3>
+  </div>
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <!-- <img ng-click="callOauthProvider('/api/auth/facebook')" ng-src="/modules/users/client/img/buttons/facebook.png"> -->
+      <a class="btn btn-default" href="#" role="button"><img style="width:100%" ng-click="callOauthProvider('/api/auth/strava')" ng-src="/modules/users/client/img/buttons/strava.png"></a>
+      <!--     <img ng-click="callOauthProvider('/api/auth/twitter')" ng-src="/modules/users/client/img/buttons/twitter.png">
     <img ng-click="callOauthProvider('/api/auth/google')" ng-src="/modules/users/client/img/buttons/google.png">
     <img ng-click="callOauthProvider('/api/auth/linkedin')" ng-src="/modules/users/client/img/buttons/linkedin.png">
     <img ng-click="callOauthProvider('/api/auth/github')" ng-src="/modules/users/client/img/buttons/github.png">
     <img ng-click="callOauthProvider('/api/auth/paypal')"  ng-src="/modules/users/client/img/buttons/paypal.png">
- -->  
+ -->
+    </div>
   </div>
   <!-- <div ui-view></div> -->
   <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="authSpinner"></div>

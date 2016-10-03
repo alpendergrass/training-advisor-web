@@ -25,6 +25,10 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
       url: '/contact',
       templateUrl: 'modules/core/client/views/contact.client.view.html'
     })
+    .state('waitlist', {
+      url: '/waitlist',
+      templateUrl: 'modules/core/client/views/waitlist.client.view.html'
+    })
     .state('not-found', {
       url: '/not-found',
       templateUrl: 'modules/core/client/views/404.client.view.html',

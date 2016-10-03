@@ -1,8 +1,11 @@
 'use strict';
 
-angular.module('core').controller('HeaderController', ['$scope', '$state', 'Authentication', 'Menus',
-  function ($scope, $state, Authentication, Menus) {
+angular.module('core').controller('HeaderController', ['$scope', '$state', 'Authentication', 'Menus', '_',
+  function ($scope, $state, Authentication, Menus, _) {
     var jQuery = window.jQuery;
+
+    //The following makes lodash available in html.
+    $scope._ = _;
 
     $scope.$state = $state;
     $scope.authentication = Authentication;

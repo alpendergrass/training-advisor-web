@@ -6,9 +6,6 @@ var acl = require('acl');
 // Using the memory backend
 acl = new acl(new acl.memoryBackend());
 
-/**
- * Invoke Admin Permissions
- */
 exports.invokeRolesPolicies = function () {
   acl.allow([{
     roles: ['admin'],
@@ -16,7 +13,14 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/site',
       permissions: '*'
     }]
-  }]);
+  }, {
+    roles: ['guest'],
+    allows: [{
+      resources: '/api/site',
+      permissions: ['get']
+    }]
+  }
+  ]);
 };
 
 /**

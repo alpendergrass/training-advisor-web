@@ -5,6 +5,7 @@ var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
   mongoose = require('mongoose'),
   passport = require('passport'),
+  Site = mongoose.model('Site'),
   User = mongoose.model('User');
 
 // URLs for which user can't be redirected on signin
@@ -73,9 +74,6 @@ exports.signin = function (req, res, next) {
   })(req, res, next);
 };
 
-/**
- * Signout
- */
 exports.signout = function (req, res) {
   req.logout();
   res.redirect('/authentication/signin');
@@ -117,6 +115,10 @@ exports.oauthCallback = function (strategy) {
           return res.redirect('/authentication/signin');
         }
 
+        if (user.waitListed) {
+          return res.redirect('/waitlist');
+        }
+
         return res.redirect(redirectURL || sessionRedirectURL || '/season');
       });
     })(req, res, next);
@@ -128,63 +130,73 @@ exports.oauthCallback = function (strategy) {
  */
 exports.saveOAuthUserProfile = function (req, providerUserProfile, done) {
   if (!req.user) {
-    // Define a search query fields
-    var searchMainProviderIdentifierField = 'providerData.' + providerUserProfile.providerIdentifierField;
-    var searchAdditionalProviderIdentifierField = 'additionalProvidersData.' + providerUserProfile.provider + '.' + providerUserProfile.providerIdentifierField;
-
-    // Define main provider search query
-    var mainProviderSearchQuery = {};
-    mainProviderSearchQuery.provider = providerUserProfile.provider;
-    mainProviderSearchQuery[searchMainProviderIdentifierField] = providerUserProfile.providerData[providerUserProfile.providerIdentifierField];
-
-    // Define additional provider search query
-    var additionalProviderSearchQuery = {};
-    additionalProviderSearchQuery[searchAdditionalProviderIdentifierField] = providerUserProfile.providerData[providerUserProfile.providerIdentifierField];
-
-    // Define a search query to find existing user with current provider profile
-    var searchQuery = {
-      $or: [mainProviderSearchQuery, additionalProviderSearchQuery]
-    };
-
-    User.findOne(searchQuery, function (err, user) {
+    Site.findOne().exec(function (err, site) {
       if (err) {
-        return done(err);
-      } else {
-        if (!user) {
-          var possibleUsername = providerUserProfile.username || ((providerUserProfile.email) ? providerUserProfile.email.split('@')[0] : '');
+        site = {allowRegistrations: true};
+      }
 
-          User.findUniqueUsername(possibleUsername, null, function (availableUsername) {
-            user = new User({
-              firstName: providerUserProfile.firstName,
-              lastName: providerUserProfile.lastName,
-              username: availableUsername,
-              displayName: providerUserProfile.displayName,
-              email: providerUserProfile.email,
-              profileImageURL: providerUserProfile.profileImageURL,
-              provider: providerUserProfile.provider,
-              providerData: providerUserProfile.providerData
+      console.log('site.allowRegistrations: ', site.allowRegistrations);
+
+      // Define a search query fields
+      var searchMainProviderIdentifierField = 'providerData.' + providerUserProfile.providerIdentifierField;
+      var searchAdditionalProviderIdentifierField = 'additionalProvidersData.' + providerUserProfile.provider + '.' + providerUserProfile.providerIdentifierField;
+
+      // Define main provider search query
+      var mainProviderSearchQuery = {};
+      mainProviderSearchQuery.provider = providerUserProfile.provider;
+      mainProviderSearchQuery[searchMainProviderIdentifierField] = providerUserProfile.providerData[providerUserProfile.providerIdentifierField];
+
+      // Define additional provider search query
+      var additionalProviderSearchQuery = {};
+      additionalProviderSearchQuery[searchAdditionalProviderIdentifierField] = providerUserProfile.providerData[providerUserProfile.providerIdentifierField];
+
+      // Define a search query to find existing user with current provider profile
+      var searchQuery = {
+        $or: [mainProviderSearchQuery, additionalProviderSearchQuery]
+      };
+
+      User.findOne(searchQuery, function (err, user) {
+        if (err) {
+          return done(err);
+        } else {
+          if (!user) {
+            var possibleUsername = providerUserProfile.username || ((providerUserProfile.email) ? providerUserProfile.email.split('@')[0] : '');
+
+            User.findUniqueUsername(possibleUsername, null, function (availableUsername) {
+              user = new User({
+                firstName: providerUserProfile.firstName,
+                lastName: providerUserProfile.lastName,
+                username: availableUsername,
+                displayName: providerUserProfile.displayName,
+                email: providerUserProfile.email,
+                profileImageURL: providerUserProfile.profileImageURL,
+                provider: providerUserProfile.provider,
+                providerData: providerUserProfile.providerData,
+                waitListed: !site.allowRegistrations
+              });
+
+              // And save the user
+              user.save(function (err) {
+                return done(err, user);
+              });
             });
-
-            // And save the user
+          } else {
+            //user exists, let's save providerData so we have the latest.
+            //It is possible that the user revoked access to our app in Strava and then reauthorized,
+            //which generates a new accessToken which must be used when calling their API.
+            user.providerData = providerUserProfile.providerData;
+            //And let's make sure we have the current image URL.
+            user.profileImageURL = providerUserProfile.profileImageURL;
+            // Then tell mongoose that we've updated the providerData field as it is a schema-less field.
+            user.markModified('providerData');
             user.save(function (err) {
               return done(err, user);
             });
-          });
-        } else {
-          //user exists, let's save providerData so we have the latest.
-          //It is possible that the user revoked access to our app in Strava and then reauthorized, 
-          //which generates a new accessToken which must be used when calling their API. 
-          user.providerData = providerUserProfile.providerData;
-          //And let's make sure we have the current image URL.
-          user.profileImageURL = providerUserProfile.profileImageURL;
-          // Then tell mongoose that we've updated the providerData field as it is a schema-less field.
-          user.markModified('providerData');
-          user.save(function (err) {
-            return done(err, user);
-          });
+          }
         }
-      }
+      });
     });
+
   } else {
     // User is already logged in, join the provider data to the existing user
     var user = req.user;
