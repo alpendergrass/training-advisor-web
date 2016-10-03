@@ -944,8 +944,8 @@ angular.module('trainingDays')
           //but I have to convert it back to a date to get my date picker
           //to consider it a valid date if the user does not pick a new date.
           trainingDay.date = new Date(trainingDay.date);
-          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').startOf('day').toDate();
-          $scope.nextDay = moment(trainingDay.date).add(1, 'day').startOf('day').toDate();
+          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
+          $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
           $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;

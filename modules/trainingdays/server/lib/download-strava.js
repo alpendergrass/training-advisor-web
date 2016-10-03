@@ -71,6 +71,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
       // We use stravaActivity.start_date which is UTC as is our trainingDay.date. We check within a day's span
       // because trainingDay.date UTC could be the day before the Strava activity date.
+      //TODO: could I use .isBetween below?
       if (stravaActivity.id && stravaActivity.weighted_average_watts &&
         moment(trainingDay.date).isSameOrBefore(stravaActivity.start_date, 'day') &&
         moment(trainingDay.date).add(1, 'day').isSameOrAfter(stravaActivity.start_date, 'day')
