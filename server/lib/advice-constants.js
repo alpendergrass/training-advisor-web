@@ -45,7 +45,7 @@ module.exports.testingEligibleFormThreshold = -7.5;
 module.exports.easyDaytNeededThreshold = -10;
 
 //If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -25;
+module.exports.restNeededThreshold = -20;
 
 //If testing is due and form is less than or equal to this, we recommend rest.
 module.exports.restNeededForTestingThreshold = -11;

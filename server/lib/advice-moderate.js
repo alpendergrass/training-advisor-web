@@ -3,7 +3,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
@@ -56,7 +56,9 @@ function shouldWeGoModerate(user, trainingDay, callback) {
 
     if (wentHard) {
       //Yesterday was a hard day, so if tomorrow is rest day go moderate.
-      var tomorrowDayOfWeek = moment(trainingDay.date).add(1, 'days').day().toString();
+      //We have to convert trainingDay.date to user local time first to get the right day of the week.
+      var tomorrowDayOfWeek = moment(trainingDay.date).add(1, 'days').tz(user.timezone).day().toString();
+
       if (_.indexOf(user.preferredRestDays, tomorrowDayOfWeek) > -1) {
         //Tomorrow's day of week is in user's list of preferred rest days.
         trainingDay.plannedActivities[0].rationale += ' Yesterday was a hard day. Tomorrow is a preferred rest day.';

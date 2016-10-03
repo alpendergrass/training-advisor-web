@@ -2,7 +2,7 @@
 
 
 var _ = require('lodash'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   mongoose = require('mongoose'),
   async = require('async'),
   TrainingDay = mongoose.model('TrainingDay'),
@@ -49,7 +49,13 @@ module.exports.checkRest = function(user, trainingDay, callback) {
 
 function isThisAPreferredRestDay(user, trainingDay, callback) {
 
-  if (_.indexOf(user.preferredRestDays, moment(trainingDay.date).day().toString()) > -1) {
+  //We have to convert trainingDay.date to user local time first to get the right day of the week.
+  //Otherwise, like in Jesse's case (UTC +1), trainingDay.date, which is a Tuesday in local time,
+  //evaluates to Monday on the server, so we are telling Jesse to take Tuesday off
+  //when Monday is his preferred off day.
+  var userDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
+
+  if (_.indexOf(user.preferredRestDays, userDayOfWeek) > -1) {
     trainingDay.plannedActivities[0].rationale += ' Is a preferred rest day.';
     trainingDay.plannedActivities[0].advice += ' Today is one of your planned rest days, so rest.';
     trainingDay.plannedActivities[0].activityType = 'rest';

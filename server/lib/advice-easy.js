@@ -2,7 +2,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   mongoose = require('mongoose'),
   async = require('async'),
   TrainingDay = mongoose.model('TrainingDay'),
@@ -66,7 +66,9 @@ function shouldWeGoEasy(user, trainingDay, callback) {
       else if (trainingDay.form <= adviceConstants.easyDaytNeededThreshold) {
         //form is below our easy threshold so if tomorrow is not rest day, go easy.
         //Otherwise we will likely be recommending rest tomorrow.
-        var tomorrowDayOfWeek = moment(trainingDay.date).add(1, 'days').day().toString();
+
+        //We have to convert trainingDay.date to user local time first to get the right day of the week.
+        var tomorrowDayOfWeek = moment(trainingDay.date).add(1, 'days').tz(user.timezone).day().toString();
 
         if (_.indexOf(user.preferredRestDays, tomorrowDayOfWeek) < 0) {
           //Tomorrow's day of week is not in user's list of preferred rest days.

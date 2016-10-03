@@ -53,10 +53,8 @@ function shouldWeDoSimulation(user, trainingDay, callback) {
   //we should figure out how to classify a workout as a simulation.
   //TODO: we should check our TSB to make sure it is not too low to handle this.
 
-  //Assuming our training date is today...
-  // var today = moment(trainingDay.date).startOf('day');
-  // var todayDayOfWeek = moment(today).day().toString();
-  var todayDayOfWeek = moment(trainingDay.date).day().toString();
+  //We have to convert trainingDay.date to user local time first to get the right day of the week.
+  var todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
 
   if (trainingDay.period === 'build') {
     trainingDay.plannedActivities[0].rationale += ' We are in a build period.';
