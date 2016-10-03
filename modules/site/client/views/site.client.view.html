@@ -1,5 +1,5 @@
 <section ng-controller="SiteController">
-  <form name="userForm" ng-submit="updateSiteSettings(userForm.$valid)" class="signin" novalidate autocomplete="off">
+  <form name="siteForm" ng-submit="update(siteForm.$valid)" novalidate autocomplete="off">
     <div ng-show="error" class="text-danger">
       <strong ng-bind="error"></strong>
     </div>
@@ -13,7 +13,7 @@
             <div class="panel-body">
               <div class="form-group " show-errors>
                 <label>
-                  <input type="checkbox" name="allowRegistrations" ng-model="app.allowRegistrations"> Allow new registrations
+                  <input type="checkbox" name="allowRegistrations" ng-model="site.allowRegistrations"> Allow new registrations
                 </label>
               </div>
             </div>
