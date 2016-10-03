@@ -33,6 +33,9 @@
               <a ui-sref="faq">FAQ</a>
             </li>
             <li ui-sref-active="active">
+              <a ui-sref="waitlist">Waitlisting</a>
+            </li>
+            <li ui-sref-active="active">
               <a ui-sref="contact">Contact Us</a>
             </li>
           </ul>
@@ -49,26 +52,26 @@
         </li>
       </ul>
 
-      <ul class="nav navbar-nav navbar-right" ng-show="authentication.user">
+      <ul class="nav navbar-nav navbar-right" ng-show="authentication.user.roles">
         <li class="dropdown" uib-dropdown>
           <a class="dropdown-toggle user-header-dropdown-toggle" uib-dropdown-toggle role="button">
             <img ng-src="{{authentication.user.profileImageURL}}" alt="{{authentication.user.displayName}}" class="header-profile-image" />
             <span ng-bind="authentication.user.displayName"></span> <b class="caret"></b>
           </a>
           <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-            <li ui-sref-active="active">
+            <li ui-sref-active="active" ng-hide="_.includes(authentication.user.roles, 'waitlist')">
               <a ui-sref="settings.profile">My Profile</a>
             </li>
             <!-- <li ui-sref-active="active">
               <a ui-sref="settings.picture">Change Profile Picture</a>
             </li> -->
-            <li ui-sref-active="active" ng-show="authentication.user.provider === 'local'">
+            <li ui-sref-active="active" ng-show="authentication.user.provider === 'local' && !_.includes(authentication.user.roles, 'waitlist')">
               <a ui-sref="settings.password">Change Password</a>
             </li>
-            <li ui-sref-active="active">
+            <li ui-sref-active="active" ng-hide="_.includes(authentication.user.roles, 'waitlist')">
               <a ui-sref="settings.accounts">Manage Social Accounts</a>
             </li>
-            <li class="divider"></li>
+            <li class="divider" ng-hide="_.includes(authentication.user.roles, 'waitlist')"></li>
             <li>
               <a href="/api/auth/signout" target="_self">Sign Out</a>
             </li>

@@ -3,6 +3,7 @@
 
 var mongoose = require('mongoose'),
   moment = require('moment'),
+  _ = require('lodash'),
   Schema = mongoose.Schema,
   crypto = require('crypto'),
   validator = require('validator'),
@@ -72,6 +73,10 @@ var UserSchema = new Schema({
   salt: {
     type: String
   },
+  waitListed: {
+    type: Boolean,
+    default: false
+  },
   profileImageURL: {
     type: String,
     default: 'modules/users/client/img/profile/default.png'
@@ -79,7 +84,7 @@ var UserSchema = new Schema({
   // birthYear: {
   //   type: Number,
   //   min: 1900,
-  //   max: 2099, 
+  //   max: 2099,
   //   required: 'Please provide your birth year',
   //   default: 1986
   // },
@@ -105,14 +110,14 @@ var UserSchema = new Schema({
   levelOfDetail: {
     type: Number,
     min: 1,
-    max: 3, 
+    max: 3,
     default: 2,
     required: 'Please indicate level of detail'
   },
   fatigueTimeConstant: {
     type: Number,
     min: 5,
-    max: 9, 
+    max: 9,
     default: 7,
     required: 'Fatigue Time Constant is required'
   },
@@ -151,7 +156,7 @@ var UserSchema = new Schema({
   roles: {
     type: [{
       type: String,
-      enum: ['user', 'admin']
+      enum: ['user', 'admin', 'waitlist']
     }],
     default: ['user'],
     required: 'Please provide at least one role'
@@ -179,6 +184,17 @@ UserSchema.pre('save', function (next) {
   if (this.password && this.isModified('password')) {
     this.salt = crypto.randomBytes(16).toString('base64');
     this.password = this.hashPassword(this.password);
+  }
+
+  next();
+});
+
+
+UserSchema.pre('save', function (next) {
+  if (this.waitListed) {
+    this.roles = ['waitlist'];
+  } else if (_.includes(this.roles, 'waitlist')) {
+    this.roles = ['user'];
   }
 
   next();
@@ -249,7 +265,7 @@ UserSchema.statics.generateRandomPassphrase = function () {
     var password = '';
     var repeatingCharacters = new RegExp('(.)\\1{2,}', 'g');
 
-    // iterate until the we have a valid passphrase. 
+    // iterate until the we have a valid passphrase.
     // NOTE: Should rarely iterate more than once, but we need this to ensure no repeating characters are present.
     while (password.length < 20 || repeatingCharacters.test(password)) {
       // build the random password
