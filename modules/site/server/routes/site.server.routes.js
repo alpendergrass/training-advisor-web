@@ -8,5 +8,4 @@ module.exports = function (app) {
   app.route('/api/site')
     .get(sitePolicy.isAllowed, site.read)
     .put(sitePolicy.isAllowed, site.update);
-    //.delete(sitePolicy.isAllowed, admin.delete);
 };
