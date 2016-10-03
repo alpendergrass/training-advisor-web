@@ -1,0 +1,32 @@
+<section ng-controller="SiteController">
+  <form name="siteForm" ng-submit="update(siteForm.$valid)" novalidate autocomplete="off">
+    <div ng-show="error" class="text-danger">
+      <strong ng-bind="error"></strong>
+    </div>
+    <fieldset>
+      <div class="row">
+        <div class="col-xs-11">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <label>New Registrations Settings</label>
+            </div>
+            <div class="panel-body">
+              <div class="form-group " show-errors>
+                <label>
+                  <input type="checkbox" name="allowRegistrations" ng-model="site.allowRegistrations"> Allow new registrations
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="'row">
+        <div class="col-xs-11">
+          <div class="text-center form-group">
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</section>
