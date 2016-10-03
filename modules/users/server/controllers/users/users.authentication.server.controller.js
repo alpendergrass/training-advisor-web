@@ -131,11 +131,9 @@ exports.oauthCallback = function (strategy) {
 exports.saveOAuthUserProfile = function (req, providerUserProfile, done) {
   if (!req.user) {
     Site.findOne().exec(function (err, site) {
-      if (err) {
-        site = {allowRegistrations: true};
+      if (err || !site) {
+        site = { allowRegistrations: true };
       }
-
-      console.log('site.allowRegistrations: ', site.allowRegistrations);
 
       // Define a search query fields
       var searchMainProviderIdentifierField = 'providerData.' + providerUserProfile.providerIdentifierField;
