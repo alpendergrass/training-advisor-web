@@ -14,14 +14,14 @@ module.exports = function (io, socket) {
   // });
 
   //Let's remove any old socket IDs for this user if they exist.
-  console.log('Clearing out saved socket IDs prior to saving new connection.');
+  // console.log('Clearing out saved socket IDs prior to saving new connection.');
   _.remove(global.userSocketIDs, function(sock) {
-    console.log('Saved socketID for ' + sock.username + '  with socket ID: ' + sock.socketID);
+    // console.log('Removed socketID for ' + sock.username + '  with socket ID: ' + sock.socketID);
     return sock.username === socket.request.user.username;
   });
 
   //save socket ID by username.
-  //TODO: user could be connected on multiple brwosers/devices. 
+  //TODO: user could be connected on multiple browsers/devices.
   //We need to better way to connect users and sockets.
   var sock = { username: socket.request.user.username, socketID: socket.id } ;
   global.userSocketIDs.push(sock);
