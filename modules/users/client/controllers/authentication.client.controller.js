@@ -14,7 +14,11 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
     }
 
     Site.get({}, function(site) {
-      $scope.allowRegistrations = site.allowRegistrations;
+      if (typeof site.allowRegistrations === "undefined"){
+        $scope.allowRegistrations = true;
+      } else {
+        $scope.allowRegistrations = site.allowRegistrations;
+      }
     }, function(errorResponse) {
       if (errorResponse.data && errorResponse.data.message) {
         $scope.error = errorResponse.data.message;
