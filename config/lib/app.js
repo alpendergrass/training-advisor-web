@@ -10,10 +10,11 @@ var config = require('../config'),
   nodemailer = require('nodemailer');
 
 var smtpTransport = nodemailer.createTransport(config.mailer.options),
+  mailSubjectPrefix = 'TacitTraining - ' + process.env.NODE_ENV,
   mailOptions = {
     to: config.mailer.from,
     from: config.mailer.from,
-    subject: 'Alert from TacitTraining - ' + process.env.NODE_ENV,
+    subject: '',
     html: '',
     text: ''
   };
@@ -41,30 +42,30 @@ module.exports.init = function init(callback) {
       console.log('***** Server timezone manually set to: ', process.env.TZ);
     }
 
-    //Schedule workout download job.
-    // var textSched = later.parse.text('every 1 min'); //time is GMT
-    var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
+    // //Schedule workout download job.
+    // // var textSched = later.parse.text('every 1 min'); //time is GMT
+    // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
 
-    if (textSched.error > -1) {
-      mailOptions.subject += ': Error';
-      mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
-      console.log(mailOptions.text);
-      smtpTransport.sendMail(mailOptions, function (err) {
-        if (err) {
-          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        }
-      });
-    } else {
-      mailOptions.subject += ': Info';
-      mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
-      console.log(mailOptions.text);
-      smtpTransport.sendMail(mailOptions, function (err) {
-        if (err) {
-          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        }
-      });
-      var timer = later.setInterval(downloadTP, textSched);
-    }
+    // if (textSched.error > -1) {
+    //   mailOptions.subject += ': Error';
+    //   mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
+    //   console.log(mailOptions.text);
+    //   smtpTransport.sendMail(mailOptions, function (err) {
+    //     if (err) {
+    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+    //     }
+    //   });
+    // } else {
+    //   mailOptions.subject += ': Info';
+    //   mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
+    //   console.log(mailOptions.text);
+    //   smtpTransport.sendMail(mailOptions, function (err) {
+    //     if (err) {
+    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+    //     }
+    //   });
+    //   var timer = later.setInterval(downloadTP, textSched);
+    // }
 
     if (callback) callback(app, db, config);
   });
@@ -75,7 +76,7 @@ function downloadTP() {
   console.log(new Date() + ' Running scheduled TP download job.');
   downloadTrainingPeaks.batchDownloadActivities(function(err) {
     if (err) {
-      mailOptions.subject += ': Error';
+      mailOptions.subject = mailSubjectPrefix + ': Error';
       mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities returned error: ' + JSON.stringify(err);
       console.log(mailOptions.text);
       smtpTransport.sendMail(mailOptions, function (err) {
@@ -84,7 +85,7 @@ function downloadTP() {
         }
       });
     } else {
-      mailOptions.subject += ': Info';
+      mailOptions.subject = mailSubjectPrefix + ': Info';
       mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities completed successfully.';
       console.log(mailOptions.text);
       smtpTransport.sendMail(mailOptions, function (err) {
@@ -117,6 +118,14 @@ module.exports.start = function start(callback) {
       if (config.meanjs['meanjs-version'])
         console.log(chalk.green('MEAN.JS version:\t\t\t' + config.meanjs['meanjs-version']));
       console.log('--');
+
+      mailOptions.subject = mailSubjectPrefix + ': Started';
+      mailOptions.text = 'App instance has been started.';
+      smtpTransport.sendMail(mailOptions, function (err) {
+        if (err) {
+          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+        }
+      });
 
       if (callback) callback(app, db, config);
     });
