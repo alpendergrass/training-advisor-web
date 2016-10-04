@@ -13,7 +13,8 @@ var path = require('path'),
 module.exports = {};
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
-  var searchDate = moment(trainingDay.date).startOf('day').unix(),
+  var searchDate = moment(trainingDay.date).unix(),
+    thruDate = moment(trainingDay.date).add(1, 'day'),
     newActivity = {},
     fudgedNP,
     activityCount = 0,
@@ -62,20 +63,22 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
     _.forEach(payload, function(stravaActivity) {
       console.log('stravaActivity.id: ' + stravaActivity.id);
-      console.log('stravaActivity.start_date: ' + stravaActivity.start_date); //2016-10-01T18:31:47Z
-      console.log('stravaActivity.start_date moment: ' + moment(stravaActivity.start_date).toDate());
-      console.log('stravaActivity.start_date_local: ' + stravaActivity.start_date_local); //looks like UTC: 2016-10-01T12:31:47Z
-      console.log('stravaActivity.start_date_local moment: ' + moment(stravaActivity.start_date_local).toDate());
-      console.log('endDate: ', moment(trainingDay.date).add(1, 'day').toDate());
+      console.log('stravaActivity.start_date: ' + stravaActivity.start_date); //2016-09-29T16:17:15Z
+      console.log('stravaActivity.start_date moment: ' + moment(stravaActivity.start_date).toDate()); //Thu Sep 29 2016 10:17:15 GMT-0600 (MDT)
+      console.log('thruDate: ', thruDate.toDate());
+
+      // stravaActivity.start_date_local is formatted as UTC:
+      // 2016-09-29T10:17:15Z
+      // moment treats start_date_local as UTC so moment(stravaActivity.start_date_local).toDate() results in a MDT:
+      // Thu Sep 29 2016 04:17:15 GMT-0600 (MDT)
+      // Not sure what start_date_local is good for.
 
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
       // We use stravaActivity.start_date which is UTC as is our trainingDay.date. We check within a day's span
       // because trainingDay.date UTC could be the day before the Strava activity date.
-      //TODO: could I use .isBetween below?
+
       if (stravaActivity.id && stravaActivity.weighted_average_watts &&
-        moment(trainingDay.date).isSameOrBefore(stravaActivity.start_date, 'day') &&
-        moment(trainingDay.date).add(1, 'day').isSameOrAfter(stravaActivity.start_date, 'day')
-        ) {
+        moment(stravaActivity.start_date).isBetween(trainingDay.date, thruDate)) {
         if (!_.find(trainingDay.completedActivities, 'sourceID', stravaActivity.id.toString())) {
           activityCount++;
           //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
