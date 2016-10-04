@@ -14,8 +14,9 @@
     </h4>
   </div>
   <div class="pull-right">
-    <a ng-show="!trainingDay.completedActivities.length > 0 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="getAdvice(true, trainingDay.date)" title="Get advice">
-      Get Advice
+    <a ng-show="trainingDay.completedActivities.length < 1 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="getAdvice(true, trainingDay.date)" title="Get advice">
+      <span ng-show="trainingDay.plannedActivities.length < 1">Get Advice</span>
+      <span ng-show="trainingDay.plannedActivities.length > 0">Update Advice</span>
     </a>
     <a ng-show="authentication.user.levelOfDetail > 1" class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
       <i class="glyphicon glyphicon-trash"></i>

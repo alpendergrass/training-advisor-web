@@ -386,7 +386,6 @@ angular.module('trainingDays')
         };
 
         $scope.error = null;
-        // $scope.chartColors = ['#45b7cd', '#ff6384', '#ff8e72'];
 
         $scope.chartOptions = {
           legend: { display: true },
@@ -409,6 +408,9 @@ angular.module('trainingDays')
                       break;
                     case 3:
                       text = 'Low Priority Event';
+                      break;
+                    case 9:
+                      text = 'Scheduled Off Day';
                       break;
                   }
                 }
