@@ -8,6 +8,6 @@ applications:
   host: training-advisor
   memory: 512M
   services:
-  - training-advisor-mongo
+  - training-advisor-mongodb
   env:
     NODE_ENV: cloud-foundry
