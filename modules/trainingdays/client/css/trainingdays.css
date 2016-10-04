@@ -34,10 +34,9 @@
   margin-bottom: 55px;
 }
 
-calendar-md md-content.agenda:first-child {
+calendar-md md-content>md-content.agenda>*>* :first-child {
   font-weight: normal !important;
 }
-
 /* To control date column width in agenda view: */
 
 calendar-md md-content.agenda > div > div > div {
