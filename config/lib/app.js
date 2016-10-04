@@ -39,7 +39,7 @@ module.exports.init = function init(callback) {
     var app = express.init(db);
 
     if (process.env.TZ) {
-      console.log('***** Server timezone manually set to: ', process.env.TZ);
+      console.log(chalk.red('***** Server timezone manually set to: ', process.env.TZ));
     }
 
     // //Schedule workout download job.

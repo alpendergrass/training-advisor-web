@@ -238,29 +238,36 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
   });
 };
 
-module.exports.clearFutureMetricsAndAdvice = function(user, startDate, callback) {
-  //Only clear thru today-ish.
+module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callback) {
+  //Only clear thru tomorrow. We don't want to wipe out our plan.
   var start,
-    end;
+    timezone,
+    tomorrow;
 
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  if (!moment(startDate).isValid()) {
-    err = new TypeError('startDate ' + startDate + ' is not a valid date');
+  if (!moment(trainingDate).isValid()) {
+    err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
     return callback(err, null);
   }
 
-  start = moment(startDate).add(1, 'day');
-  //I recognize doing endOf day on current day server side is not precise.
-  //Close enough I think.
-  end = moment().endOf('day');
+  // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
+  // Normally this should never happen but let's make sure.
+  timezone = user.timezone || 'America/Denver';
+  tomorrow = moment().tz(timezone).add(1, 'day').startOf('day').format();
+
+  if (moment(trainingDate).isSameOrAfter(tomorrow)) {
+    return callback(null, null);
+  }
+
+  start = moment(trainingDate).add(1, 'day');
 
   TrainingDay.update({
     user: user,
-    date: { $gte: start, $lte: end },
+    date: { $gte: start, $lte: tomorrow },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
     cloneOfId: null
