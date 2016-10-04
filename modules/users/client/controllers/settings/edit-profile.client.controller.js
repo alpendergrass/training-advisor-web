@@ -2,6 +2,11 @@
 
 angular.module('users').controller('EditProfileController', ['$scope', '$http', '$location', 'Users', 'Authentication', 'toastr',
   function ($scope, $http, $location, Users, Authentication, toastr) {
+    var jQuery = window.jQuery;
+    angular.element(document).ready(function() {
+      jQuery('[data-toggle="popover"]').popover();
+    });
+
     $scope.user = Authentication.user;
     $scope.user.thresholdPowerTestDate = new Date($scope.user.thresholdPowerTestDate);
     $scope.data = {
