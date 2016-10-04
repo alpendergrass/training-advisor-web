@@ -2,12 +2,13 @@
 
 var cfenv = require('cfenv'),
   appEnv = cfenv.getAppEnv();
+
 var cfMongoUrl = (function() {
-  if (appEnv.getService('training-advisor-mongo')) {
-    var mongoCreds = appEnv.getService('training-advisor-mongo').credentials;
+  if (appEnv.getService('training-advisor-mongodb')) {
+    var mongoCreds = appEnv.getService('training-advisor-mongodb').credentials;
     return mongoCreds.uri || mongoCreds.url;
   } else {
-    throw new Error('No service names "training-advisor-mongo" bound to the application.');
+    throw new Error('No service names "training-advisor-mongodb" bound to the application.');
   }
 }());
 

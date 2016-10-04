@@ -14,7 +14,7 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
     }
 
     Site.get({}, function(site) {
-      if (typeof site.allowRegistrations === "undefined"){
+      if (typeof site.allowRegistrations === 'undefined'){
         $scope.allowRegistrations = true;
       } else {
         $scope.allowRegistrations = site.allowRegistrations;
