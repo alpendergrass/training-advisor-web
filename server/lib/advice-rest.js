@@ -53,9 +53,9 @@ function isThisAPreferredRestDay(user, trainingDay, callback) {
   //Otherwise, like in Jesse's case (UTC +1), trainingDay.date, which is a Tuesday in local time,
   //evaluates to Monday on the server, so we are telling Jesse to take Tuesday off
   //when Monday is his preferred off day.
-  var userDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
+  var todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
 
-  if (_.indexOf(user.preferredRestDays, userDayOfWeek) > -1) {
+  if (_.indexOf(user.preferredRestDays, todayDayOfWeek) > -1) {
     trainingDay.plannedActivities[0].rationale += ' Is a preferred rest day.';
     trainingDay.plannedActivities[0].advice += ' Today is one of your planned rest days, so rest.';
     trainingDay.plannedActivities[0].activityType = 'rest';

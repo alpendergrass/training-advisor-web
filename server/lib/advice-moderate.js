@@ -57,7 +57,7 @@ function shouldWeGoModerate(user, trainingDay, callback) {
     if (wentHard) {
       //Yesterday was a hard day, so if tomorrow is rest day go moderate.
       //We have to convert trainingDay.date to user local time first to get the right day of the week.
-      var tomorrowDayOfWeek = moment(trainingDay.date).add(1, 'days').tz(user.timezone).day().toString();
+      var tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
 
       if (_.indexOf(user.preferredRestDays, tomorrowDayOfWeek) > -1) {
         //Tomorrow's day of week is in user's list of preferred rest days.
