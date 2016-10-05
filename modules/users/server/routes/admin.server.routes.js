@@ -18,6 +18,9 @@ module.exports = function (app) {
     .put(adminPolicy.isAllowed, admin.update)
     .delete(adminPolicy.isAllowed, admin.delete);
 
+  app.route('/api/users/impersonate/:userId')
+    .get(adminPolicy.isAllowed, admin.impersonate);
+
   // Finish by binding the user middleware
   app.param('userId', admin.userByID);
 };

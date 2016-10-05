@@ -6,16 +6,11 @@ var path = require('path'),
   User = mongoose.model('User'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
-/**
- * Show the current user
- */
+// Show the current user
 exports.read = function (req, res) {
   res.json(req.model);
 };
 
-/**
- * Update a User
- */
 exports.update = function (req, res) {
   var user = req.model;
 
@@ -36,9 +31,6 @@ exports.update = function (req, res) {
   });
 };
 
-/**
- * Delete a user
- */
 exports.delete = function (req, res) {
   var user = req.model;
 
@@ -53,9 +45,18 @@ exports.delete = function (req, res) {
   });
 };
 
-/**
- * List of Users
- */
+exports.impersonate = function(req, res, next) {
+  var user = req.model;
+
+  req.login(user, function(err) {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.json(user);
+    }
+  });
+};
+
 exports.list = function (req, res) {
   User.find({}, '-salt -password').sort('-created').populate('user', 'displayName').exec(function (err, users) {
     if (err) {
@@ -68,9 +69,7 @@ exports.list = function (req, res) {
   });
 };
 
-/**
- * User middleware
- */
+// User middleware
 exports.userByID = function (req, res, next, id) {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).send({

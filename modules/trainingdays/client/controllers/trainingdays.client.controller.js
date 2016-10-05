@@ -228,7 +228,7 @@ angular.module('trainingDays')
             // Redirect after save
             trainingDay.$create(function(response) {
               $scope.trainingDay = response;
-              $location.path('trainingDays/' + response._id);
+              $state.go('trainingDays/' + response._id);
             }, function(errorResponse) {
               if (errorResponse.data && errorResponse.data.message) {
                 $scope.error = errorResponse.data.message;
@@ -467,7 +467,7 @@ angular.module('trainingDays')
             trainingDate: $scope.today.toISOString()
           }, function(response) {
             usSpinnerService.stop('tdSpinner');
-            $location.path('season');
+            $state.go('season');
             loadChart();
           }, function(errorResponse) {
             usSpinnerService.stop('tdSpinner');
@@ -714,7 +714,7 @@ angular.module('trainingDays')
 
           // Redirect after save
           trainingDay.$create(function(response) {
-            $location.path('season');
+            $state.go('season');
 
             // Clear form fields
             $scope.name = '';
@@ -883,7 +883,7 @@ angular.module('trainingDays')
           });
 
           trainingDay.$create(function(response) {
-            $location.path('season');
+            $state.go('season');
 
             // Clear form fields
             $scope.name = '';
@@ -989,7 +989,7 @@ angular.module('trainingDays')
             }
           } else {
             $scope.trainingDay.$remove(function() {
-              $location.path('season');
+              $state.go('season');
             });
           }
         };
@@ -1135,7 +1135,7 @@ angular.module('trainingDays')
           alternateActivity: $scope.alternateActivity || null
         }, function(response) {
           $scope.trainingDay = response;
-          $location.path('trainingDays/' + response._id);
+          $state.go('trainingDays/' + response._id);
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
