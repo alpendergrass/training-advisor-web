@@ -6,6 +6,9 @@ angular.module('trainingDays')
     function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, Socket, TrainingDays, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
       var jQuery = window.jQuery;
+      angular.element(document).ready(function() {
+        jQuery('[data-toggle="popover"]').popover();
+      });
 
       //The following makes lodash available in html.
       $scope._ = _;
@@ -171,7 +174,7 @@ angular.module('trainingDays')
           //   content += '<br><i>Form: ' + trainingDay.form + '</i>';
           // }
 
-          content += '<br><i>Period: ' + trainingDay.period + '</i>';
+          // content += '<br><i>Period: ' + trainingDay.period + '</i>';
 
           content += '</small></div>';
           return content;
@@ -243,12 +246,12 @@ angular.module('trainingDays')
         initCalendar();
       };
 
-      //Highlight today in calendar view
-      //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
-      //We need a callback from the calendar module. Or something.
-      angular.element(document).ready(function() {
-        jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
-      });
+      // //Highlight today in calendar view
+      // //Note that this will not survive a change in calendar layout (calendar to agenda or v.v.).
+      // //We need a callback from the calendar module. Or something.
+      // angular.element(document).ready(function() {
+      //   jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
+      // });
 
 
       $scope.viewSeason = function() {
@@ -955,7 +958,8 @@ angular.module('trainingDays')
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
           $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-          $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
+          // $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
+          $scope.showFormAndFitness = true; //TODO: not sure why I had the check above.
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           return trainingDay;
         }

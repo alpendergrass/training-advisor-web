@@ -86,7 +86,7 @@
               </div>
               <div class="radio">
                 <label>
-                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail2" value="2"> Show me advice and some details
+                  <input type="radio" name="levelOfDetail" ng-model="user.levelOfDetail" id="levelOfDetail2" value="2"> Show me advice and some numbers
                 </label>
               </div>
               <div class="radio" ng-show="user.roles.indexOf('admin') > -1">
@@ -106,16 +106,14 @@
           </div>
           <div class="panel-body">
             <div class="form-group" show-errors>
-              <label class="small" for="preferredRestDays">Rest Day(s)</label>
-              <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Preferred Rest Days" data-content="You may select one of more days that you typically rest to have Tacit Training schedule these days as rest days."><strong>?</strong></a>
+              <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Preferred Rest Days" data-content="You may select one of more days that you typically rest to have Tacit Training schedule these days as rest days."><label class="small" for="preferredRestDays">Rest Day(s)</label></a>
               <br>
               <select multiple name="preferredRestDays" class="form-control" ng-model="user.preferredRestDays">
                 <option ng-repeat="option in data.daysOfTheWeek" value="{{option.id}}" ng-selected="{{user.preferredRestDays.indexOf(option.id) > -1}}">{{option.name}}</option>
               </select>
             </div>
             <div class="form-group" show-errors>
-              <label class="small" for="preferredSimulationDay">Race Simulations</label>
-              <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Preferred Race Simulations Day" data-content="You may select a day that you would perfer to have Tacit Training schedule race simulation workouts."><strong>?</strong></a>
+              <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Preferred Race Simulation Day" data-content="You may select a day that you  perfer to have Tacit Training schedule race simulation workouts."><label class="small" for="preferredSimulationDay">Race Simulations</label></a>
               <br>
               <select name="preferredSimulationDay" class="form-control" ng-model="user.preferredSimulationDay">
                 <option value="">Pick a day</option>
