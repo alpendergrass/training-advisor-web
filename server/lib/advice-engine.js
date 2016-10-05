@@ -333,8 +333,11 @@ function generateActivityFromAdvice(params, callback) {
 
     //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
     //when updateMetrics is called for the following day.
-    trainingDay.fitness = 0;
-    trainingDay.fatigue = 0;
+    //We should not do this if this is a start or true-up day as F&F were set by user.
+    if (!trainingDay.startingPoint && !trainingDay.fitnessAndFatigueTrueUp) {
+      trainingDay.fitness = 0;
+      trainingDay.fatigue = 0;
+    }
 
     trainingDay.save(function (err) {
       if (err) {
