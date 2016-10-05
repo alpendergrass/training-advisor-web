@@ -98,7 +98,7 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
         answer: 'Because your Tacit Training account is linked to your Strava account, you are set up to download your rides from Strava from within Tacit Training. Click the Strava download button on the Training Day page.'
       }, {
         question: 'I have not input my rides into Tacit Training for a day/week/month or two but I want to start using it again. Do I have to input all the workouts I’ve done since the last time I used it?',
-        answer: 'No. You need to do a Mid-Season True-Up - see the Training Days menu.'
+        answer: 'No. You need to do a Fitness and Fatigue True-Up - see the Training Days menu.'
       }, {
         question: 'Why are my Fitness, Fatigue and Form numbers in Tacit Training higher than in Strava?',
         answer: 'One of our goals is to give you a Training Load recommendation that you can monitor in real time on your head unit. Due to the way Strava processes raw activity data, one of the values from your Strava ride data tends to run lower than the corresponding value your head unit uses to compute Training Load. We adjust this value when computing Training Load (which affects Fitness, Fatigue and Form) using an average of the difference we’ve measured over time. It will not be exact but we believe it is close enough.'
