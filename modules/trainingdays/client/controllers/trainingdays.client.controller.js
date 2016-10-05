@@ -376,6 +376,11 @@ angular.module('trainingDays')
           }, function(response) {
             initSimFlags();
             loadChart();
+            if (!$scope.authentication.user.timezone) {
+              toastr.warning('Please go to <strong>My Profile</strong> and set your timezone.', 'Timezone Not Set', {
+                allowHtml: true
+              });
+            }
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
