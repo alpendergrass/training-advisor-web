@@ -228,7 +228,7 @@ angular.module('trainingDays')
             // Redirect after save
             trainingDay.$create(function(response) {
               $scope.trainingDay = response;
-              $state.go('trainingDays/' + response._id);
+              $location.path('trainingDays/' + response._id);
             }, function(errorResponse) {
               if (errorResponse.data && errorResponse.data.message) {
                 $scope.error = errorResponse.data.message;
@@ -1135,7 +1135,7 @@ angular.module('trainingDays')
           alternateActivity: $scope.alternateActivity || null
         }, function(response) {
           $scope.trainingDay = response;
-          $state.go('trainingDays/' + response._id);
+          $location.path('trainingDays/' + response._id);
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
