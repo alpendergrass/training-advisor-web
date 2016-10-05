@@ -19,6 +19,10 @@ angular.module('users.admin').factory('Admin', ['$resource',
     }, {
       update: {
         method: 'PUT'
+      },
+      impersonate: {
+        method: 'GET',
+        url: 'api/users/impersonate/:userId'
       }
     });
   }

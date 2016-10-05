@@ -53,6 +53,25 @@ exports.delete = function (req, res) {
   });
 };
 
+exports.impersonate = function(req, res, next) {
+
+  // if (!req.user.isAdmin) {
+  //   return next(); // skip if not admin
+  // }
+  var user = req.model;
+
+  // User.findOne({ _id: req.userId }, '-salt -password',
+  //   function(err, user) {
+      req.login(user, function(err) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.json(user);
+        }
+      });
+    // });
+};
+
 /**
  * List of Users
  */
