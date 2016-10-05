@@ -257,14 +257,12 @@ module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callba
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
   timezone = user.timezone || 'America/Denver';
-  tomorrow = moment().tz(timezone).add(1, 'day').startOf('day').format();
-
-  if (moment(trainingDate).isSameOrAfter(tomorrow)) {
-    return callback(null, null);
-  }
-
+  tomorrow = moment().tz(timezone).add(1, 'day').startOf('day');
   start = moment(trainingDate).add(1, 'day');
 
+  if (start.isSameOrAfter(tomorrow)) {
+    return callback(null, null);
+  }
   TrainingDay.update({
     user: user,
     date: { $gte: start, $lte: tomorrow },

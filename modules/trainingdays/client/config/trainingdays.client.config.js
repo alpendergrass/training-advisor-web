@@ -22,25 +22,19 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Schedule Events',
-      state: 'trainingDays.createEvent',
-      roles: ['user']
-    });
-
-    Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'Get Advice',
       state: 'trainingDays.getAdvice',
       roles: ['user']
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Start Season',
-      state: 'trainingDays.createStart',
+      title: 'Schedule Events',
+      state: 'trainingDays.createEvent',
       roles: ['user']
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Mid-Season True-Up',
+      title: 'True-Up Fitness & Fatigue',
       state: 'trainingDays.trueUp',
       roles: ['user']
     });

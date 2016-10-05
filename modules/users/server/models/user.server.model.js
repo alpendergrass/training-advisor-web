@@ -111,7 +111,7 @@ var UserSchema = new Schema({
     type: Number,
     min: 1,
     max: 3,
-    default: 2,
+    default: 1,
     required: 'Please indicate level of detail'
   },
   fatigueTimeConstant: {
