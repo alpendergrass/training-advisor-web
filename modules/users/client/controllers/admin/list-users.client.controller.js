@@ -9,7 +9,7 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
 
     $scope.buildPager = function () {
       $scope.pagedItems = [];
-      $scope.itemsPerPage = 2;
+      $scope.itemsPerPage = 15;
       $scope.currentPage = 1;
       $scope.figureOutItemsToDisplay();
     };
