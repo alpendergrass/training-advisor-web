@@ -3,6 +3,7 @@
 
 var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
+  _ = require('lodash'),
   mongoose = require('mongoose'),
   passport = require('passport'),
   Site = mongoose.model('Site'),
@@ -28,6 +29,7 @@ exports.signup = function(req, res) {
   // Add missing user fields
   user.provider = 'local';
   user.displayName = user.firstName + ' ' + user.lastName;
+  user.lastLogin = Date.now();
 
   // Then save the user
   user.save(function(err) {
@@ -59,16 +61,20 @@ exports.signin = function(req, res, next) {
     if (err || !user) {
       res.status(400).send(info);
     } else {
-      // Remove sensitive data before login
-      user.password = undefined;
-      user.salt = undefined;
+      user.lastLogin = Date.now();
+      user.save(function(err) {
+        // Ignore any save error here.
+        // Remove sensitive data before login
+        user.password = undefined;
+        user.salt = undefined;
 
-      req.login(user, function(err) {
-        if (err) {
-          res.status(400).send(err);
-        } else {
-          res.json(user);
-        }
+        req.login(user, function(err) {
+          if (err) {
+            res.status(400).send(err);
+          } else {
+            res.json(user);
+          }
+        });
       });
     }
   })(req, res, next);
@@ -107,9 +113,11 @@ exports.oauthCallback = function(strategy) {
       if (err) {
         return res.redirect('/authentication/signin?err=' + encodeURIComponent(errorHandler.getErrorMessage(err)));
       }
+
       if (!user) {
         return res.redirect('/authentication/signin');
       }
+
       req.login(user, function(err) {
         if (err) {
           return res.redirect('/authentication/signin');
@@ -117,6 +125,10 @@ exports.oauthCallback = function(strategy) {
 
         if (user.waitListed) {
           return res.redirect('/waitlist');
+        }
+
+        if (_.includes(user.roles, 'admin')) {
+          return res.redirect('/admin/users');
         }
 
         return res.redirect(redirectURL || sessionRedirectURL || '/season');
@@ -187,6 +199,7 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
             user.profileImageURL = providerUserProfile.profileImageURL;
             // Then tell mongoose that we've updated the providerData field as it is a schema-less field.
             user.markModified('providerData');
+            user.lastLogin = Date.now();
             user.save(function(err) {
               return done(err, user);
             });

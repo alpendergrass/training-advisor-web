@@ -21,7 +21,7 @@ exports.update = function (req, res) {
     user.updated = Date.now();
     user.displayName = user.firstName + ' ' + user.lastName;
     //Let's take the shotgun approach and suggest plan re-gen for any profile change
-    //even only some changes could affect advice.
+    //even if only some changes could affect advice.
     user.planGenNeeded = true;
 
     user.save(function (err) {
@@ -51,7 +51,7 @@ exports.changeProfilePicture = function (req, res) {
   var message = null;
   var upload = multer(config.uploads.profileUpload).single('newProfilePicture');
   var profileUploadFileFilter = require(path.resolve('./config/lib/multer')).profileUploadFileFilter;
-  
+
   // Filtering to upload only images
   upload.fileFilter = profileUploadFileFilter;
 

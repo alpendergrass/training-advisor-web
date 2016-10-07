@@ -164,6 +164,14 @@ var UserSchema = new Schema({
   updated: {
     type: Date
   },
+  lastLogin: {
+    type: Date,
+    default: Date.now
+  },
+  loginCount: {
+    type: Number,
+    default: 1
+  },
   created: {
     type: Date,
     default: Date.now
@@ -186,11 +194,10 @@ UserSchema.pre('save', function (next) {
     this.password = this.hashPassword(this.password);
   }
 
-  next();
-});
+  if (this.isModified('lastLogin')) {
+    this.loginCount++;
+  }
 
-
-UserSchema.pre('save', function (next) {
   if (this.waitListed) {
     this.roles = ['waitlist'];
   } else if (_.includes(this.roles, 'waitlist')) {
@@ -200,9 +207,8 @@ UserSchema.pre('save', function (next) {
   next();
 });
 
-/**
- * Hook a pre validate method to test the local password
- */
+
+//Hook a pre-validate method to test the local password
 UserSchema.pre('validate', function (next) {
   if (this.provider === 'local' && this.password && this.isModified('password')) {
     var result = owasp.test(this.password);
@@ -215,9 +221,7 @@ UserSchema.pre('validate', function (next) {
   next();
 });
 
-/**
- * Create instance method for hashing a password
- */
+//Create instance method for hashing a password
 UserSchema.methods.hashPassword = function (password) {
   if (this.salt && password) {
     return crypto.pbkdf2Sync(password, new Buffer(this.salt, 'base64'), 10000, 64).toString('base64');
