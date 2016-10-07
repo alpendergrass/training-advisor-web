@@ -9,13 +9,27 @@
       </div>
     </div>
   </div>
-  <div class="list-group">
-    <a ng-repeat="user in pagedItems" ui-sref="admin.user({userId: user._id})" class="list-group-item">
-      <h4 class="list-group-item-heading" ng-bind="user.username"></h4>
-      <p class="list-group-item-text pull-right small" ng-bind="user.roles"></p>
-      <p class="list-group-item-text" ng-bind="user.email"></p>
-    </a>
-  </div>
+  <table class="table table-hover">
+  <tr>
+    <th ng-click="sortBy('firstName')">First Name</th>
+    <th ng-click="sortBy('lastName')">Last Name</th>
+    <th ng-click="sortBy('email')">Email</th>
+    <th ng-click="sortBy('username')">Username</th>
+    <th ng-click="sortBy('created')">Created</th>
+    <th ng-click="sortBy('updated')">Updated</th>
+    <th ng-click="sortBy('roles')">Roles</th>
+  </tr>
+    <!-- <tr ng-repeat="user in pagedItems | orderBy:propertyName:reverse" > -->
+    <tr ng-repeat="user in pagedItems" >
+      <td><a ui-sref="admin.user({userId: user._id})">{{user.firstName}}</a></td>
+      <td><a ui-sref="admin.user({userId: user._id})">{{user.lastName}}</a></td>
+      <td>{{user.email}}</td>
+      <td>{{user.username}}</td>
+      <td>{{user.created}}</td>
+      <td>{{user.updated}}</td>
+      <td>{{user.roles}}</td>
+    </tr>
+  </table>
 
   <ul uib-pagination boundary-links="true" max-size="8" items-per-page="itemsPerPage" total-items="filterLength" ng-model="currentPage" ng-change="pageChanged()"></ul>
 </section>

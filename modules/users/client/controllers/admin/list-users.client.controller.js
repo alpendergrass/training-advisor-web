@@ -1,9 +1,12 @@
 'use strict';
 
-angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'Admin',
-  function ($scope, $filter, Admin) {
+angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'orderByFilter', 'Admin',
+  function ($scope, $filter, orderByFilter, Admin) {
+    $scope.propertyName = null;
+    $scope.reverse = true;
+
     Admin.query(function (data) {
-      $scope.users = data;
+      $scope.usersSorted = $scope.users = data;
       $scope.buildPager();
     });
 
@@ -15,7 +18,7 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     };
 
     $scope.figureOutItemsToDisplay = function () {
-      $scope.filteredItems = $filter('filter')($scope.users, {
+      $scope.filteredItems = $filter('filter')($scope.usersSorted, {
         $: $scope.search
       });
       $scope.filterLength = $scope.filteredItems.length;
@@ -25,6 +28,13 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     };
 
     $scope.pageChanged = function () {
+      $scope.figureOutItemsToDisplay();
+    };
+
+    $scope.sortBy = function(propertyName) {
+      $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : false;
+      $scope.propertyName = propertyName;
+      $scope.usersSorted = orderByFilter($scope.users, $scope.propertyName, $scope.reverse);
       $scope.figureOutItemsToDisplay();
     };
   }

@@ -54,6 +54,7 @@ angular.module('trainingDays')
         $scope.hasStart = true;
         $scope.hasEnd = true;
         $scope.needsPlanGen = false;
+        usSpinnerService.spin('tdSpinner');
 
         TrainingDays.getSeason({
           today: $scope.today.toISOString()
@@ -101,9 +102,11 @@ angular.module('trainingDays')
           }
 
           $scope.season = season;
+          usSpinnerService.stop('tdSpinner');
           return callback();
         }, function(errorResponse) {
           $scope.season = null;
+          usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
@@ -957,9 +960,10 @@ angular.module('trainingDays')
           $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
-          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           // $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
-          $scope.showFormAndFitness = true; //TODO: not sure why I had the check above.
+          //TODO: not sure why I had the check above.
+          $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
+          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           return trainingDay;
         }

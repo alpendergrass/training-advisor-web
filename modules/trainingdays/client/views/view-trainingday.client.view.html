@@ -80,7 +80,7 @@
     </p>
     <hr />
   </div>
-  <div ng-show="(showFormAndFitness && authentication.user.levelOfDetail > 1) || authentication.user.levelOfDetail > 2">
+  <div ng-show="showFormAndFitness">
     <!-- Let's edit in place.  -->
     <form editable-form name="trainingDayForm" onaftersave="update(true)">
       <div>

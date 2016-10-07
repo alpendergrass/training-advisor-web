@@ -5,11 +5,11 @@
         <h1 ng-bind="user.username"></h1>
       </div>
       <div class="col-md-4">
-        <a class="btn btn-primary" ui-sref="admin.user-edit({userId: user._id})">
-          <i class="glyphicon glyphicon-edit"></i>
-        </a>
         <a class="btn btn-primary" ng-click="impersonate(user._id);" title="Impersonate">
           <i class="glyphicon glyphicon-user"></i>
+        </a>
+        <a class="btn btn-primary" ui-sref="admin.user-edit({userId: user._id})">
+          <i class="glyphicon glyphicon-edit"></i>
         </a>
         <a class="btn btn-primary" ng-click="remove();" ng-if="user._id !== authentication.user._id">
           <i class="glyphicon glyphicon-trash"></i>
