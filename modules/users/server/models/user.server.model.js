@@ -165,8 +165,7 @@ var UserSchema = new Schema({
     type: Date
   },
   lastLogin: {
-    type: Date,
-    default: Date.now
+    type: Date
   },
   loginCount: {
     type: Number,
