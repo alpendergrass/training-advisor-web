@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'orderByFilter', 'Admin',
-  function ($scope, $filter, orderByFilter, Admin) {
+angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'orderByFilter', 'moment', 'Admin',
+  function ($scope, $filter, orderByFilter, moment, Admin) {
+    $scope.moment = moment;
     $scope.propertyName = null;
     $scope.reverse = true;
 
