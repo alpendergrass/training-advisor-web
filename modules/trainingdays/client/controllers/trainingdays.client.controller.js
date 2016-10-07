@@ -54,6 +54,7 @@ angular.module('trainingDays')
         $scope.hasStart = true;
         $scope.hasEnd = true;
         $scope.needsPlanGen = false;
+        usSpinnerService.spin('tdSpinner');
 
         TrainingDays.getSeason({
           today: $scope.today.toISOString()
@@ -101,9 +102,11 @@ angular.module('trainingDays')
           }
 
           $scope.season = season;
+          usSpinnerService.stop('tdSpinner');
           return callback();
         }, function(errorResponse) {
           $scope.season = null;
+          usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
