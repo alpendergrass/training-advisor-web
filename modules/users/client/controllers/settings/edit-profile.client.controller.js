@@ -28,6 +28,23 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
         { id: 'SharedCoachedPremium', name: 'Shared Coached Premium' },
       ]
     };
+
+    //Begin Datepicker stuff.
+    $scope.datePickerStatus = {
+      opened: false
+    };
+
+    $scope.openDatePicker = function($event) {
+      $scope.datePickerStatus.opened = true;
+    };
+
+    $scope.ftpDateOptions = {
+      formatYear: 'yy',
+      startingDay: 1,
+      showWeeks: false
+    };
+    //End Datepicker stuff.
+
     // Update a user profile
     $scope.updateUserProfile = function (isValid) {
       if (!isValid) {
