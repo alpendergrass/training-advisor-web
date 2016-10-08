@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('users').controller('EditProfileController', ['$scope', '$http', '$location', 'Users', 'Authentication', 'toastr',
-  function ($scope, $http, $location, Users, Authentication, toastr) {
+angular.module('users').controller('EditProfileController', ['$scope', '$http', '$state', 'Users', 'Authentication', 'toastr',
+  function ($scope, $http, $state, Users, Authentication, toastr) {
     var jQuery = window.jQuery;
     angular.element(document).ready(function() {
       jQuery('[data-toggle="popover"]').popover();
@@ -49,7 +49,6 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.updateUserProfile = function (isValid) {
       if (!isValid) {
         $scope.$broadcast('show-errors-check-validity', 'userForm');
-
         return false;
       }
 
@@ -57,8 +56,9 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
 
       user.$update(function (response) {
         $scope.$broadcast('show-errors-reset', 'userForm');
-        toastr.success('Profile Saved Successfully');
+        toastr.success('You should update your season', 'Profile Saved');
         Authentication.user = response;
+        $state.go('season');
       }, function (response) {
         toastr.error(response.data.message);
       });

@@ -154,8 +154,8 @@ exports.create = function(req, res) {
 
         statusMessage = {
           type: 'info',
-          text: 'Events have been added. You should update your season.',
-          title: 'Season Update',
+          text: 'You should update your season.',
+          title: 'Events Added',
           created: Date.now(),
           username: user.username
         };
@@ -184,8 +184,8 @@ exports.create = function(req, res) {
         if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
           statusMessage = {
             type: 'info',
-            text: 'A key training day has been added or updated. You should update your season.',
-            title: 'Season Update',
+            text: 'You should update your season.',
+            title: 'Training Day Added or Updated',
             created: Date.now(),
             username: user.username
           };
@@ -314,8 +314,8 @@ exports.delete = function(req, res) {
 
       statusMessage = {
         type: 'info',
-        text: 'A training day has been removed. You should update your season.',
-        title: 'Season Update',
+        text: 'You should update your season.',
+        title: 'Training Day Removed',
         created: Date.now(),
         username: user.username
       };
