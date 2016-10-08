@@ -964,7 +964,7 @@ angular.module('trainingDays')
           // $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
           //TODO: not sure why I had the check above.
           $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
-          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
+          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 2;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           return trainingDay;
         }
