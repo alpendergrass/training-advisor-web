@@ -674,9 +674,10 @@ angular.module('trainingDays')
         getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side.
           //May need to switch to server-side at some point. Or some combo of client and server side.
-          $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
-          $scope.trainingDays = $scope.trainingDaysChunked[0];
-          $scope.nextChunk = 1;
+          // $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
+          // $scope.trainingDays = $scope.trainingDaysChunked[0];
+          // $scope.nextChunk = 1;
+          $scope.trainingDays = $scope.trainingDaysAll;
         });
       };
 
@@ -720,7 +721,7 @@ angular.module('trainingDays')
 
           // Redirect after save
           trainingDay.$create(function(response) {
-            toastr.success('You should update your profile now.', 'Start Created', { timeOut: 10000});
+            toastr.success('You should update your profile now.', 'Start Created', { timeOut: 10000 });
             // Clear form fields
             $scope.name = '';
             $scope.fitness = 0;
