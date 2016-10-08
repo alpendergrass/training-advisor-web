@@ -103,7 +103,12 @@
             </div>
             <div class="form-group input-group-sm" show-errors>
               <label class="small" for="thresholdPowerTestDate">Last Test Date *</label>
-              <input type="date" id="thresholdPowerTestDate" name="thresholdPowerTestDate" class="form-control" ng-model="user.thresholdPowerTestDate" required>
+              <p class="input-group">
+              <input type="text" id="thresholdPowerTestDate" name="thresholdPowerTestDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="user.thresholdPowerTestDate" is-open="datePickerStatus.opened" datepicker-options="ftpDateOptions" required close-text="Close" >
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+              </p>
               <div ng-messages="userForm.thresholdPowerTestDate.$error" role="alert">
                 <p class="help-block error-text" ng-message="required">Threshold Power Test Date is required.</p>
               </div>
