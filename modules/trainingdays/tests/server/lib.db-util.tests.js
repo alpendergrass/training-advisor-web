@@ -532,13 +532,21 @@ describe('db-util Unit Tests:', function () {
     it('should return error if invalid trainingDate', function (done) {
       return dbUtil.clearFutureMetricsAndAdvice(user, null, function (err, rawResponse) {
         should.exist(err);
-        (err.message).should.match('startDate null is not a valid date');
+        (err.message).should.match('trainingDate null is not a valid date');
         done();
       });
     });
 
-    it('should return match count of 0 and modified count of zero if no trainingDay docs exist past trainingDate', function (done) {
+    it('should return null rawResponse if trainingDate is today', function (done) {
       return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+        should.not.exist(err);
+        should.not.exist(rawResponse);
+        done();
+      });
+    });
+
+    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past trainingDate', function (done) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).subtract(1, 'day').toDate(), function (err, rawResponse) {
         should.not.exist(err);
         (rawResponse.n).should.equal(0);
         (rawResponse.nModified).should.equal(0);
@@ -739,8 +747,12 @@ describe('db-util Unit Tests:', function () {
 
   describe('Method didWeGoHardTheDayBefore', function () {
     it('should return true if yesterday was a hard day', function (done) {
+      var completedActivities = [{
+        load: 999,
+        source: 'plangeneration'
+      }];
       var yesterday = moment(trainingDate).subtract(1, 'days');
-      testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
+      testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err, createdTrainingDay) {
         if (err) {
           console.log('createTrainingDay: ' + err);
         }
@@ -764,9 +776,39 @@ describe('db-util Unit Tests:', function () {
       });
     });
 
-    it('should return false if yesterday was not a hard day', function (done) {
+    it('should return false if yesterday was a hard day but no completedActivities', function (done) {
       var yesterday = moment(trainingDate).subtract(1, 'days');
       testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
+        if (err) {
+          console.log('createTrainingDay: ' + err);
+        }
+
+        createdTrainingDay.loadRating = 'hard';
+        testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
+            if (err) {
+              console.log('didWeGoHardTheDayBefore: ' + err);
+            }
+
+            should.not.exist(err);
+            (wentHard).should.match(false);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return false if yesterday was not a hard day', function (done) {
+      var completedActivities = [{
+        load: 22,
+        source: 'plangeneration'
+      }];
+      var yesterday = moment(trainingDate).subtract(1, 'days');
+      testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err, createdTrainingDay) {
         if (err) {
           console.log('createTrainingDay: ' + err);
         }
@@ -791,8 +833,12 @@ describe('db-util Unit Tests:', function () {
     });
 
     it('should return false if yesterday was a sim and not a hard day but a clone exists that was a hard day', function (done) {
+      var completedActivities = [{
+        load: 22,
+        source: 'plangeneration'
+      }];
       var yesterday = moment(trainingDate).subtract(1, 'days');
-      testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
+      testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err, createdTrainingDay) {
         if (err) {
           console.log('createTrainingDay: ' + err);
         }

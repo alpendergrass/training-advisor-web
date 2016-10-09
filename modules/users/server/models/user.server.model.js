@@ -169,7 +169,7 @@ var UserSchema = new Schema({
   },
   loginCount: {
     type: Number,
-    default: 1
+    default: 0
   },
   created: {
     type: Date,
