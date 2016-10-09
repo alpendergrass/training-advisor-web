@@ -350,6 +350,8 @@ exports.getSeason = function(req, res) {
     effectiveGoalDate,
     dates = {};
 
+  console.log('Active user: ', user.username);
+
   dbUtil.getStartDay(user, today, function(err, startDay) {
     if (err) {
       return res.status(400).send({
