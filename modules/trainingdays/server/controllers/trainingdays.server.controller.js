@@ -152,15 +152,15 @@ exports.create = function(req, res) {
           });
         }
 
-        statusMessage = {
-          type: 'info',
-          text: 'You should update your season.',
-          title: 'Events Added',
-          created: Date.now(),
-          username: user.username
-        };
+        // statusMessage = {
+        //   type: 'info',
+        //   text: 'You should update your season.',
+        //   title: 'Events Added',
+        //   created: Date.now(),
+        //   username: user.username
+        // };
 
-        dbUtil.sendMessageToUser(statusMessage, user);
+        // dbUtil.sendMessageToUser(statusMessage, user);
         res.json(trainingDay);
       });
     });
@@ -181,17 +181,17 @@ exports.create = function(req, res) {
           });
         }
 
-        if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
-          statusMessage = {
-            type: 'info',
-            text: 'You should update your season.',
-            title: 'Training Day Added or Updated',
-            created: Date.now(),
-            username: user.username
-          };
+        // if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
+        //   statusMessage = {
+        //     type: 'info',
+        //     text: 'You should update your season.',
+        //     title: 'Training Day Added or Updated',
+        //     created: Date.now(),
+        //     username: user.username
+        //   };
 
-          dbUtil.sendMessageToUser(statusMessage, user);
-        }
+        //   dbUtil.sendMessageToUser(statusMessage, user);
+        // }
         res.json(trainingDay);
       });
     });
@@ -257,7 +257,7 @@ exports.update = function(req, res) {
 
     if (recomputeAdvice) {
       params.alternateActivity = null;
-      params.alertUser = true;
+      // params.alertUser = true;
 
       adviceEngine.advise(params, function(err, trainingDay) {
         if (err) {
@@ -277,15 +277,15 @@ exports.update = function(req, res) {
           });
         }
 
-        var statusMessage = {
-          type: 'info',
-          text: 'Your training day has been updated. You should update your season.',
-          title: 'Season Update',
-          created: Date.now(),
-          username: req.user.username
-        };
+        // var statusMessage = {
+        //   type: 'info',
+        //   text: 'Your training day has been updated. You should update your season.',
+        //   title: 'Season Update',
+        //   created: Date.now(),
+        //   username: req.user.username
+        // };
 
-        dbUtil.sendMessageToUser(statusMessage, req.user);
+        // dbUtil.sendMessageToUser(statusMessage, req.user);
         return res.json(trainingDay);
       });
     }
@@ -312,15 +312,15 @@ exports.delete = function(req, res) {
         });
       }
 
-      statusMessage = {
-        type: 'info',
-        text: 'You should update your season.',
-        title: 'Training Day Removed',
-        created: Date.now(),
-        username: user.username
-      };
+      // statusMessage = {
+      //   type: 'info',
+      //   text: 'You should update your season.',
+      //   title: 'Training Day Removed',
+      //   created: Date.now(),
+      //   username: user.username
+      // };
 
-      dbUtil.sendMessageToUser(statusMessage, user);
+      // dbUtil.sendMessageToUser(statusMessage, user);
       res.json(trainingDay);
     });
   });
@@ -396,7 +396,7 @@ exports.getAdvice = function(req, res) {
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
   params.alternateActivity = req.query.alternateActivity;
-  params.alertUser = true;
+  // params.alertUser = true;
 
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
@@ -414,13 +414,13 @@ exports.genPlan = function(req, res) {
   params.user = req.user;
   params.trainingDate = req.params.trainingDate;
 
-  adviceEngine.generatePlan(params, function(err) {
+  adviceEngine.generatePlan(params, function(err, statusMessage) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     } else {
-      res.json('Plan generated');
+      res.json(statusMessage);
     }
   });
 };
@@ -475,14 +475,14 @@ exports.downloadActivities = function(req, res) {
   var trainingDay = req.trainingDay;
 
   if (req.query.provider === 'strava') {
-    downloadStrava.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
+    downloadStrava.downloadActivities(req.user, trainingDay, function(err, response) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
       }
 
-      return res.json(trainingDay);
+      return res.json(response);
     });
   }
 

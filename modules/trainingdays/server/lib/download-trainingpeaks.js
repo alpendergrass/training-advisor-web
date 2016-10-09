@@ -122,10 +122,10 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
   soap.createClient(url, function(err, client) {
     if (err) {
-      statusMessage.text = 'TrainingPeaks access failed - createClient: ' + (err.msg || '');
-      statusMessage.type = 'error';
-      dbUtil.sendMessageToUser(statusMessage, user);
-      return callback(err, null);
+      // statusMessage.text = 'TrainingPeaks access failed - createClient: ' + (err.msg || '');
+      // statusMessage.type = 'error';
+      // dbUtil.sendMessageToUser(statusMessage, user);
+      return callback(new Error('TrainingPeaks access failed - createClient: ' + (err.msg || '')), null);
     }
 
     async.waterfall([
@@ -137,8 +137,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         var countPhrase = '';
 
         if (err) {
-          dbUtil.sendMessageToUser(statusMessage, user);
-          return callback(err, null);
+          // dbUtil.sendMessageToUser(statusMessage, user);
+          return callback(new Error(statusMessage.text), null);
         }
 
         if (activityCount < 1) {
@@ -146,7 +146,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
             statusMessage.text = 'We found no new TrainingPeaks workouts for the day.';
             statusMessage.type = 'info';
           }
-          dbUtil.sendMessageToUser(statusMessage, user);
+          // dbUtil.sendMessageToUser(statusMessage, user);
+          trainingDay.lastStatus = statusMessage;
           return callback(null, trainingDay);
         }
 
@@ -158,10 +159,10 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
         trainingDay.save(function(err) {
           if (err) {
-            statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to save the data.';
-            statusMessage.type = 'error';
-            dbUtil.sendMessageToUser(statusMessage, user);
-            return callback(err, null);
+            // statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to save the data.';
+            // statusMessage.type = 'error';
+            // dbUtil.sendMessageToUser(statusMessage, user);
+            return callback(new Error('We downloaded ' + countPhrase + ' but encountered an error when we tried to save the data.'), null);
           }
 
           //Update metrics for trainingDay as completedActivities likely has changed.
@@ -174,13 +175,15 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
             if (err) {
               statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
               statusMessage.type = 'warning';
-              dbUtil.sendMessageToUser(statusMessage, user);
-              return callback(err, null);
+              // dbUtil.sendMessageToUser(statusMessage, user);
+              trainingDay.lastStatus = statusMessage;
+              return callback(null, trainingDay);
             }
 
-            statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your season.';
+            statusMessage.text = 'We downloaded ' + countPhrase + '.';
             statusMessage.type = 'success';
-            dbUtil.sendMessageToUser(statusMessage, user);
+            // dbUtil.sendMessageToUser(statusMessage, user);
+            trainingDay.lastStatus = statusMessage;
             return callback(null, trainingDay);
           });
         });

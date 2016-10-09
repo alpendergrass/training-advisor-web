@@ -243,6 +243,7 @@ var TrainingDaySchema = new Schema({
       trim: true
     }
   }],
+  lastStatus: {},
   user: {
     type: Schema.ObjectId,
     ref: 'User'

@@ -37,19 +37,19 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
   //retrieve activities from strava
   strava.athlete.listActivities({ 'access_token': accessToken, 'after': searchDate },function(err, payload) {
     if(err) {
-      statusMessage.text = 'Strava access failed: ' + (err.msg || '');
-      statusMessage.type = 'error';
-      dbUtil.sendMessageToUser(statusMessage, user);
+      // statusMessage.text = 'Strava access failed: ' + (err.msg || '');
+      // statusMessage.type = 'error';
+      // dbUtil.sendMessageToUser(statusMessage, user);
       return callback(err, null);
     }
 
     if(payload.errors) {
       console.log('Strava access failed: ' + payload.message);
       console.log(JSON.stringify(payload));
-      statusMessage.text = 'Strava access failed: ' + payload.message;
-      statusMessage.type = 'error';
-      dbUtil.sendMessageToUser(statusMessage, user);
-      return callback(err, null);
+      // statusMessage.text = 'Strava access failed: ' + payload.message;
+      // statusMessage.type = 'error';
+      // dbUtil.sendMessageToUser(statusMessage, user);
+      return callback(new Error('Strava access failed: ' + payload.message), null);
     }
 
     console.log('strava activities returned: ' + payload.length);
@@ -57,7 +57,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     if (payload.length < 1) {
       statusMessage.text = 'We found no Strava activities for the day.';
       statusMessage.type = 'info';
-      dbUtil.sendMessageToUser(statusMessage, user);
+      trainingDay.lastStatus = statusMessage;
+      // dbUtil.sendMessageToUser(statusMessage, user);
       return callback(null, trainingDay);
     }
 
@@ -112,7 +113,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     if (activityCount < 1) {
       statusMessage.text = 'We found no new Strava activities for the day. Note that activities without power data are not downloaded.';
       statusMessage.type = 'info';
-      dbUtil.sendMessageToUser(statusMessage, user);
+      // dbUtil.sendMessageToUser(statusMessage, user);
+      trainingDay.lastStatus = statusMessage;
       return callback(null, trainingDay);
     }
 
@@ -126,7 +128,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       if (err) {
         statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to save the data.';
         statusMessage.type = 'error';
-        dbUtil.sendMessageToUser(statusMessage, user);
+        // dbUtil.sendMessageToUser(statusMessage, user);
         return callback(err, null);
       }
 
@@ -140,13 +142,15 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         if (err) {
           statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
           statusMessage.type = 'warning';
-          dbUtil.sendMessageToUser(statusMessage, user);
-          return callback(err, null);
+          // dbUtil.sendMessageToUser(statusMessage, user);
+          trainingDay.lastStatus = statusMessage;
+          return callback(null, trainingDay);
         }
 
-        statusMessage.text = 'We downloaded ' + countPhrase + '. You should update your season.';
+        statusMessage.text = 'We downloaded ' + countPhrase + '.';
         statusMessage.type = 'success';
-        dbUtil.sendMessageToUser(statusMessage, user);
+        // dbUtil.sendMessageToUser(statusMessage, user);
+        trainingDay.lastStatus = statusMessage;
         return callback(null, trainingDay);
       });
     });
