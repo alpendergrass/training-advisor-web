@@ -182,7 +182,8 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
                 profileImageURL: providerUserProfile.profileImageURL,
                 provider: providerUserProfile.provider,
                 providerData: providerUserProfile.providerData,
-                waitListed: !site.allowRegistrations
+                waitListed: !site.allowRegistrations,
+                lastLogin: Date.now()
               });
 
               // And save the user
