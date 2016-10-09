@@ -98,7 +98,7 @@ module.exports.generatePlan = function(params, callback) {
             adviceParams = {
               user: user,
               trainingDate: trainingDay.date,
-              alertUser: false,
+              // alertUser: false,
               genPlan: true
             };
 
@@ -147,8 +147,7 @@ module.exports.generatePlan = function(params, callback) {
 
                     statusMessage.text = 'We have updated your season.';
                     statusMessage.type = 'success';
-                    dbUtil.sendMessageToUser(statusMessage, params.user);
-                    return callback(null, true);
+                    return callback(null, statusMessage);
                   });
                 });
               });
@@ -218,17 +217,17 @@ module.exports.advise = function(params, callback) {
             return callback(err, null);
           }
 
-          if (params.alertUser && !trainingDay.isSimDay) {
-            statusMessage = {
-              type: 'info',
-              text: 'You should update your season.',
-              title: 'Training Metrics Updated',
-              created: Date.now(),
-              username: user.username
-            };
+          // if (params.alertUser && !trainingDay.isSimDay) {
+          //   statusMessage = {
+          //     type: 'info',
+          //     text: 'You should update your season.',
+          //     title: 'Training Metrics Updated',
+          //     created: Date.now(),
+          //     username: user.username
+          //   };
 
-            dbUtil.sendMessageToUser(statusMessage, user);
-          }
+          //   dbUtil.sendMessageToUser(statusMessage, user);
+          // }
 
           return callback(null, recommendation);
         });
