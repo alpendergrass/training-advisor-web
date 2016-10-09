@@ -483,7 +483,6 @@ angular.module('trainingDays')
           }, function(response) {
             usSpinnerService.stop('tdSpinner');
             toastr.success(response.text, response.title); //, { timeOut: 10000 });
-            $state.go('season');
             loadChart();
           }, function(errorResponse) {
             usSpinnerService.stop('tdSpinner');

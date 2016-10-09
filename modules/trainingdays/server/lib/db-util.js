@@ -1,6 +1,6 @@
 'use strict';
 
-var moment = require('moment'),
+var moment = require('moment-timezone'),
   _ = require('lodash'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -413,10 +413,15 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
 
   var start = moment(searchDate).subtract(1, 'day');
   var end = moment(searchDate);
+
+  // We need to check for the existence of completedActivities below
+  // as the loadRating could be from a genPlan where the completedActivities
+  // were generated then removed.
   var query = TrainingDay
     .where('user').equals(user)
     .where('cloneOfId').equals(null)
     .where('date').gte(start).lte(end)
+    .where('completedActivities').ne([])
     .where('loadRating').in(['simulation', 'hard']);
 
   query.findOne().exec(function(err, trainingDay) {
