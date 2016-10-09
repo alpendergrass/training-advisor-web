@@ -56,7 +56,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
 
       user.$update(function (response) {
         $scope.$broadcast('show-errors-reset', 'userForm');
-        toastr.success('You should update your season', 'Profile Saved');
+        toastr.success('Your profile has been updated.', 'Profile Saved');
         Authentication.user = response;
         $state.go('season');
       }, function (response) {

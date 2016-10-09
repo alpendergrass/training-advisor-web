@@ -2,8 +2,8 @@
 
 // TrainingDays controller
 angular.module('trainingDays')
-  .controller('TrainingDaysController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'Socket', 'TrainingDays', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, Socket, TrainingDays, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
+  .controller('TrainingDaysController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
+    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
@@ -13,19 +13,19 @@ angular.module('trainingDays')
       //The following makes lodash available in html.
       $scope._ = _;
 
-      //Create socket for server-to-client messaging.
-      //Make sure the Socket is connected
-      if (!Socket.socket) {
-        Socket.connect();
-      }
+      // //Create socket for server-to-client messaging.
+      // //Make sure the Socket is connected
+      // if (!Socket.socket) {
+      //   Socket.connect();
+      // }
 
-      //The following will remove any listeners. We create a new one below.
-      Socket.init();
+      // //The following will remove any listeners. We create a new one below.
+      // Socket.init();
 
-      // Add an event listener to the 'trainingDayMessage' event
-      Socket.on('trainingDayMessage', function(message) {
-        toastr[message.type](message.text, message.title);
-      });
+      // // Add an event listener to the 'trainingDayMessage' event
+      // Socket.on('trainingDayMessage', function(message) {
+      //   toastr[message.type](message.text, message.title);
+      // });
 
       //Set default dates.
       $scope.today = moment().startOf('day').toDate();
@@ -328,7 +328,7 @@ angular.module('trainingDays')
           return 3;
         };
 
-        var loadChart = function(argument) {
+        var loadChart = function(callback) {
           getSeason(function() {
             if ($scope.season) {
               loadArray = _.flatMap($scope.season, extractLoad);
@@ -366,6 +366,10 @@ angular.module('trainingDays')
                 }
               ];
             }
+
+            if (callback) {
+              return callback();
+            }
           });
         };
 
@@ -381,12 +385,17 @@ angular.module('trainingDays')
             commit: 'no'
           }, function(response) {
             initSimFlags();
-            loadChart();
-            if (!$scope.authentication.user.timezone) {
-              toastr.warning('Please go to <strong>My Profile</strong> and set your timezone.', 'Timezone Not Set', {
-                allowHtml: true
-              });
-            }
+            loadChart(function() {
+              if (!$scope.authentication.user.timezone) {
+                toastr.warning('Please go to <strong>My Profile</strong> and set your timezone.', 'Timezone Not Set', {
+                  allowHtml: true,
+                  timeOut: 7000
+                });
+              }
+              if ($scope.needsPlanGen) {
+                toastr.info('You should update your season.', 'Season View May Be Out Of Date');
+              }
+            });
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -473,6 +482,7 @@ angular.module('trainingDays')
             trainingDate: $scope.today.toISOString()
           }, function(response) {
             usSpinnerService.stop('tdSpinner');
+            toastr.success(response.text, response.title); //, { timeOut: 10000 });
             $state.go('season');
             loadChart();
           }, function(errorResponse) {
@@ -608,45 +618,14 @@ angular.module('trainingDays')
       };
 
       $scope.listTrainingDays = function() {
+        // This function is no longer used in a user accessible view. Admin only.
         var getAllTrainingDays = function(callback) {
-          //Initialize these to prevent temp loading of alert at top of TD list.
-          $scope.hasStart = true;
-          $scope.hasEnd = true;
-          $scope.needsPlanGen = false;
-
           $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
             //not sure why Mongo/Mongoose returns a string for a date field but
             //we need trainingDay.date to be a valid date object for comparision purposes in the view.
             _.forEach($scope.trainingDaysAll, function(td) {
               td.date = new Date(td.date);
             });
-
-            $scope.hasStart = _.find($scope.trainingDaysAll, function(td) {
-              // moment.isSameOrBefore is only available in versions 2.10.7 but
-              // I'm using a component (angular-timezone-selector) that currently specifies an earlier version.
-              //TODO: watch for an updated version of angular-timezone-selector.
-              //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
-              //Supports later version of moment. isSameOrBefore should work now.
-              // return td.startingPoint && moment(td.date).isSameOrBefore(moment());
-              return td.startingPoint && moment(td.date).isBefore(moment());
-            });
-
-            //Find first future goal TD if any.
-            $scope.hasEnd = _.chain($scope.trainingDaysAll)
-              .filter(function(td) {
-                return td.scheduledEventRanking === 1 && moment(td.date).isAfter(moment());
-              })
-              .sortBy(['date'])
-              .head()
-              .value();
-
-            if ($scope.hasEnd) {
-              $scope.needsPlanGen = _.find($scope.trainingDaysAll, function(td) {
-                //Determine is there are any TDs before next goal which do not have plannedActivities.
-                //If there are we need to offer plan gen.
-                return moment(td.date).isAfter(moment().add(1, 'day')) && moment(td.date).isBefore(moment($scope.hasEnd.date).add(1, 'day')) && td.plannedActivities.length < 1;
-              });
-            }
 
             if (callback) {
               return callback();
@@ -677,6 +656,7 @@ angular.module('trainingDays')
           // $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
           // $scope.trainingDays = $scope.trainingDaysChunked[0];
           // $scope.nextChunk = 1;
+          // 10/7/2016: infinite scrolling was breaking deployment.
           $scope.trainingDays = $scope.trainingDaysAll;
         });
       };
@@ -721,7 +701,7 @@ angular.module('trainingDays')
 
           // Redirect after save
           trainingDay.$create(function(response) {
-            toastr.success('You should update your profile now.', 'Start Created', { timeOut: 10000 });
+            toastr.success('You should update your profile now.', 'Start Created', { timeOut: 7000 });
             // Clear form fields
             $scope.name = '';
             $scope.fitness = 0;
@@ -1074,9 +1054,12 @@ angular.module('trainingDays')
 
           trainingDay.$downloadActivities({
             provider: provider
-          }, function(response) {
+          }, function(trainingDay) {
             usSpinnerService.stop('tdSpinner');
-            $scope.checkGiveFeedback(trainingDay);
+            toastr[trainingDay.lastStatus.type](trainingDay.lastStatus.text, trainingDay.lastStatus.title);
+            if (trainingDay.lastStatus.type === 'success') {
+              $scope.checkGiveFeedback(trainingDay);
+            }
           }, function(errorResponse) {
             usSpinnerService.stop('tdSpinner');
             if (errorResponse.data && errorResponse.data.message) {
@@ -1115,7 +1098,7 @@ angular.module('trainingDays')
           trainingDay = $scope.trainingDay;
         }
 
-        trainingDay.$update(function() {}, function(errorResponse) {
+        trainingDay.$update(function(response) {}, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {

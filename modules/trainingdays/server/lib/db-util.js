@@ -431,18 +431,18 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
   });
 };
 
-module.exports.sendMessageToUser = function (message, user) {
-  var socketIDlookup = _.find(global.userSocketIDs, function(sock) {
-    return sock.username === user.username;
-  });
+// module.exports.sendMessageToUser = function (message, user) {
+//   var socketIDlookup = _.find(global.userSocketIDs, function(sock) {
+//     return sock.username === user.username;
+//   });
 
-  if (socketIDlookup) {
-    console.log('Emitting trainingDayMessage "' + message.text + '" to ' + user.username + ' on socketID ' + socketIDlookup.socketID);
-    global.io.to(socketIDlookup.socketID).emit('trainingDayMessage', message);
-  } else {
-    console.log('socketIDlookup failed for username ' + user.username);
-  }
-};
+//   if (socketIDlookup) {
+//     console.log('Emitting trainingDayMessage "' + message.text + '" to ' + user.username + ' on socketID ' + socketIDlookup.socketID);
+//     global.io.to(socketIDlookup.socketID).emit('trainingDayMessage', message);
+//   } else {
+//     console.log('socketIDlookup failed for username ' + user.username);
+//   }
+// };
 
 function getTrainingDaysForDate(user, trainingDate, callback) {
   if (!user) {
