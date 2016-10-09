@@ -74,7 +74,7 @@ describe('advice-easy Unit Tests:', function () {
             params.trainingDate = yesterday;
 
             return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
-              //we have to update metrics in order for yesrday's loadRating to be assigned.
+              //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
               }
@@ -118,7 +118,7 @@ describe('advice-easy Unit Tests:', function () {
             params.trainingDate = yesterday;
 
             return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
-              //we have to update metrics in order for yesrday's loadRating to be assigned.
+              //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
               }

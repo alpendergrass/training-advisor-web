@@ -10,7 +10,7 @@ var path = require('path'),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics');
 
-var user, 
+var user,
   trainingDate,
   expectedTargetAvgDailyLoad = 50.58,
   daysUntilGoal = adviceConstants.minimumNumberOfTrainingDays,
@@ -24,11 +24,11 @@ describe('advice-metrics Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser; 
-      params.user = newUser; 
+      user = newUser;
+      params.user = newUser;
 
       trainingDate = moment().startOf('day').toDate();
-      params.trainingDate = trainingDate; 
+      params.trainingDate = trainingDate;
 
       testHelpers.createGoalEvent(user, trainingDate, daysUntilGoal, function(err) {
         if (err) {
@@ -42,14 +42,14 @@ describe('advice-metrics Unit Tests:', function () {
 
   describe('Method updateMetrics', function () {
     it('should return error if no user', function (done) {
-      params.user = null; 
+      params.user = null;
       return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
       });
     });
-    
+
     it('should return error if missing trainingDate', function (done) {
       params.trainingDate = null;
       return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
@@ -474,7 +474,7 @@ describe('advice-metrics Unit Tests:', function () {
         var completedActivities = [{
           load: 1
         }, {
-          load: 1      
+          load: 1
         }];
 
         testHelpers.createTrainingDay(user, tDate, completedActivities, function(err) {
@@ -492,7 +492,7 @@ describe('advice-metrics Unit Tests:', function () {
       });
     });
 
-    it('should return loadRating of moderate if a completed activitiy of sufficient load exists for current trainingDay', function (done) {
+    it('should return loadRating of moderate if a completed activity of sufficient load exists for current trainingDay', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 1, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -581,7 +581,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        var tDate = moment(trainingDate); 
+        var tDate = moment(trainingDate);
         //moderate upperLoadFactor is 1.20
         var completedActivities = [{
           load: (expectedTargetAvgDailyLoad * 0.2)
@@ -646,7 +646,7 @@ describe('advice-metrics Unit Tests:', function () {
         });
       });
     });
-    
+
     it('should return daysUntilNextPriority3Event equal 1 if priority 3 event is tomorrow', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 1, 1, 1, function(err) {
         if (err) {
@@ -674,7 +674,7 @@ describe('advice-metrics Unit Tests:', function () {
         });
       });
     });
-    
+
   });
 
   afterEach(function (done) {

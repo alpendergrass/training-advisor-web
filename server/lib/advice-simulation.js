@@ -1,7 +1,7 @@
 'use strict';
 
 
-var moment = require('moment'),
+var moment = require('moment-timezone'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   adviceConstants = require('./advice-constants'),
