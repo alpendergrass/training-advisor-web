@@ -1,5 +1,6 @@
 'use strict';
 
+// Using json-rules-engine for advice generation.
 
 var path = require('path'),
   _ = require('lodash'),
