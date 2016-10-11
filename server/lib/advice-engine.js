@@ -1,12 +1,17 @@
 'use strict';
 
 // Using json-rules-engine for advice generation.
+// To turn on tracing output in the engine, add the following line to the .env file.
+// DEBUG=json-rules-engine
 
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
   async = require('async'),
   mongoose = require('mongoose'),
+  Engine = require('json-rules-engine').Engine,
+  Rule = require('json-rules-engine').Rule,
+  Fact = require('json-rules-engine').Fact,
   TrainingDay = mongoose.model('TrainingDay'),
   adviceMetrics = require('./advice-metrics'),
   adviceEvent = require('./advice-event'),
@@ -103,7 +108,7 @@ module.exports.generatePlan = function(params, callback) {
               genPlan: true
             };
 
-            module.exports.advise(adviceParams, function (err, trainingDay) {
+            module.exports.advise(adviceParams, function(err, trainingDay) {
               if (err) {
                 return callback(err);
               }
@@ -141,7 +146,7 @@ module.exports.generatePlan = function(params, callback) {
                   user.thresholdPowerTestDate = savedThresholdPowerTestDate;
                   user.planGenNeeded = false;
 
-                  user.save(function (err) {
+                  user.save(function(err) {
                     if (err) {
                       return callback(err, null);
                     }
@@ -254,7 +259,7 @@ module.exports.advise = function(params, callback) {
             return callback(err);
           }
 
-          recommendation.save(function (err) {
+          recommendation.save(function(err) {
             if (err) {
               return callback(err, null);
             }
@@ -268,6 +273,133 @@ module.exports.advise = function(params, callback) {
 };
 
 function generateAdvice(user, trainingDay, callback) {
+
+  let engine = new Engine();
+
+  let offDayRule = new Rule();
+
+  offDayRule.setConditions({
+    all: [{
+      fact: 'trainingDay',
+      operator: 'equal',
+      value: 9,
+      path: '.scheduledEventRanking'
+    }]
+  });
+
+  offDayRule.setEvent({
+    type: 'recommendation',
+    params: {
+      activityType: 'event',
+      rationale: 'Today is a scheduled off day.',
+      advice: 'You have scheduled the day off. Enjoy your day.'
+    }
+  });
+
+  engine.addRule(offDayRule);
+
+  let lowPriorityEventInPeakOrRaceRule = {
+    conditions: {
+      all: [
+        {
+          fact: 'trainingDay',
+          operator: 'equal',
+          value: 3,
+          path: '.scheduledEventRanking'
+        },
+        {
+          any: [
+            {
+              fact: 'trainingDay',
+              operator: 'equal',
+              value: 'peak',
+              path: '.period'
+            },
+            {
+              fact: 'trainingDay',
+              operator: 'equal',
+              value: 'race',
+              path: '.period'
+            }
+          ]
+        }
+      ]
+    },
+    event: {
+      type: 'factAssertion',
+      params: {
+        factName: 'isLowPrioirtyEventInPeakOrRacePeriod'
+      }
+    },
+    priority: 9
+  };
+
+  engine.addRule(lowPriorityEventInPeakOrRaceRule);
+
+  let lowPriorityEventRule = {
+    conditions: {
+      all: [
+        {
+          fact: 'isLowPrioirtyEventInPeakOrRacePeriod',
+          operator: 'equal',
+          value: true
+        },
+        {
+          fact: 'trainingDay',
+          operator: 'lessThan',
+          // value: 'adviceConstants.priority3EventCutOffThreshold', //add to almanac when starting?
+          value: 9,
+          path: '.daysUntilNextGoalEvent'
+        }
+      ]
+    },
+    event: {
+      type: 'recommendation',
+      params: {
+        activityType: 'event',
+        rationale: 'Today is a priority 3 (low priority) event in peak or race period. Goal event is a few days away.',
+        advice: 'You should skip this event.'
+      }
+    }
+  };
+
+  engine.addRule(lowPriorityEventRule);
+
+  // engine.on('failure', function(rule, almanac) {
+  //   console.log('failed rule: ', rule.event);
+  //   // console.log('almanac: ', almanac);
+  // });
+
+  engine.on('factAssertion', function(params, almanac) {
+    console.log('params: ', params);
+    let newFact = new Fact(params.factName, true, { priority: 500 });
+    console.log('newFact: ', newFact);
+    engine.addFact(newFact);
+    //This fact is added to the engine, not the almanac.
+    //When I check the fact above, I get an error saying it is not defined.
+    console.log('almanac: ', almanac); //what I thought was the almanac is actually the engine.
+  });
+
+
+
+
+  let facts = { trainingDay: trainingDay };
+
+  engine
+    .run(facts)
+    .then(triggeredEvents => { // run() return events with truthy conditions
+      triggeredEvents.map(event => console.log(event.params));
+    })
+    .catch(console.log);
+
+
+
+
+
+
+
+
+
   //Each method in the waterfall must return all objects used by subsequent methods.
   async.waterfall([
     async.apply(adviceEvent.checkEvent, user, trainingDay),
@@ -306,7 +438,7 @@ function generateAdvice(user, trainingDay, callback) {
           return callback(err);
         }
 
-        trainingDay.save(function (err) {
+        trainingDay.save(function(err) {
           if (err) {
             return callback(err, null);
           } else {
@@ -339,7 +471,7 @@ function generateActivityFromAdvice(params, callback) {
       trainingDay.fatigue = 0;
     }
 
-    trainingDay.save(function (err) {
+    trainingDay.save(function(err) {
       if (err) {
         return callback(err, null);
       }
@@ -347,7 +479,7 @@ function generateActivityFromAdvice(params, callback) {
       if (trainingDay.plannedActivities[0].activityType === 'test') {
         //Make it look as if the user tested when recommended.
         user.thresholdPowerTestDate = trainingDay.date;
-        user.save(function (err) {
+        user.save(function(err) {
           if (err) {
             return callback(err, null);
           }
