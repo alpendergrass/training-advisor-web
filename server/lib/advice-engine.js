@@ -283,28 +283,22 @@ function generateAdvice(user, trainingDay, callback) {
   console.log('trainingDay.plannedActivities[0].rationale: ', trainingDay.plannedActivities[0].rationale);
 
   var R = new RuleEngine(adviceEvent.eventRules);
+  R.register(adviceTest.testRules);
 
   //Now pass the fact on to the rule engine for results
   R.execute(fact,function(result){
-    // if(result.result) {
+    console.log('result.matchPath: ', result.matchPath);
     console.log('activityType: ', result.trainingDay.plannedActivities[0].activityType);
     console.log('rationale: ', result.trainingDay.plannedActivities[0].rationale);
     console.log('advice: ', result.trainingDay.plannedActivities[0].advice);
-    console.log('result.matchPath: ', result.matchPath);
-    // } else {
-    //   console.log('result.result: ', result.result);
-    // }
-  });
-
-
 
 
   //Each method in the waterfall must return all objects used by subsequent methods.
   async.waterfall([
     // async.apply(adviceEvent.checkEvent, user, trainingDay),
     // adviceTest.checkTest,
-    async.apply(adviceTest.checkTest, user, trainingDay),
-    adviceRest.checkRest,
+    // adviceRest.checkRest,
+    async.apply(adviceRest.checkRest, user, trainingDay),
     adviceEasy.checkEasy,
     adviceModerate.checkModerate,
     adviceSimulation.checkSimulation
@@ -348,6 +342,10 @@ function generateAdvice(user, trainingDay, callback) {
       });
     }
   );
+
+
+  });
+
 }
 
 function generateActivityFromAdvice(params, callback) {

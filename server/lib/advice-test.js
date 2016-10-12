@@ -8,27 +8,47 @@ var moment = require('moment'),
   adviceConstants = require('./advice-constants'),
   err;
 
-// var rules = [
-//   {
-//     'name': 'testingDueRule',
-//     'condition': function(R) {
-//       R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
-//         (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
-//         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
-//         (this.isTestingDue)
-//       );
-//     },
-//     'consequence': function(R) {
-//       this.result = true;
-//       this.trainingDay.plannedActivities[0].rationale += ` Today is a priority ${this.trainingDay.scheduledEventRanking} event but testing is due. Recommending skipping.`;
-//       this.trainingDay.plannedActivities[0].advice += ` You have a non-goal event scheduled for today. However, testing is due.
-//  You should skip this event.`;
-//       R.stop();
-//     }
-//   },
-// ]
+var rules = [
+  {
+    'name': 'testingDueAndFormIsRecoveredRule',
+    'condition': function(R) {
+      R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
+        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
+        (this.isTestingDue) &&
+        (this.trainingDay.form > this.adviceConstants.testingEligibleFormThreshold)
+      );
+    },
+    'consequence': function(R) {
+      this.result = true;
+      this.trainingDay.plannedActivities[0].activityType = 'test';
+      this.trainingDay.plannedActivities[0].rationale += `  Form is sufficiently recovered for testing.`;
+      this.trainingDay.plannedActivities[0].advice += `  Testing is due and form is sufficiently recovered for testing. Do a functional threshold power (FTP) test.
+  Be sure to update your Tacit Training profile with your new threshold and the date you did the test.`;
+      R.stop();
+    }
+  } //,
+  // {
+  //   'name': 'testingDueButFormIsNotRecoveredRule',
+  //   'condition': function(R) {
+  //     R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
+  //       (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
+  //       (this.isTestingDue) &&
+  //       (this.trainingDay.form <= this.adviceConstants.testingEligibleFormThreshold)
+  //     );
+  //   },
+  //   'consequence': function(R) {
+  //     this.result = true;
+  //     this.trainingDay.plannedActivities[0].rationale += `  Form is sufficiently recovered for testing.`;
+  //     this.trainingDay.plannedActivities[0].advice += `  Testing is due and form is sufficiently recovered for testing. Do a functional threshold power (FTP) test.
+  // Be sure to update your Tacit Training profile with your new threshold and the date you did the test.`;
+  //     R.next();
+  //   }
+  // },
+];
 
 module.exports = {};
+
+module.exports.testRules = rules;
 
 module.exports.checkTest = function(user, trainingDay, callback) {
 

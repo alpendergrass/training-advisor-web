@@ -74,9 +74,9 @@ Race results are not important. Remember that your future goals are the reason y
     }
   },
   {
-    'name': 'nonGoalEventTestDueRule',
+    'name': 'nonGoalEventButTestingDueRule',
     'condition': function(R) {
-      R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
+      R.when(this &&
         (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
         (this.isTestingDue)
@@ -87,7 +87,7 @@ Race results are not important. Remember that your future goals are the reason y
       this.trainingDay.plannedActivities[0].rationale += ` Today is a priority ${this.trainingDay.scheduledEventRanking} event but testing is due. Recommending skipping.`;
       this.trainingDay.plannedActivities[0].advice += ` You have a non-goal event scheduled for today. However, testing is due.
  You should skip this event.`;
-      R.stop();
+      R.next();
     }
   },
   {

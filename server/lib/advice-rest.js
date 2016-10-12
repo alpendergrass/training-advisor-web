@@ -128,7 +128,7 @@ function isRestNeededInPrepForTesting (user, trainingDay, callback) {
 
   if (adviceUtil.isTestingDue(user, trainingDay) && trainingDay.form <= adviceConstants.restNeededForTestingThreshold) {
     trainingDay.plannedActivities[0].rationale += ' Rest recommended in preparation for testing.';
-    trainingDay.plannedActivities[0].rationale += ' Rest is needed in preparation for testing, so rest today.';
+    trainingDay.plannedActivities[0].advice += ' Rest is needed in preparation for testing, so rest today.';
     trainingDay.plannedActivities[0].activityType = 'rest';
   }
 
