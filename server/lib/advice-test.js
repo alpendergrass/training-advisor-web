@@ -14,7 +14,7 @@ var rules = [
     'condition': function(R) {
       R.when(this &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
-        (this.isTestingDue) &&
+        (this.testingIsDue) &&
         (this.trainingDay.form > this.adviceConstants.testingEligibleFormThreshold)
       );
     },
@@ -31,7 +31,7 @@ var rules = [
   //   'condition': function(R) {
   //     R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
   //       (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
-  //       (this.isTestingDue) &&
+  //       (this.testingIsDue) &&
   //       (this.trainingDay.form <= this.adviceConstants.testingEligibleFormThreshold)
   //     );
   //   },

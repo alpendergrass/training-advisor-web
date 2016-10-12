@@ -1,6 +1,5 @@
 'use strict';
 
-
 var _ = require('lodash'),
   moment = require('moment-timezone'),
   mongoose = require('mongoose'),
@@ -76,7 +75,7 @@ var rules = [
     'condition': function(R) {
       R.when(this &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
-        (this.isTestingDue) &&
+        (this.testingIsDue) &&
         (this.trainingDay.form <= this.adviceConstants.restNeededForTestingThreshold)
       );
     },
@@ -86,7 +85,7 @@ var rules = [
       this.trainingDay.plannedActivities[0].advice += ` Rest is needed in preparation for testing, so rest today.`;
       R.stop();
     }
-  },
+  }
 ];
 
 module.exports = {};

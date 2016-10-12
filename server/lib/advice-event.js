@@ -43,7 +43,7 @@ var rules = [
     'condition': function(R) {
       R.when(this && (this.trainingDay.scheduledEventRanking === 2) &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
-        (!this.isTestingDue)
+        (!this.testingIsDue)
       );
     },
     'consequence': function(R) {
@@ -60,7 +60,7 @@ If you feel good go for the podium but if you do not have the legs, sit in. You 
     'condition': function(R) {
       R.when(this && (this.trainingDay.scheduledEventRanking === 3) &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
-        (!this.isTestingDue)
+        (!this.testingIsDue)
       );
     },
     'consequence': function(R) {
@@ -79,7 +79,7 @@ Race results are not important. Remember that your future goals are the reason y
       R.when(this &&
         (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
-        (this.isTestingDue)
+        (this.testingIsDue)
       );
     },
     'consequence': function(R) {
@@ -91,6 +91,8 @@ Race results are not important. Remember that your future goals are the reason y
     }
   },
   {
+    // TODO: Negative rule - does not set activity, should we have this? Smells a bit.
+    // Move advice to the rules that set activity?
     'name': 'nonGoalEventInPeakOrRaceRule',
     'condition': function(R) {
       R.when(this && this.nextCheck !== 'impendingGoal' && //have to include test on nextCheck to keep this rule from triggering itself.
@@ -110,6 +112,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     }
   },
   {
+    // TODO: Negative rule - does not set activity, should we have this? Smells a bit.
     'name': 'skipEventForImpendingGoalRule',
     'condition': function(R) {
       R.when(this && (this.nextCheck === 'impendingGoal') &&
@@ -118,14 +121,15 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     },
     'consequence': function(R) {
       this.result = true;
-      this.nextCheck = null;
-      this.nextParm = null;
+      // this.nextCheck = null;
+      // this.nextParm = null;
       this.trainingDay.plannedActivities[0].rationale += ' Recommending skipping.';
       this.trainingDay.plannedActivities[0].advice += ' You should skip this event.';
       R.next();
     }
   },
   {
+    // TODO: Negative rule - does not set activity, should we have this? Smells a bit.
     'name': 'cautionDueToImpendingGoalRule',
     'condition': function(R) {
       R.when(this && (this.nextCheck === 'impendingGoal') &&
@@ -134,16 +138,14 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     },
     'consequence': function(R) {
       this.result = true;
-      this.nextCheck = null;
-      this.nextParm = null;
+      // this.nextCheck = null;
+      // this.nextParm = null;
       this.trainingDay.plannedActivities[0].rationale += ' Recommending caution.';
       this.trainingDay.plannedActivities[0].advice += ' Only do this event if you feel certain it will help you prepare for your goal event.';
       R.next();
     }
   }
 ];
-
-
 
 module.exports = {};
 
