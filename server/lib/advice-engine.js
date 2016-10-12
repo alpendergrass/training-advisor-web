@@ -275,8 +275,10 @@ function generateAdvice(user, trainingDay, callback) {
 
   var fact = {};
   fact.trainingDay = trainingDay;
-  fact.isTestingDue = adviceUtil.isTestingDue(user, trainingDay);
   fact.adviceConstants = adviceConstants;
+  fact.isTestingDue = adviceUtil.isTestingDue(user, trainingDay);
+  fact.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
+
   fact.nextCheck = null;
   fact.nextParm = null;
 
@@ -284,64 +286,65 @@ function generateAdvice(user, trainingDay, callback) {
 
   var R = new RuleEngine(adviceEvent.eventRules);
   R.register(adviceTest.testRules);
+  R.register(adviceRest.restRules);
 
   //Now pass the fact on to the rule engine for results
   R.execute(fact,function(result){
-    console.log('result.matchPath: ', result.matchPath);
+    console.log('trainingDate: ', result.trainingDay.date);
     console.log('activityType: ', result.trainingDay.plannedActivities[0].activityType);
     console.log('rationale: ', result.trainingDay.plannedActivities[0].rationale);
     console.log('advice: ', result.trainingDay.plannedActivities[0].advice);
 
 
-  //Each method in the waterfall must return all objects used by subsequent methods.
-  async.waterfall([
-    // async.apply(adviceEvent.checkEvent, user, trainingDay),
-    // adviceTest.checkTest,
-    // adviceRest.checkRest,
-    async.apply(adviceRest.checkRest, user, trainingDay),
-    adviceEasy.checkEasy,
-    adviceModerate.checkModerate,
-    adviceSimulation.checkSimulation
-  ],
-    function(err, user, trainingDay) {
-      if (err) {
-        return callback(err, null, null);
-      }
-
-      if (trainingDay.plannedActivities[0].activityType === '') {
-
-        if (trainingDay.period === 'transition') {
-          trainingDay.plannedActivities[0].activityType = 'choice';
-          trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
-          trainingDay.plannedActivities[0].advice += ' You are in transition. You should take a break from training. Now is a good time for cross-training. If you ride, keep it mellow and fun.';
-        } else if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
-          trainingDay.plannedActivities[0].activityType = 'hard';
-          trainingDay.plannedActivities[0].rationale += ' Is ' + trainingDay.period + ' period, recommending hard ride but load will be smaller than typical hard ride.';
-          trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
-        } else {
-          //Default is a hard workout.
-          trainingDay.plannedActivities[0].activityType = 'hard';
-          trainingDay.plannedActivities[0].rationale += ' No other recommendation, so hard.';
-          trainingDay.plannedActivities[0].advice += ' If you feel up to it you should go hard today. You appear to be sufficiently rested.';
-          trainingDay.plannedActivities[0].advice += ' Intensity should be high but will vary based on ride duration.';
-        }
-      }
-
-      adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
+    //Each method in the waterfall must return all objects used by subsequent methods.
+    async.waterfall([
+      // async.apply(adviceEvent.checkEvent, user, trainingDay),
+      // adviceTest.checkTest,
+      // adviceRest.checkRest,
+      // adviceEasy.checkEasy,
+      async.apply(adviceEasy.checkEasy, user, trainingDay),
+      adviceModerate.checkModerate,
+      adviceSimulation.checkSimulation
+    ],
+      function(err, user, trainingDay) {
         if (err) {
-          return callback(err);
+          return callback(err, null, null);
         }
 
-        trainingDay.save(function(err) {
-          if (err) {
-            return callback(err, null);
+        if (trainingDay.plannedActivities[0].activityType === '') {
+
+          if (trainingDay.period === 'transition') {
+            trainingDay.plannedActivities[0].activityType = 'choice';
+            trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
+            trainingDay.plannedActivities[0].advice += ' You are in transition. You should take a break from training. Now is a good time for cross-training. If you ride, keep it mellow and fun.';
+          } else if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
+            trainingDay.plannedActivities[0].activityType = 'hard';
+            trainingDay.plannedActivities[0].rationale += ' Is ' + trainingDay.period + ' period, recommending hard ride but load will be smaller than typical hard ride.';
+            trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
           } else {
-            return callback(null, trainingDay);
+            //Default is a hard workout.
+            trainingDay.plannedActivities[0].activityType = 'hard';
+            trainingDay.plannedActivities[0].rationale += ' No other recommendation, so hard.';
+            trainingDay.plannedActivities[0].advice += ' If you feel up to it you should go hard today. You appear to be sufficiently rested.';
+            trainingDay.plannedActivities[0].advice += ' Intensity should be high but will vary based on ride duration.';
           }
+        }
+
+        adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
+          if (err) {
+            return callback(err);
+          }
+
+          trainingDay.save(function(err) {
+            if (err) {
+              return callback(err, null);
+            } else {
+              return callback(null, trainingDay);
+            }
+          });
         });
-      });
-    }
-  );
+      }
+    );
 
 
   });
