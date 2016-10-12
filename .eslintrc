@@ -14,7 +14,8 @@
     space-in-parens: [2, "never"]
   },
   env: {
-    node: true
+    node: ,
+    es6: true
   },
   globals: {
     angular: true,

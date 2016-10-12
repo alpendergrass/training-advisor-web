@@ -68,8 +68,8 @@ module.exports = function (app, db) {
   //TODO: When we start using SSL we will need to figure out how to do secure socket.io. Maybe.
   //I need to use port 4443 for websocket because it does not work over port 80 in Cloud Foundry.
   //The following attaches the socketio server to an engine.io instance that is bound to the provided port.
-  //This works locally to I don't need to explicitly create an http ser er and then bind the socketio server to it.
-  //Unfortunatly it does not work in production (Pivotal). 
+  //This works locally so I don't need to explicitly create an http server and then bind the socketio server to it.
+  //Unfortunately it does not work in production (Pivotal).
   //Apparently it also has to be secure: https://support.run.pivotal.io/entries/80621715-Does-cloudfoundry-allows-the-websocket-requests-on-port-other-than-4443-
   //Using port 4443 (and WSS) is a requirement to use WebSockets on PWS.  PS does not support WebSockets over port 80 or 443.  It also only support WSS and does not support unencrypted WS.
   // var io = socketio.listen(4443);
