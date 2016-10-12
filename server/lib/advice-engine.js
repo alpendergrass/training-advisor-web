@@ -10,6 +10,7 @@ var path = require('path'),
   // Engine = require('json-rules-engine').Engine,
   // Rule = require('json-rules-engine').Rule,
   // Fact = require('json-rules-engine').Fact,
+  RuleEngine = require('node-rules'),
   TrainingDay = mongoose.model('TrainingDay'),
   adviceMetrics = require('./advice-metrics'),
   adviceEvent = require('./advice-event'),
@@ -20,6 +21,7 @@ var path = require('path'),
   adviceSimulation = require('./advice-simulation'),
   adviceLoad = require('./advice-load'),
   adviceConstants = require('./advice-constants'),
+  adviceUtil = require('./advice-util'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
 
@@ -164,7 +166,6 @@ module.exports.generatePlan = function(params, callback) {
 };
 
 module.exports.advise = function(params, callback) {
-
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
   if (!params.user) {
@@ -272,127 +273,34 @@ module.exports.advise = function(params, callback) {
 
 function generateAdvice(user, trainingDay, callback) {
 
-  // let engine = new Engine();
+  var fact = {};
+  fact.trainingDay = trainingDay;
+  fact.isTestingDue = adviceUtil.isTestingDue(user, trainingDay);
+  fact.adviceConstants = adviceConstants;
 
-  // let offDayRule = new Rule();
+  // console.log('fact: ', fact);
 
-  // offDayRule.setConditions({
-  //   all: [{
-  //     fact: 'trainingDay',
-  //     operator: 'equal',
-  //     value: 9,
-  //     path: '.scheduledEventRanking'
-  //   }]
-  // });
+  var R = new RuleEngine(adviceEvent.eventRules);
 
-  // offDayRule.setEvent({
-  //   type: 'recommendation',
-  //   params: {
-  //     activityType: 'event',
-  //     rationale: 'Today is a scheduled off day.',
-  //     advice: 'You have scheduled the day off. Enjoy your day.'
-  //   }
-  // });
+  //Now pass the fact on to the rule engine for results
+  R.execute(fact,function(result){
+    if(result.result) {
+      console.log('rationale: ', result.trainingDay.plannedActivities[0].rationale);
+      console.log('advice: ', result.trainingDay.plannedActivities[0].advice);
+      console.log('result.matchPath: ', result.matchPath);
+    } else {
+      console.log('result.result: ', result.result);
+    }
+  });
 
-  // engine.addRule(offDayRule);
-
-  // let lowPriorityEventInPeakOrRaceRule = {
-  //   conditions: {
-  //     all: [
-  //       {
-  //         fact: 'trainingDay',
-  //         operator: 'equal',
-  //         value: 3,
-  //         path: '.scheduledEventRanking'
-  //       },
-  //       {
-  //         any: [
-  //           {
-  //             fact: 'trainingDay',
-  //             operator: 'equal',
-  //             value: 'peak',
-  //             path: '.period'
-  //           },
-  //           {
-  //             fact: 'trainingDay',
-  //             operator: 'equal',
-  //             value: 'race',
-  //             path: '.period'
-  //           }
-  //         ]
-  //       }
-  //     ]
-  //   },
-  //   event: {
-  //     type: 'factAssertion',
-  //     params: {
-  //       factName: 'isLowPrioirtyEventInPeakOrRacePeriod'
-  //     }
-  //   },
-  //   priority: 9
-  // };
-
-  // engine.addRule(lowPriorityEventInPeakOrRaceRule);
-
-  // let lowPriorityEventRule = {
-  //   conditions: {
-  //     all: [
-  //       {
-  //         fact: 'isLowPrioirtyEventInPeakOrRacePeriod',
-  //         operator: 'equal',
-  //         value: true
-  //       },
-  //       {
-  //         fact: 'trainingDay',
-  //         operator: 'lessThan',
-  //         // value: 'adviceConstants.priority3EventCutOffThreshold', //add to almanac when starting?
-  //         value: 9,
-  //         path: '.daysUntilNextGoalEvent'
-  //       }
-  //     ]
-  //   },
-  //   event: {
-  //     type: 'recommendation',
-  //     params: {
-  //       activityType: 'event',
-  //       rationale: 'Today is a priority 3 (low priority) event in peak or race period. Goal event is a few days away.',
-  //       advice: 'You should skip this event.'
-  //     }
-  //   }
-  // };
-
-  // engine.addRule(lowPriorityEventRule);
-
-  // // engine.on('failure', function(rule, almanac) {
-  // //   console.log('failed rule: ', rule.event);
-  // //   // console.log('almanac: ', almanac);
-  // // });
-
-  // engine.on('factAssertion', function(params, almanac) {
-  //   console.log('params: ', params);
-  //   let newFact = new Fact(params.factName, true, { priority: 500 });
-  //   console.log('newFact: ', newFact);
-  //   engine.addFact(newFact);
-  //   //This fact is added to the engine, not the almanac.
-  //   //When I check the fact above, I get an error saying it is not defined.
-  //   console.log('almanac: ', almanac); //what I thought was the almanac is actually the engine.
-  // });
-
-  // let facts = { trainingDay: trainingDay };
-
-  // engine
-  //   .run(facts)
-  //   .then(triggeredEvents => { // run() return events with truthy conditions
-  //     triggeredEvents.map(event => console.log(event.params));
-  //   })
-  // .catch(console.log);
 
 
 
   //Each method in the waterfall must return all objects used by subsequent methods.
   async.waterfall([
-    async.apply(adviceEvent.checkEvent, user, trainingDay),
-    adviceTest.checkTest,
+    // async.apply(adviceEvent.checkEvent, user, trainingDay),
+    // adviceTest.checkTest,
+    async.apply(adviceTest.checkTest, user, trainingDay),
     adviceRest.checkRest,
     adviceEasy.checkEasy,
     adviceModerate.checkModerate,
