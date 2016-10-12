@@ -68,15 +68,32 @@ If you feel good go for the podium but if you do not have the legs, sit in. You 
       this.trainingDay.plannedActivities[0].activityType = 'event';
       this.trainingDay.plannedActivities[0].rationale += ' Today is a low priority event.';
       this.trainingDay.plannedActivities[0].advice += ` You have a low priority event scheduled for today.
-Your primary objective today is to get a quality, race-pace workout.
-If you feel good go hard but if not, sit in or drop out. Race results are not important. Remember that your future goals are the reason you are riding today.`;
+Your primary objective today is to get a quality, race-pace workout. If you feel good go hard but if not, sit in or drop out.
+Race results are not important. Remember that your future goals are the reason you are riding today.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 'nonGoalEventTestDueRule',
+    'condition': function(R) {
+      R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
+        (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
+        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
+        (this.isTestingDue)
+      );
+    },
+    'consequence': function(R) {
+      this.result = true;
+      this.trainingDay.plannedActivities[0].rationale += ` Today is a priority ${this.trainingDay.scheduledEventRanking} event but testing is due. Recommending skipping.`;
+      this.trainingDay.plannedActivities[0].advice += ` You have a non-goal event scheduled for today. However, testing is due.
+ You should skip this event.`;
       R.stop();
     }
   },
   {
     'name': 'nonGoalEventInPeakOrRaceRule',
     'condition': function(R) {
-      R.when(this && !this.nextCheck && //have to include test on nextCheck to keep this rule from triggering itself.
+      R.when(this && this.nextCheck !== 'impendingGoal' && //have to include test on nextCheck to keep this rule from triggering itself.
         (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
         (this.trainingDay.period === 'peak' || this.trainingDay.period === 'race')
       );
@@ -105,7 +122,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
       this.nextParm = null;
       this.trainingDay.plannedActivities[0].rationale += ' Recommending skipping.';
       this.trainingDay.plannedActivities[0].advice += ' You should skip this event.';
-      R.stop();
+      R.next();
     }
   },
   {
@@ -121,7 +138,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
       this.nextParm = null;
       this.trainingDay.plannedActivities[0].rationale += ' Recommending caution.';
       this.trainingDay.plannedActivities[0].advice += ' Only do this event if you feel certain it will help you prepare for your goal event.';
-      R.stop();
+      R.next();
     }
   }
 ];

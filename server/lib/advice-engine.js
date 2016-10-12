@@ -277,20 +277,23 @@ function generateAdvice(user, trainingDay, callback) {
   fact.trainingDay = trainingDay;
   fact.isTestingDue = adviceUtil.isTestingDue(user, trainingDay);
   fact.adviceConstants = adviceConstants;
+  fact.nextCheck = null;
+  fact.nextParm = null;
 
-  // console.log('fact: ', fact);
+  console.log('trainingDay.plannedActivities[0].rationale: ', trainingDay.plannedActivities[0].rationale);
 
   var R = new RuleEngine(adviceEvent.eventRules);
 
   //Now pass the fact on to the rule engine for results
   R.execute(fact,function(result){
-    if(result.result) {
-      console.log('rationale: ', result.trainingDay.plannedActivities[0].rationale);
-      console.log('advice: ', result.trainingDay.plannedActivities[0].advice);
-      console.log('result.matchPath: ', result.matchPath);
-    } else {
-      console.log('result.result: ', result.result);
-    }
+    // if(result.result) {
+    console.log('activityType: ', result.trainingDay.plannedActivities[0].activityType);
+    console.log('rationale: ', result.trainingDay.plannedActivities[0].rationale);
+    console.log('advice: ', result.trainingDay.plannedActivities[0].advice);
+    console.log('result.matchPath: ', result.matchPath);
+    // } else {
+    //   console.log('result.result: ', result.result);
+    // }
   });
 
 
