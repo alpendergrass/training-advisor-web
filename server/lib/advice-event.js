@@ -91,19 +91,16 @@ Race results are not important. Remember that your future goals are the reason y
     }
   },
   {
-    // TODO: Negative rule - does not set activity, should we have this? Smells a bit.
-    // Move advice to the rules that set activity?
     'name': 'nonGoalEventInPeakOrRaceRule',
     'condition': function(R) {
-      R.when(this && this.nextCheck !== 'impendingGoal' && //have to include test on nextCheck to keep this rule from triggering itself.
+      R.when(this && this.trainingState !== 'nonGoalEventInPeakOrRace' && //have to include test on trainingState to keep this rule from triggering itself.
         (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
         (this.trainingDay.period === 'peak' || this.trainingDay.period === 'race')
       );
     },
     'consequence': function(R) {
       this.result = true;
-      this.nextCheck = 'impendingGoal';
-      this.nextParm = this.trainingDay.scheduledEventRanking === 2? this.adviceConstants.priority2EventCutOffThreshold : this.adviceConstants.priority3EventCutOffThreshold;
+      this.trainingState = 'nonGoalEventInPeakOrRace';
       this.trainingDay.plannedActivities[0].rationale += ` Today is a priority ${this.trainingDay.scheduledEventRanking} event. In ${this.trainingDay.period} period.
 Goal event is ${this.trainingDay.daysUntilNextGoalEvent} days away.`;
       this.trainingDay.plannedActivities[0].advice += ` You have a non-goal event scheduled for today.
@@ -112,34 +109,28 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     }
   },
   {
-    // TODO: Negative rule - does not set activity, should we have this? Smells a bit.
     'name': 'skipEventForImpendingGoalRule',
     'condition': function(R) {
-      R.when(this && (this.nextCheck === 'impendingGoal') &&
-        (this.trainingDay.daysUntilNextGoalEvent < this.nextParm)
+      R.when(this && (this.trainingState === 'nonGoalEventInPeakOrRace') &&
+        (this.trainingDay.daysUntilNextGoalEvent < (this.trainingDay.scheduledEventRanking === 2? this.adviceConstants.priority2EventCutOffThreshold : this.adviceConstants.priority3EventCutOffThreshold))
       );
     },
     'consequence': function(R) {
       this.result = true;
-      // this.nextCheck = null;
-      // this.nextParm = null;
       this.trainingDay.plannedActivities[0].rationale += ' Recommending skipping.';
       this.trainingDay.plannedActivities[0].advice += ' You should skip this event.';
       R.next();
     }
   },
   {
-    // TODO: Negative rule - does not set activity, should we have this? Smells a bit.
     'name': 'cautionDueToImpendingGoalRule',
     'condition': function(R) {
-      R.when(this && (this.nextCheck === 'impendingGoal') &&
-        (this.trainingDay.daysUntilNextGoalEvent >= this.nextParm)
+      R.when(this && (this.trainingState === 'nonGoalEventInPeakOrRace') &&
+        (this.trainingDay.daysUntilNextGoalEvent < (this.trainingDay.scheduledEventRanking === 2? this.adviceConstants.priority2EventCutOffThreshold : this.adviceConstants.priority3EventCutOffThreshold))
       );
     },
     'consequence': function(R) {
       this.result = true;
-      // this.nextCheck = null;
-      // this.nextParm = null;
       this.trainingDay.plannedActivities[0].rationale += ' Recommending caution.';
       this.trainingDay.plannedActivities[0].advice += ' Only do this event if you feel certain it will help you prepare for your goal event.';
       R.next();

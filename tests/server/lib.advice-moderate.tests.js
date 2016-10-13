@@ -10,16 +10,16 @@ var path = require('path'),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
-  adviceModerate = require('../../server/lib/advice-moderate');
+  adviceEngine = require('../../server/lib/advice-engine');
 
-var user, 
-  trainingDate, 
-  trainingDay, 
+var user,
+  trainingDate,
+  trainingDay,
   params = {};
 
-describe('advice-moderate Unit Tests:', function () {
+describe('advice-moderate Unit Tests:', function() {
 
-  beforeEach(function (done) {
+  beforeEach(function(done) {
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
@@ -33,24 +33,8 @@ describe('advice-moderate Unit Tests:', function () {
     });
   });
 
-  describe('Method checkModerate', function () {
-    it('should return error if no user', function (done) {
-      return adviceModerate.checkModerate(null, null, function (err, user, trainingDay) {
-        should.exist(err);
-        (err.message).should.match('valid user is required');
-        done();
-      });
-    });
-    
-    it('should return error if no trainingDay', function (done) {
-      return adviceModerate.checkModerate(user, null, function (err, user, trainingDay) {
-        should.exist(err);
-        (err.message).should.match('valid trainingDay is required');
-        done();
-      });
-    });
-
-    it('should not return a recommendation if yesterday was a not a hard day', function (done) {
+  describe('Moderate Tests', function() {
+    it('should not return moderate if yesterday was a not a hard day', function(done) {
       var yesterday = moment(trainingDate).subtract(1, 'days');
       var completedActivities = [{
         activityType: 'moderate'
@@ -61,41 +45,37 @@ describe('advice-moderate Unit Tests:', function () {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceModerate.checkModerate(user, trainingDay, function (err, user, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
           should.not.exist(err);
-          should.exist(user);
           should.exist(trainingDay);
-          // console.log('returned trainingDay: ' + trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match('');
+          (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
           done();
         });
       });
     });
 
-    it('should not return a recommendation if yesterday was a hard day but tomorrow is not a preferred rest day', function (done) {
+    it('should not return moderate if yesterday was a hard day but tomorrow is not a preferred rest day', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
       var yesterday = moment(trainingDate).subtract(1, 'days');
       var completedActivities = [{
         activityType: 'simulation'
       }];
 
-      testHelpers.createTrainingDay(user,yesterday, completedActivities, function(err) {
+      testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
         if (err) {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceModerate.checkModerate(user, trainingDay, function (err, user, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
           should.not.exist(err);
-          should.exist(user);
           should.exist(trainingDay);
-          // console.log('returned trainingDay: ' + trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match('');
+          (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
           done();
         });
       });
     });
 
-    it('should return moderate if yesterday was a hard day and tomorrow is a preferred rest day', function (done) {
+    it('should return moderate if yesterday was a hard day and tomorrow is a preferred rest day', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(1, 'days').day().toString()];
       testHelpers.createStartingPoint(user, trainingDate, 60, 9, 9, function(err) {
         if (err) {
@@ -117,21 +97,18 @@ describe('advice-moderate Unit Tests:', function () {
             }
 
             params.trainingDate = yesterday;
-            
-            return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
+
+            return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
               }
-              //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
 
-              return adviceModerate.checkModerate(user, trainingDay, function (err, user, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
                 should.not.exist(err);
-                should.exist(user);
                 should.exist(trainingDay);
-                // console.log('returned trainingDay: ' + trainingDay);
                 (trainingDay.plannedActivities[0].activityType).should.match(/moderate/);
-                (trainingDay.plannedActivities[0].rationale).should.containEql('Yesterday was a hard day. Tomorrow is a preferred rest day.');
+                (trainingDay.plannedActivities[0].rationale).should.containEql('Yesterday was a hard day, tomorrow is a preferred rest day');
                 done();
               });
             });
@@ -139,8 +116,8 @@ describe('advice-moderate Unit Tests:', function () {
         });
       });
     });
-    
-    it('should not return a recommendation if yesterday was a hard day and tomorrow is a preferred rest day but we are in peak period', function (done) {
+
+    it('should not return moderate if yesterday was a hard day and tomorrow is a preferred rest day but we are in peak period', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(1, 'days').day().toString()];
       testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err) {
         if (err) {
@@ -163,20 +140,17 @@ describe('advice-moderate Unit Tests:', function () {
 
             params.trainingDate = yesterday;
 
-            return adviceMetrics.updateMetrics(params, function (err, metricizedTrainingDay) {
+            return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
               }
-              //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
 
               trainingDay.period = 'peak';
-              return adviceModerate.checkModerate(user, trainingDay, function (err, user, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
                 should.not.exist(err);
-                should.exist(user);
                 should.exist(trainingDay);
-                // console.log('returned trainingDay: ' + trainingDay);
-                (trainingDay.plannedActivities[0].activityType).should.match('');
+                (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
                 done();
               });
             });
@@ -184,11 +158,11 @@ describe('advice-moderate Unit Tests:', function () {
         });
       });
     });
-    
+
   });
 
-  afterEach(function (done) {
-    TrainingDay.remove().exec(function () {
+  afterEach(function(done) {
+    TrainingDay.remove().exec(function() {
       User.remove().exec(done);
     });
   });

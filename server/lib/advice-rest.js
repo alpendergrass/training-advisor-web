@@ -58,6 +58,7 @@ var rules = [
     'name': 'restNeededInPrepForPriority2EventRule',
     'condition': function(R) {
       R.when(this &&
+        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
         (this.trainingDay.daysUntilNextPriority2Event === 1)
       );
     },

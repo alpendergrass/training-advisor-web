@@ -6,11 +6,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
-  // advisorTestHelpers = require(path.resolve('./util/test-helpers'),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
-  adviceConstants = require('../../server/lib/advice-constants'),
-  adviceMetrics = require('../../server/lib/advice-metrics'),
-  adviceEvent = require('../../server/lib/advice-event'),
   adviceEngine = require('../../server/lib/advice-engine');
 
 var user, trainingDate, trainingDay;
@@ -18,14 +14,6 @@ var user, trainingDate, trainingDay;
 describe('advice-event Unit Tests:', function () {
 
   beforeEach(function (done) {
-
-    // advisorTestHelpers.initRuleEngine(function(err, r) {
-    //   if (err) {
-    //     return done(err);
-    //   }
-
-    //   R = r;
-
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
@@ -36,7 +24,6 @@ describe('advice-event Unit Tests:', function () {
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
     });
-    // });
   });
 
   describe('Event Rules', function () {

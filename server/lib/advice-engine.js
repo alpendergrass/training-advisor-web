@@ -34,8 +34,7 @@ function generateAdvice(user, trainingDay, callback) {
       return callback(err, null, null);
     }
 
-    fact.nextCheck = null;
-    fact.nextParm = null;
+    fact.trainingState = null;
     fact.adviceConstants = adviceConstants;
     fact.wentHardYesterday = wentHard;
     fact.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
@@ -366,4 +365,3 @@ module.exports.advise = function(params, callback) {
 
 // The following is only exported for testing.
 module.exports._testGenerateAdvice = generateAdvice;
-
