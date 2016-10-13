@@ -44,6 +44,16 @@ gulp.task('nodemon', function () {
   });
 });
 
+// Nodemon task
+gulp.task('nodemon:debug', function () {
+  return plugins.nodemon({
+    script: 'server.js',
+    nodeArgs: ['--debug', '--inspect'],
+    ext: 'js,html',
+    watch: _.union(defaultAssets.server.views, defaultAssets.server.allJS, defaultAssets.server.config)
+  });
+});
+
 // Watch Files For Changes
 gulp.task('watch', function () {
   // Start livereload
@@ -271,7 +281,7 @@ gulp.task('test:server', function (done) {
 });
 
 //Run all server tests in debug mode
-//First run Node Inspector from the command line: 
+//First run Node Inspector from the command line:
 //Alberts-iMac:web al$ node-inspector
 //Then open in browser: http://127.0.0.1:8080/?ws=127.0.0.1:8080&port=5858
 //App will break in node inspector on first line.
@@ -299,7 +309,8 @@ gulp.task('default', function (done) {
 
 // Run the project in debug mode
 gulp.task('debug', function (done) {
-  runSequence('env:dev', 'lint', ['nodemon', 'watch', 'node-inspector'], done);
+  // runSequence('env:dev', 'lint', ['nodemon', 'watch', 'node-inspector'], done);
+  runSequence('env:dev', 'lint', ['nodemon:debug', 'watch'], done);
 });
 
 gulp.task('node-inspector', function () {

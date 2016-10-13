@@ -126,6 +126,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
     trainingDay.save(function (err) {
       if (err) {
+        console.log('Strava downloadActivities td.save err: ', err);
         statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to save the data.';
         statusMessage.type = 'error';
         // dbUtil.sendMessageToUser(statusMessage, user);
@@ -138,8 +139,9 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         trainingDate: trainingDay.date
       };
 
-      adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+      adviceMetrics.updateMetrics(params, function(err, updatedTrainingDay) {
         if (err) {
+          console.log('Strava downloadActivities updateMetrics err: ', err);
           statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
           statusMessage.type = 'warning';
           // dbUtil.sendMessageToUser(statusMessage, user);
@@ -150,8 +152,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         statusMessage.text = 'We downloaded ' + countPhrase + '.';
         statusMessage.type = 'success';
         // dbUtil.sendMessageToUser(statusMessage, user);
-        trainingDay.lastStatus = statusMessage;
-        return callback(null, trainingDay);
+        updatedTrainingDay.lastStatus = statusMessage;
+        return callback(null, updatedTrainingDay);
       });
     });
   });

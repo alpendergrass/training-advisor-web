@@ -42,7 +42,7 @@ module.exports.init = function init(callback) {
       console.log(chalk.red('***** Server timezone manually set to: ', process.env.TZ));
     }
 
-    // //Schedule workout download job.
+    // //Schedule workout download job: need to figure out how to run this on only one instance.
     // // var textSched = later.parse.text('every 1 min'); //time is GMT
     // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
 
