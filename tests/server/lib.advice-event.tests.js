@@ -6,45 +6,40 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  // advisorTestHelpers = require(path.resolve('./util/test-helpers'),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
-  adviceEvent = require('../../server/lib/advice-event');
+  adviceEvent = require('../../server/lib/advice-event'),
+  adviceEngine = require('../../server/lib/advice-engine');
 
 var user, trainingDate, trainingDay;
 
 describe('advice-event Unit Tests:', function () {
 
   beforeEach(function (done) {
+
+    // advisorTestHelpers.initRuleEngine(function(err, r) {
+    //   if (err) {
+    //     return done(err);
+    //   }
+
+    //   R = r;
+
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
     });
+    // });
   });
 
-  describe('Method checkEvent', function () {
-    it('should return error if no user', function (done) {
-      return adviceEvent.checkEvent(null, null, function (err, user, trainingDay) {
-        should.exist(err);
-        (err.message).should.match('valid user is required');
-        done();
-      });
-    });
-    
-    it('should return error if no trainingDay', function (done) {
-      return adviceEvent.checkEvent(user, null, function (err, user, trainingDay) {
-        should.exist(err);
-        (err.message).should.match('valid trainingDay is required');
-        done();
-      });
-    });
-
+  describe('Event Rules', function () {
     it('should return goal rationale if today is a priority 1 event', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
@@ -58,13 +53,12 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 1;
 
-          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
             should.not.exist(err);
-            should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.match(/event/);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('event');
+            (trainingDay.plannedActivities[0].rationale).should.containEql('priority 1 (goal) event');
             done();
           });
         });
@@ -84,9 +78,8 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 2;
 
-          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
             should.not.exist(err);
-            should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.match(/event/);
@@ -110,9 +103,8 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 3;
 
-          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
             should.not.exist(err);
-            should.exist(user);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.match(/event/);
@@ -134,9 +126,8 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
             should.not.exist(err);
-            should.exist(user);
             should.exist(trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
             done();
@@ -159,9 +150,8 @@ describe('advice-event Unit Tests:', function () {
           trainingDay.scheduledEventRanking = 2;
           trainingDay.period = 'peak';
 
-          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
             should.not.exist(err);
-            should.exist(user);
             should.exist(trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
             done();
@@ -184,9 +174,8 @@ describe('advice-event Unit Tests:', function () {
           trainingDay.scheduledEventRanking = 3;
           trainingDay.period = 'peak';
 
-          return adviceEvent.checkEvent(user, trainingDay, function (err, user, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
             should.not.exist(err);
-            should.exist(user);
             should.exist(trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
             done();
