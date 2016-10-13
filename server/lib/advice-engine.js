@@ -19,6 +19,7 @@ var path = require('path'),
   adviceEasy = require('./advice-easy'),
   adviceModerate = require('./advice-moderate'),
   adviceSimulation = require('./advice-simulation'),
+  adviceHard = require('./advice-hard'),
   adviceLoad = require('./advice-load'),
   adviceConstants = require('./advice-constants'),
   adviceUtil = require('./advice-util'),
@@ -282,7 +283,7 @@ function generateAdvice(user, trainingDay, callback) {
   fact.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
   fact.tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
   dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function(err, wentHard) {
-    //TODO: use a promise here.
+    //TODO: use a promise here?
     if (err) {
       return callback(err, null, null);
     }
@@ -295,6 +296,7 @@ function generateAdvice(user, trainingDay, callback) {
     R.register(adviceEasy.easyRules);
     R.register(adviceModerate.moderateRules);
     R.register(adviceSimulation.simulationRules);
+    R.register(adviceHard.hardRules);
 
     R.execute(fact,function(result){
       console.log('trainingDate: ', result.trainingDay.date);
@@ -317,24 +319,24 @@ function generateAdvice(user, trainingDay, callback) {
         //     return callback(err, null, null);
         //   }
 
-      if (trainingDay.plannedActivities[0].activityType === '') {
+      // if (trainingDay.plannedActivities[0].activityType === '') {
 
-        if (trainingDay.period === 'transition') {
-          trainingDay.plannedActivities[0].activityType = 'choice';
-          trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
-          trainingDay.plannedActivities[0].advice += ' You are in transition. You should take a break from training. Now is a good time for cross-training. If you ride, keep it mellow and fun.';
-        } else if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
-          trainingDay.plannedActivities[0].activityType = 'hard';
-          trainingDay.plannedActivities[0].rationale += ' Is ' + trainingDay.period + ' period, recommending hard ride but load will be smaller than typical hard ride.';
-          trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
-        } else {
-          //Default is a hard workout.
-          trainingDay.plannedActivities[0].activityType = 'hard';
-          trainingDay.plannedActivities[0].rationale += ' No other recommendation, so hard.';
-          trainingDay.plannedActivities[0].advice += ' If you feel up to it you should go hard today. You appear to be sufficiently rested.';
-          trainingDay.plannedActivities[0].advice += ' Intensity should be high but will vary based on ride duration.';
-        }
-      }
+      //   if (trainingDay.period === 'transition') {
+      //     trainingDay.plannedActivities[0].activityType = 'choice';
+      //     trainingDay.plannedActivities[0].rationale += ' Is transition period, user can slack off if he/she desires.';
+      //     trainingDay.plannedActivities[0].advice += ' You are in transition. You should take a break from training. Now is a good time for cross-training. If you ride, keep it mellow and fun.';
+      //   } else if (trainingDay.period === 'peak' || trainingDay.period === 'race') {
+      //     trainingDay.plannedActivities[0].activityType = 'hard';
+      //     trainingDay.plannedActivities[0].rationale += ' Is ' + trainingDay.period + ' period, recommending hard ride but load will be smaller than typical hard ride.';
+      //     trainingDay.plannedActivities[0].advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
+      //   } else {
+      //     //Default is a hard workout.
+      //     trainingDay.plannedActivities[0].activityType = 'hard';
+      //     trainingDay.plannedActivities[0].rationale += ' No other recommendation, so hard.';
+      //     trainingDay.plannedActivities[0].advice += ' If you feel up to it you should go hard today. You appear to be sufficiently rested.';
+      //     trainingDay.plannedActivities[0].advice += ' Intensity should be high but will vary based on ride duration.';
+      //   }
+      // }
 
       adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
         if (err) {
