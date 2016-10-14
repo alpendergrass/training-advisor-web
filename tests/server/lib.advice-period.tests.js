@@ -20,7 +20,7 @@ describe('advice-period Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
@@ -35,7 +35,7 @@ describe('advice-period Unit Tests:', function () {
         done();
       });
     });
-    
+
     it('should return error if period start does not exist', function (done) {
       return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
         should.exist(err);
@@ -103,32 +103,6 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return totalTrainingDays equal minimumNumberOfTrainingDays if total counted training days is grater than the minimum but a recent goal exists', function (done) {
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays, 1, 1, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-
-        testHelpers.createGoalEvent(user, trainingDate, 1, function(err) {
-          if (err) {
-            console.log('createGoalEvent: ' + err);
-          }
-
-          testHelpers.createGoalEvent(user, trainingDate, -1, function(err) {
-            if (err) {
-              console.log('createGoalEvent - past goal: ' + err);
-            }
-
-            return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
-              should.not.exist(err);
-              (periodData.totalTrainingDays).should.equal(adviceConstants.minimumNumberOfTrainingDays);
-              done();
-            });
-          });
-        });
-      });
-    });
-
     it('should return totalTrainingDays equal minimumNumberOfTrainingDays if total counted training days is less than the minimum', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 0, 1, 1, function(err) {
         if (err) {
@@ -139,7 +113,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.totalTrainingDays).should.equal(adviceConstants.minimumNumberOfTrainingDays);
@@ -159,7 +133,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.totalTrainingDays).should.equal(adviceConstants.minimumNumberOfTrainingDays);
@@ -175,11 +149,11 @@ describe('advice-period Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 1, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfRaceDays, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.totalTrainingDays).should.equal(adviceConstants.maximumNumberOfTrainingDays);
@@ -195,11 +169,11 @@ describe('advice-period Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays + 1, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.maxDaysToLookAheadForFutureGoals + 1, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.period).should.match('transition');
@@ -209,17 +183,17 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should not return error if total training days is equal to the mamimum', function (done) {
+    it('should not return error if total training days is equal to the maximum', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 0, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays + adviceConstants.maximumNumberOfRaceDays, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.totalTrainingDays).should.equal(adviceConstants.maximumNumberOfTrainingDays);
@@ -239,7 +213,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.period).should.match('base');
@@ -249,7 +223,7 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return peak period if goal date is day after trainingDate', function (done) {
+    it('should return race period if goal date is day after trainingDate', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 1, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -259,10 +233,10 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('peak');
+            (periodData.period).should.match('race');
             done();
           });
         });
@@ -280,7 +254,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.period).should.match('base');
@@ -300,7 +274,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.period).should.match('build');
@@ -320,11 +294,11 @@ describe('advice-period Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, daysForward, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, daysForward + adviceConstants.minimumNumberOfRaceDays, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             // console.log('periodData: ' + JSON.stringify(periodData));
@@ -346,7 +320,7 @@ describe('advice-period Unit Tests:', function () {
     //       if (err) {
     //         console.log('createGoalEvent: ' + err);
     //       }
-          
+
     //       return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
     //         should.not.exist(err);
     //         (periodData.period).should.match('peak');
@@ -362,11 +336,11 @@ describe('advice-period Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfPeakDays - 1, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfPeakDays + adviceConstants.minimumNumberOfRaceDays - 1, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.period).should.match('peak');
@@ -377,16 +351,16 @@ describe('advice-period Unit Tests:', function () {
     });
 
     it('should return peak period duration greater than or equal to minimumNumberOfPeakDays if short total training period', function (done) {
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 14, 1, 1, function(err) {
+      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 14, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfRaceDays, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             //console.log('periodData: ' + JSON.stringify(periodData));
@@ -398,16 +372,16 @@ describe('advice-period Unit Tests:', function () {
     });
 
     it('should return peak period duration of maximumNumberOfPeakDays if long total training period', function (done) {
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays - 10, 1, 1, function(err) {
+      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 10, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.maximumNumberOfRaceDays, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
             (periodData.peakPeriodDays).should.equal(adviceConstants.maximumNumberOfPeakDays);
@@ -427,9 +401,6 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
-          // console.log('trainingDay: ' + trainingDay);
-          // console.log('goalDay: ' + goalDay);
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
@@ -451,7 +422,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day'), null, function(err, createdTrainingDay) {
             if (err) {
               console.log('createTrainingDay: ' + err);
@@ -487,7 +458,7 @@ describe('advice-period Unit Tests:', function () {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
-          
+
           testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day'), null, function(err, createdTrainingDay) {
             if (err) {
               console.log('createTrainingDay: ' + err);
