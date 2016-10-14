@@ -29,7 +29,6 @@ function generateAdvice(user, trainingDay, callback) {
   var fact = {};
 
   dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function(err, wentHard) {
-    //TODO: use a promise here?
     if (err) {
       return callback(err, null, null);
     }
@@ -147,7 +146,7 @@ module.exports.generatePlan = function(params, callback) {
       username: user.username
     };
 
-  //TODO: Make the following a async.series or something to clean it up. Yuck.
+  //TODO: Make the following a async.series, use EC6 promises or something to clean it up. Yuck.
 
   //As a precaution we remove all planning activities.
   //If we errored out last time there could be some left over planning activities.

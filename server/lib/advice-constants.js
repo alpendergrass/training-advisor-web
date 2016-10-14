@@ -2,16 +2,13 @@
 
 module.exports = {};
 
-//This is the minimum duration from season start to first goal event: 16 weeks.
-//TODO: this should be until start of race period -> 15 weeks
+//This is the minimum duration from season start to  start of race period -> 15 weeks
 module.exports.minimumNumberOfTrainingDays = 105;
 
-//This is the maximum duration from season start to first goal event: 26 weeks.
-//TODO: this should be until start of race period -> 25 weeks
+//This is the maximum duration from season start to start of race period -> 25 weeks
 module.exports.maximumNumberOfTrainingDays = 175;
 
 
-//TODO: this should be until start of race period.
 module.exports.basePortionOfTotalTrainingDays = 0.52;
 module.exports.buildPortionOfTotalTrainingDays = 0.41;
 
@@ -31,7 +28,6 @@ module.exports.maxDaysToLookAheadForSeasonEnd = 366;
 module.exports.TPAutoDownloadLookbackNumberOfDays = '3';
 
 //Skip lesser event if within this many days of goal event.
-//TODO: maybe just no 2/3 events in race period?
 module.exports.priority2EventCutOffThreshold = 5;
 module.exports.priority3EventCutOffThreshold = 9;
 
