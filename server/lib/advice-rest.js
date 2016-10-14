@@ -1,7 +1,6 @@
 'use strict';
 
-var _ = require('lodash'),
-  adviceConstants = require('./advice-constants');
+var _ = require('lodash');
 
 var rules = [
   {
@@ -22,9 +21,9 @@ var rules = [
     'name': 'sufficientlyFatiguedToNeedRestRule',
     'condition': function(R) {
       R.when(this &&
-        this.trainingDay.form <= adviceConstants.restNeededThreshold ||
-        (this.trainingDay.period === 'peak' && this.trainingDay.form <= adviceConstants.restNeededForPeakingThreshold) ||
-        (this.trainingDay.period === 'race' && this.trainingDay.form <= adviceConstants.restNeededForRacingThreshold)
+        this.trainingDay.form <= this.adviceConstants.restNeededThreshold ||
+        (this.trainingDay.period === 'peak' && this.trainingDay.form <= this.adviceConstants.restNeededForPeakingThreshold) ||
+        (this.trainingDay.period === 'race' && this.trainingDay.form <= this.adviceConstants.restNeededForRacingThreshold)
       );
     },
     'consequence': function(R) {
