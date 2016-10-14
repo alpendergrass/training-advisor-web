@@ -88,15 +88,7 @@ describe('User server routes tests', function () {
             }
 
             signoutRes.redirect.should.equal(true);
-
-            // NodeJS v4 changed the status code representation so we must check
-            // before asserting, to be comptabile with all node versions.
-            if (process.version.indexOf('v4') === 0 || process.version.indexOf('v5') === 0) {
-              signoutRes.text.should.containEql('Found. Redirecting to');
-            } else {
-              signoutRes.text.should.equal('Moved Temporarily. Redirecting to /');
-            }
-
+            signoutRes.text.should.containEql('Found. Redirecting to');
             return done();
           });
       });

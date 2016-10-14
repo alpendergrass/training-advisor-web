@@ -23,7 +23,7 @@ module.exports = {
         directoryPath: process.cwd(),
         fileName: 'access-test.log',
         rotatingLogs: { // for more info on rotating logs - https://github.com/holidayextras/file-stream-rotator#usage
-          active: true, // activate to use rotating logs 
+          active: true, // activate to use rotating logs
           fileName: 'access-test-%DATE%.log', // if rotating logs are active, this fileName setting will be used
           frequency: 'daily',
           verbose: false
@@ -41,8 +41,8 @@ module.exports = {
     callbackURL: '/api/auth/facebook/callback'
   },
   strava: {
-    clientID: process.env.STRAVA_CLIENT_ID || 'CLIENT_ID', 
-    clientSecret: process.env.STRAVA_CLIENT_SECRET || 'CLIENT_SECRET', 
+    clientID: process.env.STRAVA_CLIENT_ID || 'CLIENT_ID',
+    clientSecret: process.env.STRAVA_CLIENT_SECRET || 'CLIENT_SECRET',
     callbackURL: process.env.STRAVA_REDIRECT_URI || '/api/auth/strava/callback'
   },
   twitter: {

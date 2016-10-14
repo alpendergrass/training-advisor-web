@@ -8,6 +8,7 @@ var _ = require('lodash'),
 
 // global seed options object
 var seedOptions = {};
+mongoose.Promise = global.Promise;
 
 function removeUser (user) {
   return new Promise(function (resolve, reject) {
@@ -120,8 +121,8 @@ module.exports.start = function start(options) {
     seedOptions.logResults = options.logResults;
   }
 
-  if (_.has(options, 'seedUser')) { 
-    seedOptions.seedUser = options.seedUser; 
+  if (_.has(options, 'seedUser')) {
+    seedOptions.seedUser = options.seedUser;
   }
 
   if (_.has(options, 'seedAdmin')) {

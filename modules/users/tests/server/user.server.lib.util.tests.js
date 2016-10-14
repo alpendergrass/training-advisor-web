@@ -57,7 +57,7 @@ describe('user-util Unit Tests:', function() {
         done();
       });
     });
-    
+
     it('should return default fatigueTimeConstant if trainingEffortFeedback is zero', function(done) {
       return userUtil.updateFatigueTimeConstant(user.id, 0, function(err, fatigueTimeConstant) {
         should.not.exist(err);
@@ -65,7 +65,7 @@ describe('user-util Unit Tests:', function() {
         done();
       });
     });
-    
+
     it('should return default fatigueTimeConstant plus one if trainingEffortFeedback is one', function(done) {
       return userUtil.updateFatigueTimeConstant(user.id, 1, function(err, fatigueTimeConstant) {
         should.not.exist(err);
@@ -73,7 +73,7 @@ describe('user-util Unit Tests:', function() {
         done();
       });
     });
-    
+
     it('should return default fatigueTimeConstant minue one if trainingEffortFeedback is -1', function(done) {
       return userUtil.updateFatigueTimeConstant(user.id, -1, function(err, fatigueTimeConstant) {
         should.not.exist(err);
@@ -81,7 +81,7 @@ describe('user-util Unit Tests:', function() {
         done();
       });
     });
-    
+
     it('should return default minimumFatigueTimeConstant if trainingEffortFeedback is -2', function(done) {
       return userUtil.updateFatigueTimeConstant(user.id, -2, function(err, fatigueTimeConstant) {
         should.not.exist(err);
@@ -89,7 +89,7 @@ describe('user-util Unit Tests:', function() {
         done();
       });
     });
-    
+
     it('should return default minimumFatigueTimeConstant if current user.fatigueTimeConstant equals minimumFatigueTimeConstant and trainingEffortFeedback is -2', function(done) {
       user.fatigueTimeConstant = adviceConstants.minimumFatigueTimeConstant;
       user.save(function(err) {
@@ -109,7 +109,7 @@ describe('user-util Unit Tests:', function() {
         done();
       });
     });
-    
+
     it('should return default maximumFatigueTimeConstant if current user.fatigueTimeConstant equals maximumFatigueTimeConstant and trainingEffortFeedback is 2', function(done) {
       user.fatigueTimeConstant = adviceConstants.maximumFatigueTimeConstant;
       user.save(function(err) {
@@ -134,11 +134,12 @@ describe('user-util Unit Tests:', function() {
 
     it('should return user if autoDownload is true', function(done) {
       user.trainingPeaksCredentials.autoDownload = true;
-      user.save();
-      return userUtil.getTrainingPeaksAutoDownloadUsers(function(err, users) {
-        should.not.exist(err);
-        (users.length).should.equal(1);
-        done();
+      user.save(function(err) {
+        return userUtil.getTrainingPeaksAutoDownloadUsers(function(err, users) {
+          should.not.exist(err);
+          (users.length).should.equal(1);
+          done();
+        });
       });
     });
   });

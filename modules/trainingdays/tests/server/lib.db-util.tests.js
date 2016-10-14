@@ -62,7 +62,6 @@ describe('db-util Unit Tests:', function () {
         return dbUtil.getTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          //console.log('trainingDay:' + trainingDay);
           (trainingDay.name).should.match(/Existing trainingDay/);
           done();
         });
@@ -113,8 +112,6 @@ describe('db-util Unit Tests:', function () {
 
   });
 
-
-
   describe('Method getExistingTrainingDayDocument', function () {
     it('should return error if no user', function (done) {
       return dbUtil.getExistingTrainingDayDocument(null, null, function (err, trainingDay) {
@@ -149,7 +146,6 @@ describe('db-util Unit Tests:', function () {
         return dbUtil.getExistingTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          //console.log('trainingDay:' + trainingDay);
           (trainingDay.name).should.match(/Existing trainingDay/);
           done();
         });
@@ -170,7 +166,6 @@ describe('db-util Unit Tests:', function () {
           return dbUtil.getExistingTrainingDayDocument(user, trainingDate, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            //console.log('trainingDay:' + trainingDay);
             (trainingDay.name).should.match(/Existing trainingDay/);
             (trainingDay._id).should.match(simDay._id);
             (trainingDay.isSimDay).should.match(true);

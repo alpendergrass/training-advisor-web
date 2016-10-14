@@ -11,7 +11,7 @@ var should = require('should'),
 /**
  * Globals
  */
-var user, 
+var user,
   trainingDate,
   trainingDay;
 
@@ -26,7 +26,7 @@ describe('TrainingDay Model Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
@@ -35,8 +35,7 @@ describe('TrainingDay Model Unit Tests:', function () {
 
   describe('Method Save', function () {
     it('should be able to save without problems', function (done) {
-      this.timeout(10000);
-      return trainingDay.save(function (err) {
+      trainingDay.save(function (err) {
         should.not.exist(err);
         done();
       });
@@ -45,20 +44,11 @@ describe('TrainingDay Model Unit Tests:', function () {
     it('should be able to show an error when try to save without date', function (done) {
       trainingDay.date = null;
 
-      return trainingDay.save(function (err) {
+      trainingDay.save(function (err) {
         should.exist(err);
         done();
       });
     });
-
-    // it('should be able to show an error when try to save without plannedActivities[0].activityType', function (done) {
-    //   trainingDay.plannedActivities[0].activityType = '';
-
-    //   return trainingDay.save(function (err) {
-    //     should.exist(err);
-    //     done();
-    //   });
-    // });
   });
 
   afterEach(function (done) {

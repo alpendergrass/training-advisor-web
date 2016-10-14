@@ -7,6 +7,8 @@ var moment = require('moment-timezone'),
   TrainingDay = mongoose.model('TrainingDay'),
   err;
 
+mongoose.Promise = global.Promise;
+
 module.exports = {};
 
 module.exports.getTrainingDayDocument = function(user, trainingDate, callback) {
@@ -294,7 +296,7 @@ module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callba
 
 module.exports.makeSimDay = function(trainingDay, callback) {
   var cloneTD = new TrainingDay(trainingDay);
-
+  cloneTD.isNew = true;
   cloneTD._id = mongoose.Types.ObjectId();
   cloneTD.cloneOfId = trainingDay._id;
   cloneTD.isSimDay = false;

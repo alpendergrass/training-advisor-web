@@ -91,12 +91,11 @@ describe('Configuration Tests:', function () {
 
       // Save original value
       var nodeEnv = process.env.NODE_ENV;
-      // Set node env ro production environment
+      // Set node env to production environment
       process.env.NODE_ENV = 'production';
 
       User.find({ username: adminFromSeedConfig.username }, function(err, users) {
 
-        // There shouldn't be any errors
         should.not.exist(err);
         users.should.be.instanceof(Array).and.have.lengthOf(0);
 
@@ -306,7 +305,7 @@ describe('Configuration Tests:', function () {
         seed
           .start({ logResults: false })
           .then(function () {
-            // we don't ever expect to make it here but we don't want to timeout          
+            // we don't ever expect to make it here but we don't want to timeout
             User.remove(function(err) {
               should.not.exist(err);
               // force this test to fail since we should never be here
@@ -459,7 +458,7 @@ describe('Configuration Tests:', function () {
     it('should use the default log format of "combined" when an invalid format was provided', function () {
       // manually set the config log format to be invalid
       config.log = {
-        format: '_some_invalid_format_'        
+        format: '_some_invalid_format_'
       };
 
       var format = logger.getFormat();
@@ -566,7 +565,7 @@ describe('Configuration Tests:', function () {
       var _dir = process.cwd() + '/temp-rotating-logs';
       var _filename = 'unit-test-rotating-access-%DATE%.log';
 
-      // enable rotating logs      
+      // enable rotating logs
       config.log = {
         format: 'combined',
         options: {
