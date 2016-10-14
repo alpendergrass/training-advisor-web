@@ -1,7 +1,5 @@
 'use strict';
 
-// Using node-rules for advice generation.
-
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
@@ -26,20 +24,20 @@ var path = require('path'),
 
 function generateAdvice(user, trainingDay, callback) {
 
-  var fact = {};
+  var facts = {};
 
   dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function(err, wentHard) {
     if (err) {
       return callback(err, null, null);
     }
 
-    fact.trainingState = null;
-    fact.adviceConstants = adviceConstants;
-    fact.wentHardYesterday = wentHard;
-    fact.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
-    fact.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
-    fact.tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
-    fact.trainingDay = trainingDay;
+    facts.trainingState = null;
+    facts.adviceConstants = adviceConstants;
+    facts.wentHardYesterday = wentHard;
+    facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
+    facts.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
+    facts.tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
+    facts.trainingDay = trainingDay;
 
     var R = new RuleEngine(adviceEvent.eventRules);
     R.register(adviceTest.testRules);
@@ -50,12 +48,7 @@ function generateAdvice(user, trainingDay, callback) {
     R.register(adviceChoice.choiceRules);
     R.register(adviceHard.hardRules);
 
-    R.execute(fact,function(result){
-      // console.log('trainingDate: ', result.trainingDay.date);
-      // console.log('activityType: ', result.trainingDay.plannedActivities[0].activityType);
-      // console.log('rationale: ', result.trainingDay.plannedActivities[0].rationale);
-      // console.log('advice: ', result.trainingDay.plannedActivities[0].advice);
-
+    R.execute(facts,function(result){
       adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
         if (err) {
           return callback(err);
