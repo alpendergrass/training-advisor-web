@@ -7,22 +7,20 @@ var moment = require('moment-timezone'),
   adviceConstants = require('./advice-constants'),
   err;
 
-var rules = [
-  {
-    'name': 'simulationIfPreferredSimulationDayInBuildRule',
-    'condition': function(R) {
-      R.when(this && this.trainingDay.period === 'build' &&
-        (this.trainingDay.user.preferredSimulationDay && this.trainingDay.user.preferredSimulationDay === this.todayDayOfWeek)
-      );
-    },
-    'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'simulation';
-      this.trainingDay.plannedActivities[0].rationale += ' We are in a build period, we are sufficiently rested and today is our preferred simulation day.';
-      this.trainingDay.plannedActivities[0].advice += ' Today is your preferred simulation day and you are sufficiently rested, so do a ride similar to your goal event.';
-      R.stop();
-    }
+var rules = [{
+  'name': 'simulationIfPreferredSimulationDayInBuildRule',
+  'condition': function(R) {
+    R.when(this && this.trainingDay.period === 'build' &&
+      (this.trainingDay.user.preferredSimulationDay && this.trainingDay.user.preferredSimulationDay === this.todayDayOfWeek)
+    );
+  },
+  'consequence': function(R) {
+    this.trainingDay.plannedActivities[0].activityType = 'simulation';
+    this.trainingDay.plannedActivities[0].rationale += ' We are in a build period, we are sufficiently rested and today is our preferred simulation day.';
+    this.trainingDay.plannedActivities[0].advice += ' Today is your preferred simulation day, so do a ride similar to your goal event.';
+    R.stop();
   }
-];
+}];
 
 module.exports = {};
 
@@ -85,7 +83,7 @@ function shouldWeDoSimulation(user, trainingDay, callback) {
       trainingDay.plannedActivities[0].rationale += ' Today is not our preferred simulation day.';
     }
 
-
+    // TODO: re-implement simulation overdue rule.
     //else {
     //   isSimulationOverdue(today, trainingDay, function(err, simulationOverdue) {
     //     if (err) {

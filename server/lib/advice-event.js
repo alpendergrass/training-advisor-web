@@ -93,7 +93,8 @@ Race results are not important. Remember that your future goals are the reason y
   {
     'name': 'nonGoalEventInPeakOrRaceRule',
     'condition': function(R) {
-      R.when(this && this.trainingState !== 'nonGoalEventInPeakOrRace' && //have to include test on trainingState to keep this rule from triggering itself.
+      R.when(this && !this.trainingState && //have to include test on trainingState to keep this rule from triggering itself.
+      // R.when(this && this.trainingState !== 'nonGoalEventInPeakOrRace' && //have to include test on trainingState to keep this rule from triggering itself.
         (this.trainingDay.scheduledEventRanking === 2 || this.trainingDay.scheduledEventRanking === 3) &&
         (this.trainingDay.period === 'peak' || this.trainingDay.period === 'race')
       );

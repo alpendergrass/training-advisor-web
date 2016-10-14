@@ -108,7 +108,7 @@ var rules = [
     },
     'consequence': function(R) {
       this.trainingDay.plannedActivities[0].activityType = 'easy';
-      this.trainingDay.plannedActivities[0].rationale += ' Recommending easy in preparation for testing.';
+      this.trainingDay.plannedActivities[0].rationale += ' Testing is due. Recommending easy in preparation for testing.';
       this.trainingDay.plannedActivities[0].advice += ' An easy day or rest is needed in preparation for testing. Your form is not sufficiently recovered for testing.';
       R.stop();
     }

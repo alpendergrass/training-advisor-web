@@ -27,7 +27,7 @@ describe('advice-test Unit Tests:', function () {
     });
   });
 
-  describe('(TP) Test Rules', function () {
+  describe('Test Rules', function () {
     it('should not return test recommendation if testing is not due', function (done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
 
@@ -35,19 +35,6 @@ describe('advice-test Unit Tests:', function () {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match('test');
-        done();
-      });
-    });
-
-    it('should not return test recommendation if testing is due but form is not recovered', function (done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
-      trainingDay.form = adviceConstants.testingEligibleFormThreshold;
-
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
-        should.not.exist(err);
-        should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match('test');
-        (trainingDay.plannedActivities[0].rationale).should.containEql('Testing is due');
         done();
       });
     });

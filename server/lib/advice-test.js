@@ -20,17 +20,12 @@ var rules = [
     },
     'consequence': function(R) {
       this.trainingDay.plannedActivities[0].activityType = 'test';
-      this.trainingDay.plannedActivities[0].rationale += ' Form is sufficiently recovered for testing.';
+      this.trainingDay.plannedActivities[0].rationale += ' Testing is due and form is sufficiently recovered for testing.';
       this.trainingDay.plannedActivities[0].advice += ` Testing is due and form is sufficiently recovered for testing. Do a functional threshold power (FTP) test.
  Be sure to update your Tacit Training profile with your new threshold and the date you did the test.`;
       R.stop();
     }
   }
-  // TODO: implement:
-    // trainingDay.plannedActivities[0].rationale += ' However, form is not sufficiently recovered for testing.';
-    // trainingDay.plannedActivities[0].advice += ' Testing is due but form is not sufficiently recovered for testing.';
-    // trainingDay.plannedActivities[0].activityType = '';
-
 ];
 
 module.exports = {};

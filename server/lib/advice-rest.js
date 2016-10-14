@@ -82,8 +82,8 @@ var rules = [
     },
     'consequence': function(R) {
       this.trainingDay.plannedActivities[0].activityType = 'rest';
-      this.trainingDay.plannedActivities[0].rationale += ' Rest recommended in preparation for testing.';
-      this.trainingDay.plannedActivities[0].advice += ' Rest is needed in preparation for testing, so rest today.';
+      this.trainingDay.plannedActivities[0].rationale += ' Testing is due. Rest recommended in preparation for testing.';
+      this.trainingDay.plannedActivities[0].advice += ' Testing is due but form is not sufficiently recovered for testing. Rest is needed in preparation for testing, so rest today.';
       R.stop();
     }
   }
