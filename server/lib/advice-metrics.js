@@ -205,8 +205,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
       currentTrainingDay.dailyTargetRampRate = 0.001;
     } else {
       //Let's break it down to make it easier to understand when I come back to it a year from now.
-      totalBaseAndBuildDays = results.periodData.basePeriodDays + results.periodData.buildPeriodDays;
-      percentageOfTrainingTimeRemaining = (totalBaseAndBuildDays - results.periodData.currentDayCount) / totalBaseAndBuildDays;
+      percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
       currentTrainingDay.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
       currentTrainingDay.dailyTargetRampRate = Math.round((currentTrainingDay.sevenDayTargetRampRate / 7) * 100) / 100;
     }
