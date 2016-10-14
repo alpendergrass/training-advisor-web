@@ -8,6 +8,7 @@ module.exports = {
     // server: ['modules/trainingdays/tests/server/**/*.js'],
     // server: ['modules/trainingdays/tests/server/lib.db-util.tests.js'],
     // server: ['modules/advisor/tests/server/**/*.js'],
+    // server: ['modules/advisor/tests/server/lib.advice-period.tests.js'],
     // server: ['modules/advisor/tests/server/lib.advice-metrics.tests.js'],
     // server: ['modules/advisor/tests/server/lib.advice-util.tests.js'],
     // server: ['modules/users/tests/server/**/*.js'],
