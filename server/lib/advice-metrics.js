@@ -11,6 +11,7 @@ var path = require('path'),
   adviceConstants = require('./advice-constants'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   err;
+require('lodash-migrate');
 
 module.exports = {};
 

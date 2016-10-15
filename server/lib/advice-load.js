@@ -9,6 +9,7 @@ var path = require('path'),
   adviceConstants = require('./advice-constants'),
   latestPlannedActivity,
   err;
+require('lodash-migrate');
 
 module.exports = {};
 

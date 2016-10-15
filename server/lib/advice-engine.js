@@ -21,6 +21,7 @@ var path = require('path'),
   adviceUtil = require('./advice-util'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
+require('lodash-migrate');
 
 function generateAdvice(user, trainingDay, callback) {
 
