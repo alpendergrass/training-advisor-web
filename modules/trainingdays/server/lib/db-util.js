@@ -6,6 +6,7 @@ var moment = require('moment-timezone'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   err;
+require('lodash-migrate');
 
 mongoose.Promise = global.Promise;
 

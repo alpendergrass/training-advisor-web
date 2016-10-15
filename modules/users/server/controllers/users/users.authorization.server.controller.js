@@ -4,6 +4,7 @@
 var _ = require('lodash'),
   mongoose = require('mongoose'),
   User = mongoose.model('User');
+require('lodash-migrate');
 
 /**
  * User middleware

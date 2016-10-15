@@ -9,6 +9,7 @@ var path = require('path'),
   dbUtil = require('./db-util'),
   strava = require('strava-v3'),
   err;
+require('lodash-migrate');
 
 module.exports = {};
 
@@ -80,7 +81,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
       if (stravaActivity.id && stravaActivity.weighted_average_watts &&
         moment(stravaActivity.start_date).isBetween(trainingDay.date, thruDate)) {
-        if (!_.find(trainingDay.completedActivities, 'sourceID', stravaActivity.id.toString())) {
+        if (!_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
           activityCount++;
           //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
           fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);

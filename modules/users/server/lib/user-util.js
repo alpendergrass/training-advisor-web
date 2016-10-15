@@ -8,6 +8,7 @@ var path = require('path'),
   User = mongoose.model('User'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   err;
+require('lodash-migrate');
 
 module.exports = {};
 
@@ -66,8 +67,8 @@ module.exports.getTrainingPeaksAutoDownloadUsers = function(callback) {
   query.find().exec(function(err, users) {
     if (err) {
       return callback(err, null);
-    } 
-    
+    }
+
     return callback(null, users);
   });
 };

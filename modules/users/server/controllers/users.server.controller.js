@@ -1,7 +1,7 @@
 'use strict';
 
-
 var _ = require('lodash');
+require('lodash-migrate');
 
 /**
  * Extend user's controller

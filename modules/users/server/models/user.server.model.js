@@ -9,6 +9,7 @@ var mongoose = require('mongoose'),
   validator = require('validator'),
   generatePassword = require('generate-password'),
   owasp = require('owasp-password-strength-test');
+require('lodash-migrate');
 
 /**
  * A Validation function for local strategy properties

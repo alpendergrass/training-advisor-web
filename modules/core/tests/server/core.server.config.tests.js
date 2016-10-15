@@ -1,6 +1,5 @@
 'use strict';
 
-
 var _ = require('lodash'),
   should = require('should'),
   mongoose = require('mongoose'),
@@ -11,6 +10,7 @@ var _ = require('lodash'),
   config = require(path.resolve('./config/config')),
   logger = require(path.resolve('./config/lib/logger')),
   seed = require(path.resolve('./config/lib/seed'));
+require('lodash-migrate');
 
 /**
  * Globals

@@ -1,11 +1,11 @@
 'use strict';
 
-
 var _ = require('lodash'),
   defaultAssets = require('./config/assets/default'),
   testAssets = require('./config/assets/test'),
   testConfig = require('./config/env/test'),
   karmaReporters = ['progress'];
+require('lodash-migrate');
 
 if (testConfig.coverage) {
   karmaReporters.push('coverage');

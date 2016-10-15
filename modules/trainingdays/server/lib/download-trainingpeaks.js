@@ -10,6 +10,7 @@ var path = require('path'),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util'));
+require('lodash-migrate');
 
 // Globals
 var url = 'http://www.trainingpeaks.com/tpwebservices/service.asmx?WSDL',
@@ -349,7 +350,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
 function processWorkout(client, args, trainingDay, callback) {
   var newActivity = {};
 
-  if (_.find(trainingDay.completedActivities, 'sourceID', args.workoutId.toString())) {
+  if (_.find(trainingDay.completedActivities, { 'sourceID': args.workoutId.toString() })) {
     console.log('===> Workout ' + args.workoutId + ' has been previously downloaded.');
     callback();
   } else {

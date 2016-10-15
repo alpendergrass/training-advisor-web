@@ -1,6 +1,5 @@
 'use strict';
 
-
 var _ = require('lodash'),
   defaultAssets = require('./config/assets/default'),
   testAssets = require('./config/assets/test'),
@@ -18,6 +17,7 @@ var _ = require('lodash'),
   webdriver_update = require('gulp-protractor').webdriver_update,
   webdriver_standalone = require('gulp-protractor').webdriver_standalone,
   nodeInspector = require('gulp-node-inspector');
+require('lodash-migrate');
 
 // Set NODE_ENV to 'test'
 gulp.task('env:test', function () {
