@@ -41,7 +41,7 @@
     "generate-password": "^1.1.1",
     "glob": "^7.1.1",
     "gulp": "^3.9.1",
-    "helmet": "~0.9.1",
+    "helmet": "^2.3.0",
     "jasmine-core": "^2.3.4",
     "later": "^1.2.0",
     "lodash": "^3.10.0",
