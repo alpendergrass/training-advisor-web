@@ -251,7 +251,7 @@ describe('Users E2E Tests:', function () {
       element(by.model('credentials.password')).sendKeys(user1.password);
       // Click Submit button
       element(by.css('button[type="submit"]')).click();
-      expect(browser.getCurrentUrl()).toEqual('http://localhost:3001/');
+      expect(browser.getCurrentUrl()).toEqual('http://localhost:3001/settings/profile');
     });
 
     it('Should report Email already exists', function () {
@@ -322,7 +322,7 @@ describe('Users E2E Tests:', function () {
       element(by.model('credentials.password')).sendKeys(user1.password);
       // Click Submit button
       element(by.css('button[type="submit"]')).click();
-      expect(browser.getCurrentUrl()).toEqual('http://localhost:3001/');
+      expect(browser.getCurrentUrl()).toEqual('http://localhost:3001/season');
     });
 
   });
