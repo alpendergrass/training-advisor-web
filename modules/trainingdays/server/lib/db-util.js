@@ -263,9 +263,10 @@ module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callba
   tomorrow = moment().tz(timezone).add(1, 'day').startOf('day');
   start = moment(trainingDate).add(1, 'day');
 
-  if (start.isSameOrAfter(tomorrow)) {
+  if (start.isAfter(tomorrow)) {
     return callback(null, null);
   }
+
   TrainingDay.update({
     user: user,
     date: { $gte: start, $lte: tomorrow },
@@ -282,6 +283,7 @@ module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callba
       dailyTargetRampRate: 0,
       rampRateAdjustmentFactor: 1,
       targetAvgDailyLoad: 0,
+      loadRating: '',
       plannedActivities: []
     }
   }, {
@@ -382,6 +384,37 @@ module.exports.revertSimulation = function(user, callback) {
       }
 
       return callback(null);
+    });
+  });
+};
+
+module.exports.clearPlanningData = function(user, trainingDate) {
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('valid user is required');
+      reject(err);
+    }
+
+    if (!moment(trainingDate).isValid()) {
+      err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
+      reject(err);
+    }
+
+    TrainingDay.update({
+      user: user,
+      date: { $gte: moment(trainingDate) },
+      cloneOfId: null
+    }, {
+      $set: { loadRating: '', },
+      $pull: { completedActivities: { source: 'plangeneration' } }
+    }, {
+      multi: true
+    }, function(err, rawResponse) {
+      if (err) {
+        reject(err);
+      }
+
+      resolve(rawResponse);
     });
   });
 };

@@ -89,6 +89,9 @@ function generateRecurrences(req, callback) {
 
 function createTrainingDay(req, callback) {
   //It is possible that a document already exists for this day in which case we will update.
+
+  var params = {};
+
   dbUtil.getTrainingDayDocument(req.user, req.body.date, function(err, trainingDay) {
     if (err) {
       return callback(err, null);
@@ -116,17 +119,32 @@ function createTrainingDay(req, callback) {
 
     trainingDay.notes = req.body.notes || '';
     trainingDay.period = '';
-    //trainingDay.targetIntensity = 0;
+    trainingDay.sevenDayRampRate = 0;
     trainingDay.sevenDayTargetRampRate = 0;
     trainingDay.dailyTargetRampRate = 0;
+    trainingDay.rampRateAdjustmentFactor = 1;
     trainingDay.targetAvgDailyLoad = 0;
+    trainingDay.loadRating = '';
+    trainingDay.plannedActivities = [];
 
     trainingDay.save(function(err) {
       if (err) {
         return callback(err, null);
       }
 
-      return callback(null, trainingDay);
+      if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+        params.user = req.user;
+        params.trainingDate = new Date(trainingDay.date);
+        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+          if (err) {
+            return callback(err, null);
+          }
+
+          return callback(null, trainingDay);
+        });
+      } else {
+        return callback(null, trainingDay);
+      }
     });
   });
 }

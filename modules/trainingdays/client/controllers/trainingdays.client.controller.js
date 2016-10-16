@@ -227,6 +227,7 @@ angular.module('trainingDays')
           if (td) {
             $state.go('trainingDays.view', { trainingDayId: td._id });
           } else {
+            //trainingDay does not exist, we need to create it first.
             var trainingDay = new TrainingDays({
               date: date
             });

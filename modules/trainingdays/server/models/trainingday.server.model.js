@@ -15,7 +15,7 @@ var plannedActivitySources = {
   message: invalidDataErrorMessage
 };
 var loadRatings = {
-  values: 'hard|moderate|easy|rest'.split('|'),
+  values: 'hard|moderate|easy|rest|'.split('|'),
   message: invalidDataErrorMessage
 };
 var periods = {
@@ -159,7 +159,7 @@ var TrainingDaySchema = new Schema({
   },
   loadRating: {
     type: String,
-    default: 'rest',
+    default: '',
     enum: loadRatings
   },
   trainingEffortFeedback: {

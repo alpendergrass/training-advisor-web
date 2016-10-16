@@ -532,8 +532,8 @@ describe('db-util Unit Tests:', function () {
       });
     });
 
-    it('should return null rawResponse if trainingDate is today', function (done) {
-      return dbUtil.clearFutureMetricsAndAdvice(user, trainingDate, function (err, rawResponse) {
+    it('should return null rawResponse if trainingDate is tomorrow', function (done) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, moment(trainingDate).add(1, 'day').toDate(), function (err, rawResponse) {
         should.not.exist(err);
         should.not.exist(rawResponse);
         done();
