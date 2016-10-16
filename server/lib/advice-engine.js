@@ -65,7 +65,6 @@ function generateAdvice(user, trainingDay, callback) {
       });
     });
   });
-
 }
 
 function generateActivityFromAdvice(params, callback) {
@@ -110,6 +109,7 @@ function generateActivityFromAdvice(params, callback) {
     });
   }
 }
+
 module.exports = {};
 
 module.exports.generatePlan = function(params, callback) {
@@ -140,81 +140,76 @@ module.exports.generatePlan = function(params, callback) {
       username: user.username
     };
 
-  //TODO: Make the following a async.series, use EC6 promises or something to clean it up. Yuck.
+  //TODO: Make the following a async.series, use promises or something to clean it up. Yuck.
 
-  //As a precaution we remove all planning activities.
-  //If we errored out last time there could be some left over planning activities.
-  dbUtil.removePlanningActivities(user, function(err, rawResponse) {
+  // Get future goal days.
+  dbUtil.getFuturePriorityDays(user, trainingDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
     if (err) {
       return callback(err, null);
     }
 
-    dbUtil.getFuturePriorityDays(user, trainingDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
+    if (goalDays.length < 1) {
+      err = new TypeError('A goal is required in order to generate a season view.');
+      return callback(err, null);
+    }
+
+    //Use last goal to generate plan.
+    goalDay = goalDays[goalDays.length - 1];
+
+    //We call updateMetrics here to ensure we have good starting metrics.
+    adviceMetrics.updateMetrics(params, function(err, td) {
       if (err) {
         return callback(err, null);
       }
 
-      if (goalDays.length < 1) {
-        err = new TypeError('A goal is required in order to generate a season view.');
-        return callback(err, null);
-      }
-
-      //Use last goal to generate plan.
-      goalDay = goalDays[goalDays.length - 1];
-
-      //I don't think we should have to call updateMetrics here.
-      //But we will just in case.
-      adviceMetrics.updateMetrics(params, function(err, td) {
+      //get all training days from trainingDate thru goal.
+      dbUtil.getTrainingDays(user, trainingDate, goalDay.date, function(err, trainingDays) {
         if (err) {
           return callback(err, null);
         }
 
-        //get all training days from trainingDate thru goal.
-        dbUtil.getTrainingDays(user, trainingDate, goalDay.date, function(err, trainingDays) {
-          if (err) {
-            return callback(err, null);
-          }
+        if (trainingDays.length < 1) {
+          err = new TypeError('No training days returned by getTrainingDays.');
+          return callback(err, null);
+        }
 
-          if (trainingDays.length < 1) {
-            err = new TypeError('No training days returned by getTrainingDays.');
-            return callback(err, null);
-          }
+        //if today has a ride, start with tomorrow.
+        if (trainingDays[0].completedActivities.length > 0) {
+          trainingDays.shift();
+        }
 
-          //if today has a ride, start with tomorrow, else start with today.
-          if (trainingDays[0].completedActivities.length > 0) {
-            trainingDays.shift();
-          }
+        //As a precaution we remove all planning data.
+        //If we errored out last time there could be some left overs.
+        // dbUtil.removePlanningActivities(user, function(err, rawResponse) {
+        //   if (err) {
+        //     return callback(err, null);
+        //   }
+        dbUtil.clearPlanningData(user, trainingDays[0].date)
+          .then(function() {
+            async.eachSeries(trainingDays, function(trainingDay, callback) {
+              adviceParams = {
+                user: user,
+                trainingDate: trainingDay.date,
+                genPlan: true
+              };
 
-          async.eachSeries(trainingDays, function(trainingDay, callback) {
-            adviceParams = {
-              user: user,
-              trainingDate: trainingDay.date,
-              // alertUser: false,
-              genPlan: true
-            };
-
-            module.exports.advise(adviceParams, function(err, trainingDay) {
-              if (err) {
-                return callback(err);
-              }
-
-              adviceParams.trainingDay = trainingDay;
-
-              generateActivityFromAdvice(adviceParams, function(err, trainingDay) {
+              module.exports.advise(adviceParams, function(err, trainingDay) {
                 if (err) {
                   return callback(err);
                 }
 
-                return callback();
-              });
-            });
-          },
-            function(err) {
-              if (err) {
-                return callback(err, null);
-              }
+                adviceParams.trainingDay = trainingDay;
 
-              dbUtil.removePlanningActivities(user, function(err, rawResponse) {
+                generateActivityFromAdvice(adviceParams, function(err, trainingDay) {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  return callback();
+                });
+              });
+            },
+              function(err) {
                 if (err) {
                   return callback(err, null);
                 }
@@ -228,23 +223,28 @@ module.exports.generatePlan = function(params, callback) {
                     return callback(err, null);
                   }
 
-                  user.thresholdPowerTestDate = savedThresholdPowerTestDate;
-                  user.planGenNeeded = false;
-
-                  user.save(function(err) {
-                    if (err) {
+                  dbUtil.clearPlanningData(user, trainingDays[0].date)
+                    .then(function() {
+                      user.thresholdPowerTestDate = savedThresholdPowerTestDate;
+                      user.planGenNeeded = false;
+                      return user.save();
+                    })
+                    .then(function() {
+                      statusMessage.text = 'We have updated your season.';
+                      statusMessage.type = 'success';
+                      return callback(null, statusMessage);
+                    })
+                    .catch(function(err) {
                       return callback(err, null);
-                    }
-
-                    statusMessage.text = 'We have updated your season.';
-                    statusMessage.type = 'success';
-                    return callback(null, statusMessage);
-                  });
+                    });
                 });
-              });
-            }
-          );
-        });
+              } // end eachSeries callback
+            );
+          })
+          .catch(function(err) {
+            //from clearPlanningData() before eachSeries
+            return callback(err, null);
+          });
       });
     });
   });
