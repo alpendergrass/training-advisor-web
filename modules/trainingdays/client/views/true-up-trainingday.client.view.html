@@ -29,7 +29,7 @@
 
       <div class="form-group" show-errors>
         <div class="col-md-4">
-          <label for="fitness">Current Fitness (CTL) *</label>
+          <label for="fitness">Current Fitness *</label>
           <input name="fitness" type="number" min="1" max="199" step="1" ng-model="fitness" id="fitness" class="form-control" placeholder="Current Fitness" required>
           <div ng-messages="trainingDayForm.fitness.$error" role="alert">
             <p class="help-block error-text" ng-message="required">Fitness value is required.</p>
@@ -41,7 +41,7 @@
 
       <div class="form-group" show-errors>
         <div class="col-md-4">
-          <label for="fatigue">Current Fatigue (ATL) *</label>
+          <label for="fatigue">Current Fatigue *</label>
           <input name="fatigue" type="number" min="1" max="199" step="1" ng-model="fatigue" id="fatigue" class="form-control" placeholder="Current Fatigue" required>
           <div ng-messages="trainingDayForm.fatigue.$error" role="alert">
             <p class="help-block error-text" ng-message="required">Fatigue value is required.</p>
