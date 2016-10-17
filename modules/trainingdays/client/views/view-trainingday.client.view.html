@@ -179,10 +179,10 @@
       <label>Training Load Rating: <i>{{trainingDay.loadRating}}</i></label>
     </p>
     <p>
-      <!-- only show download option if we have TP creds.
+      <!-- only show download option if we have TP creds. -->
       <a href="#" ng-click="downloadActivities('trainingpeaks')" title="Download workouts from TrainingPeaks®" ng-show="authentication.user.trainingPeaksCredentials.username && authentication.user.trainingPeaksCredentials.password">
         <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/trainingpeaks.png">
-      </a> -->
+      </a>
       <!-- only show download option if connected to Strava. -->
       <a href="#" ng-click="downloadActivities('strava')" title="Download activities from Strava" ng-show="isConnectedSocialAccount('strava')">
         <!-- Strava Download -->
