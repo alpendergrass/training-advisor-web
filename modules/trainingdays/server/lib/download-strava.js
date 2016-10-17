@@ -31,8 +31,10 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     },
     params = {};
 
-  console.log('trainingDay: ' + moment(trainingDay.date).toDate());
-  console.log('Strava searchDate: ' + moment.unix(searchDate).toDate());
+  console.log('Initiating Strava downloadActivities for TacitTraining user: ', user.username);
+
+  // console.log('trainingDay: ' + moment(trainingDay.date).toDate());
+  // console.log('Strava searchDate: ' + moment.unix(searchDate).toDate());
 
   accessToken = user.provider ==='strava'? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
   //retrieve activities from strava
@@ -64,10 +66,10 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     }
 
     _.forEach(payload, function(stravaActivity) {
-      console.log('stravaActivity.id: ' + stravaActivity.id);
-      console.log('stravaActivity.start_date: ' + stravaActivity.start_date); //2016-09-29T16:17:15Z
-      console.log('stravaActivity.start_date moment: ' + moment(stravaActivity.start_date).toDate()); //Thu Sep 29 2016 10:17:15 GMT-0600 (MDT)
-      console.log('thruDate: ', thruDate.toDate());
+      // console.log('stravaActivity.id: ' + stravaActivity.id);
+      // console.log('stravaActivity.start_date: ' + stravaActivity.start_date); //2016-09-29T16:17:15Z
+      // console.log('stravaActivity.start_date moment: ' + moment(stravaActivity.start_date).toDate()); //Thu Sep 29 2016 10:17:15 GMT-0600 (MDT)
+      // console.log('thruDate: ', thruDate.toDate());
 
       // stravaActivity.start_date_local is formatted as UTC:
       // 2016-09-29T10:17:15Z
@@ -90,7 +92,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           // TSS = [(s x W x IF) / (FTP x 3600)] x 100
           // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
           newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
-          console.log('===> We found a keeper...');
+          console.log('===> We found a Strava keeper for user ', user.username);
           console.log('stravaActivity.weighted_average_watts: ' + stravaActivity.weighted_average_watts);
           console.log('fudgedNP: ' + fudgedNP);
           console.log('stravaActivity.elapsed_time: ' + stravaActivity.elapsed_time);

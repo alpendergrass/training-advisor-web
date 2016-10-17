@@ -121,6 +121,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
   statusMessage.created = Date.now();
   statusMessage.username = user.username;
 
+  console.log('Initiating TrainingPeaks downloadActivities for TacitTraining user: ', user.username);
+
   soap.createClient(url, function(err, client) {
     if (err) {
       // statusMessage.text = 'TrainingPeaks access failed - createClient: ' + (err.msg || '');
@@ -362,7 +364,7 @@ function processWorkout(client, args, trainingDay, callback) {
       }
 
       if (payload && payload.GetExtendedWorkoutDataForAccessibleAthleteResult && payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx && payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout) {
-        console.log('===> We found a keeper...');
+        console.log('===> We found a TrainingPeaks keeper for user ', user.username);
         console.log('TrainingPeaks workout ' + args.workoutId + ' returned. Timestamp: ' + payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.time);
         activityCount++;
         newActivity.source = 'trainingpeaks';
