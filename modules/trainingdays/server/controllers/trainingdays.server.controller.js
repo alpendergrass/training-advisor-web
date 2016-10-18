@@ -1,7 +1,7 @@
 'use strict';
 
 var path = require('path'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
@@ -33,7 +33,9 @@ function generateRecurrences(req, callback) {
   var spec = req.body.recurrenceSpec,
     startDate = moment(req.body.date),
     nextDate,
-    endDate = moment(req.body.recurrenceSpec.endsOn).add(1, 'day'), //.endOf('day'),
+    timezone = req.user.timezone || 'America/Denver',
+    endDate = moment.tz(req.body.recurrenceSpec.endsOn, timezone).add(1, 'day'),
+    // endDate = moment(req.body.recurrenceSpec.endsOn).add(1, 'day'),
     trainingDay;
 
   req.body.eventRecurrenceID = Math.floor(Math.random() * 999999999999999) + 1;
@@ -363,6 +365,7 @@ exports.list = function(req, res) {
 
 exports.getSeason = function(req, res) {
   var user = req.user,
+    timezone = user.timezone || 'America/Denver',
     today = new Date(req.params.today),
     effectiveStartDate,
     effectiveGoalDate,
@@ -380,7 +383,8 @@ exports.getSeason = function(req, res) {
     if (startDay) {
       effectiveStartDate = startDay.date;
     } else {
-      effectiveStartDate = moment(today).subtract(1, 'day');
+      effectiveStartDate = moment.tz(today, timezone).subtract(1, 'day');
+      // effectiveStartDate = moment(today).subtract(1, 'day');
     }
 
     //Get future goal days to determine end of season.
@@ -395,7 +399,8 @@ exports.getSeason = function(req, res) {
         //Use last goal to end season.
         effectiveGoalDate = goalDays[goalDays.length - 1].date;
       } else {
-        effectiveGoalDate = moment(today).add(1, 'day');
+        effectiveGoalDate = moment.tz(today, timezone).add(1, 'day');
+        // effectiveGoalDate = moment(today).add(1, 'day');
       }
 
       dbUtil.getTrainingDays(user, effectiveStartDate, effectiveGoalDate, function(err, trainingDays) {

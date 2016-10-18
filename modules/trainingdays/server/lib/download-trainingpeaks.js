@@ -34,7 +34,6 @@ module.exports.batchDownloadActivities = function(callback) {
   individualUserErrors = [];
 
   userUtil.getTrainingPeaksAutoDownloadUsers(function(err, users) {
-    //console.log('users: ' + JSON.stringify(users));
     if (err) {
       return callback(err, null);
     }
@@ -62,7 +61,6 @@ module.exports.batchDownloadActivities = function(callback) {
         ],
           function(err, user, trainingDay) {
             if (err) {
-              // console.log('err: ' + err.message);
               logStatus();
               individualUserErrors.push(err);
               return callback();
@@ -100,7 +98,7 @@ module.exports.batchDownloadActivities = function(callback) {
         );
       }, function(err) {
         if (individualUserErrors.length > 0) {
-          console.log('individualUserErrors: ' + individualUserErrors);
+          console.log('TrainingPeaks: individualUserErrors: ' + individualUserErrors);
         }
         return callback(null, individualUserErrors);
       });
@@ -109,7 +107,7 @@ module.exports.batchDownloadActivities = function(callback) {
 };
 
 function logStatus() {
-  console.log('TP batch download: ' + JSON.stringify(statusMessage));
+  console.log('TrainingPeaks: batch download: ' + JSON.stringify(statusMessage));
 }
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
@@ -121,7 +119,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
   statusMessage.created = Date.now();
   statusMessage.username = user.username;
 
-  console.log('Initiating TrainingPeaks downloadActivities for TacitTraining user: ', user.username);
+  console.log('TrainingPeaks: Initiating downloadActivities for TacitTraining user: ', user.username);
 
   soap.createClient(url, function(err, client) {
     if (err) {
@@ -204,7 +202,7 @@ function getAthlete(user, trainingDay, client, callback) {
 
   client.GetAccessibleAthletes(args, function(err, payload) {
     if (err) {
-      console.log('TrainingPeaks access failed for ' + args.username + ' - GetAccessibleAthletes: ' + (err.message || ''));
+      console.log('TrainingPeaks: access failed for ' + args.username + ' - GetAccessibleAthletes: ' + (err.message || ''));
       statusMessage.username = user.username;
       statusMessage.text = 'TrainingPeaks access failed - ' + (err.message || '');
       statusMessage.type = 'error';
@@ -213,11 +211,11 @@ function getAthlete(user, trainingDay, client, callback) {
 
     if (payload) {
       if (payload.GetAccessibleAthletesResult && payload.GetAccessibleAthletesResult.PersonBase) {
-        console.log('TrainingPeaks athletes returned: ' + payload.GetAccessibleAthletesResult.PersonBase.length);
-        console.log('payload.GetAccessibleAthletesResult.PersonBase[0].PersonId: ' + payload.GetAccessibleAthletesResult.PersonBase[0].PersonId);
+        console.log('TrainingPeaks: athletes returned: ' + payload.GetAccessibleAthletesResult.PersonBase.length);
+        console.log('TrainingPeaks: payload.GetAccessibleAthletesResult.PersonBase[0].PersonId: ' + payload.GetAccessibleAthletesResult.PersonBase[0].PersonId);
         return callback(null, user, trainingDay, client, payload.GetAccessibleAthletesResult.PersonBase[0].PersonId);
       } else {
-        console.log('TrainingPeaks access failed for ' + args.username + ' - GetAccessibleAthletes: suspected invalid account type.');
+        console.log('TrainingPeaks: access failed for ' + args.username + ' - GetAccessibleAthletes: suspected invalid account type.');
         statusMessage.username = user.username;
         statusMessage.text = 'You must be a premium member to download from TrainingPeaks. Please check account type in your profile.';
         statusMessage.type = 'error';
@@ -225,7 +223,7 @@ function getAthlete(user, trainingDay, client, callback) {
       }
     }
 
-    console.log('No TrainingPeaks athletes returned for user ' + args.username + ' with account type of ' + args.types);
+    console.log('TrainingPeaks: No athletes returned for user ' + args.username + ' with account type of ' + args.types);
     statusMessage.text = 'No TrainingPeaks athletes returned for user ' + args.username + ' with account type of ' + args.types;
     statusMessage.type = 'error';
     return callback(null, user, trainingDay, null, null);
@@ -269,11 +267,11 @@ function getWorkouts(user, trainingDay, client, personId, callback) {
     }
 
     if (payload && payload.GetWorkoutsForAccessibleAthleteResult && payload.GetWorkoutsForAccessibleAthleteResult.Workout && payload.GetWorkoutsForAccessibleAthleteResult.Workout.length > 0) {
-      console.log('TrainingPeaks workouts returned: ' + payload.GetWorkoutsForAccessibleAthleteResult.Workout.length);
+      console.log('TrainingPeaks: workouts returned: ' + payload.GetWorkoutsForAccessibleAthleteResult.Workout.length);
       return callback(null, user, trainingDay, client, personId, payload.GetWorkoutsForAccessibleAthleteResult.Workout);
     }
 
-    console.log('No TrainingPeaks workouts returned for user ' + args.username + ' with personId of ' + personId);
+    console.log('TrainingPeaks: No workouts returned for user ' + args.username + ' with personId of ' + personId);
     statusMessage.text = 'We found no TrainingPeaks workouts for the day.';
     statusMessage.type = 'info';
     return callback(null, user, trainingDay, null, null, null);
@@ -353,7 +351,7 @@ function processWorkout(client, args, trainingDay, callback) {
   var newActivity = {};
 
   if (_.find(trainingDay.completedActivities, { 'sourceID': args.workoutId.toString() })) {
-    console.log('===> Workout ' + args.workoutId + ' has been previously downloaded.');
+    console.log('===> TrainingPeaks: Workout ' + args.workoutId + ' has been previously downloaded.');
     callback();
   } else {
     client.GetExtendedWorkoutDataForAccessibleAthlete(args, function(err, payload) {
@@ -364,8 +362,8 @@ function processWorkout(client, args, trainingDay, callback) {
       }
 
       if (payload && payload.GetExtendedWorkoutDataForAccessibleAthleteResult && payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx && payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout) {
-        console.log('===> We found a TrainingPeaks keeper for user ', user.username);
-        console.log('TrainingPeaks workout ' + args.workoutId + ' returned. Timestamp: ' + payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.time);
+        console.log('===> TrainingPeaks: We found a keeper for TP username ', args.username);
+        console.log('TrainingPeaks: workout ' + args.workoutId + ' returned. Timestamp: ' + payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.time);
         activityCount++;
         newActivity.source = 'trainingpeaks';
         newActivity.sourceID = args.workoutId;
@@ -375,7 +373,7 @@ function processWorkout(client, args, trainingDay, callback) {
         trainingDay.completedActivities.push(newActivity);
         newActivity = {};
       } else {
-        console.log('No TrainingPeaks workout data returned for user ' + args.username + ' with workoutId ' + args.workoutId);
+        console.log('TrainingPeaks: No workout data returned for username ' + args.username + ' with workoutId ' + args.workoutId);
         statusMessage.text = 'No TrainingPeaks workout data returned for user ' + args.username + ' with workoutId of ' + args.workoutId;
         statusMessage.type = 'error';
       }

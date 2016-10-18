@@ -83,25 +83,33 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
   }
 
   var trainingDays = [],
-    currentNumeric = toNumericDate(startDate),
-    endNumeric = toNumericDate(endDate),
-    currentDate = moment(startDate);
+    // currentNumeric = toNumericDate(startDate),
+    // endNumeric = toNumericDate(endDate),
+    currentDate = moment(startDate),
+    timezone = user.timezone || 'America/Denver';
+  // console.log('endDate: ', endDate);
 
   async.whilst(
     function() {
-      currentNumeric = toNumericDate(currentDate);
-      return currentNumeric <= endNumeric;
+      // currentNumeric = toNumericDate(currentDate);
+      return currentDate.isSameOrBefore(endDate);
+      // return currentNumeric <= endNumeric;
     },
     function(callback) {
       module.exports.getTrainingDayDocument(user, currentDate.toDate(), function(err, trainingDay) {
         if (err) {
+          console.log('err: ', err);
           return callback(err, null);
         }
         trainingDays.push(trainingDay);
-        callback(null, currentDate.add(1, 'day'));
+        currentDate = moment.tz(currentDate, timezone).add(1, 'day');
+        callback(null, trainingDay);
       });
     },
     function (err, lastDay) {
+      if (err) {
+        return callback(err, null);
+      }
       return callback(null, trainingDays);
     }
   );
@@ -182,7 +190,9 @@ module.exports.getPriorPriorityDays = function(user, searchDate, priority, numbe
   }
 
   var trainingDate = moment(searchDate),
-    minDate = moment(searchDate).subtract(numberOfDaysBack, 'days');
+    timezone = user.timezone || 'America/Denver',
+    minDate = moment.tz(searchDate, timezone).subtract(numberOfDaysBack, 'days');
+    // minDate = moment(searchDate).subtract(numberOfDaysBack, 'days');
 
   if (!trainingDate.isValid()) {
     err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
@@ -243,10 +253,6 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
 
 module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callback) {
   //Only clear thru tomorrow. We don't want to wipe out our plan.
-  var start,
-    timezone,
-    tomorrow;
-
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
@@ -257,11 +263,15 @@ module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callba
     return callback(err, null);
   }
 
+  var start,
+    timezone = user.timezone || 'America/Denver',
+    tomorrow;
+
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
-  timezone = user.timezone || 'America/Denver';
   tomorrow = moment().tz(timezone).add(1, 'day').startOf('day');
-  start = moment(trainingDate).add(1, 'day');
+  start = moment.tz(trainingDate, timezone).add(1, 'day');
+  // start = moment(trainingDate).add(1, 'day');
 
   if (start.isAfter(tomorrow)) {
     return callback(null, null);
@@ -447,8 +457,10 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
     return callback(err, null);
   }
 
-  var start = moment(searchDate).subtract(1, 'day');
-  var end = moment(searchDate);
+  var timezone = user.timezone || 'America/Denver',
+    start = moment.tz(searchDate, timezone).subtract(1, 'day'),
+    // start = moment(searchDate).subtract(1, 'day'),
+    end = moment(searchDate);
 
   // We need to check for the existence of completedActivities below
   // as the loadRating could be from a genPlan where the completedActivities
@@ -492,7 +504,9 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   }
 
   var searchDate = moment(trainingDate),
-    searchDateNumeric;
+    searchDateNumeric,
+    end,
+    timezone = user.timezone || 'America/Denver';
 
   if (!moment(searchDate).isValid()) {
     err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
@@ -521,21 +535,22 @@ function getTrainingDaysForDate(user, trainingDate, callback) {
   //this GMT date resulted in midnight GMT on June 19 6PM in browser local time. The
   //end date was also off by 6 hours.
 
-  // var end = moment(searchDate).add(1, 'day'); //.endOf('day');
+  end = moment.tz(searchDate, timezone).add(1, 'day');
 
-  // var query = TrainingDay
-  //   .where('user').equals(user)
-  //   .where('date').gte(searchDate).lt(end);
+  var query = TrainingDay
+    .where('user').equals(user)
+    .where('date').gte(searchDate).lt(end)
+    .where('cloneOfId').equals(null);
 
   //No longer using dates in query. Using dateNumeric which is an integer derived from 'YYYYMMDD'.
   //This is a step in simplifying date queries by removing the time component.
 
-  searchDateNumeric = toNumericDate(searchDate);
+  // searchDateNumeric = toNumericDate(searchDate);
 
-  var query = TrainingDay
-    .where('user').equals(user)
-    .where('dateNumeric').equals(searchDateNumeric)
-    .where('cloneOfId').equals(null);
+  // var query = TrainingDay
+  //   .where('user').equals(user)
+  //   .where('dateNumeric').equals(searchDateNumeric)
+  //   .where('cloneOfId').equals(null);
 
   query.find().populate('user').exec(function(err, trainingDays) {
     if (err) {

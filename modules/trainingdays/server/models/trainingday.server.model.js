@@ -59,31 +59,27 @@ var TrainingDaySchema = new Schema({
     type: Boolean,
     default: false
   },
-  //CTL
   fitness: {
     type: Number,
     min: minFitnessOrFatigueValue,
     max: maxFitnessOrFatigueValue,
     default: 0
   },
-  //ATL
   fatigue: {
     type: Number,
     min: minFitnessOrFatigueValue,
     max: maxFitnessOrFatigueValue,
     default: 0
   },
-  //TSB
   form: {
     type: Number,
     default: 0
   },
-  //weekly fitness (CTL) ramp rate
   startingPoint: {
     type: Boolean,
     default: false
   },
-  //We set this flag to supress recomputation if the user manually updates F&F.
+  //We set this flag to suppress recomputation if the user manually updates F&F.
   fitnessAndFatigueTrueUp: {
     type: Boolean,
     default: false
@@ -135,7 +131,7 @@ var TrainingDaySchema = new Schema({
     enum: periods,
     default: ''
   },
-  //weekly target fitness (CTL) ramp rate
+  //fitness (CTL) ramp rates
   sevenDayRampRate: {
     type: Number,
     default: 0
@@ -144,7 +140,6 @@ var TrainingDaySchema = new Schema({
     type: Number,
     default: 0
   },
-  //daily target fitness (CTL) ramp rate
   dailyTargetRampRate: {
     type: Number,
     default: 0
