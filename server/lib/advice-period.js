@@ -1,7 +1,7 @@
 'use strict';
 
 var path = require('path'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   _ = require('lodash'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -116,7 +116,8 @@ function determinePeriod(user, trainingDay, callback) {
         basePeriodAdjustment,
         lastRaceSearchDate,
         lastRace,
-        periodData = {};
+        periodData = {},
+        timezone = user.timezone || 'America/Denver';
 
       if (results.nextPriority2Date) {
         periodData.daysUntilNextPriority2Event = results.nextPriority2Date.diff(trainingDate, 'days');
@@ -152,7 +153,8 @@ function determinePeriod(user, trainingDay, callback) {
         } else {
           firstGoalDateInRacePeriod = moment(results.futureGoalDays[0].date);
         }
-        results.endOfTrainingPeriod = moment(firstGoalDateInRacePeriod).subtract(7, 'days');
+        results.endOfTrainingPeriod = moment.tz(firstGoalDateInRacePeriod, timezone).subtract(7, 'days');
+        // results.endOfTrainingPeriod = moment(firstGoalDateInRacePeriod).subtract(7, 'days');
 
         determineEffectiveStartDate(results, function(err, startDate) {
           if (err) {

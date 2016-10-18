@@ -2,7 +2,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
@@ -116,6 +116,8 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
   //We use yesterday's fitness and fatigue to compute today's form, like TP does it.
   //This prevents today's form from changing when completed activities are added to today.
 
+  var timezone = user.timezone || 'America/Denver';
+
   //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
   async.series({
     periodData: function(callback){
@@ -131,7 +133,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
       if (currentTrainingDay.startingPoint || currentTrainingDay.fitnessAndFatigueTrueUp) {
         //Special cases:
         //1. If called with the first trainingDay of the training period, no point in looking for prior day.
-        //2. User is done a F&F trueup: she has manually entered these values and we do not want to recompute them.
+        //2. User has done a F&F trueup: she has manually entered these values and we do not want to recompute them.
         //We will return null for prior day and check for null prior day below.
         if (currentTrainingDay.fitness === 0 && currentTrainingDay.fatigue === 0) {
           err = new RangeError('Starting day or F&F true-up day should not have fitness and fatigue equal to zero.');
@@ -141,7 +143,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
         return callback(null, null);
       }
 
-      var priorDate = moment(currentTrainingDay.date).subtract(1, 'days');
+      var priorDate = moment.tz(currentTrainingDay.date, timezone).subtract(1, 'day');
 
       dbUtil.getTrainingDayDocument(user, priorDate, function(err, priorTrainingDay) {
         if (err) {
@@ -265,8 +267,11 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 function computeSevenDayRampRate(user, trainingDay, callback) {
   //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-  var priorDate = moment(trainingDay.date).subtract(8, 'days'),
-    yesterday = moment(trainingDay.date).subtract(1, 'days'),
+  var timezone = user.timezone || 'America/Denver',
+    priorDate = moment.tz(trainingDay.date, timezone).subtract(8, 'days'),
+    yesterday = moment.tz(trainingDay.date, timezone).subtract(1, 'days'),
+    // priorDate = moment(trainingDay.date).subtract(8, 'days'),
+    // yesterday = moment(trainingDay.date).subtract(1, 'days'),
     rampRate;
 
   dbUtil.getExistingTrainingDayDocument(user, yesterday, function(err, yesterdayTrainingDay) {

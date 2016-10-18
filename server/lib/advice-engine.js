@@ -2,7 +2,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment'),
+  moment = require('moment-timezone'),
   async = require('async'),
   mongoose = require('mongoose'),
   RuleEngine = require('node-rules'),
