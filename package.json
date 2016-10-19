@@ -51,6 +51,7 @@
     "moment": "^2.11.1",
     "moment-timezone": "^0.5.5",
     "mongoose": "^4.6.3",
+    "mongration": "0.0.15",
     "morgan": "^1.6.1",
     "multer": "^1.2.0",
     "node-rules": "^3.1.0",

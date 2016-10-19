@@ -6,6 +6,7 @@ var config = require('../config'),
   express = require('./express'),
   chalk = require('chalk'),
   seed = require('./seed'),
+  migration = require('./migration'),
   later = require('later'),
   nodemailer = require('nodemailer');
 
@@ -34,41 +35,47 @@ module.exports.loadModels = function loadModels() {
 };
 
 module.exports.init = function init(callback) {
-  mongoose.connect(function (db) {
-    // Initialize express
-    var app = express.init(db);
+  migration.migrate()
+    .then(function() {
+      mongoose.connect(function(db) {
+        // Initialize express
+        var app = express.init(db);
 
-    if (process.env.TZ) {
-      console.log(chalk.red('***** Server timezone manually set to: ', process.env.TZ));
-    }
+        if (process.env.TZ) {
+          console.log(chalk.blue('Server timezone manually set to: ', process.env.TZ));
+        }
 
-    // //Schedule workout download job: need to figure out how to run this on only one instance.
-    // // var textSched = later.parse.text('every 1 min'); //time is GMT
-    // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
+        // //Schedule workout download job: need to figure out how to run this on only one instance.
+        // // var textSched = later.parse.text('every 1 min'); //time is GMT
+        // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
 
-    // if (textSched.error > -1) {
-    //   mailOptions.subject += ': Error';
-    //   mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
-    //   console.log(mailOptions.text);
-    //   smtpTransport.sendMail(mailOptions, function (err) {
-    //     if (err) {
-    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-    //     }
-    //   });
-    // } else {
-    //   mailOptions.subject += ': Info';
-    //   mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
-    //   console.log(mailOptions.text);
-    //   smtpTransport.sendMail(mailOptions, function (err) {
-    //     if (err) {
-    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-    //     }
-    //   });
-    //   var timer = later.setInterval(downloadTP, textSched);
-    // }
+        // if (textSched.error > -1) {
+        //   mailOptions.subject += ': Error';
+        //   mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
+        //   console.log(mailOptions.text);
+        //   smtpTransport.sendMail(mailOptions, function (err) {
+        //     if (err) {
+        //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+        //     }
+        //   });
+        // } else {
+        //   mailOptions.subject += ': Info';
+        //   mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
+        //   console.log(mailOptions.text);
+        //   smtpTransport.sendMail(mailOptions, function (err) {
+        //     if (err) {
+        //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+        //     }
+        //   });
+        //   var timer = later.setInterval(downloadTP, textSched);
+        // }
 
-    if (callback) callback(app, db, config);
-  });
+        if (callback) callback(app, db, config);
+      });
+    })
+    .catch(function(err) {
+      if (callback) callback();
+    });
 };
 
 function downloadTP() {
@@ -79,7 +86,7 @@ function downloadTP() {
       mailOptions.subject = mailSubjectPrefix + ': Error';
       mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities returned error: ' + JSON.stringify(err);
       console.log(mailOptions.text);
-      smtpTransport.sendMail(mailOptions, function (err) {
+      smtpTransport.sendMail(mailOptions, function(err) {
         if (err) {
           console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
         }
@@ -88,7 +95,7 @@ function downloadTP() {
       mailOptions.subject = mailSubjectPrefix + ': Info';
       mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities completed successfully.';
       console.log(mailOptions.text);
-      smtpTransport.sendMail(mailOptions, function (err) {
+      smtpTransport.sendMail(mailOptions, function(err) {
         if (err) {
           console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
         }
@@ -100,10 +107,10 @@ function downloadTP() {
 module.exports.start = function start(callback) {
   var _this = this;
 
-  _this.init(function (app, db, config) {
+  _this.init(function(app, db, config) {
 
     // Start the app by listening on <port>
-    app.listen(config.port, function () {
+    app.listen(config.port, function() {
 
       // Logging initialization
       console.log('--');
@@ -121,7 +128,7 @@ module.exports.start = function start(callback) {
 
       mailOptions.subject = mailSubjectPrefix + ': Started';
       mailOptions.text = 'App instance has been started.';
-      smtpTransport.sendMail(mailOptions, function (err) {
+      smtpTransport.sendMail(mailOptions, function(err) {
         if (err) {
           console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
         }
