@@ -10,99 +10,146 @@ require('lodash-migrate');
 
 mongoose.Promise = global.Promise;
 
+function getTrainingDay(user, numericDate, callback) {
+  if (!user) {
+    err = new TypeError('valid user is required');
+    return callback(err, null);
+  }
+
+  if (!moment(numericDate.toString()).isValid()) {
+    err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  //We are assuming that our searchDate is midnight local (browser) time.
+  //We add 1 day to the time to get the end of our search span.
+  //(Note that originally we added 24 hours which broke on days that DST started or ended.)
+  //Mongo stores times in GMT so our search start and end date should
+  //likewise be converted to GMT for the query below.
+
+  //In general our convention for date handling it to always use dates with time
+  //set to midnight local (browser) time. On the server we do not have to worry
+  //about server local time.
+
+  //We were getting tripped up as the date coming in from the browser was
+  //in GMT like so: 2016-06-20T06:00:00.000Z. When we parsed this date
+  //when running on my server here (which is in mountain time zone) it
+  //produced a searchDate like: Mon Jun 20 2016 00:00:00 GMT-0600 (MDT)
+  //which worked fine with the query I was using originally using startOf day and
+  //endOf day.
+  //But when this code ran on the Bluemix server, with time set to GMT,
+  //trainingDate of 2016-06-20T06:00:00.000Z was being parsed to
+  //Mon Jun 20 2016 06:00:00 GMT+0000 (UTC). Applying startOf to
+  //this GMT date resulted in midnight GMT on June 19 6PM in browser local time. The
+  //end date was also off by 6 hours.
+
+  // end = moment.tz(searchDate, timezone).add(1, 'day');
+
+  // var query = TrainingDay
+  //   .where('user').equals(user)
+  //   .where('date').gte(searchDate).lt(end)
+  //   .where('cloneOfId').equals(null);
+
+  //No longer using dates in query. Using dateNumeric which is an integer derived from 'YYYYMMDD'.
+  //This is a step in simplifying date queries by removing the time component.
+
+
+  var query = TrainingDay
+    .where('user').equals(user)
+    .where('dateNumeric').equals(numericDate)
+    .where('cloneOfId').equals(null);
+
+  query.findOne().populate('user').exec(function(err, trainingDay) {
+    if (err) {
+      return callback(err, null);
+    }
+
+    return callback(null, trainingDay);
+  });
+}
+
+//TODO: this function is duplicated in controller.
+function toNumericDate(date) {
+  var dateString = moment(date).format('YYYYMMDD');
+  return parseInt(dateString, 10);
+}
+
 module.exports = {};
 
-module.exports.getTrainingDayDocument = function(user, trainingDate, callback) {
+module.exports.toNumericDate = toNumericDate;
+
+module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
   //If requested training day does not exist it will be created and returned.
   //This should be the only place in the app where a new training day is created from scratch.
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
-  getTrainingDaysForDate(user, trainingDate, function(err, trainingDays) {
+  getTrainingDay(user, numericDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null);
     }
 
-    if (trainingDays.length < 1) {
+    if (!trainingDay) {
       var newTrainingDay = new TrainingDay();
-      newTrainingDay.date = moment(trainingDate).toDate();
+      newTrainingDay.dateNumeric = numericDate;
+      newTrainingDay.date = moment(numericDate.toString()).toDate();
       newTrainingDay.user = user;
-      newTrainingDay.save(function(err, trainingDay) {
+      newTrainingDay.save(function(err, createdTrainingDay) {
         if (err) {
           return callback(err, null);
         }
 
-        return callback(null, trainingDay);
+        return callback(null, createdTrainingDay);
       });
     } else {
-      if (trainingDays.length > 1) {
-        err = new RangeError('Multiple trainingDay documents returned for date ' + moment(trainingDate).toDate());
-        return callback(err, null);
-
-      }
-      return callback(null, trainingDays[0]);
+      return callback(null, trainingDay);
     }
   });
 };
 
-module.exports.getExistingTrainingDayDocument = function(user, trainingDate, callback) {
+module.exports.getExistingTrainingDayDocument = function(user, numericDate, callback) {
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
-  getTrainingDaysForDate(user, trainingDate, function(err, trainingDays) {
+  getTrainingDay(user, numericDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null);
     }
 
-    if (trainingDays.length < 1) {
-      return callback(null, null);
-    }
-
-    if (trainingDays.length > 1) {
-      err = new RangeError('Multiple trainingDay documents returned for date ' + moment(trainingDate).toDate());
-      return callback(err, null);
-    }
-
-    return callback(null, trainingDays[0]);
+    return callback(null, trainingDay);
   });
 };
 
-module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
+module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate, callback) {
   //Will return a trainingDay doc for each day between startDate and endDate inclusive.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  if (!moment(startDate).isValid()) {
-    err = new TypeError('getTrainingDays startDate ' + startDate + ' is not a valid date');
+  if (!moment(numericStartDate.toString()).isValid()) {
+    err = new TypeError('getTrainingDays numericStartDate ' + numericStartDate + ' is not a valid date');
     return callback(err, null);
   }
 
-  if (!moment(endDate).isValid()) {
-    err = new TypeError('getTrainingDays endDate ' + endDate + ' is not a valid date');
+  if (!moment(numericEndDate.toString()).isValid()) {
+    err = new TypeError('getTrainingDays numericEndDate ' + numericEndDate + ' is not a valid date');
     return callback(err, null);
   }
 
   var trainingDays = [],
-    // currentNumeric = toNumericDate(startDate),
-    // endNumeric = toNumericDate(endDate),
-    currentDate = moment(startDate),
-    timezone = user.timezone || 'America/Denver';
-  // console.log('endDate: ', endDate);
+    currentNumeric = numericStartDate;
 
   async.whilst(
     function() {
-      // currentNumeric = toNumericDate(currentDate);
-      return currentDate.isSameOrBefore(endDate);
-      // return currentNumeric <= endNumeric;
+      return currentNumeric <= numericEndDate;
     },
     function(callback) {
-      module.exports.getTrainingDayDocument(user, currentDate.toDate(), function(err, trainingDay) {
+      module.exports.getTrainingDayDocument(user, currentNumeric, function(err, trainingDay) {
         if (err) {
           console.log('err: ', err);
           return callback(err, null);
         }
         trainingDays.push(trainingDay);
-        currentDate = moment.tz(currentDate, timezone).add(1, 'day');
+        currentNumeric = toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
         callback(null, trainingDay);
       });
     },
@@ -115,28 +162,27 @@ module.exports.getTrainingDays = function(user, startDate, endDate, callback) {
   );
 };
 
-module.exports.getStartDay = function(user, searchDate, callback) {
+module.exports.getStartDay = function(user, numericSearchDate, callback) {
   //select most recent starting trainingDay.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(searchDate);
-
-  if (!trainingDate.isValid()) {
-    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+  if (!moment(numericSearchDate.toString()).isValid()) {
+    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
 
   var query = {
     user: user,
     startingPoint: true,
-    date: { $lte: trainingDate },
+    dateNumeric: { $lte: numericSearchDate },
+    // date: { $lte: trainingDate },
     cloneOfId: null
   };
 
-  TrainingDay.find(query).sort({ date: -1 }).limit(1)
+  TrainingDay.find(query).sort({ dateNumeric: -1 }).limit(1)
   .exec(function(err, trainingDays) {
     if (err) {
       return callback(err, null);
@@ -150,29 +196,30 @@ module.exports.getStartDay = function(user, searchDate, callback) {
   });
 };
 
-module.exports.getFuturePriorityDays = function(user, searchDate, priority, numberOfDaysOut, callback) {
+module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut, callback) {
   //select priority n trainingDays after searchDate. Include searchDate
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(searchDate),
-    maxDate = moment(searchDate).add(numberOfDaysOut, 'days');
-
-  if (!trainingDate.isValid()) {
-    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+  if (!moment(numericSearchDate.toString()).isValid()) {
+    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
+
+  // var trainingDate = moment(searchDate),
+  var numericMaxDate = toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
 
   var query = {
     user: user,
     scheduledEventRanking: priority,
-    date: { $gte: trainingDate, $lte: maxDate },
+    dateNumeric: { $gte: numericSearchDate, $lte: numericMaxDate },
+    // date: { $gte: trainingDate, $lte: maxDate },
     cloneOfId: null
   };
 
-  TrainingDay.find(query).sort({ date: 1 })
+  TrainingDay.find(query).sort({ dateNumeric: 1 })
   .exec(function(err, priorityDays) {
     if (err) {
       return callback(err, null);
@@ -182,27 +229,24 @@ module.exports.getFuturePriorityDays = function(user, searchDate, priority, numb
   });
 };
 
-module.exports.getPriorPriorityDays = function(user, searchDate, priority, numberOfDaysBack, callback) {
+module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority, numberOfDaysBack, callback) {
   //select priority n trainingDays before searchDate.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(searchDate),
-    timezone = user.timezone || 'America/Denver',
-    minDate = moment.tz(searchDate, timezone).subtract(numberOfDaysBack, 'days');
-    // minDate = moment(searchDate).subtract(numberOfDaysBack, 'days');
-
-  if (!trainingDate.isValid()) {
-    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+  if (!moment(numericSearchDate.toString()).isValid()) {
+    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
+
+  var numericMinDate = toNumericDate(moment(numericSearchDate).subtract(numberOfDaysBack, 'days'));
 
   var query = {
     user: user,
     scheduledEventRanking: priority,
-    date: { $lt: trainingDate, $gte: minDate },
+    dateNumeric: { $lt: numericSearchDate, $gte: numericMinDate },
     cloneOfId: null
   };
 
@@ -216,24 +260,22 @@ module.exports.getPriorPriorityDays = function(user, searchDate, priority, numbe
   });
 };
 
-module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
+module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback) {
   //select most recent goal trainingDay before today.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var trainingDate = moment(searchDate);
-
-  if (!trainingDate.isValid()) {
-    err = new TypeError('searchDate ' + searchDate + ' is not a valid date');
+  if (!moment(numericSearchDate.toString()).isValid()) {
+    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
 
   var query = {
     user: user,
     scheduledEventRanking: 1,
-    date: { $lt: trainingDate },
+    dateNumeric: { $lt: numericSearchDate },
     cloneOfId: null
   };
 
@@ -251,35 +293,30 @@ module.exports.getMostRecentGoalDay = function(user, searchDate, callback) {
   });
 };
 
-module.exports.clearFutureMetricsAndAdvice = function(user, trainingDate, callback) {
+module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, callback) {
   //Only clear thru tomorrow. We don't want to wipe out our plan.
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  if (!moment(trainingDate).isValid()) {
-    err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
+  if (!moment(numericDate.toString()).isValid()) {
+    err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
     return callback(err, null);
   }
 
-  var start,
-    timezone = user.timezone || 'America/Denver',
-    tomorrow;
-
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
-  tomorrow = moment().tz(timezone).add(1, 'day').startOf('day');
-  start = moment.tz(trainingDate, timezone).add(1, 'day');
-  // start = moment(trainingDate).add(1, 'day');
+  var tomorrowNumeric = toNumericDate(moment().add(1, 'day')), //potential timezone issue here.
+    startNumeric = toNumericDate(moment(numericDate.toString()).add(1, 'day'));
 
-  if (start.isAfter(tomorrow)) {
+  if (startNumeric > tomorrowNumeric) {
     return callback(null, null);
   }
 
   TrainingDay.update({
     user: user,
-    date: { $gte: start, $lte: tomorrow },
+    dateNumeric: { $gte: startNumeric, $lte: tomorrowNumeric },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
     cloneOfId: null
@@ -398,21 +435,21 @@ module.exports.revertSimulation = function(user, callback) {
   });
 };
 
-module.exports.clearPlanningData = function(user, trainingDate) {
+module.exports.clearPlanningData = function(user, numericDate) {
   return new Promise(function(resolve, reject) {
     if (!user) {
       err = new TypeError('valid user is required');
       return reject(err);
     }
 
-    if (!moment(trainingDate).isValid()) {
-      err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
+    if (!moment(numericDate.toString()).isValid()) {
+      err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
       return reject(err);
     }
 
     TrainingDay.update({
       user: user,
-      date: { $gte: moment(trainingDate) },
+      dateNumeric: { $gte: numericDate },
       cloneOfId: null
     }, {
       $set: { loadRating: '', },
@@ -451,16 +488,13 @@ module.exports.removePlanningActivities = function(user, callback) {
   });
 };
 
-module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
+module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, callback) {
   if (!user) {
     err = new TypeError('valid user is required');
     return callback(err, null);
   }
 
-  var timezone = user.timezone || 'America/Denver',
-    start = moment.tz(searchDate, timezone).subtract(1, 'day'),
-    // start = moment(searchDate).subtract(1, 'day'),
-    end = moment(searchDate);
+  var numericYesterday = toNumericDate(moment(numericSearchDate.toString()).subtract(1, 'day'));
 
   // We need to check for the existence of completedActivities below
   // as the loadRating could be from a genPlan where the completedActivities
@@ -468,7 +502,7 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
   var query = TrainingDay
     .where('user').equals(user)
     .where('cloneOfId').equals(null)
-    .where('date').gte(start).lte(end)
+    .where('dateNumeric').equals(numericYesterday)
     .where('completedActivities').ne([])
     .where('loadRating').in(['simulation', 'hard']);
 
@@ -496,72 +530,3 @@ module.exports.didWeGoHardTheDayBefore = function(user, searchDate, callback) {
 //     console.log('socketIDlookup failed for username ' + user.username);
 //   }
 // };
-
-function getTrainingDaysForDate(user, trainingDate, callback) {
-  if (!user) {
-    err = new TypeError('valid user is required');
-    return callback(err, null);
-  }
-
-  var searchDate = moment(trainingDate),
-    searchDateNumeric,
-    end,
-    timezone = user.timezone || 'America/Denver';
-
-  if (!moment(searchDate).isValid()) {
-    err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
-    return callback(err, null);
-  }
-
-  //We are assuming that our searchDate is midnight local (browser) time.
-  //We add 1 day to the time to get the end of our search span.
-  //(Note that originally we added 24 hours which broke on days that DST started or ended.)
-  //Mongo stores times in GMT so our search start and end date should
-  //likewise be converted to GMT for the query below.
-
-  //In general our convention for date handling it to always use dates with time
-  //set to midnight local (browser) time. On the server we do not have to worry
-  //about server local time.
-
-  //We were getting tripped up as the date coming in from the browser was
-  //in GMT like so: 2016-06-20T06:00:00.000Z. When we parsed this date
-  //when running on my server here (which is in mountain time zone) it
-  //produced a searchDate like: Mon Jun 20 2016 00:00:00 GMT-0600 (MDT)
-  //which worked fine with the query I was using originally using startOf day and
-  //endOf day.
-  //But when this code ran on the Bluemix server, with time set to GMT,
-  //trainingDate of 2016-06-20T06:00:00.000Z was being parsed to
-  //Mon Jun 20 2016 06:00:00 GMT+0000 (UTC). Applying startOf to
-  //this GMT date resulted in midnight GMT on June 19 6PM in browser local time. The
-  //end date was also off by 6 hours.
-
-  end = moment.tz(searchDate, timezone).add(1, 'day');
-
-  var query = TrainingDay
-    .where('user').equals(user)
-    .where('date').gte(searchDate).lt(end)
-    .where('cloneOfId').equals(null);
-
-  //No longer using dates in query. Using dateNumeric which is an integer derived from 'YYYYMMDD'.
-  //This is a step in simplifying date queries by removing the time component.
-
-  // searchDateNumeric = toNumericDate(searchDate);
-
-  // var query = TrainingDay
-  //   .where('user').equals(user)
-  //   .where('dateNumeric').equals(searchDateNumeric)
-  //   .where('cloneOfId').equals(null);
-
-  query.find().populate('user').exec(function(err, trainingDays) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    return callback(null, trainingDays);
-  });
-}
-
-function toNumericDate(date) {
-  var dateString = moment(date).format('YYYYMMDD');
-  return parseInt(dateString, 10);
-}

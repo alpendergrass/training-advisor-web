@@ -24,6 +24,69 @@ function getTrainingDay(id, callback) {
   });
 }
 
+function createTrainingDay(req, callback) {
+  //It is possible that a document already exists for this day in which case we will update.
+
+  var params = {},
+    numericDate = dbUtil.toNumericDate(req.body.date);
+
+  dbUtil.getTrainingDayDocument(req.user, numericDate, function(err, trainingDay) {
+    if (err) {
+      return callback(err, null);
+    }
+
+    if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+      //Preserve existing name, if any.
+      trainingDay.name = trainingDay.name? trainingDay.name + ', ' + req.body.name : req.body.name;
+      trainingDay.startingPoint = req.body.startingPoint;
+      trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
+      trainingDay.fitness = req.body.fitness;
+      trainingDay.fatigue = req.body.fatigue;
+      //Normally form is calculated using the preceding day's fitness and fatigue but we do not have prior day here.
+      trainingDay.form = Math.round((req.body.fitness - req.body.fatigue) * 100) / 100;
+    } else if (req.body.scheduledEventRanking) {
+      trainingDay.name = req.body.name;
+      trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
+      trainingDay.estimatedLoad = req.body.estimatedLoad;
+
+      if (req.body.recurrenceSpec) {
+        trainingDay.recurrenceSpec = req.body.recurrenceSpec;
+        trainingDay.eventRecurrenceID = req.body.eventRecurrenceID;
+      }
+    }
+
+    trainingDay.notes = req.body.notes || '';
+    trainingDay.period = '';
+    trainingDay.sevenDayRampRate = 0;
+    trainingDay.sevenDayTargetRampRate = 0;
+    trainingDay.dailyTargetRampRate = 0;
+    trainingDay.rampRateAdjustmentFactor = 1;
+    trainingDay.targetAvgDailyLoad = 0;
+    trainingDay.loadRating = '';
+    trainingDay.plannedActivities = [];
+
+    trainingDay.save(function(err) {
+      if (err) {
+        return callback(err, null);
+      }
+
+      if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+        params.user = req.user;
+        params.numericDate = trainingDay.dateNumeric;
+        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+          if (err) {
+            return callback(err, null);
+          }
+
+          return callback(null, trainingDay);
+        });
+      } else {
+        return callback(null, trainingDay);
+      }
+    });
+  });
+}
+
 function generateRecurrences(req, callback) {
   //Our first event will be on current day is current day is a selected day of week.
   //If not it will be the first selected DOW after current day.
@@ -87,68 +150,6 @@ function generateRecurrences(req, callback) {
       //return the last trainingDay created.
       return callback(null, trainingDay);
     });
-}
-
-function createTrainingDay(req, callback) {
-  //It is possible that a document already exists for this day in which case we will update.
-
-  var params = {};
-
-  dbUtil.getTrainingDayDocument(req.user, req.body.date, function(err, trainingDay) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
-      //Preserve existing name, if any.
-      trainingDay.name = trainingDay.name? trainingDay.name + ', ' + req.body.name : req.body.name;
-      trainingDay.startingPoint = req.body.startingPoint;
-      trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
-      trainingDay.fitness = req.body.fitness;
-      trainingDay.fatigue = req.body.fatigue;
-      //Normally form is calculated using the preceding day's fitness and fatigue but we do not have prior day here.
-      trainingDay.form = Math.round((req.body.fitness - req.body.fatigue) * 100) / 100;
-    } else if (req.body.scheduledEventRanking) {
-      trainingDay.name = req.body.name;
-      trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
-      trainingDay.estimatedLoad = req.body.estimatedLoad;
-
-      if (req.body.recurrenceSpec) {
-        trainingDay.recurrenceSpec = req.body.recurrenceSpec;
-        trainingDay.eventRecurrenceID = req.body.eventRecurrenceID;
-      }
-    }
-
-    trainingDay.notes = req.body.notes || '';
-    trainingDay.period = '';
-    trainingDay.sevenDayRampRate = 0;
-    trainingDay.sevenDayTargetRampRate = 0;
-    trainingDay.dailyTargetRampRate = 0;
-    trainingDay.rampRateAdjustmentFactor = 1;
-    trainingDay.targetAvgDailyLoad = 0;
-    trainingDay.loadRating = '';
-    trainingDay.plannedActivities = [];
-
-    trainingDay.save(function(err) {
-      if (err) {
-        return callback(err, null);
-      }
-
-      if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
-        params.user = req.user;
-        params.trainingDate = new Date(trainingDay.date);
-        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-          if (err) {
-            return callback(err, null);
-          }
-
-          return callback(null, trainingDay);
-        });
-      } else {
-        return callback(null, trainingDay);
-      }
-    });
-  });
 }
 
 exports.create = function(req, res) {
@@ -224,7 +225,7 @@ exports.read = function(req, res) {
 };
 
 exports.getDay = function(req, res) {
-  dbUtil.getTrainingDayDocument(req.user, req.params.trainingDate, function(err, trainingDay) {
+  dbUtil.getTrainingDayDocument(req.user, dbUtil.toNumericDate(req.params.trainingDate), function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -257,6 +258,7 @@ exports.update = function(req, res) {
 
   trainingDay.name = req.body.name;
   trainingDay.date = new Date(req.body.date);
+  trainingDay.dateNumeric = dbUtil.toNumericDate(req.body.date);
   trainingDay.fitness = req.body.fitness;
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
@@ -273,7 +275,7 @@ exports.update = function(req, res) {
     }
 
     params.user = req.user;
-    params.trainingDate = new Date(trainingDay.date);
+    params.numericDate = trainingDay.dateNumeric;
 
     if (recomputeAdvice) {
       params.alternateActivity = null;
@@ -349,8 +351,7 @@ exports.delete = function(req, res) {
 exports.list = function(req, res) {
   //Returns all existing trainingDays.
   //Note that this will include sim clone days so there could be dups for some days.
-  var user = req.user,
-    today = req.query.clientDate; //need to use current date from client to avoid time zone issues.
+  var user = req.user;
 
   TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function(err, trainingDays) {
     if (err) {
@@ -365,15 +366,15 @@ exports.list = function(req, res) {
 
 exports.getSeason = function(req, res) {
   var user = req.user,
-    timezone = user.timezone || 'America/Denver',
-    today = new Date(req.params.today),
-    effectiveStartDate,
-    effectiveGoalDate,
+    // timezone = user.timezone || 'America/Denver',
+    numericToday = dbUtil.toNumericDate(req.params.today),
+    numericEffectiveStartDate,
+    numericEffectiveGoalDate,
     dates = {};
 
   console.log('Active user: ', user.username);
 
-  dbUtil.getStartDay(user, today, function(err, startDay) {
+  dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -381,14 +382,14 @@ exports.getSeason = function(req, res) {
     }
 
     if (startDay) {
-      effectiveStartDate = startDay.date;
+      numericEffectiveStartDate = startDay.dateNumeric;
     } else {
-      effectiveStartDate = moment.tz(today, timezone).subtract(1, 'day');
-      // effectiveStartDate = moment(today).subtract(1, 'day');
+      numericEffectiveStartDate = dbUtil.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
+      // effectiveStartDate = moment.tz(req.params.today, timezone).subtract(1, 'day');
     }
 
     //Get future goal days to determine end of season.
-    dbUtil.getFuturePriorityDays(user, today, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
+    dbUtil.getFuturePriorityDays(user, numericToday, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -397,13 +398,13 @@ exports.getSeason = function(req, res) {
 
       if (goalDays.length > 0) {
         //Use last goal to end season.
-        effectiveGoalDate = goalDays[goalDays.length - 1].date;
+        numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
       } else {
-        effectiveGoalDate = moment.tz(today, timezone).add(1, 'day');
-        // effectiveGoalDate = moment(today).add(1, 'day');
+        numericEffectiveGoalDate = dbUtil.toNumericDate(moment(numericToday.toString()).add(1, 'day'));
+        // effectiveGoalDate = moment.tz(today, timezone).add(1, 'day');
       }
 
-      dbUtil.getTrainingDays(user, effectiveStartDate, effectiveGoalDate, function(err, trainingDays) {
+      dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {
         if (err) {
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
@@ -419,7 +420,7 @@ exports.getSeason = function(req, res) {
 exports.getAdvice = function(req, res) {
   var params = {};
   params.user = req.user;
-  params.trainingDate = req.params.trainingDate;
+  params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
   params.alternateActivity = req.query.alternateActivity;
   // params.alertUser = true;
 
@@ -437,7 +438,7 @@ exports.getAdvice = function(req, res) {
 exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
-  params.trainingDate = req.params.trainingDate;
+  params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
 
   adviceEngine.generatePlan(params, function(err, statusMessage) {
     if (err) {

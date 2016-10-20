@@ -49,7 +49,7 @@ var TrainingDaySchema = new Schema({
   },
   dateNumeric: {
     type: Number,
-    default: 0
+    required: 'numericDate is required'
   },
   cloneOfId: {
     type: Schema.Types.ObjectId,
@@ -243,14 +243,6 @@ var TrainingDaySchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   }
-});
-
-TrainingDaySchema.pre('save', function(next) {
-  // Note that date and therefore dateNumeric are server date - UTC.
-  // That date could be a different day than on the client, a day before or a day after.
-  var dateString = moment(this.get('date')).format('YYYYMMDD');
-  this.dateNumeric = parseInt(dateString, 10);
-  next();
 });
 
 mongoose.model('TrainingDay', TrainingDaySchema);

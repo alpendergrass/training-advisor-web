@@ -27,9 +27,12 @@ angular.module('trainingDays')
       //   toastr[message.type](message.text, message.title);
       // });
 
-      //Set default dates.
+      //Set dates.
       $scope.today = moment().startOf('day').toDate();
       $scope.adviceDate = $scope.today;
+      $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
+      $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
+      $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate();
 
       //Begin Datepicker stuff.
       $scope.datePickerStatus = {
@@ -41,9 +44,6 @@ angular.module('trainingDays')
       };
       //End Datepicker stuff.
 
-      $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
-      $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
-      $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate();
 
       // Check if provider is already in use with current user
       $scope.isConnectedSocialAccount = function(provider) {
@@ -62,7 +62,8 @@ angular.module('trainingDays')
           _.forEach(season, function(td) {
             //not sure why Mongo/Mongoose returns a string for a date field but
             //td.date has to be a date object.
-            td.date = new Date(td.date);
+            //td.date = new Date(td.date);
+            td.date = moment(td.dateNumeric.toString()).toDate();
 
             if (moment(td.date).isSame(moment(), 'day')) {
               td.htmlID = 'today';
@@ -82,6 +83,7 @@ angular.module('trainingDays')
           //Find first future goal TD if any.
           $scope.hasEnd = _.chain(season)
             .filter(function(td) {
+              // console.log('td.date: ', td.date);
               return td.scheduledEventRanking === 1 && moment(td.date).isAfter(moment());
             })
             .sortBy(['date'])
@@ -622,7 +624,7 @@ angular.module('trainingDays')
         var getAllTrainingDays = function(callback) {
           $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
             //not sure why Mongo/Mongoose returns a string for a date field but
-            //we need trainingDay.date to be a valid date object for comparision purposes in the view.
+            //we need trainingDay.date to be a valid date object for comparison purposes in the view.
             _.forEach($scope.trainingDaysAll, function(td) {
               td.date = new Date(td.date);
             });
@@ -664,7 +666,7 @@ angular.module('trainingDays')
       $scope.setUpStartingPoint = function() {
         var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
         var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-
+        $scope.startDate = $scope.today;
         $scope.startDateOptions = {
           formatYear: 'yy',
           startingDay: 1,
@@ -937,7 +939,8 @@ angular.module('trainingDays')
           //not sure why Mongo/Mongoose returns a string for a date field
           //but I have to convert it back to a date to get my date picker
           //to consider it a valid date if the user does not pick a new date.
-          trainingDay.date = new Date(trainingDay.date);
+          // trainingDay.date = new Date(trainingDay.date);
+          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');

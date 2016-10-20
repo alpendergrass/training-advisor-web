@@ -34,7 +34,6 @@ gulp.task('env:prod', function () {
   process.env.NODE_ENV = 'production';
 });
 
-// Nodemon task
 gulp.task('nodemon', function () {
   return plugins.nodemon({
     script: 'server.js',
@@ -44,7 +43,6 @@ gulp.task('nodemon', function () {
   });
 });
 
-// Nodemon task
 gulp.task('nodemon:debug', function () {
   return plugins.nodemon({
     script: 'server.js',
@@ -304,7 +302,8 @@ gulp.task('test:e2e', function (done) {
 
 // Run the project in development mode
 gulp.task('default', function (done) {
-  runSequence('env:dev', 'lint', ['nodemon', 'watch'], done);
+  runSequence('env:dev', 'lint', ['nodemon'], done);
+  // runSequence('env:dev', 'lint', ['nodemon', 'watch'], done);
 });
 
 // Run the project in debug mode
