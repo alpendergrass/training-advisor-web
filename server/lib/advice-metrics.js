@@ -23,13 +23,13 @@ module.exports.updateMetrics = function(params, callback) {
     return callback(err, null);
   }
 
-  if (!params.trainingDate) {
-    err = new TypeError('trainingDate is required');
+  if (!params.numericDate) {
+    err = new TypeError('date is required to update metrics');
     return callback(err, null);
   }
 
-  if (!moment(params.trainingDate).isValid()) {
-    err = new TypeError('trainingDate ' + params.trainingDate + ' is not a valid date');
+  if (!moment(params.numericDate.toString()).isValid()) {
+    err = new TypeError('date ' + params.numericDate + ' is not a valid date');
     return callback(err, null);
   }
 
@@ -67,7 +67,7 @@ function clearRunway(params, callback) {
     return callback(null, params);
   }
 
-  dbUtil.clearFutureMetricsAndAdvice(params.user, params.trainingDate, function(err, rawResponse) {
+  dbUtil.clearFutureMetricsAndAdvice(params.user, params.numericDate, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
     }
@@ -77,7 +77,7 @@ function clearRunway(params, callback) {
 }
 
 function updateFatigue(params, callback) {
-  dbUtil.getTrainingDayDocument(params.user, params.trainingDate, function(err, trainingDay) {
+  dbUtil.getTrainingDayDocument(params.user, params.numericDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null, null);
     }
@@ -116,7 +116,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
   //We use yesterday's fitness and fatigue to compute today's form, like TP does it.
   //This prevents today's form from changing when completed activities are added to today.
 
-  var timezone = user.timezone || 'America/Denver';
+  // var timezone = user.timezone || 'America/Denver';
 
   //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
   async.series({
@@ -143,9 +143,10 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
         return callback(null, null);
       }
 
-      var priorDate = moment.tz(currentTrainingDay.date, timezone).subtract(1, 'day');
+      var numericPriorDate = dbUtil.toNumericDate(moment(currentTrainingDay.dateNumeric.toString()).subtract(1, 'day'));
+      // var priorDate = moment.tz(currentTrainingDay.date, timezone).subtract(1, 'day');
 
-      dbUtil.getTrainingDayDocument(user, priorDate, function(err, priorTrainingDay) {
+      dbUtil.getTrainingDayDocument(user, numericPriorDate, function(err, priorTrainingDay) {
         if (err) {
           return callback(err, null);
         }

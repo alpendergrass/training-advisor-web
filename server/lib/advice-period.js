@@ -33,14 +33,14 @@ module.exports.getPeriod = function(user, trainingDay, callback) {
 function determinePeriod(user, trainingDay, callback) {
   async.parallel(
     {
-      startDate: function(callback) {
-        dbUtil.getStartDay(user, trainingDay.date, function(err, startDay) {
+      numericStartDate: function(callback) {
+        dbUtil.getStartDay(user, trainingDay.dateNumeric, function(err, startDay) {
           if (err) {
             return callback(err);
           }
 
           if (startDay) {
-            return callback(null, moment(startDay.date));
+            return callback(null, startDay.dateNumeric);
           }
 
           err = new TypeError('Starting date for current training period was not found.');
@@ -48,7 +48,7 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       futureGoalDays: function(callback) {
-        dbUtil.getFuturePriorityDays(user, trainingDay.date, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
           if (err) {
             return callback(err, null);
           }
@@ -60,39 +60,39 @@ function determinePeriod(user, trainingDay, callback) {
           return callback(null, null);
         });
       },
-      nextPriority2Date: function(callback) {
-        dbUtil.getFuturePriorityDays(user, trainingDay.date, 2, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
+      numericNextPriority2Date: function(callback) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 2, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
           if (err) {
             return callback(err, null);
           }
 
           if (priorityDays.length > 0) {
-            return callback(null, moment(priorityDays[0].date));
+            return callback(null, priorityDays[0].dateNumeric);
           }
 
           return callback(null, null);
         });
       },
-      nextPriority3Date: function(callback) {
-        dbUtil.getFuturePriorityDays(user, trainingDay.date, 3, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
+      numericNextPriority3Date: function(callback) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 3, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
           if (err) {
             return callback(err, null);
           }
 
           if (priorityDays.length > 0) {
-            return callback(null, moment(priorityDays[0].date));
+            return callback(null, priorityDays[0].dateNumeric);
           }
 
           return callback(null, null);
         });
       },
-      mostRecentGoalDate: function(callback) {
-        dbUtil.getMostRecentGoalDay(user, trainingDay.date, function(err, goalDay) {
+      numericMostRecentGoalDate: function(callback) {
+        dbUtil.getMostRecentGoalDay(user, trainingDay.dateNumeric, function(err, goalDay) {
           if (err) {
             return callback(err, null);
           }
           if (goalDay) {
-            return callback(null, moment(goalDay.date));
+            return callback(null, goalDay.dateNumeric);
           }
 
           return callback(null, null);
@@ -105,7 +105,7 @@ function determinePeriod(user, trainingDay, callback) {
         return callback(err, null);
       }
 
-      var trainingDate = moment(trainingDay.date),
+      var trainingDate = moment(trainingDay.dateNumeric.toString()),
         startDate,
         firstGoalDateInRacePeriod,
         totalTrainingDays,
@@ -116,17 +116,16 @@ function determinePeriod(user, trainingDay, callback) {
         basePeriodAdjustment,
         lastRaceSearchDate,
         lastRace,
-        periodData = {},
-        timezone = user.timezone || 'America/Denver';
+        periodData = {};
 
       if (results.nextPriority2Date) {
-        periodData.daysUntilNextPriority2Event = results.nextPriority2Date.diff(trainingDate, 'days');
+        periodData.daysUntilNextPriority2Event = moment(results.numericNextPriority2Date.toString()).diff(trainingDate, 'days');
       } else {
         periodData.daysUntilNextPriority2Event = 0;
       }
 
       if (results.nextPriority3Date) {
-        periodData.daysUntilNextPriority3Event = results.nextPriority3Date.diff(trainingDate, 'days');
+        periodData.daysUntilNextPriority3Event = moment(results.numericNextPriority3Date.toString()).diff(trainingDate, 'days');
       } else {
         periodData.daysUntilNextPriority3Event = 0;
       }
@@ -143,18 +142,18 @@ function determinePeriod(user, trainingDay, callback) {
         return callback(null, periodData);
       }
 
-      dbUtil.getPriorPriorityDays(user, results.futureGoalDays[0].date, 1, adviceConstants.maximumNumberOfRaceDays, function(err, priorGoalDays) {
+      dbUtil.getPriorPriorityDays(user, results.futureGoalDays[0].dateNumeric, 1, adviceConstants.maximumNumberOfRaceDays, function(err, priorGoalDays) {
         if (err) {
           return callback(err, null);
         }
 
         if (priorGoalDays.length > 0) {
-          firstGoalDateInRacePeriod = moment(priorGoalDays[0].date);
+          firstGoalDateInRacePeriod = moment(priorGoalDays[0].dateNumeric.toString());
         } else {
-          firstGoalDateInRacePeriod = moment(results.futureGoalDays[0].date);
+          firstGoalDateInRacePeriod = moment(results.futureGoalDays[0].dateNumeric.toString());
         }
-        results.endOfTrainingPeriod = moment.tz(firstGoalDateInRacePeriod, timezone).subtract(7, 'days');
-        // results.endOfTrainingPeriod = moment(firstGoalDateInRacePeriod).subtract(7, 'days');
+
+        results.endOfTrainingPeriod = moment(firstGoalDateInRacePeriod).subtract(7, 'days');
 
         determineEffectiveStartDate(results, function(err, startDate) {
           if (err) {
@@ -220,12 +219,12 @@ function determinePeriod(user, trainingDay, callback) {
 
           //If base or build and last goal was less than midSeasonTransitionNumberOfDays ago, reset period to transition.
           if (periodData.period === 'base' || periodData.period === 'build') {
-            if (trainingDate.diff(results.mostRecentGoalDate, 'days') <= adviceConstants.midSeasonTransitionNumberOfDays) {
+            if (trainingDate.diff(results.numericMostRecentGoalDate.toString(), 'days') <= adviceConstants.midSeasonTransitionNumberOfDays) {
               periodData.period = 'transition';
             }
           }
 
-          periodData.daysUntilNextGoalEvent = moment(results.futureGoalDays[0].date).diff(trainingDate, 'days');
+          periodData.daysUntilNextGoalEvent = moment(results.futureGoalDays[0].dateNumeric.toString()).diff(trainingDate, 'days');
 
           return callback(null, periodData);
         });
@@ -268,17 +267,20 @@ function determineEffectiveStartDate(dates, callback) {
   //   //TODO: maybe we do not need this if condition if we use "firstGoalDateInRacePeriod"
   //   effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
   // } else
-  if (dates.endOfTrainingPeriod.diff(dates.startDate, 'days') < adviceConstants.minimumNumberOfTrainingDays) {
+
+  console.log('dates.numericStartDate: ', dates.numericStartDate);
+  if (dates.endOfTrainingPeriod.diff(dates.numericStartDate.toString(), 'days') < adviceConstants.minimumNumberOfTrainingDays) {
     //Computed training duration is shorter than the minimum.
     //Use minimum training duration.
     effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
-  } else if (dates.endOfTrainingPeriod.diff(dates.startDate, 'days') > adviceConstants.maximumNumberOfTrainingDays) {
+  } else if (dates.endOfTrainingPeriod.diff(dates.numericStartDate.toString(), 'days') > adviceConstants.maximumNumberOfTrainingDays) {
     //Computed training duration is longer than the maximum.
     //Use maximum training duration.
     effectiveStartDate.subtract(adviceConstants.maximumNumberOfTrainingDays, 'days');
   } else {
     //Training duration using user-supplied start date is within minimum and maximum durations.
-    effectiveStartDate = dates.startDate.clone();
+    effectiveStartDate = moment(dates.numericStartDate.toString());
+    // effectiveStartDate = dates.startDate.clone();
   }
 
   return callback(null, effectiveStartDate);

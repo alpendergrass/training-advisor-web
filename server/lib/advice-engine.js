@@ -27,7 +27,7 @@ function generateAdvice(user, trainingDay, callback) {
 
   var facts = {};
 
-  dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function(err, wentHard) {
+  dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
     if (err) {
       return callback(err, null, null);
     }
@@ -36,8 +36,10 @@ function generateAdvice(user, trainingDay, callback) {
     facts.adviceConstants = adviceConstants;
     facts.wentHardYesterday = wentHard;
     facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
-    facts.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
-    facts.tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
+    facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
+    facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'days').day().toString();
+    // facts.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
+    // facts.tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
     facts.trainingDay = trainingDay;
 
     var R = new RuleEngine(adviceEvent.eventRules);
@@ -122,13 +124,13 @@ module.exports.generatePlan = function(params, callback) {
   }
 
   //Start date should be the current day in the user's time zone.
-  if (!params.trainingDate) {
-    err = new TypeError('trainingDate is required');
+  if (!params.numericDate) {
+    err = new TypeError('genPlan date is required');
     return callback(err, null);
   }
 
-  var trainingDate = new Date(params.trainingDate),
-    user = params.user,
+  // trainingDate = new Date(params.numericDate),
+  var user = params.user,
     adviceParams = {},
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
     goalDay,
@@ -143,7 +145,7 @@ module.exports.generatePlan = function(params, callback) {
   //TODO: Make the following a async.series, use promises or something to clean it up. Yuck.
 
   // Get future goal days.
-  dbUtil.getFuturePriorityDays(user, trainingDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
+  dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
     if (err) {
       return callback(err, null);
     }
@@ -163,7 +165,7 @@ module.exports.generatePlan = function(params, callback) {
       }
 
       //get all training days from trainingDate thru goal.
-      dbUtil.getTrainingDays(user, trainingDate, goalDay.date, function(err, trainingDays) {
+      dbUtil.getTrainingDays(user, params.numericDate, goalDay.dateNumeric, function(err, trainingDays) {
         if (err) {
           return callback(err, null);
         }
@@ -184,12 +186,12 @@ module.exports.generatePlan = function(params, callback) {
         //   if (err) {
         //     return callback(err, null);
         //   }
-        dbUtil.clearPlanningData(user, trainingDays[0].date)
+        dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
           .then(function() {
             async.eachSeries(trainingDays, function(trainingDay, callback) {
               adviceParams = {
                 user: user,
-                trainingDate: trainingDay.date,
+                numericDate: trainingDay.dateNumeric,
                 genPlan: true
               };
 
@@ -215,7 +217,7 @@ module.exports.generatePlan = function(params, callback) {
                 }
 
                 //We need to update metrics for last day as it will not be up to date otherwise.
-                adviceParams.trainingDate = trainingDays[trainingDays.length - 1].date;
+                adviceParams.numerisDate = trainingDays[trainingDays.length - 1].dateNumeric;
                 adviceParams.trainingDay = null;
 
                 adviceMetrics.updateMetrics(adviceParams, function(err, td) {
@@ -223,7 +225,7 @@ module.exports.generatePlan = function(params, callback) {
                     return callback(err, null);
                   }
 
-                  dbUtil.clearPlanningData(user, trainingDays[0].date)
+                  dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
                     .then(function() {
                       user.thresholdPowerTestDate = savedThresholdPowerTestDate;
                       user.planGenNeeded = false;
@@ -254,22 +256,21 @@ module.exports.advise = function(params, callback) {
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
   if (!params.user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('advise valid user is required');
     return callback(err, null);
   }
 
-  if (!params.trainingDate) {
-    err = new TypeError('trainingDate is required');
+  if (!params.numericDate) {
+    err = new TypeError('advise numericDate is required');
     return callback(err, null);
   }
 
-  var trainingDate = new Date(params.trainingDate),
-    user = params.user;
-
-  if (!moment(trainingDate).isValid()) {
-    err = new TypeError('trainingDate ' + params.trainingDate + ' is not a valid date');
+  if (!moment(params.numericDate.toString()).isValid()) {
+    err = new TypeError('advise numericDate ' + params.numericDate + ' is not a valid date');
     return callback(err, null);
   }
+
+  var user = params.user;
 
   async.series(
     //series of one.
