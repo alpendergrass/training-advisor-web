@@ -19,16 +19,16 @@ module.exports = {
     options: {
       // Stream defaults to process.stdout
       // Uncomment/comment to toggle the logging to a log on the file system
-      //stream: {
-      //  directoryPath: process.cwd(),
-      //  fileName: 'access.log',
-      //  rotatingLogs: { // for more info on rotating logs - https://github.com/holidayextras/file-stream-rotator#usage
-      //    active: false, // activate to use rotating logs 
-      //    fileName: 'access-%DATE%.log', // if rotating logs are active, this fileName setting will be used
-      //    frequency: 'daily',
-      //    verbose: false
-      //  }
-      //}
+      stream: {
+        directoryPath: process.cwd(),
+        fileName: 'access-dev.log',
+        rotatingLogs: { // for more info on rotating logs - https://github.com/holidayextras/file-stream-rotator#usage
+          active: false, // activate to use rotating logs
+          fileName: 'access-dev-%DATE%.log', // if rotating logs are active, this fileName setting will be used
+          frequency: 'daily',
+          verbose: false
+        }
+      }
     }
   },
   app: {
@@ -36,12 +36,12 @@ module.exports = {
   },
   facebook: {
     clientID: process.env.FACEBOOK_ID || 'APP_ID',
-    clientSecret: process.env.FACEBOOK_SECRET || 'APP_SECRET' ,
+    clientSecret: process.env.FACEBOOK_SECRET || 'APP_SECRET',
     callbackURL: '/api/auth/facebook/callback'
   },
   strava: {
-    clientID: process.env.STRAVA_CLIENT_ID || 'CLIENT_ID', 
-    clientSecret: process.env.STRAVA_CLIENT_SECRET || 'CLIENT_SECRET', 
+    clientID: process.env.STRAVA_CLIENT_ID || 'CLIENT_ID',
+    clientSecret: process.env.STRAVA_CLIENT_SECRET || 'CLIENT_SECRET',
     callbackURL: process.env.STRAVA_REDIRECT_URI || '/api/auth/strava/callback'
   },
   twitter: {

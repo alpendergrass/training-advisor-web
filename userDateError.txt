@@ -1,0 +1,36 @@
+
+Username
+jorgebarbosa
+Multiple trainingDay documents returned for date Sat Oct 29 2016 23:00:00 GMT+0000 (UTC)
+
+Before:
+  searchDateNumeric = toNumericDate(searchDate); //'YYYYMMDD'
+-  var query = TrainingDay
+-    .where('user').equals(user)
+-    .where('dateNumeric').equals(searchDateNumeric)
+-    .where('cloneOfId').equals(null);
+
+Now:
+end = moment.tz(searchDate, timezone).add(1, 'day'); => Oct 31 2016 00:00:00 GMT+0000 (UTC)
+  var query = TrainingDay
+    .where('user').equals(user)
+    .where('date').gte(searchDate).lt(end)
+    .where('cloneOfId').equals(null);
+
+searchDate = Oct 29 2016 23:00:00 GMT+0000 (UTC) 
+  tz =>       Oct 30 2016 00:00:00 GMT+0100 (BDT)
+  +1 day =>   Oct 31 2016 00:00:00 GMT+0000 (BST) => Oct 31 2016 00:00:00 GMT+0000 (UTC)
+
+
+  "date": new Date("2016-10-28T23:00:00+0000"),
+
+  "date": new Date("2016-10-29T23:00:00+0000"),
+  "date": new Date("2016-10-30T23:00:00+0000"),
+
+  "date": new Date("2016-10-31T23:00:00+0000"),
+
+
+
+What happens if the user is traveling? They may change their timezone. we could end up with the same problem. Should I revisit using dateNumeric?
+
+Rule is dateNumeric is always the date the user thinks it is. This means we need to always use the user's timezone when we compute date numeric.

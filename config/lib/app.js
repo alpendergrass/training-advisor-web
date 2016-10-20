@@ -35,47 +35,41 @@ module.exports.loadModels = function loadModels() {
 };
 
 module.exports.init = function init(callback) {
-  migration.migrate()
-    .then(function() {
-      mongoose.connect(function(db) {
-        // Initialize express
-        var app = express.init(db);
+  mongoose.connect(function(db) {
+    // Initialize express
+    var app = express.init(db);
 
-        if (process.env.TZ) {
-          console.log(chalk.blue('Server timezone manually set to: ', process.env.TZ));
-        }
+    if (process.env.TZ) {
+      console.log(chalk.blue('Server timezone manually set to: ', process.env.TZ));
+    }
 
-        // //Schedule workout download job: need to figure out how to run this on only one instance.
-        // // var textSched = later.parse.text('every 1 min'); //time is GMT
-        // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
+    // //Schedule workout download job: need to figure out how to run this on only one instance.
+    // // var textSched = later.parse.text('every 1 min'); //time is GMT
+    // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
 
-        // if (textSched.error > -1) {
-        //   mailOptions.subject += ': Error';
-        //   mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
-        //   console.log(mailOptions.text);
-        //   smtpTransport.sendMail(mailOptions, function (err) {
-        //     if (err) {
-        //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        //     }
-        //   });
-        // } else {
-        //   mailOptions.subject += ': Info';
-        //   mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
-        //   console.log(mailOptions.text);
-        //   smtpTransport.sendMail(mailOptions, function (err) {
-        //     if (err) {
-        //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        //     }
-        //   });
-        //   var timer = later.setInterval(downloadTP, textSched);
-        // }
+    // if (textSched.error > -1) {
+    //   mailOptions.subject += ': Error';
+    //   mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
+    //   console.log(mailOptions.text);
+    //   smtpTransport.sendMail(mailOptions, function (err) {
+    //     if (err) {
+    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+    //     }
+    //   });
+    // } else {
+    //   mailOptions.subject += ': Info';
+    //   mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
+    //   console.log(mailOptions.text);
+    //   smtpTransport.sendMail(mailOptions, function (err) {
+    //     if (err) {
+    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+    //     }
+    //   });
+    //   var timer = later.setInterval(downloadTP, textSched);
+    // }
 
-        if (callback) callback(app, db, config);
-      });
-    })
-    .catch(function(err) {
-      if (callback) callback();
-    });
+    if (callback) callback(null, app, db, config);
+  });
 };
 
 function downloadTP() {
@@ -107,34 +101,46 @@ function downloadTP() {
 module.exports.start = function start(callback) {
   var _this = this;
 
-  _this.init(function(app, db, config) {
+  _this.init(function(err, app, db, config) {
 
-    // Start the app by listening on <port>
-    app.listen(config.port, function() {
+    if (err) {
+      console.log(chalk.red('App init failed with error: ', err));
+      return;
+    }
 
-      // Logging initialization
-      console.log('--');
-      console.log(chalk.green(config.app.title));
-      console.log(chalk.green('Environment:\t\t\t' + process.env.NODE_ENV));
-      console.log(chalk.green('Port:\t\t\t\t' + config.port));
-      console.log(chalk.green('Database:\t\t\t\t' + config.db.uri));
-      if (process.env.NODE_ENV === 'secure') {
-        console.log(chalk.green('HTTPs:\t\t\t\ton'));
-      }
-      console.log(chalk.green('App version:\t\t\t' + config.meanjs.version));
-      if (config.meanjs['meanjs-version'])
-        console.log(chalk.green('MEAN.JS version:\t\t\t' + config.meanjs['meanjs-version']));
-      console.log('--');
+    migration.migrate()
+      .then(function() {
+        // Start the app by listening on <port>
+        app.listen(config.port, function() {
 
-      mailOptions.subject = mailSubjectPrefix + ': Started';
-      mailOptions.text = 'App instance has been started.';
-      smtpTransport.sendMail(mailOptions, function(err) {
-        if (err) {
-          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        }
+          // Logging initialization
+          console.log('--');
+          console.log(chalk.green(config.app.title));
+          console.log(chalk.green('Environment:\t\t\t' + process.env.NODE_ENV));
+          console.log(chalk.green('Port:\t\t\t\t' + config.port));
+          console.log(chalk.green('Database:\t\t\t\t' + config.db.uri));
+          if (process.env.NODE_ENV === 'secure') {
+            console.log(chalk.green('HTTPs:\t\t\t\ton'));
+          }
+          console.log(chalk.green('App version:\t\t\t' + config.meanjs.version));
+          if (config.meanjs['meanjs-version'])
+            console.log(chalk.green('MEAN.JS version:\t\t\t' + config.meanjs['meanjs-version']));
+          console.log('--');
+
+          mailOptions.subject = mailSubjectPrefix + ': Started';
+          mailOptions.text = 'App instance has been started.';
+          smtpTransport.sendMail(mailOptions, function(err) {
+            if (err) {
+              console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+            }
+          });
+
+          if (callback) callback(app, db, config);
+        });
+      })
+      .catch(function(err) {
+        if (callback) callback(err);
       });
 
-      if (callback) callback(app, db, config);
-    });
   });
 };

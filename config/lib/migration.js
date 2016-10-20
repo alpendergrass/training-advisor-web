@@ -5,21 +5,31 @@ var path = require('path'),
   config = require('../config'),
   Migration = require('mongration').Migration;
 
-// var db = mongoose.connect(config.db.uri, config.db.options, function (err) {
-
 module.exports = {};
 
 module.exports.migrate = function() {
-  if (process.env.RUN_MIGRATIONS === 'false') {
-    console.log(chalk.green('Skipping migrations'));
+  console.log('process.env.RUN_MIGRATIONS: ', process.env.RUN_MIGRATIONS);
+
+  if (!process.env.RUN_MIGRATIONS || process.env.RUN_MIGRATIONS === 'false') {
+    //Seems I should not have to explicitly check for false, but I do.
+    console.log(chalk.green('Skipping migrations - RUN_MIGRATIONS env variable is false or not set.'));
     return Promise.resolve();
   }
 
-  console.log(chalk.red('Running migrations'));
+  console.log('process.env.CF_INSTANCE_INDEX: ', process.env.CF_INSTANCE_INDEX);
+
+  var instanceIndex = process.env.CF_INSTANCE_INDEX || 0;
+
+  if (instanceIndex > 0) {
+    console.log(chalk.green('Skipping migrations - not running on first instance.'));
+    return Promise.resolve();
+  }
+
+  console.log(chalk.green('Running migrations.'));
 
   var migrationConfig = {
       mongoUri: config.db.uri,
-      migrationCollection: 'migrationversion'
+      migrationCollection: 'migrations'
     },
     migration = new Migration(migrationConfig);
 
@@ -28,12 +38,13 @@ module.exports.migrate = function() {
   return new Promise(function(resolve, reject) {
     migration.migrate(function(err, results) {
       if (err) {
-        console.log('Migration error: ', err);
-        reject(err);
+        console.log(chalk.red('Migration failed with error: ', err));
+        return reject(err);
       }
 
+      // console.log(chalk.green('Migration results: ', results));
       console.log('Migration results: ', results);
-      resolve(results);
+      return resolve(results);
     });
   });
 };

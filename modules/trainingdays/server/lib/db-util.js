@@ -402,12 +402,12 @@ module.exports.clearPlanningData = function(user, trainingDate) {
   return new Promise(function(resolve, reject) {
     if (!user) {
       err = new TypeError('valid user is required');
-      reject(err);
+      return reject(err);
     }
 
     if (!moment(trainingDate).isValid()) {
       err = new TypeError('trainingDate ' + trainingDate + ' is not a valid date');
-      reject(err);
+      return reject(err);
     }
 
     TrainingDay.update({
@@ -421,10 +421,10 @@ module.exports.clearPlanningData = function(user, trainingDate) {
       multi: true
     }, function(err, rawResponse) {
       if (err) {
-        reject(err);
+        return reject(err);
       }
 
-      resolve(rawResponse);
+      return resolve(rawResponse);
     });
   });
 };
