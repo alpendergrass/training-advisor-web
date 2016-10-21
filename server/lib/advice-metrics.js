@@ -2,7 +2,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment-timezone'),
+  moment = require('moment'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
@@ -116,8 +116,6 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
   //We use yesterday's fitness and fatigue to compute today's form, like TP does it.
   //This prevents today's form from changing when completed activities are added to today.
 
-  // var timezone = user.timezone || 'America/Denver';
-
   //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
   async.series({
     periodData: function(callback){
@@ -144,7 +142,6 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
       }
 
       var numericPriorDate = dbUtil.toNumericDate(moment(currentTrainingDay.dateNumeric.toString()).subtract(1, 'day'));
-      // var priorDate = moment.tz(currentTrainingDay.date, timezone).subtract(1, 'day');
 
       dbUtil.getTrainingDayDocument(user, numericPriorDate, function(err, priorTrainingDay) {
         if (err) {
@@ -187,7 +184,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
     if (results.priorTrainingDay) {
       currentTrainingDay.fitness = Math.round((results.priorTrainingDay.fitness + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
       currentTrainingDay.fatigue = Math.round((results.priorTrainingDay.fatigue + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fatigue) / fatigueTimeConstant)) * 10) / 10;
-      //TODO: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
+      //Trello: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
       //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So:
       //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7)
       //Our adjustment of fatigueTimeConstant in theory should achieve the same thing but may not be sensitive enough.
@@ -268,11 +265,8 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 function computeSevenDayRampRate(user, trainingDay, callback) {
   //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-  var timezone = user.timezone || 'America/Denver',
-    priorDate = moment.tz(trainingDay.date, timezone).subtract(8, 'days'),
-    yesterday = moment.tz(trainingDay.date, timezone).subtract(1, 'days'),
-    // priorDate = moment(trainingDay.date).subtract(8, 'days'),
-    // yesterday = moment(trainingDay.date).subtract(1, 'days'),
+  var priorDate = toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
+    yesterday = toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
     rampRate;
 
   dbUtil.getExistingTrainingDayDocument(user, yesterday, function(err, yesterdayTrainingDay) {

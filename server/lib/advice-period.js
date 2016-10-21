@@ -1,7 +1,7 @@
 'use strict';
 
 var path = require('path'),
-  moment = require('moment-timezone'),
+  moment = require('moment'),
   _ = require('lodash'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -219,7 +219,7 @@ function determinePeriod(user, trainingDay, callback) {
 
           //If base or build and last goal was less than midSeasonTransitionNumberOfDays ago, reset period to transition.
           if (periodData.period === 'base' || periodData.period === 'build') {
-            if (trainingDate.diff(results.numericMostRecentGoalDate.toString(), 'days') <= adviceConstants.midSeasonTransitionNumberOfDays) {
+            if (results.numericMostRecentGoalDate && trainingDate.diff(results.numericMostRecentGoalDate.toString(), 'days') <= adviceConstants.midSeasonTransitionNumberOfDays) {
               periodData.period = 'transition';
             }
           }
@@ -268,7 +268,6 @@ function determineEffectiveStartDate(dates, callback) {
   //   effectiveStartDate.subtract(adviceConstants.minimumNumberOfTrainingDays, 'days');
   // } else
 
-  console.log('dates.numericStartDate: ', dates.numericStartDate);
   if (dates.endOfTrainingPeriod.diff(dates.numericStartDate.toString(), 'days') < adviceConstants.minimumNumberOfTrainingDays) {
     //Computed training duration is shorter than the minimum.
     //Use minimum training duration.

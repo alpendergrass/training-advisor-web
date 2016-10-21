@@ -18,7 +18,7 @@ var rules = [{
 // function isSimulationOverdue(today, trainingDay, callback) {
 //   //Assuming our training date is today,
 //   //have we not done a race simulation in the last seven days (?)
-//   var aWeekAgo = moment.tz(today, timezone).subtract(7, 'days');
+//   var aWeekAgo = moment(today).subtract(7, 'days');
 
 //   var countQuery = TrainingDay
 //     .where('date').gte(aWeekAgo).lt(today)

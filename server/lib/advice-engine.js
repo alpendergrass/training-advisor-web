@@ -2,7 +2,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment-timezone'),
+  moment = require('moment'),
   async = require('async'),
   mongoose = require('mongoose'),
   RuleEngine = require('node-rules'),
@@ -37,9 +37,7 @@ function generateAdvice(user, trainingDay, callback) {
     facts.wentHardYesterday = wentHard;
     facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
     facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
-    facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'days').day().toString();
-    // facts.todayDayOfWeek = moment.tz(trainingDay.date, user.timezone).day().toString();
-    // facts.tomorrowDayOfWeek = moment.tz(trainingDay.date, user.timezone).add(1, 'days').day().toString();
+    facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
     facts.trainingDay = trainingDay;
 
     var R = new RuleEngine(adviceEvent.eventRules);
@@ -97,7 +95,7 @@ function generateActivityFromAdvice(params, callback) {
 
       if (trainingDay.plannedActivities[0].activityType === 'test') {
         //Make it look as if the user tested when recommended.
-        user.thresholdPowerTestDate = trainingDay.date;
+        user.thresholdPowerTestDate = moment(trainingDay.dateNumeric.toString()).toDate();
         user.save(function(err) {
           if (err) {
             return callback(err, null);
@@ -182,11 +180,7 @@ module.exports.generatePlan = function(params, callback) {
 
         //As a precaution we remove all planning data.
         //If we errored out last time there could be some left overs.
-        // dbUtil.removePlanningActivities(user, function(err, rawResponse) {
-        //   if (err) {
-        //     return callback(err, null);
-        //   }
-        dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
+        dbUtil.removePlanningActivities(user, trainingDays[0].dateNumeric)
           .then(function() {
             async.eachSeries(trainingDays, function(trainingDay, callback) {
               adviceParams = {
@@ -217,7 +211,7 @@ module.exports.generatePlan = function(params, callback) {
                 }
 
                 //We need to update metrics for last day as it will not be up to date otherwise.
-                adviceParams.numerisDate = trainingDays[trainingDays.length - 1].dateNumeric;
+                adviceParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
                 adviceParams.trainingDay = null;
 
                 adviceMetrics.updateMetrics(adviceParams, function(err, td) {
@@ -244,7 +238,7 @@ module.exports.generatePlan = function(params, callback) {
             );
           })
           .catch(function(err) {
-            //from clearPlanningData() before eachSeries
+            //from removePlanningActivities() before eachSeries
             return callback(err, null);
           });
       });

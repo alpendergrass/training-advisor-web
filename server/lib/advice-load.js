@@ -38,7 +38,7 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
     return callback(null, trainingDay);
   } else if (latestPlannedActivity.activityType === 'simulation') {
     //We use the goal event estimate for simulations. We have to go find the next goal day.
-    dbUtil.getFuturePriorityDays(user, trainingDay.date, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, goalDays) {
+    dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, goalDays) {
       if (err) {
         return callback(err, null);
       }
