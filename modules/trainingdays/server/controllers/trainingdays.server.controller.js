@@ -98,7 +98,6 @@ function generateRecurrences(req, callback) {
     nextDate,
     timezone = req.user.timezone || 'America/Denver',
     endDate = moment.tz(req.body.recurrenceSpec.endsOn, timezone).add(1, 'day'),
-    // endDate = moment(req.body.recurrenceSpec.endsOn).add(1, 'day'),
     trainingDay;
 
   req.body.eventRecurrenceID = Math.floor(Math.random() * 999999999999999) + 1;
@@ -366,7 +365,6 @@ exports.list = function(req, res) {
 
 exports.getSeason = function(req, res) {
   var user = req.user,
-    // timezone = user.timezone || 'America/Denver',
     numericToday = dbUtil.toNumericDate(req.params.today),
     numericEffectiveStartDate,
     numericEffectiveGoalDate,
@@ -385,7 +383,6 @@ exports.getSeason = function(req, res) {
       numericEffectiveStartDate = startDay.dateNumeric;
     } else {
       numericEffectiveStartDate = dbUtil.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
-      // effectiveStartDate = moment.tz(req.params.today, timezone).subtract(1, 'day');
     }
 
     //Get future goal days to determine end of season.
@@ -401,7 +398,6 @@ exports.getSeason = function(req, res) {
         numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
       } else {
         numericEffectiveGoalDate = dbUtil.toNumericDate(moment(numericToday.toString()).add(1, 'day'));
-        // effectiveGoalDate = moment.tz(today, timezone).add(1, 'day');
       }
 
       dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {
@@ -422,7 +418,6 @@ exports.getAdvice = function(req, res) {
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
   params.alternateActivity = req.query.alternateActivity;
-  // params.alertUser = true;
 
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
@@ -458,7 +453,7 @@ exports.getSimDay = function(req, res) {
   var trainingDay = req.trainingDay;
 
   if (trainingDay.isSimDay) {
-    // This day has aready been simmed.
+    // This day has already been simmed.
     res.json(trainingDay);
   } else {
     dbUtil.makeSimDay(trainingDay, function(err, simDay) {

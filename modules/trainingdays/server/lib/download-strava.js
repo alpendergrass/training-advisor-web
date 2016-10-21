@@ -14,10 +14,14 @@ require('lodash-migrate');
 module.exports = {};
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
+  // TODO: I am wary of converting to dateNumeric here since it was so painful getting it working with date.
+  // I should do it in order to remove reliance on user.timezone.
+  // perhaps start_date_local converted to numeric date would allow us to say stravaDate === dateNumeric.
+  // Sure seems like it should.
+
   var searchDate = moment(trainingDay.date).unix(),
     timezone = user.timezone || 'America/Denver',
     thruDate = moment.tz(trainingDay.date, timezone).add(1, 'day'),
-    // thruDate = moment(trainingDay.date).add(1, 'day'),
     newActivity = {},
     fudgedNP,
     activityCount = 0,
@@ -67,9 +71,9 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     _.forEach(payload, function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC:
       // 2016-09-29T10:17:15Z
-      // moment treats start_date_local as UTC so moment(stravaActivity.start_date_local).toDate() results in a MDT:
+      // moment treats start_date_local as UTC so moment(stravaActivity.start_date_local).toDate() results in a MDT here:
       // Thu Sep 29 2016 04:17:15 GMT-0600 (MDT)
-      // Not sure what start_date_local is good for.
+      // Not sure what start_date_local is good for. Maybe for comparison with dateNumeric.
 
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
       // We use stravaActivity.start_date which is UTC as is our trainingDay.date. We check within a day's span
@@ -133,7 +137,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       //Update metrics for trainingDay as completedActivities likely has changed.
       params = {
         user: user,
-        trainingDate: trainingDay.date
+        numericDate: trainingDay.dateNumeric
       };
 
       adviceMetrics.updateMetrics(params, function(err, updatedTrainingDay) {

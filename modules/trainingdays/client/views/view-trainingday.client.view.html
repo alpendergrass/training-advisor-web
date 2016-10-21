@@ -137,11 +137,6 @@
             <td style="width:20%"></td>
           </tr>
           <tr ng-repeat="completedActivity in trainingDay.completedActivities">
-              <!-- <td>
-                <span editable-select="completedActivity.activityType" e-name="activityType" e-form="completedActivityForm" e-ng-options="s.value as s.text for s in activityTypes" e-required>
-                            {{completedActivity.activityType}}
-                        </span>
-              </td> -->
               <td>
                 <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link">View on Strava</a></span>
                 <span ng-if="completedActivity.source !== 'strava'">{{ completedActivity.source }}</span>
@@ -179,14 +174,14 @@
       <label>Training Load Rating: <i>{{trainingDay.loadRating}}</i></label>
     </p>
     <p>
-      <!-- only show download option if we have TP creds. -->
-      <a href="#" ng-click="downloadActivities('trainingpeaks')" title="Download workouts from TrainingPeaks®" ng-show="authentication.user.trainingPeaksCredentials.username && authentication.user.trainingPeaksCredentials.password">
-        <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/trainingpeaks.png">
-      </a>
       <!-- only show download option if connected to Strava. -->
       <a href="#" ng-click="downloadActivities('strava')" title="Download activities from Strava" ng-show="isConnectedSocialAccount('strava')">
         <!-- Strava Download -->
         <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/strava.png">
+      </a>
+      <!-- only show download option if we have TP creds. -->
+      <a href="#" ng-click="downloadActivities('trainingpeaks')" title="Download workouts from TrainingPeaks®" ng-show="authentication.user.trainingPeaksCredentials.username && authentication.user.trainingPeaksCredentials.password">
+        <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/trainingpeaks.png">
       </a>
       <button class="btn btn-default" title="Manually add activity" ng-click="addCompletedActivity()">
         <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
@@ -198,7 +193,7 @@
   </div>
   <div ng-show="authentication.user.levelOfDetail > 2">
     <small>
-      <div>Date: {{trainingDay.date }}</div>
+      <div>dateNumeric: {{trainingDay.dateNumeric}}</div>
       <div>Rationale: {{trainingDay.plannedActivities[0].rationale }}</div>
       <div>startingPoint: {{trainingDay.startingPoint }}</div>
       <div>period: {{trainingDay.period }}</div>
@@ -217,5 +212,4 @@
       </em>
     </small>
   </div>
-<!--   <p>TrainingPeaks®, Training Stress Score® and TSS® are registered trademarks of <a href="http://trainingpeaks.com/" class="colored" target="_blank">Peaksware, LLC</a>.</p> -->
 </section>

@@ -758,7 +758,7 @@ describe('db-util Unit Tests:', function () {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function (err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
@@ -784,7 +784,7 @@ describe('db-util Unit Tests:', function () {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function (err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
@@ -814,7 +814,7 @@ describe('db-util Unit Tests:', function () {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function (err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
@@ -855,7 +855,7 @@ describe('db-util Unit Tests:', function () {
                 console.log('updateTrainingDay: ' + err);
               }
 
-              return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.date, function (err, wentHard) {
+              return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function (err, wentHard) {
                 if (err) {
                   console.log('didWeGoHardTheDayBefore: ' + err);
                 }

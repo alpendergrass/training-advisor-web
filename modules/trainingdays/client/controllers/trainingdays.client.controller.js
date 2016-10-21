@@ -60,9 +60,6 @@ angular.module('trainingDays')
           today: $scope.today.toISOString()
         }, function(season) {
           _.forEach(season, function(td) {
-            //not sure why Mongo/Mongoose returns a string for a date field but
-            //td.date has to be a date object.
-            //td.date = new Date(td.date);
             td.date = moment(td.dateNumeric.toString()).toDate();
 
             if (moment(td.date).isSame(moment(), 'day')) {
@@ -71,19 +68,12 @@ angular.module('trainingDays')
           });
 
           $scope.hasStart = _.find(season, function(td) {
-            // moment.isSameOrBefore is only available in versions 2.10.7 but
-            // I'm using a component (angular-timezone-selector) that currently specifies an earlier version.
-            //TODO: watch for an updated version of angular-timezone-selector.
-            //9/1/16: Now using download of fork https://github.com/j-w-miller/angular-timezone-selector, not bower install of original.
-            //Supports later version of moment. isSameOrBefore should work now.
-            // return td.startingPoint && moment(td.date).isSameOrBefore(moment());
             return td.startingPoint && moment(td.date).isBefore(moment());
           });
 
           //Find first future goal TD if any.
           $scope.hasEnd = _.chain(season)
             .filter(function(td) {
-              // console.log('td.date: ', td.date);
               return td.scheduledEventRanking === 1 && moment(td.date).isAfter(moment());
             })
             .sortBy(['date'])
@@ -541,11 +531,12 @@ angular.module('trainingDays')
         };
 
         $scope.cancelSim = function() {
-          //confirm revert if simConfigUnderway
-          //if confirmed, revertSim()
-          // $scope.revertSim();
-          //otherwise, reset flags.
-          initSimFlags();
+          //TODO: confirm revert if simConfigUnderway
+          if ($scope.simConfigUnderway || $scope.simHasRun) {
+            $scope.revertSim();
+          } else {
+            initSimFlags();
+          }
         };
 
         $scope.openSimDay = function(id) {
@@ -626,6 +617,7 @@ angular.module('trainingDays')
             //not sure why Mongo/Mongoose returns a string for a date field but
             //we need trainingDay.date to be a valid date object for comparison purposes in the view.
             _.forEach($scope.trainingDaysAll, function(td) {
+              //Note that we are not using dateNumeric here.
               td.date = new Date(td.date);
             });
 
@@ -936,16 +928,10 @@ angular.module('trainingDays')
         });
 
         function prepForTDView(trainingDay) {
-          //not sure why Mongo/Mongoose returns a string for a date field
-          //but I have to convert it back to a date to get my date picker
-          //to consider it a valid date if the user does not pick a new date.
-          // trainingDay.date = new Date(trainingDay.date);
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
-          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day');
-          // $scope.showFormAndFitness = trainingDay.fitness !== 0 || trainingDay.fatigue !== 0 || trainingDay.form !== 0;
-          //TODO: not sure why I had the check above.
+          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
           $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
           $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 2;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');

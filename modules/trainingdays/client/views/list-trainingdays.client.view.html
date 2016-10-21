@@ -7,7 +7,7 @@
   <!-- <div class="list-group" infinite-scroll="nextBatch()" infinite-scroll-disabled='nextChunk >= trainingDaysChunked.length'> -->
     <div ng-repeat="trainingDay in trainingDays" id="{{trainingDay.htmlID || ''}}" class="{{trainingDay.htmlID || ''}}">
       <a ui-sref="trainingDays.view({trainingDayId: trainingDay._id})" class="list-group-item">
-        <h4 class="list-group-item-heading">{{trainingDay.date | date:'EEE, MMM d, y'}}<span ng-show="trainingDay.name"> - {{trainingDay.name}}</span></h4>
+        <h4 class="list-group-item-heading">dateNumeric: {{trainingDay.dateNumeric}} - date:{{trainingDay.date | date:'EEE, MMM d, y'}}<span ng-show="trainingDay.name"> - {{trainingDay.name}}</span></h4>
         <small>
         <p class="list-group-item-text"></p>
         <p class="list-group-item-text text-danger" ng-show="trainingDay.startingPoint">Start Day</p>
@@ -33,6 +33,7 @@
         </ul>
         <small>
           <ul class="list-inline">
+            <li>dateNumeric: {{trainingDay.dateNumeric}}</li>
             <li>Fitness: {{trainingDay.fitness}}</li>
             <li>Fatigue: {{trainingDay.fatigue}}</li>
             <li>Form: {{trainingDay.form}}</li>

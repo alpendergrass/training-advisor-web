@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('users').controller('EditProfileController', ['$scope', '$http', '$state', 'Users', 'Authentication', 'toastr',
-  function ($scope, $http, $state, Users, Authentication, toastr) {
+angular.module('users').controller('EditProfileController', ['$scope', '$http', '$state', 'Users', 'Authentication', 'moment', 'toastr',
+  function ($scope, $http, $state, Users, Authentication, moment, toastr) {
     var jQuery = window.jQuery;
     angular.element(document).ready(function() {
       jQuery('[data-toggle="popover"]').popover();
@@ -41,7 +41,8 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.ftpDateOptions = {
       formatYear: 'yy',
       startingDay: 1,
-      showWeeks: false
+      showWeeks: false,
+      maxDate: moment().toDate()
     };
     //End Datepicker stuff.
 

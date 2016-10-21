@@ -1,6 +1,6 @@
 'use strict';
 
-var moment = require('moment-timezone'),
+var moment = require('moment'),
   _ = require('lodash'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -21,39 +21,6 @@ function getTrainingDay(user, numericDate, callback) {
     return callback(err, null);
   }
 
-  //We are assuming that our searchDate is midnight local (browser) time.
-  //We add 1 day to the time to get the end of our search span.
-  //(Note that originally we added 24 hours which broke on days that DST started or ended.)
-  //Mongo stores times in GMT so our search start and end date should
-  //likewise be converted to GMT for the query below.
-
-  //In general our convention for date handling it to always use dates with time
-  //set to midnight local (browser) time. On the server we do not have to worry
-  //about server local time.
-
-  //We were getting tripped up as the date coming in from the browser was
-  //in GMT like so: 2016-06-20T06:00:00.000Z. When we parsed this date
-  //when running on my server here (which is in mountain time zone) it
-  //produced a searchDate like: Mon Jun 20 2016 00:00:00 GMT-0600 (MDT)
-  //which worked fine with the query I was using originally using startOf day and
-  //endOf day.
-  //But when this code ran on the Bluemix server, with time set to GMT,
-  //trainingDate of 2016-06-20T06:00:00.000Z was being parsed to
-  //Mon Jun 20 2016 06:00:00 GMT+0000 (UTC). Applying startOf to
-  //this GMT date resulted in midnight GMT on June 19 6PM in browser local time. The
-  //end date was also off by 6 hours.
-
-  // end = moment.tz(searchDate, timezone).add(1, 'day');
-
-  // var query = TrainingDay
-  //   .where('user').equals(user)
-  //   .where('date').gte(searchDate).lt(end)
-  //   .where('cloneOfId').equals(null);
-
-  //No longer using dates in query. Using dateNumeric which is an integer derived from 'YYYYMMDD'.
-  //This is a step in simplifying date queries by removing the time component.
-
-
   var query = TrainingDay
     .where('user').equals(user)
     .where('dateNumeric').equals(numericDate)
@@ -68,7 +35,6 @@ function getTrainingDay(user, numericDate, callback) {
   });
 }
 
-//TODO: this function is duplicated in controller.
 function toNumericDate(date) {
   var dateString = moment(date).format('YYYYMMDD');
   return parseInt(dateString, 10);
@@ -153,7 +119,7 @@ module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate
         callback(null, trainingDay);
       });
     },
-    function (err, lastDay) {
+    function(err, lastDay) {
       if (err) {
         return callback(err, null);
       }
@@ -183,17 +149,17 @@ module.exports.getStartDay = function(user, numericSearchDate, callback) {
   };
 
   TrainingDay.find(query).sort({ dateNumeric: -1 }).limit(1)
-  .exec(function(err, trainingDays) {
-    if (err) {
-      return callback(err, null);
-    }
+    .exec(function(err, trainingDays) {
+      if (err) {
+        return callback(err, null);
+      }
 
-    if (trainingDays.length === 0) {
-      return callback(null, null);
-    }
+      if (trainingDays.length === 0) {
+        return callback(null, null);
+      }
 
-    return callback(null, trainingDays[0]);
-  });
+      return callback(null, trainingDays[0]);
+    });
 };
 
 module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut, callback) {
@@ -220,13 +186,13 @@ module.exports.getFuturePriorityDays = function(user, numericSearchDate, priorit
   };
 
   TrainingDay.find(query).sort({ dateNumeric: 1 })
-  .exec(function(err, priorityDays) {
-    if (err) {
-      return callback(err, null);
-    }
+    .exec(function(err, priorityDays) {
+      if (err) {
+        return callback(err, null);
+      }
 
-    return callback(null, priorityDays);
-  });
+      return callback(null, priorityDays);
+    });
 };
 
 module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority, numberOfDaysBack, callback) {
@@ -251,13 +217,13 @@ module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority
   };
 
   TrainingDay.find(query).sort({ date: 1 })
-  .exec(function(err, priorityDays) {
-    if (err) {
-      return callback(err, null);
-    }
+    .exec(function(err, priorityDays) {
+      if (err) {
+        return callback(err, null);
+      }
 
-    return callback(null, priorityDays);
-  });
+      return callback(null, priorityDays);
+    });
 };
 
 module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback) {
@@ -280,17 +246,17 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
   };
 
   TrainingDay.find(query).sort({ date: -1 }).limit(1)
-  .exec(function(err, trainingDays) {
-    if (err) {
-      return callback(err, null);
-    }
+    .exec(function(err, trainingDays) {
+      if (err) {
+        return callback(err, null);
+      }
 
-    if (trainingDays.length === 0) {
-      return callback(null, null);
-    }
+      if (trainingDays.length === 0) {
+        return callback(null, null);
+      }
 
-    return callback(null, trainingDays[0]);
-  });
+      return callback(null, trainingDays[0]);
+    });
 };
 
 module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, callback) {
@@ -390,7 +356,7 @@ module.exports.commitSimulation = function(user, callback) {
 
     TrainingDay.remove({
       user: user,
-      cloneOfId: { $ne : null }
+      cloneOfId: { $ne: null }
     }, function(err) {
       if (err) {
         return callback(err);
@@ -408,24 +374,24 @@ module.exports.revertSimulation = function(user, callback) {
     return callback(err, null);
   }
 
-  TrainingDay.update({
+  TrainingDay.remove({
     user: user,
-    cloneOfId: { $ne : null }
-  }, {
-    $set: {
-      cloneOfId: null
-    }
-  }, {
-    multi: true
-  }, function(err, rawResponse) {
+    isSimDay: true
+  }, function(err) {
     if (err) {
       return callback(err);
     }
 
-    TrainingDay.remove({
+    TrainingDay.update({
       user: user,
-      isSimDay: true
-    }, function(err) {
+      cloneOfId: { $ne: null }
+    }, {
+      $set: {
+        cloneOfId: null
+      }
+    }, {
+      multi: true
+    }, function(err, rawResponse) {
       if (err) {
         return callback(err);
       }
@@ -466,25 +432,26 @@ module.exports.clearPlanningData = function(user, numericDate) {
   });
 };
 
-module.exports.removePlanningActivities = function(user, callback) {
-  //plangeneration CompletedActivities are activities used to generate a plan.
-  if (!user) {
-    err = new TypeError('valid user is required');
-    return callback(err, null);
-  }
-
-  TrainingDay.update({
-    user: user
-  }, {
-    $pull: { completedActivities: { source: 'plangeneration' } }
-  }, {
-    multi: true
-  }, function(err, rawResponse) {
-    if (err) {
-      return callback(err, null);
+module.exports.removePlanningActivities = function(user) {
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('valid user is required');
+      return reject(err);
     }
 
-    return callback(null, rawResponse);
+    TrainingDay.update({
+      user: user
+    }, {
+      $pull: { completedActivities: { source: 'plangeneration' } }
+    }, {
+      multi: true
+    }, function(err, rawResponse) {
+      if (err) {
+        return reject(err);
+      }
+
+      return resolve(rawResponse);
+    });
   });
 };
 

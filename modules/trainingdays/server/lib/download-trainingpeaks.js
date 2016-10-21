@@ -76,7 +76,7 @@ module.exports.batchDownloadActivities = function(callback) {
               //update metrics for trainingDay, which should be the latest.
               params = {
                 user: user,
-                trainingDate: trainingDay.date
+                numericDate: trainingDay.dateNumeric
               };
 
               adviceMetrics.updateMetrics(params, function(err, trainingDay) {
@@ -169,7 +169,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           //Update metrics for trainingDay as completedActivities likely has changed.
           params = {
             user: user,
-            trainingDate: trainingDay.date
+            numericDate: trainingDay.dateNumeric
           };
 
           adviceMetrics.updateMetrics(params, function(err, trainingDay) {
@@ -242,11 +242,11 @@ function getWorkouts(user, trainingDay, client, personId, callback) {
 
   if (trainingDay) {
     //Get workouts for the day.
-    startDate = moment(trainingDay.date).format('YYYY-MM-DD');
+    startDate = moment(trainingDay.dateNumeric.toString()).format('YYYY-MM-DD');
     endDate = startDate;
   } else {
     //Get all workouts for the last TPAutoDownloadLookbackNumberOfDays days.
-    //TODO: Do not download workouts prior to start day.
+    //Trello: Do not download workouts prior to start day.
     startDate = moment().subtract(adviceConstants.TPAutoDownloadLookbackNumberOfDays, 'days').format('YYYY-MM-DD');
     endDate = moment().format('YYYY-MM-DD');
   }
