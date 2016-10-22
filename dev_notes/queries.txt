@@ -1,0 +1,3 @@
+{ dateNumeric: { $gte: 20161026, $lte: 20161026 }}
+
+{ "_id": ObjectId("580bf4de84f5635e3a9149cb")}

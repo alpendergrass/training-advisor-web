@@ -226,7 +226,6 @@ angular.module('trainingDays')
 
             // Redirect after save
             trainingDay.$create(function(response) {
-              $scope.trainingDay = response;
               $location.path('trainingDays/' + response._id);
             }, function(errorResponse) {
               if (errorResponse.data && errorResponse.data.message) {
@@ -546,7 +545,9 @@ angular.module('trainingDays')
               $scope.trainingDay = TrainingDays.getSimDay({
                 trainingDayId: id
               },
-                function(trainingDay) {},
+                function(trainingDay) {
+                  trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+                },
                 function(errorResponse) {
                   if (errorResponse.data && errorResponse.data.message) {
                     $scope.error = errorResponse.data.message;
@@ -941,10 +942,10 @@ angular.module('trainingDays')
         $scope.getDay = function(date) {
           $scope.error = null;
 
-          $scope.trainingDay = TrainingDays.getDay({
+          TrainingDays.getDay({
             trainingDate: date.toISOString()
           }, function(trainingDay) {
-            prepForTDView(trainingDay);
+            $state.go('trainingDays.view', { trainingDayId: trainingDay._id });
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -1060,7 +1061,6 @@ angular.module('trainingDays')
           });
         };
 
-        // Find existing TrainingDay
         $scope.trainingDay = TrainingDays.get({
           trainingDayId: $stateParams.trainingDayId
         }, function(trainingDay) {
@@ -1114,9 +1114,12 @@ angular.module('trainingDays')
         TrainingDays.getAdvice({
           trainingDate: getAdviceDate.toISOString(),
           alternateActivity: $scope.alternateActivity || null
-        }, function(response) {
-          $scope.trainingDay = response;
-          $location.path('trainingDays/' + response._id);
+        }, function(trainingDay) {
+          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+          // We reload the trainingDay in case we are on the view TD page.
+          $scope.trainingDay = trainingDay;
+          // We do location.path in case we are on the getAdvice page.
+          $location.path('trainingDays/' + trainingDay._id);
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
