@@ -12,7 +12,12 @@ mongoose.Promise = global.Promise;
 
 function getTrainingDay(user, numericDate, callback) {
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('getTrainingDay valid user is required');
+    return callback(err, null);
+  }
+
+  if (!numericDate) {
+    err = new TypeError('getTrainingDay numericDate is required to getTrainingDay');
     return callback(err, null);
   }
 
@@ -87,12 +92,22 @@ module.exports.getExistingTrainingDayDocument = function(user, numericDate, call
 module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate, callback) {
   //Will return a trainingDay doc for each day between startDate and endDate inclusive.
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('getTrainingDaysvalid user is required');
+    return callback(err, null);
+  }
+
+  if (!numericStartDate) {
+    err = new TypeError('numericStartDate is required to getTrainingDay');
     return callback(err, null);
   }
 
   if (!moment(numericStartDate.toString()).isValid()) {
     err = new TypeError('getTrainingDays numericStartDate ' + numericStartDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  if (!numericEndDate) {
+    err = new TypeError('numericEndDate is required to getTrainingDay');
     return callback(err, null);
   }
 
@@ -131,12 +146,17 @@ module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate
 module.exports.getStartDay = function(user, numericSearchDate, callback) {
   //select most recent starting trainingDay.
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('getStartDay valid user is required');
+    return callback(err, null);
+  }
+
+  if (!numericSearchDate) {
+    err = new TypeError('getStartDay numericSearchDate is required to getTrainingDay');
     return callback(err, null);
   }
 
   if (!moment(numericSearchDate.toString()).isValid()) {
-    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
+    err = new TypeError('getStartDay numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
 
@@ -165,12 +185,17 @@ module.exports.getStartDay = function(user, numericSearchDate, callback) {
 module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut, callback) {
   //select priority n trainingDays after searchDate. Include searchDate
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('getFuturePriorityDays valid user is required');
+    return callback(err, null);
+  }
+
+  if (!numericSearchDate) {
+    err = new TypeError('numericSearchDate is required to getFuturePriorityDays');
     return callback(err, null);
   }
 
   if (!moment(numericSearchDate.toString()).isValid()) {
-    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
+    err = new TypeError('getFuturePriorityDays numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
 
@@ -202,6 +227,11 @@ module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority
     return callback(err, null);
   }
 
+  if (!numericSearchDate) {
+    err = new TypeError('numericSearchDate is required to getPriorPriorityDays');
+    return callback(err, null);
+  }
+
   if (!moment(numericSearchDate.toString()).isValid()) {
     err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
@@ -229,12 +259,17 @@ module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority
 module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback) {
   //select most recent goal trainingDay before today.
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('getMostRecentGoalDay valid user is required');
+    return callback(err, null);
+  }
+
+  if (!numericSearchDate) {
+    err = new TypeError('getMostRecentGoalDay numericSearchDate is required to getMostRecentGoalDay');
     return callback(err, null);
   }
 
   if (!moment(numericSearchDate.toString()).isValid()) {
-    err = new TypeError('numericSearchDate ' + numericSearchDate + ' is not a valid date');
+    err = new TypeError('getMostRecentGoalDay numericSearchDate ' + numericSearchDate + ' is not a valid date');
     return callback(err, null);
   }
 
@@ -262,12 +297,17 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
 module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, callback) {
   //Only clear thru tomorrow. We don't want to wipe out our plan.
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('clearFutureMetricsAndAdvice valid user is required');
+    return callback(err, null);
+  }
+
+  if (!numericDate) {
+    err = new TypeError('clearFutureMetricsAndAdvice numericDate is required to getTrainingDay');
     return callback(err, null);
   }
 
   if (!moment(numericDate.toString()).isValid()) {
-    err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
+    err = new TypeError('clearFutureMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
     return callback(err, null);
   }
 
@@ -404,12 +444,17 @@ module.exports.revertSimulation = function(user, callback) {
 module.exports.clearPlanningData = function(user, numericDate) {
   return new Promise(function(resolve, reject) {
     if (!user) {
-      err = new TypeError('valid user is required');
+      err = new TypeError('clearPlanningData valid user is required');
+      return reject(err);
+    }
+
+    if (!numericDate) {
+      err = new TypeError('clearPlanningData numericDate is required to getTrainingDay');
       return reject(err);
     }
 
     if (!moment(numericDate.toString()).isValid()) {
-      err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
+      err = new TypeError('clearPlanningData numericDate ' + numericDate + ' is not a valid date');
       return reject(err);
     }
 
@@ -435,7 +480,7 @@ module.exports.clearPlanningData = function(user, numericDate) {
 module.exports.removePlanningActivities = function(user) {
   return new Promise(function(resolve, reject) {
     if (!user) {
-      err = new TypeError('valid user is required');
+      err = new TypeError('removePlanningActivities valid user is required');
       return reject(err);
     }
 
@@ -457,7 +502,7 @@ module.exports.removePlanningActivities = function(user) {
 
 module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, callback) {
   if (!user) {
-    err = new TypeError('valid user is required');
+    err = new TypeError('didWeGoHardTheDayBefore valid user is required');
     return callback(err, null);
   }
 

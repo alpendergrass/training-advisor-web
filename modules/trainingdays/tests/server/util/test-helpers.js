@@ -1,9 +1,11 @@
 'use strict';
 
-var moment = require('moment'),
+var path = require('path'),
+  moment = require('moment'),
   mongoose = require('mongoose'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
 
 module.exports = {};
@@ -45,14 +47,16 @@ module.exports.updateUser = function(user, callback) {
 };
 
 module.exports.createStartingPoint = function(user, trainingDate, daysBack, fitness, fatigue, callback) {
-  var trainingDay = new TrainingDay({
-    date: moment(trainingDate).subtract(daysBack, 'days'),
-    name: 'Starting point trainingDay',
-    startingPoint: true,
-    fitness: fitness,
-    fatigue: fatigue,
-    user: user
-  });
+  var computedDate = moment(trainingDate).subtract(daysBack, 'days'),
+    trainingDay = new TrainingDay({
+      date: computedDate,
+      dateNumeric: dbUtil.toNumericDate(computedDate),
+      name: 'Starting point trainingDay',
+      startingPoint: true,
+      fitness: fitness,
+      fatigue: fatigue,
+      user: user
+    });
 
   trainingDay.save(function (err) {
     if (err) {
@@ -65,11 +69,19 @@ module.exports.createStartingPoint = function(user, trainingDate, daysBack, fitn
 };
 
 module.exports.createGoalEvent = function(user, trainingDate, daysForward, callback) {
-  var trainingDay = new TrainingDay({
-    date: moment(trainingDate).add(daysForward, 'days'),
+  var computedDate = moment(trainingDate).add(daysForward, 'days'),
+    plannedActivities = [],
+    trainingDay;
+
+  plannedActivities[0] = {};
+
+  trainingDay = new TrainingDay({
+    date: computedDate,
+    dateNumeric: dbUtil.toNumericDate(computedDate),
     name: 'Goal trainingDay',
     scheduledEventRanking: 1,
     estimatedLoad: 567,
+    plannedActivities: plannedActivities,
     user: user
   });
 
@@ -85,11 +97,13 @@ module.exports.createGoalEvent = function(user, trainingDate, daysForward, callb
 
 module.exports.createTrainingDayObject = function(trainingDate, user) {
   var plannedActivities = [];
+
   plannedActivities[0] = {};
   plannedActivities[0].activityType = '';
-  
+
   var trainingDay = new TrainingDay({
     date: trainingDate,
+    dateNumeric: dbUtil.toNumericDate(trainingDate),
     name: 'Incoming trainingDay',
     plannedActivities: plannedActivities,
     user: user
@@ -101,6 +115,7 @@ module.exports.createTrainingDayObject = function(trainingDate, user) {
 module.exports.createTrainingDay = function(user, aDate, completedActivities, callback) {
   var trainingDay = new TrainingDay({
     date: moment(aDate),
+    dateNumeric: dbUtil.toNumericDate(aDate),
     name: 'Existing trainingDay',
     completedActivities: completedActivities || [],
     user: user
@@ -130,9 +145,9 @@ module.exports.getTrainingDay = function(id, callback) {
     if (err) {
       console.log('getTrainingDay findById error: ' + err);
       return callback(err, null);
-    } 
+    }
 
-    return callback(null, trainingDay); 
+    return callback(null, trainingDay);
   });
-}; 
+};
 

@@ -54,8 +54,8 @@ describe('TrainingDay server routes tests', function () {
 
       trainingDay = testHelpers.createTrainingDayObject(new Date(), user);
       trainingDay.startingPoint = true; //if no starting point exists, we will backtrack forever looking for one when we update.
-      trainingDay.fitness = 12; 
-      trainingDay.fatigue = 13; 
+      trainingDay.fitness = 12;
+      trainingDay.fatigue = 13;
       done();
     });
   });
@@ -124,7 +124,7 @@ describe('TrainingDay server routes tests', function () {
           .send(trainingDay)
           .expect(400)
           .end(function (trainingDaySaveErr, trainingDaySaveRes) {
-            (trainingDaySaveRes.body.message).should.match('trainingDate null is not a valid date');
+            (trainingDaySaveRes.body.message).should.containEql('numericDate is required');
             done(trainingDaySaveErr);
           });
       });
@@ -143,7 +143,7 @@ describe('TrainingDay server routes tests', function () {
         if (err) {
           console.log('createGoalEvent: ' + err);
         }
-        
+
         agent.post('/api/auth/signin')
           .send(credentials)
           .expect(200)

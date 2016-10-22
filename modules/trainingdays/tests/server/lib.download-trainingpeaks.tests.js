@@ -16,7 +16,7 @@ var downloadTrainingPeaks,
   getWorkoutsForAccessibleAthleteStub,
   getExtendedWorkoutDataForAccessibleAthleteStub,
   sendMessageToUserStub,
-  user, 
+  user,
   trainingDate,
   trainingDay,
   workoutDay,
@@ -30,7 +30,7 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
     sendMessageToUserStub = function(statusMessage, user) {
       console.log('statusMessage: ' + JSON.stringify(statusMessage));
     };
-    downloadTrainingPeaks = proxyquire('../../server/lib/download-trainingpeaks', 
+    downloadTrainingPeaks = proxyquire('../../server/lib/download-trainingpeaks',
       { 'soap': soapStub, './db-util': { 'sendMessageToUser' : sendMessageToUserStub } }
     );
 
@@ -88,10 +88,10 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return an error in the errors collection when GetAccessibleAthletes fails for a user', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(new Error('Stubbed getAccessibleAthletes error'), null); 
+        return callback(new Error('Stubbed getAccessibleAthletes error'), null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub }); 
+        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -112,10 +112,10 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetAccessibleAthletes returns no payload', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, null); 
+        return callback(null, null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub }); 
+        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -146,10 +146,10 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetAccessibleAthletes returns a payload with no athletes', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: [] }); 
+        return callback(null, { GetAccessibleAthletesResult: [] });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub }); 
+        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -180,16 +180,16 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return an error in the errors collection when GetAccessibleAthletes returns an invalid personId', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(new Error('Stubbed getWorkoutsForAccessibleAthleteStub error'), null); 
+        return callback(new Error('Stubbed getWorkoutsForAccessibleAthleteStub error'), null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
-          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub 
-        }); 
+          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub
+        });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -210,16 +210,16 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetWorkoutsForAccessibleAthlete returns a payload with no activities', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [] } });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
-          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub 
-        }); 
+          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub
+        });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -250,20 +250,20 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetExtendedWorkoutDataForAccessibleAthlete does not returns payload for requested workout', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
         return callback(null, null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -294,27 +294,27 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return one activity when GetWorkoutsForAccessibleAthlete returns a payload with one workout', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, 
-          { GetExtendedWorkoutDataForAccessibleAthleteResult: 
-            { pwx: 
-              { workout: 
+        return callback(null,
+          { GetExtendedWorkoutDataForAccessibleAthleteResult:
+            { pwx:
+              { workout:
                 { 'time': '2016-07-02T10:06:53', 'title': 'Workout Title', 'summarydata': { 'tss': 234 } }
-              } 
-            } 
-          }); 
+              }
+            }
+          });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -353,27 +353,27 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return two activities when GetWorkoutsForAccessibleAthlete returns a payload with two workouts', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }, { 'WorkoutId': 9012, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }, { 'WorkoutId': 9012, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, 
-          { GetExtendedWorkoutDataForAccessibleAthleteResult: 
-            { pwx: 
-              { workout: 
+        return callback(null,
+          { GetExtendedWorkoutDataForAccessibleAthleteResult:
+            { pwx:
+              { workout:
                 { 'time': '2016-07-02T10:06:53', 'title': 'Workout Title', 'summarydata': { 'tss': 234 } }
-              } 
-            } 
-          }); 
+              }
+            }
+          });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -407,30 +407,30 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
         });
       });
     });
-  
+
     it('should not save activity when GetWorkoutsForAccessibleAthlete returns a payload with an activity that already exists in the database', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, 
-          { GetExtendedWorkoutDataForAccessibleAthleteResult: 
-            { pwx: 
-              { workout: 
+        return callback(null,
+          { GetExtendedWorkoutDataForAccessibleAthleteResult:
+            { pwx:
+              { workout:
                 { 'time': '2001-07-02T10:06:53', 'title': 'Workout Title', 'summarydata': { 'tss': 234 } }
-              } 
-            } 
-          }); 
+              }
+            }
+          });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       user.trainingPeaksCredentials.autoDownload = true;
@@ -484,10 +484,10 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return an error when GetAccessibleAthletes fails', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(new Error('Stubbed getAccessibleAthletes error'), null); 
+        return callback(new Error('Stubbed getAccessibleAthletes error'), null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub }); 
+        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub });
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
@@ -499,10 +499,10 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetAccessibleAthletes returns no payload', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, null); 
+        return callback(null, null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub }); 
+        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub });
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
@@ -514,10 +514,10 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetAccessibleAthletes returns a payload with no athletes', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: [] }); 
+        return callback(null, { GetAccessibleAthletesResult: [] });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub }); 
+        return callback(null, { 'GetAccessibleAthletes': getAccessibleAthletesStub });
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
@@ -529,16 +529,16 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return an error when GetAccessibleAthletes returns an invalid personId', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(new Error('Stubbed getWorkoutsForAccessibleAthleteStub error'), null); 
+        return callback(new Error('Stubbed getWorkoutsForAccessibleAthleteStub error'), null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
-          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub 
-        }); 
+          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub
+        });
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
@@ -550,16 +550,16 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetWorkoutsForAccessibleAthlete returns a payload with no activities', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [] } });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
-          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub 
-        }); 
+          'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub
+        });
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
@@ -571,20 +571,20 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return no activities when GetExtendedWorkoutDataForAccessibleAthlete does not returns payload for requested workout', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
         return callback(null, null);
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
@@ -596,27 +596,27 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return one activity when GetWorkoutsForAccessibleAthlete returns a payload with one workout', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, 
-          { GetExtendedWorkoutDataForAccessibleAthleteResult: 
-            { pwx: 
-              { workout: 
+        return callback(null,
+          { GetExtendedWorkoutDataForAccessibleAthleteResult:
+            { pwx:
+              { workout:
                 { 'time': '2016-07-02T10:06:53', 'title': 'Workout Title', 'summarydata': { 'tss': 234 } }
-              } 
-            } 
-          }); 
+              }
+            }
+          });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err) {
@@ -636,27 +636,27 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should return two activities when GetWorkoutsForAccessibleAthlete returns a payload with two workouts', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }, { 'WorkoutId': 9012, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }, { 'WorkoutId': 9012, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, 
-          { GetExtendedWorkoutDataForAccessibleAthleteResult: 
-            { pwx: 
-              { workout: 
+        return callback(null,
+          { GetExtendedWorkoutDataForAccessibleAthleteResult:
+            { pwx:
+              { workout:
                 { 'time': '2016-07-02T10:06:53', 'title': 'Workout Title', 'summarydata': { 'tss': 234 } }
-              } 
-            } 
-          }); 
+              }
+            }
+          });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err) {
@@ -674,27 +674,27 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
     it('should not save activity when GetWorkoutsForAccessibleAthlete returns a payload with an activity that already exists in the database', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
-        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } }); 
+        return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
       getWorkoutsForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } }); 
+        return callback(null, { GetWorkoutsForAccessibleAthleteResult: { Workout: [{ 'WorkoutId': 5678, 'WorkoutDay': workoutDay }] } });
       };
       getExtendedWorkoutDataForAccessibleAthleteStub = function(args, callback) {
-        return callback(null, 
-          { GetExtendedWorkoutDataForAccessibleAthleteResult: 
-            { pwx: 
-              { workout: 
+        return callback(null,
+          { GetExtendedWorkoutDataForAccessibleAthleteResult:
+            { pwx:
+              { workout:
                 { 'time': '2001-07-02T10:06:53', 'title': 'Workout Title', 'summarydata': { 'tss': 234 } }
-              } 
-            } 
-          }); 
+              }
+            }
+          });
       };
       soapStub.createClient = function(url, callback) {
-        return callback(null, { 
+        return callback(null, {
           'GetAccessibleAthletes': getAccessibleAthletesStub,
           'GetWorkoutsForAccessibleAthlete': getWorkoutsForAccessibleAthleteStub,
-          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub 
-        }); 
+          'GetExtendedWorkoutDataForAccessibleAthlete': getExtendedWorkoutDataForAccessibleAthleteStub
+        });
       };
 
       activityDate = moment(trainingDate).subtract(1, 'day').toDate();

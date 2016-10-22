@@ -305,7 +305,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
       offset = moment.tz(workout.WorkoutDay, timezone).format('Z'); //-06:00
       trainingDate = trainingDate + offset; //2016-07-23T09:36:05-06:00
 
-      dbUtil.getTrainingDayDocument(user, trainingDate, function(err, retrievedTrainingDay) {
+      dbUtil.getTrainingDayDocument(user, dbUtil.toNumericDate(trainingDate), function(err, retrievedTrainingDay) {
         if (err) {
           statusMessage.text = 'TrainingPeaks download failed - getTrainingDayDocument returned error: ' + (err.msg || '');
           statusMessage.type = 'error';
