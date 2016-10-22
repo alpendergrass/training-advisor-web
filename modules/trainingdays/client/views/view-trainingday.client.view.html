@@ -52,7 +52,7 @@
         <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedLoad === trainingDay.plannedActivities[0].targetMinLoad">
           Today's load should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
         </span>
-        <span ng-show="trainingDay.plannedActivities[0].activityType == 'event' && trainingDay.estimatedLoad < 1">
+        <span ng-show="trainingDay.plannedActivities[0].activityType == 'event' && trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9 && trainingDay.estimatedLoad < 1">
           You provided no load estimate for this event. Our load recommendation for a workout today would be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
         </span>
          <span ng-show="trainingDay.plannedActivities[0].activityType == 'event' && trainingDay.estimatedLoad">
