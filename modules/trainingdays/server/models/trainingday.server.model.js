@@ -1,8 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-  Schema = mongoose.Schema,
-  moment = require('moment');
+  Schema = mongoose.Schema;
 
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 

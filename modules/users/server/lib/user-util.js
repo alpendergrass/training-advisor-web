@@ -1,7 +1,6 @@
 'use strict';
 
 var path = require('path'),
-  moment = require('moment'),
   _ = require('lodash'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),

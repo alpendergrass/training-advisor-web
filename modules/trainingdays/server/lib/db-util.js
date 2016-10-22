@@ -199,14 +199,12 @@ module.exports.getFuturePriorityDays = function(user, numericSearchDate, priorit
     return callback(err, null);
   }
 
-  // var trainingDate = moment(searchDate),
   var numericMaxDate = toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
 
   var query = {
     user: user,
     scheduledEventRanking: priority,
     dateNumeric: { $gte: numericSearchDate, $lte: numericMaxDate },
-    // date: { $gte: trainingDate, $lte: maxDate },
     cloneOfId: null
   };
 
@@ -237,7 +235,7 @@ module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority
     return callback(err, null);
   }
 
-  var numericMinDate = toNumericDate(moment(numericSearchDate).subtract(numberOfDaysBack, 'days'));
+  var numericMinDate = toNumericDate(moment(numericSearchDate.toString()).subtract(numberOfDaysBack, 'days'));
 
   var query = {
     user: user,
