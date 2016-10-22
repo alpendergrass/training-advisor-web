@@ -7,7 +7,7 @@ var moment = require('moment'),
 module.exports = {};
 
 module.exports.isTestingDue = function(user, trainingDay) {
-  var now = moment(trainingDay.date);
+  var now = moment(trainingDay.dateNumeric.toString());
   var testDate = moment(user.thresholdPowerTestDate);
   var howLong = now.diff(testDate, 'days');
   return howLong >= adviceConstants.testingNagDayCount;

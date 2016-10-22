@@ -160,9 +160,8 @@ function determinePeriod(user, trainingDay, callback) {
             return callback(err, null);
           }
 
-          //Determine how many days total between start and goal. Add one to make it inclusive.
-          periodData.totalTrainingDays = results.endOfTrainingPeriod.diff(startDate, 'days'); // + 1;
-
+          //Determine how many days total between start and goal.
+          periodData.totalTrainingDays = results.endOfTrainingPeriod.diff(startDate, 'days');
           //Compute number of days for each period.
           periodData.basePeriodDays = Math.round(periodData.totalTrainingDays * adviceConstants.basePortionOfTotalTrainingDays);
           periodData.buildPeriodDays = Math.round(periodData.totalTrainingDays * adviceConstants.buildPortionOfTotalTrainingDays);
@@ -185,7 +184,7 @@ function determinePeriod(user, trainingDay, callback) {
           //Use last goal date within maximumNumberOfRaceDays of start of race period to define number of race days, with min of minimumNumberOfRaceDays
           lastRaceSearchDate = moment(results.endOfTrainingPeriod).add(adviceConstants.maximumNumberOfRaceDays, 'days');
           lastRace = _.findLast(results.futureGoalDays, function(goalDay) {
-            return moment(goalDay.date).isSameOrBefore(lastRaceSearchDate, 'day');
+            return moment(goalDay.dateNumeric.toString()).isSameOrBefore(lastRaceSearchDate, 'day');
           });
 
           if (lastRace) {

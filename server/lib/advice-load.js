@@ -2,7 +2,6 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  moment = require('moment'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),

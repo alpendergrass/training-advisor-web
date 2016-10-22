@@ -343,7 +343,6 @@ describe('advice-metrics Unit Tests:', function () {
         params.numericDate = dbUtil.toNumericDate(moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays, 'days'));
 
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
-          //console.log('trainingDay: ' + trainingDay);
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.period).should.equal('peak');
@@ -449,7 +448,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        var tDate = moment(trainingDate); //.subtract(1, 'days');
+        var tDate = moment(trainingDate);
         var completedActivities = [{
           load: 1
         }];
@@ -475,7 +474,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        var tDate = moment(trainingDate); //.subtract(1, 'days');
+        var tDate = moment(trainingDate);
         var completedActivities = [{
           load: 1
         }, {
@@ -530,7 +529,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        var tDate = moment(trainingDate); //.subtract(1, 'days');
+        var tDate = moment(trainingDate);
         //moderate upperLoadFactor is 1.20
         var completedActivities = [{
           load: (expectedTargetAvgDailyLoad * 0.2)
