@@ -7,6 +7,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
@@ -15,6 +16,7 @@ var path = require('path'),
 var user,
   trainingDate,
   trainingDay,
+  yesterday,
   params = {};
 
 describe('advice-easy Unit Tests:', function() {
@@ -28,6 +30,7 @@ describe('advice-easy Unit Tests:', function() {
       user = newUser;
       params.user = user;
       trainingDate = moment().startOf('day').toDate();
+      yesterday = moment(trainingDate).subtract(1, 'days');
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
     });
@@ -36,16 +39,17 @@ describe('advice-easy Unit Tests:', function() {
   describe('Easy Rules', function() {
     it('should return easy if yesterday was a hard day, form is below easy day threshold and tomorrow is a not preferred rest day', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err) {
+
+      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err, startDay) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
-        testHelpers.createGoalEvent(user, trainingDate, 40, function(err) {
+
+        testHelpers.createGoalEvent(user, trainingDate, 40, function(err, goalDay) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
 
-          var yesterday = moment(trainingDate).subtract(1, 'days');
           var completedActivities = [{
             load: 999
           }];
@@ -55,7 +59,7 @@ describe('advice-easy Unit Tests:', function() {
               console.log('createTrainingDay: ' + err);
             }
 
-            params.trainingDate = yesterday;
+            params.numericDate = dbUtil.toNumericDate(yesterday);
 
             return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
@@ -87,7 +91,6 @@ describe('advice-easy Unit Tests:', function() {
             console.log('createGoalEvent: ' + err);
           }
 
-          var yesterday = moment(trainingDate).subtract(1, 'days');
           var completedActivities = [{
             load: 999
           }];
@@ -96,7 +99,7 @@ describe('advice-easy Unit Tests:', function() {
             if (err) {
               console.log('createTrainingDay: ' + err);
             }
-            params.trainingDate = yesterday;
+            params.numericDate = dbUtil.toNumericDate(yesterday);
 
             return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
@@ -128,7 +131,6 @@ describe('advice-easy Unit Tests:', function() {
             console.log('createGoalEvent: ' + err);
           }
 
-          var yesterday = moment(trainingDate).subtract(1, 'days');
           var completedActivities = [{
             load: 999
           }];

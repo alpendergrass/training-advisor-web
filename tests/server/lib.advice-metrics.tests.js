@@ -6,6 +6,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics');
@@ -27,7 +28,7 @@ describe('advice-metrics Unit Tests:', function () {
       params.user = newUser;
 
       trainingDate = moment().startOf('day').toDate();
-      params.trainingDate = trainingDate;
+      params.numericDate = dbUtil.toNumericDate(trainingDate);
 
       testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays + adviceConstants.minimumNumberOfRaceDays, function(err) {
         if (err) {
@@ -50,16 +51,16 @@ describe('advice-metrics Unit Tests:', function () {
     });
 
     it('should return error if missing trainingDate', function (done) {
-      params.trainingDate = null;
+      params.numericDate = null;
       return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
         should.exist(err);
-        (err.message).should.match('trainingDate is required');
+        (err.message).should.containEql('numericDate is required');
         done();
       });
     });
 
     it('should return error if invalid trainingDate', function (done) {
-      params.trainingDate = '20161232';
+      params.numericDate = '20161232';
       return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
         should.exist(err);
         (err.message).should.containEql('is not a valid date');
@@ -339,7 +340,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        params.trainingDate = moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays, 'days');
+        params.numericDate = dbUtil.toNumericDate(moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays, 'days'));
 
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           //console.log('trainingDay: ' + trainingDay);
@@ -363,7 +364,7 @@ describe('advice-metrics Unit Tests:', function () {
     //       console.log('createStartingPoint: ' + err);
     //     }
 
-    //     params.trainingDate = moment(trainingDate).add(16, 'days');
+    //     params.numericDate = moment(trainingDate).add(16, 'days');
 
     //     return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
     //       should.not.exist(err);
@@ -384,7 +385,7 @@ describe('advice-metrics Unit Tests:', function () {
     //       console.log('createStartingPoint: ' + err);
     //     }
 
-    //     params.trainingDate = moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays * adviceConstants.basePortionOfTotalTrainingDays + 1, 'days');
+    //     params.numericDate = moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays * adviceConstants.basePortionOfTotalTrainingDays + 1, 'days');
 
     //     return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
     //       should.not.exist(err);

@@ -118,13 +118,13 @@ function determinePeriod(user, trainingDay, callback) {
         lastRace,
         periodData = {};
 
-      if (results.nextPriority2Date) {
+      if (results.numericNextPriority2Date) {
         periodData.daysUntilNextPriority2Event = moment(results.numericNextPriority2Date.toString()).diff(trainingDate, 'days');
       } else {
         periodData.daysUntilNextPriority2Event = 0;
       }
 
-      if (results.nextPriority3Date) {
+      if (results.numericNextPriority3Date) {
         periodData.daysUntilNextPriority3Event = moment(results.numericNextPriority3Date.toString()).diff(trainingDate, 'days');
       } else {
         periodData.daysUntilNextPriority3Event = 0;

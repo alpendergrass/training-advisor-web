@@ -24,7 +24,7 @@ module.exports.updateMetrics = function(params, callback) {
   }
 
   if (!params.numericDate) {
-    err = new TypeError('date is required to update metrics');
+    err = new TypeError('numericDate is required to update metrics');
     return callback(err, null);
   }
 
@@ -265,8 +265,8 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 function computeSevenDayRampRate(user, trainingDay, callback) {
   //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-  var priorDate = toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
-    yesterday = toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
+  var priorDate = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
+    yesterday = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
     rampRate;
 
   dbUtil.getExistingTrainingDayDocument(user, yesterday, function(err, yesterdayTrainingDay) {

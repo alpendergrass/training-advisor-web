@@ -6,6 +6,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceEngine = require('../../server/lib/advice-engine');
@@ -20,7 +21,7 @@ describe('advice-engine Unit Tests:', function () {
         return done(err);
       }
 
-      user = newUser;    
+      user = newUser;
 
       trainingDate = new Date().toISOString();
       done();
@@ -32,17 +33,17 @@ describe('advice-engine Unit Tests:', function () {
       params = {};
       return adviceEngine.advise(params, function (err, trainingDay) {
         should.exist(err);
-        (err.message).should.match('valid user is required');
+        (err.message).should.containEql('valid user is required');
         done();
       });
     });
-    
+
     it('should return error if no adviceDate', function (done) {
       params = {};
       params.user = user;
       return adviceEngine.advise(params, function (err, trainingDay) {
         should.exist(err);
-        (err.message).should.match('trainingDate is required');
+        (err.message).should.containEql('numericDate is required');
         done();
       });
     });
@@ -53,7 +54,7 @@ describe('advice-engine Unit Tests:', function () {
       params.trainingDate = 'notAValidDate';
       return adviceEngine.advise(params, function (err, trainingDay) {
         should.exist(err);
-        (err.message).should.match('trainingDate notAValidDate is not a valid date');
+        (err.message).should.containEql('numericDate is required');
         done();
       });
     });
@@ -61,7 +62,7 @@ describe('advice-engine Unit Tests:', function () {
     it('should return error if start day does not exist', function (done) {
       params = {};
       params.user = user;
-      params.trainingDate = trainingDate;
+      params.numericDate = dbUtil.toNumericDate(trainingDate);
       return adviceEngine.advise(params, function (err, trainingDay) {
         should.exist(err);
         (err.message).should.containEql('Starting date for current training period was not found.');
@@ -77,7 +78,7 @@ describe('advice-engine Unit Tests:', function () {
 
         params = {};
         params.user = user;
-        params.trainingDate = trainingDate;
+        params.numericDate = dbUtil.toNumericDate(trainingDate);
         return adviceEngine.advise(params, function (err, trainingDay) {
           should.not.exist(err);
           done();
@@ -98,7 +99,7 @@ describe('advice-engine Unit Tests:', function () {
 
           params = {};
           params.user = user;
-          params.trainingDate = trainingDate;
+          params.numericDate = dbUtil.toNumericDate(trainingDate);
           return adviceEngine.advise(params, function (err, trainingDay) {
             should.not.exist(err);
             (trainingDay.plannedActivities[0].activityType).should.not.match('');
@@ -123,7 +124,7 @@ describe('advice-engine Unit Tests:', function () {
 
           params = {};
           params.user = user;
-          params.trainingDate = trainingDate;
+          params.numericDate = dbUtil.toNumericDate(trainingDate);
           params.alternateActivity = 'hard';
           return adviceEngine.advise(params, function (err, trainingDay) {
             should.not.exist(err);
@@ -150,7 +151,7 @@ describe('advice-engine Unit Tests:', function () {
 
           params = {};
           params.user = user;
-          params.trainingDate = trainingDate;
+          params.numericDate = dbUtil.toNumericDate(trainingDate);
           adviceEngine.advise(params, function (err, trainingDay) {
             params.alternateActivity = 'moderate';
             return adviceEngine.advise(params, function (err, trainingDay) {

@@ -7,6 +7,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceMetrics = require('../../server/lib/advice-metrics'),
@@ -96,7 +97,7 @@ describe('advice-moderate Unit Tests:', function() {
               console.log('createTrainingDay: ' + err);
             }
 
-            params.trainingDate = yesterday;
+            params.numericDate = dbUtil.toNumericDate(yesterday);
 
             return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
@@ -138,7 +139,7 @@ describe('advice-moderate Unit Tests:', function() {
               console.log('createTrainingDay: ' + err);
             }
 
-            params.trainingDate = yesterday;
+            params.numericDate = dbUtil.toNumericDate(yesterday);
 
             return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.

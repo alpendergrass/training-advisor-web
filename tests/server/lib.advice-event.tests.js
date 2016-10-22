@@ -33,7 +33,7 @@ describe('advice-event Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 0, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, 0, function(err, trainingDay) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
@@ -58,7 +58,7 @@ describe('advice-event Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 0, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, 0, function(err, trainingDay) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
@@ -83,7 +83,7 @@ describe('advice-event Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 0, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, 0, function(err, trainingDay) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }

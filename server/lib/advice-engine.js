@@ -49,14 +49,16 @@ function generateAdvice(user, trainingDay, callback) {
     R.register(adviceChoice.choiceRules);
     R.register(adviceHard.hardRules);
 
-    R.execute(facts,function(result){
+    R.execute(facts, function(result){
       adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
         if (err) {
+          console.log('setLoadRecommendations err: ', err);
           return callback(err);
         }
 
         trainingDay.save(function(err) {
           if (err) {
+            console.log('trainingDay.save err: ', err);
             return callback(err, null);
           } else {
             return callback(null, trainingDay);
