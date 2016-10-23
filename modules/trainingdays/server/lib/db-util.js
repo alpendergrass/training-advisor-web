@@ -54,7 +54,6 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
   //This should be the only place in the app where a new training day is created from scratch.
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
-  var timezone = user.timezone || 'America/Denver';
 
   getTrainingDay(user, numericDate, function(err, trainingDay) {
     if (err) {
@@ -62,7 +61,8 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
     }
 
     if (!trainingDay) {
-      var newTrainingDay = new TrainingDay();
+      var newTrainingDay = new TrainingDay(),
+        timezone = user.timezone || 'America/Denver';
       newTrainingDay.dateNumeric = numericDate;
       newTrainingDay.date = moment.tz(numericDate.toString(), timezone).toDate();
       newTrainingDay.user = user;
