@@ -1,6 +1,6 @@
 'use strict';
 
-var moment = require('moment'),
+var moment = require('moment-timezone'),
   _ = require('lodash'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -54,6 +54,8 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
   //This should be the only place in the app where a new training day is created from scratch.
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
+  var timezone = user.timezone || 'America/Denver';
+
   getTrainingDay(user, numericDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null);
@@ -62,7 +64,7 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
     if (!trainingDay) {
       var newTrainingDay = new TrainingDay();
       newTrainingDay.dateNumeric = numericDate;
-      newTrainingDay.date = moment(numericDate.toString()).toDate();
+      newTrainingDay.date = moment.tz(numericDate.toString(), timezone).toDate();
       newTrainingDay.user = user;
       newTrainingDay.save(function(err, createdTrainingDay) {
         if (err) {

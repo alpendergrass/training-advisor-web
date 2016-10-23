@@ -8,11 +8,9 @@ var path = require('path'),
 module.exports = {};
 
 module.exports.migrate = function() {
-  console.log('process.env.RUN_MIGRATIONS: ', process.env.RUN_MIGRATIONS);
-
   if (!process.env.RUN_MIGRATIONS || process.env.RUN_MIGRATIONS === 'false') {
     //Seems I should not have to explicitly check for false, but I do.
-    console.log(chalk.green('Skipping migrations - RUN_MIGRATIONS env variable is false or not set.'));
+    console.log(chalk.green('Skipping migrations.'));
     return Promise.resolve();
   }
 
