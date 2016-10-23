@@ -274,7 +274,7 @@ angular.module('trainingDays')
         var setLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
-            return '#97BBCD';
+            return '#FFA07A';
           }
 
           if (td.isSimDay) {
@@ -305,7 +305,7 @@ angular.module('trainingDays')
         var setFormPointColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
-            return '#98D8E2';
+            return '#FFA07A';
           }
 
           return '#FFFFFF';
@@ -753,9 +753,6 @@ angular.module('trainingDays')
             templateUrl: 'recurrance.html',
             //size: 'sm',
             controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
-              //By setting $scope.trainingEffortFeedback to '' we disable the Save button
-              //until the user makes a selection.
-
               $scope.recurrenceSpec = {
                 daysOfWeek: {}
               };
@@ -1009,10 +1006,11 @@ angular.module('trainingDays')
           var index = _.indexOf($scope.trainingDay.completedActivities, _.find($scope.trainingDay.completedActivities, { created: created }));
           $scope.trainingDay.completedActivities.splice(index, 1, data);
 
-          var trainingDay = $scope.trainingDay;
-
-          $scope.trainingDay.$update(function() {
-            $scope.checkGiveFeedback(trainingDay);
+          $scope.trainingDay.$update(function(trainingDay) {
+            //We need to correct the date coming from server-side as it might not have self corrected yet.
+            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+            $scope.trainingDay = trainingDay;
+            $scope.checkGiveFeedback($scope.trainingDay);
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -1039,16 +1037,17 @@ angular.module('trainingDays')
 
         $scope.downloadActivities = function(provider) {
           usSpinnerService.spin('tdSpinner');
-          var trainingDay = $scope.trainingDay;
-          // var d = new Date(trainingDay.date);
 
-          trainingDay.$downloadActivities({
+          $scope.trainingDay.$downloadActivities({
             provider: provider
           }, function(trainingDay) {
             usSpinnerService.stop('tdSpinner');
+            //We need to correct the date coming from server-side as it might not have self corrected yet.
+            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+            $scope.trainingDay = trainingDay;
             toastr[trainingDay.lastStatus.type](trainingDay.lastStatus.text, trainingDay.lastStatus.title);
             if (trainingDay.lastStatus.type === 'success') {
-              $scope.checkGiveFeedback(trainingDay);
+              $scope.checkGiveFeedback($scope.trainingDay);
             }
           }, function(errorResponse) {
             usSpinnerService.stop('tdSpinner');
@@ -1076,6 +1075,9 @@ angular.module('trainingDays')
       };
 
       $scope.update = function(isValid, trainingDay) {
+        //We are being called as if we were synchronous here.
+        //TODO: we should return something, ideally a promise.
+        //And anywhere else we call trainingDay.$update should be modified to call here.
         $scope.error = null;
 
         if (!isValid) {
@@ -1087,7 +1089,11 @@ angular.module('trainingDays')
           trainingDay = $scope.trainingDay;
         }
 
-        trainingDay.$update(function(response) {}, function(errorResponse) {
+        trainingDay.$update(function(trainingDay) {
+          //We need to correct the date coming from server-side as it might not have self corrected yet.
+          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+          $scope.trainingDay = trainingDay;
+        }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
