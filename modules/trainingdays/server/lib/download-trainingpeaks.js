@@ -369,7 +369,7 @@ function processWorkout(client, args, trainingDay, callback) {
         newActivity.sourceID = args.workoutId;
         newActivity.name = payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.title;
         newActivity.load = Math.round(payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.summarydata.tss);
-        newActivity.notes = 'Timestamp: ' + payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.time;
+        newActivity.notes = payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.title ? payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.title : 'Timestamp: ' + payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.time;
         trainingDay.completedActivities.push(newActivity);
         newActivity = {};
       } else {
