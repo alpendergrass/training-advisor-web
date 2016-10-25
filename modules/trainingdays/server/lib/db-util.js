@@ -79,15 +79,15 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
   });
 };
 
-module.exports.getExistingTrainingDayDocument = function(user, numericDate, callback) {
-  callback = (typeof callback === 'function') ? callback : function(err, data) {};
+module.exports.getExistingTrainingDayDocument = function(user, numericDate) {
+  return new Promise(function(resolve, reject) {
+    getTrainingDay(user, numericDate, function(err, trainingDay) {
+      if (err) {
+        return reject(err);
+      }
 
-  getTrainingDay(user, numericDate, function(err, trainingDay) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    return callback(null, trainingDay);
+      return resolve(trainingDay);
+    });
   });
 };
 

@@ -10,7 +10,7 @@ module.exports = {
     // server: ['modules/trainingdays/tests/server/lib.download-strava.tests.js'],
     // server: ['modules/trainingdays/tests/server/lib.download-trainingpeaks.tests.js'],
     // server: ['modules/advisor/tests/server/**/*.js'],
-    // server: ['modules/advisor/tests/server/lib.advice-event.tests.js'],
+    // server: ['modules/advisor/tests/server/lib.advice-easy.tests.js'],
     // server: ['modules/advisor/tests/server/lib.advice-metrics.tests.js'],
     // server: ['modules/advisor/tests/server/lib.advice-util.tests.js'],
     // server: ['modules/users/tests/server/**/*.js'],
