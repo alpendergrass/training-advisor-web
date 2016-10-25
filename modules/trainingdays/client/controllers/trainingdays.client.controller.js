@@ -54,6 +54,7 @@ angular.module('trainingDays')
         $scope.hasStart = true;
         $scope.hasEnd = true;
         $scope.needsPlanGen = false;
+        $scope.isWorking = true;
         usSpinnerService.spin('tdSpinner');
 
         TrainingDays.getSeason({
@@ -95,9 +96,11 @@ angular.module('trainingDays')
 
           $scope.season = season;
           usSpinnerService.stop('tdSpinner');
+          $scope.isWorking = false;
           return callback();
         }, function(errorResponse) {
           $scope.season = null;
+          $scope.isWorking = false;
           usSpinnerService.stop('tdSpinner');
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
@@ -468,6 +471,7 @@ angular.module('trainingDays')
         };
 
         $scope.genPlan = function() {
+          $scope.isWorking = true;
           usSpinnerService.spin('tdSpinner');
           $scope.error = null;
 
@@ -475,9 +479,11 @@ angular.module('trainingDays')
             trainingDate: $scope.today.toISOString()
           }, function(response) {
             usSpinnerService.stop('tdSpinner');
+            $scope.isWorking = false;
             toastr.success(response.text, response.title); //, { timeOut: 10000 });
             loadChart();
           }, function(errorResponse) {
+            $scope.isWorking = false;
             usSpinnerService.stop('tdSpinner');
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;

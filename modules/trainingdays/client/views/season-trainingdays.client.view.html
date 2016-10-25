@@ -10,16 +10,17 @@
   </div>
   <div ng-show="hasStart">
   <div>
-    <div class="pull-left">
-      <md-button ng-show="hasStart" ng-disabled="simMode" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
+    <div class="pull-left" ng-disabled="isWorking">
+      <md-button ng-show="hasStart" ng-disabled="simMode || isWorking" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
     </div>
     <div class="pull-left">
-      <md-button ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" ng-show="hasStart && hasEnd" ng-disabled="simMode" ng-click="genPlan()">Update Season</md-button>
+      <md-button ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" ng-show="hasStart && hasEnd" ng-disabled="simMode || isWorking" ng-click="genPlan()">Update Season</md-button>
     </div>
     <div class="pull-right">
-      <md-button ng-disabled="simMode" ui-sref="calendar()">Calendar</md-button>
+      <md-button ng-disabled="simMode || isWorking" ui-sref="calendar()">Calendar</md-button>
     </div>
   </div>
+
   <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
   <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
     <strong ng-bind="error"></strong>
@@ -34,7 +35,7 @@
     </div>
     <div class="md-toolbar-tools">
       <span flex="4"></span>
-      <md-button ng-disabled="simMode" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
+      <md-button ng-disabled="simMode || isWorking" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
         What If?
       </md-button>
       <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run">
