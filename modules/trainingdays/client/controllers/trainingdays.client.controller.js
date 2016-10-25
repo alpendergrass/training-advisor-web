@@ -219,22 +219,23 @@ angular.module('trainingDays')
           if (td) {
             $state.go('trainingDays.view', { trainingDayId: td._id });
           } else {
-            //trainingDay does not exist, we need to create it first.
-            var trainingDay = new TrainingDays({
-              date: date
-            });
+            if (moment(date).isSameOrAfter($scope.hasStart.date)) {
+              //trainingDay does not exist, we need to create it first.
+              var trainingDay = new TrainingDays({
+                date: date
+              });
 
-            // Redirect after save
-            trainingDay.$create(function(response) {
-              $location.path('trainingDays/' + response._id);
-            }, function(errorResponse) {
-              if (errorResponse.data && errorResponse.data.message) {
-                $scope.error = errorResponse.data.message;
-              } else {
-                //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-                $scope.error = 'Server error prevented trainingDay creation.';
-              }
-            });
+              trainingDay.$create(function(response) {
+                $location.path('trainingDays/' + response._id);
+              }, function(errorResponse) {
+                if (errorResponse.data && errorResponse.data.message) {
+                  $scope.error = errorResponse.data.message;
+                } else {
+                  //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+                  $scope.error = 'Server error prevented trainingDay creation.';
+                }
+              });
+            }
           }
         };
 

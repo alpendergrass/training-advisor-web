@@ -399,7 +399,7 @@ exports.getSeason = function(req, res) {
         //Use last goal to end season.
         numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
       } else {
-        numericEffectiveGoalDate = dbUtil.toNumericDate(moment(numericToday.toString()).add(1, 'day'));
+        numericEffectiveGoalDate = dbUtil.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
       }
 
       dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {

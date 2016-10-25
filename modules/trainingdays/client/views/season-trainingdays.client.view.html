@@ -8,6 +8,7 @@
     <span ng-hide="hasStart">To get started you need to create a <a ui-sref="trainingDays.createStart">Start Day</a>.</span>
     <span ng-hide="hasEnd"> You should create at least one <a ui-sref="trainingDays.createEvent({'scheduledEventRanking': '1'})">Goal Event</a> for the current season.</span>
   </div>
+  <div ng-show="hasStart">
   <div>
     <div class="pull-left">
       <md-button ng-show="hasStart" ng-disabled="simMode" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
@@ -53,6 +54,7 @@
         What-If Help
       </md-button>
     </div>
+  </div>
   </div>
 
   <div class="modal fade" id="simHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
