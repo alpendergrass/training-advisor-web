@@ -84,8 +84,12 @@ function generateActivityFromAdvice(params, callback) {
 
     //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
     //when updateMetrics is called for the following day.
-    trainingDay.fitness = 0;
-    trainingDay.fatigue = 0;
+    //Do not want to zero out a starting point though.
+    //This issue will go away once we start plan gen with tomorrow always
+    if (!trainingDay.startingPoint) {
+      trainingDay.fitness = 0;
+      trainingDay.fatigue = 0;
+    }
 
     trainingDay.save(function(err) {
       if (err) {
@@ -173,6 +177,7 @@ module.exports.generatePlan = function(params, callback) {
         }
 
         //if today has a ride, start with tomorrow.
+        //TODO: we should always start with tomorrow.
         if (trainingDays[0].completedActivities.length > 0) {
           trainingDays.shift();
         }
