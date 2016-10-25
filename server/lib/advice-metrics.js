@@ -50,7 +50,7 @@ module.exports.updateMetrics = function(params, callback) {
 
       params.user.planGenNeeded = true;
 
-      params.user.save(function (err) {
+      params.user.save(function(err) {
         if (err) {
           return callback(err, null);
         }
@@ -118,7 +118,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
 
   //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
   async.series({
-    periodData: function(callback){
+    periodData: function(callback) {
       advicePeriod.getPeriod(user, currentTrainingDay, function(err, periodData) {
         if (err) {
           return callback(err);
@@ -149,7 +149,7 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
         }
 
         if (priorTrainingDay.fitness === 0 && priorTrainingDay.fatigue === 0) {
-          updateMetricsForDay(user, priorTrainingDay, function (err, updatedpriorTrainingDay) {
+          updateMetricsForDay(user, priorTrainingDay, function(err, updatedpriorTrainingDay) {
             if (err) {
               return callback(err, null);
             }
@@ -162,87 +162,87 @@ function updateMetricsForDay(user, currentTrainingDay, callback) {
       });
     }
   },
-  function(err, results) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    var totalBaseAndBuildDays,
-      percentageOfTrainingTimeRemaining,
-      currentTrainingDayTotalLoad,
-      fatigueTimeConstant,
-      priorDayFitness,
-      priorDayFatigue;
-
-    currentTrainingDay.period = results.periodData.period;
-    currentTrainingDayTotalLoad = sumBy(currentTrainingDay.completedActivities, 'load');
-    fatigueTimeConstant = user.fatigueTimeConstant || adviceConstants.defaultFatigueTimeConstant;
-
-    //Compute fitness and fatigue for current trainingDay.
-    //If priorTrainingDay does not exist, currentTrainingDay is our starting day or is a F&F trueup and
-    //fitness and fatigue would have been supplied by the user.
-    if (results.priorTrainingDay) {
-      currentTrainingDay.fitness = Math.round((results.priorTrainingDay.fitness + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
-      currentTrainingDay.fatigue = Math.round((results.priorTrainingDay.fatigue + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fatigue) / fatigueTimeConstant)) * 10) / 10;
-      //Trello: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
-      //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So:
-      //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7)
-      //Our adjustment of fatigueTimeConstant in theory should achieve the same thing but may not be sensitive enough.
-      priorDayFitness = results.priorTrainingDay.fitness;
-      priorDayFatigue = results.priorTrainingDay.fatigue;
-    } else {
-      //We need something to use below in computing form and targetAvgDailyLoad
-      priorDayFitness = currentTrainingDay.fitness;
-      priorDayFatigue = currentTrainingDay.fatigue;
-    }
-
-    //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
-    //and decrease (linearly) to 3 by the end of build.
-    //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
-    //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
-
-    if (currentTrainingDay.period === 'peak' || currentTrainingDay.period === 'race' || currentTrainingDay.period === 'transition'){
-      //In essence, a zero ramp.
-      currentTrainingDay.dailyTargetRampRate = 0.001;
-    } else {
-      //Let's break it down to make it easier to understand when I come back to it a year from now.
-      percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
-      currentTrainingDay.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
-      currentTrainingDay.dailyTargetRampRate = Math.round((currentTrainingDay.sevenDayTargetRampRate / 7) * 100) / 100;
-    }
-
-    //Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
-    currentTrainingDay.targetAvgDailyLoad = Math.round(((adviceConstants.defaultFitnessTimeConstant * currentTrainingDay.dailyTargetRampRate) + priorDayFitness) * 100) / 100;
-
-    //Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
-    //Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
-    //currentTrainingDay.form = Math.round((currentTrainingDay.fitness - currentTrainingDay.fatigue) * 100) / 100;
-    currentTrainingDay.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
-    currentTrainingDay.loadRating = determineLoadRating(currentTrainingDay.targetAvgDailyLoad, currentTrainingDayTotalLoad);
-
-    currentTrainingDay.daysUntilNextGoalEvent = results.periodData.daysUntilNextGoalEvent;
-    currentTrainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
-    currentTrainingDay.daysUntilNextPriority3Event = results.periodData.daysUntilNextPriority3Event;
-
-    // computeSevenDayRampRate(user, currentTrainingDay, function (err, rampRate) {
-      //ignore error...for now at least.
-    //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
-    // currentTrainingDay.sevenDayRampRate = rampRate;
-    currentTrainingDay.sevenDayRampRate = 0;
-
-    currentTrainingDay.save(function (err) {
+    function(err, results) {
       if (err) {
         return callback(err, null);
-      } else {
-        return callback(null, currentTrainingDay);
       }
+
+      var totalBaseAndBuildDays,
+        percentageOfTrainingTimeRemaining,
+        currentTrainingDayTotalLoad,
+        fatigueTimeConstant,
+        priorDayFitness,
+        priorDayFatigue;
+
+      currentTrainingDay.period = results.periodData.period;
+      currentTrainingDayTotalLoad = sumBy(currentTrainingDay.completedActivities, 'load');
+      fatigueTimeConstant = user.fatigueTimeConstant || adviceConstants.defaultFatigueTimeConstant;
+
+      //Compute fitness and fatigue for current trainingDay.
+      //If priorTrainingDay does not exist, currentTrainingDay is our starting day or is a F&F trueup and
+      //fitness and fatigue would have been supplied by the user.
+      if (results.priorTrainingDay) {
+        currentTrainingDay.fitness = Math.round((results.priorTrainingDay.fitness + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
+        currentTrainingDay.fatigue = Math.round((results.priorTrainingDay.fatigue + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fatigue) / fatigueTimeConstant)) * 10) / 10;
+        //Trello: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
+        //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So:
+        //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7)
+        //Our adjustment of fatigueTimeConstant in theory should achieve the same thing but may not be sensitive enough.
+        priorDayFitness = results.priorTrainingDay.fitness;
+        priorDayFatigue = results.priorTrainingDay.fatigue;
+      } else {
+        //We need something to use below in computing form and targetAvgDailyLoad
+        priorDayFitness = currentTrainingDay.fitness;
+        priorDayFatigue = currentTrainingDay.fatigue;
+      }
+
+      //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
+      //and decrease (linearly) to 3 by the end of build.
+      //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
+      //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
+
+      if (currentTrainingDay.period === 'peak' || currentTrainingDay.period === 'race' || currentTrainingDay.period === 'transition') {
+        //In essence, a zero ramp.
+        currentTrainingDay.dailyTargetRampRate = 0.001;
+      } else {
+        //Let's break it down to make it easier to understand when I come back to it a year from now.
+        percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
+        currentTrainingDay.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
+        currentTrainingDay.dailyTargetRampRate = Math.round((currentTrainingDay.sevenDayTargetRampRate / 7) * 100) / 100;
+      }
+
+      //Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
+      currentTrainingDay.targetAvgDailyLoad = Math.round(((adviceConstants.defaultFitnessTimeConstant * currentTrainingDay.dailyTargetRampRate) + priorDayFitness) * 100) / 100;
+
+      //Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
+      //Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
+      //currentTrainingDay.form = Math.round((currentTrainingDay.fitness - currentTrainingDay.fatigue) * 100) / 100;
+      currentTrainingDay.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
+      currentTrainingDay.loadRating = determineLoadRating(currentTrainingDay.targetAvgDailyLoad, currentTrainingDayTotalLoad);
+
+      currentTrainingDay.daysUntilNextGoalEvent = results.periodData.daysUntilNextGoalEvent;
+      currentTrainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
+      currentTrainingDay.daysUntilNextPriority3Event = results.periodData.daysUntilNextPriority3Event;
+
+      // computeSevenDayRampRate(user, currentTrainingDay, function (err, rampRate) {
+      //ignore error...for now at least.
+      //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
+        // currentTrainingDay.sevenDayRampRate = rampRate;
+      currentTrainingDay.sevenDayRampRate = 0;
+
+      currentTrainingDay.save(function(err) {
+        if (err) {
+          return callback(err, null);
+        } else {
+          return callback(null, currentTrainingDay);
+        }
+      });
+      // });
     });
-    // });
-  });
 }
 
-function sumBy(items, prop){
-  return items.reduce(function(a, b){
+function sumBy(items, prop) {
+  return items.reduce(function(a, b) {
     return a + b[prop];
   }, 0);
 }
@@ -269,26 +269,26 @@ function computeSevenDayRampRate(user, trainingDay, callback) {
     yesterday = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
     rampRate;
 
-  dbUtil.getExistingTrainingDayDocument(user, yesterday, function(err, yesterdayTrainingDay) {
-    if (err) {
-      return callback(err, 0);
-    }
-
-    if (!yesterdayTrainingDay) {
-      return callback(null, 0);
-    }
-
-    dbUtil.getExistingTrainingDayDocument(user, priorDate, function(err, priorTrainingDay) {
-      if (err) {
-        return callback(err, 0);
-      }
-
-      if (!priorTrainingDay) {
+  dbUtil.getExistingTrainingDayDocument(user, yesterday)
+    .then(function(yesterdayTrainingDay) {
+      if (!yesterdayTrainingDay) {
         return callback(null, 0);
       }
 
-      rampRate = Math.round((yesterdayTrainingDay.fitness - priorTrainingDay.fitness) * 100) / 100;
-      return callback(null, rampRate);
+      dbUtil.getExistingTrainingDayDocument(user, priorDate)
+        .then(function(priorTrainingDay) {
+          if (!priorTrainingDay) {
+            return callback(null, 0);
+          }
+
+          rampRate = Math.round((yesterdayTrainingDay.fitness - priorTrainingDay.fitness) * 100) / 100;
+          return callback(null, rampRate);
+        })
+        .catch(function(err) {
+          return callback(err, 0);
+        });
+    })
+    .catch(function(err) {
+      return callback(err, 0);
     });
-  });
 }

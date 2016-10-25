@@ -37,7 +37,7 @@ describe('advice-easy Unit Tests:', function() {
   });
 
   describe('Easy Rules', function() {
-    it('should return easy if yesterday was a hard day, form is below easy day threshold and tomorrow is a not preferred rest day', function(done) {
+    it('should return easy if yesterday was a hard day, form is below easy day threshold and tomorrow is a not preferred rest or off day', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
 
       testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err, startDay) {
@@ -61,7 +61,7 @@ describe('advice-easy Unit Tests:', function() {
 
             params.numericDate = dbUtil.toNumericDate(yesterday);
 
-            return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
+            adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
               if (err) {
                 console.log('updateMetrics: ' + err);
@@ -80,173 +80,232 @@ describe('advice-easy Unit Tests:', function() {
       });
     });
 
-    it('should not return easy if yesterday was a hard day and tomorrow is a not preferred rest day but form is above easy day threshold', function(done) {
-      user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-        testHelpers.createGoalEvent(user, trainingDate, 40, function(err) {
+    describe('Easy Rules', function() {
+      it('should not return easy if yesterday was a hard day, form is below easy day threshold but tomorrow is an off day', function(done) {
+        user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
+
+        testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err, startDay) {
           if (err) {
-            console.log('createGoalEvent: ' + err);
+            console.log('createStartingPoint: ' + err);
           }
 
-          var completedActivities = [{
-            load: 999
-          }];
-
-          testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
+          testHelpers.createGoalEvent(user, trainingDate, 40, function(err, goalDay) {
             if (err) {
-              console.log('createTrainingDay: ' + err);
+              console.log('createGoalEvent: ' + err);
             }
-            params.numericDate = dbUtil.toNumericDate(yesterday);
 
-            return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
-              //we have to update metrics in order for yesterday's loadRating to be assigned.
+            var completedActivities = [{
+              load: 999
+            }];
+
+            testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
               if (err) {
-                console.log('updateMetrics: ' + err);
+                console.log('createTrainingDay: ' + err);
               }
-              trainingDay.form = adviceConstants.easyDaytNeededThreshold + 1;
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
-                should.not.exist(err);
-                should.exist(trainingDay);
-                (trainingDay.plannedActivities[0].activityType).should.not.match(/easy/);
-                done();
+              testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day'), null, function(err, createdTrainingDay) {
+                if (err) {
+                  console.log('createTrainingDay: ' + err);
+                }
+
+                createdTrainingDay.scheduledEventRanking = 9;
+
+                testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
+                  if (err) {
+                    console.log('updateTrainingDay: ' + err);
+                  }
+
+                  params.numericDate = dbUtil.toNumericDate(yesterday);
+
+                  adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
+                    //we have to update metrics in order for yesterday's loadRating to be assigned.
+                    if (err) {
+                      console.log('updateMetrics: ' + err);
+                    }
+                    trainingDay.form = adviceConstants.easyDaytNeededThreshold;
+
+                    return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+                      should.not.exist(err);
+                      should.exist(trainingDay);
+                      (trainingDay.plannedActivities[0].activityType).should.not.match(/easy/);
+                      done();
+                    });
+                  });
+                });
               });
             });
           });
         });
       });
-    });
 
-    it('should return easy if yesterday was a hard day and we are peaking', function(done) {
-      user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-        testHelpers.createGoalEvent(user, trainingDate, 40, function(err) {
+      it('should not return easy if yesterday was a hard day and tomorrow is a not preferred rest day but form is above easy day threshold', function(done) {
+        user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
+        testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err) {
           if (err) {
-            console.log('createGoalEvent: ' + err);
+            console.log('createStartingPoint: ' + err);
           }
-
-          var completedActivities = [{
-            load: 999
-          }];
-
-          testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
+          testHelpers.createGoalEvent(user, trainingDate, 40, function(err) {
             if (err) {
-              console.log('createTrainingDay: ' + err);
+              console.log('createGoalEvent: ' + err);
             }
 
-            params.trainingDate = yesterday;
+            var completedActivities = [{
+              load: 999
+            }];
 
-            return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
-              //we have to update metrics in order for yesterday's loadRating to be assigned.
+            testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
               if (err) {
-                console.log('updateMetrics: ' + err);
+                console.log('createTrainingDay: ' + err);
               }
-              //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
-              trainingDay.period = 'peak';
+              params.numericDate = dbUtil.toNumericDate(yesterday);
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
-                should.not.exist(err);
-                should.exist(trainingDay);
-                (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
-                done();
+              return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
+                //we have to update metrics in order for yesterday's loadRating to be assigned.
+                if (err) {
+                  console.log('updateMetrics: ' + err);
+                }
+                trainingDay.form = adviceConstants.easyDaytNeededThreshold + 1;
+
+                return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+                  should.not.exist(err);
+                  should.exist(trainingDay);
+                  (trainingDay.plannedActivities[0].activityType).should.not.match(/easy/);
+                  done();
+                });
               });
             });
           });
         });
       });
-    });
 
-    it('should return easy recommendation if testing is due and somewhat fatigued', function(done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
-      trainingDay.form = adviceConstants.testingEligibleFormThreshold;
+      it('should return easy if yesterday was a hard day and we are peaking', function(done) {
+        user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
+        testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - 40, 9, 9, function(err) {
+          if (err) {
+            console.log('createStartingPoint: ' + err);
+          }
+          testHelpers.createGoalEvent(user, trainingDate, 40, function(err) {
+            if (err) {
+              console.log('createGoalEvent: ' + err);
+            }
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
-        should.not.exist(err);
-        should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
-        done();
+            var completedActivities = [{
+              load: 999
+            }];
+
+            testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
+              if (err) {
+                console.log('createTrainingDay: ' + err);
+              }
+
+              params.trainingDate = yesterday;
+
+              return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
+                //we have to update metrics in order for yesterday's loadRating to be assigned.
+                if (err) {
+                  console.log('updateMetrics: ' + err);
+                }
+                //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
+                trainingDay.period = 'peak';
+
+                return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+                  should.not.exist(err);
+                  should.exist(trainingDay);
+                  (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
+                  done();
+                });
+              });
+            });
+          });
+        });
       });
-    });
 
-    it('should return easy recommendation if goal event is in 3 days', function(done) {
-      testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-        trainingDay.daysUntilNextGoalEvent = 3;
+      it('should return easy recommendation if testing is due and somewhat fatigued', function(done) {
+        user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+        trainingDay.form = adviceConstants.testingEligibleFormThreshold;
 
         return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
-          (trainingDay.plannedActivities[0].rationale).should.containEql('goal event is in three days');
           done();
         });
       });
-    });
 
-    it('should return easy recommendation if goal event is tomorrow', function(done) {
-      testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-        trainingDay.daysUntilNextGoalEvent = 1;
+      it('should return easy recommendation if goal event is in 3 days', function(done) {
+        testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
+          if (err) {
+            console.log('createStartingPoint: ' + err);
+          }
+          trainingDay.daysUntilNextGoalEvent = 3;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
-          should.not.exist(err);
-          should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
-          (trainingDay.plannedActivities[0].rationale).should.containEql('goal event is tomorrow');
-          done();
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+            should.not.exist(err);
+            should.exist(trainingDay);
+            (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
+            (trainingDay.plannedActivities[0].rationale).should.containEql('goal event is in three days');
+            done();
+          });
         });
       });
-    });
 
-    it('should return easy recommendation if priority 2 event is in two days', function(done) {
-      testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-        trainingDay.daysUntilNextPriority2Event = 2;
+      it('should return easy recommendation if goal event is tomorrow', function(done) {
+        testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
+          if (err) {
+            console.log('createStartingPoint: ' + err);
+          }
+          trainingDay.daysUntilNextGoalEvent = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
-          should.not.exist(err);
-          should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
-          (trainingDay.plannedActivities[0].rationale).should.containEql('priority 2 event is in two days');
-          done();
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+            should.not.exist(err);
+            should.exist(trainingDay);
+            (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
+            (trainingDay.plannedActivities[0].rationale).should.containEql('goal event is tomorrow');
+            done();
+          });
         });
       });
-    });
 
-    it('should return easy recommendation if priority 3 event is in one day', function(done) {
-      testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-        trainingDay.daysUntilNextPriority3Event = 1;
+      it('should return easy recommendation if priority 2 event is in two days', function(done) {
+        testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
+          if (err) {
+            console.log('createStartingPoint: ' + err);
+          }
+          trainingDay.daysUntilNextPriority2Event = 2;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
-          should.not.exist(err);
-          should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
-          (trainingDay.plannedActivities[0].rationale).should.containEql('priority 3 event is in one day');
-          done();
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+            should.not.exist(err);
+            should.exist(trainingDay);
+            (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
+            (trainingDay.plannedActivities[0].rationale).should.containEql('priority 2 event is in two days');
+            done();
+          });
         });
       });
+
+      it('should return easy recommendation if priority 3 event is in one day', function(done) {
+        testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
+          if (err) {
+            console.log('createStartingPoint: ' + err);
+          }
+          trainingDay.daysUntilNextPriority3Event = 1;
+
+          return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+            should.not.exist(err);
+            should.exist(trainingDay);
+            (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
+            (trainingDay.plannedActivities[0].rationale).should.containEql('priority 3 event is in one day');
+            done();
+          });
+        });
+      });
+
     });
 
-  });
-
-  afterEach(function(done) {
-    TrainingDay.remove().exec(function() {
-      User.remove().exec(done);
+    afterEach(function(done) {
+      TrainingDay.remove().exec(function() {
+        User.remove().exec(done);
+      });
     });
   });
 });

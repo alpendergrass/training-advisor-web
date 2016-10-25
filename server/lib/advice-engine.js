@@ -25,48 +25,56 @@ require('lodash-migrate');
 
 function generateAdvice(user, trainingDay, callback) {
 
-  var facts = {};
+  var facts = {},
+    tomorrow = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
 
-  dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
-    if (err) {
-      return callback(err, null, null);
-    }
-
-    facts.trainingState = null;
-    facts.adviceConstants = adviceConstants;
-    facts.wentHardYesterday = wentHard;
-    facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
-    facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
-    facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
-    facts.trainingDay = trainingDay;
-
-    var R = new RuleEngine(adviceEvent.eventRules);
-    R.register(adviceTest.testRules);
-    R.register(adviceRest.restRules);
-    R.register(adviceEasy.easyRules);
-    R.register(adviceModerate.moderateRules);
-    R.register(adviceSimulation.simulationRules);
-    R.register(adviceChoice.choiceRules);
-    R.register(adviceHard.hardRules);
-
-    R.execute(facts, function(result){
-      adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
+  dbUtil.getExistingTrainingDayDocument(user, tomorrow)
+    .then(function(tomorrowTrainingDay) {
+      dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
         if (err) {
-          console.log('setLoadRecommendations err: ', err);
-          return callback(err);
+          return callback(err, null, null);
         }
 
-        trainingDay.save(function(err) {
-          if (err) {
-            console.log('trainingDay.save err: ', err);
-            return callback(err, null);
-          } else {
-            return callback(null, trainingDay);
-          }
+        facts.trainingState = null;
+        facts.adviceConstants = adviceConstants;
+        facts.wentHardYesterday = wentHard;
+        facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
+        facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
+        facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
+        facts.trainingDay = trainingDay;
+        facts.tomorrowTrainingDay = tomorrowTrainingDay;
+
+        var R = new RuleEngine(adviceEvent.eventRules);
+        R.register(adviceTest.testRules);
+        R.register(adviceRest.restRules);
+        R.register(adviceEasy.easyRules);
+        R.register(adviceModerate.moderateRules);
+        R.register(adviceSimulation.simulationRules);
+        R.register(adviceChoice.choiceRules);
+        R.register(adviceHard.hardRules);
+
+        R.execute(facts, function(result){
+          adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
+            if (err) {
+              console.log('setLoadRecommendations err: ', err);
+              return callback(err);
+            }
+
+            trainingDay.save(function(err) {
+              if (err) {
+                console.log('trainingDay.save err: ', err);
+                return callback(err, null);
+              } else {
+                return callback(null, trainingDay);
+              }
+            });
+          });
         });
       });
+    })
+    .catch(function(err) {
+      return callback(err, 0);
     });
-  });
 }
 
 function generateActivityFromAdvice(params, callback) {

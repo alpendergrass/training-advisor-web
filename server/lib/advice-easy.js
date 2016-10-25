@@ -14,7 +14,7 @@ var rules = [
     'consequence': function(R) {
       this.trainingDay.plannedActivities[0].activityType = 'easy';
       this.trainingDay.plannedActivities[0].rationale += ' Yesterday was hard, in peak or race, so recommending easy.';
-      this.trainingDay.plannedActivities[0].advice += `  Yesterday was a hard day and you are peaking so go easy today. Intensity should be below 0.75.
+      this.trainingDay.plannedActivities[0].advice += ` Yesterday was a hard day and you are peaking so go easy today. Intensity should be below 0.75.
  As always, take the day off if you feel you need the rest.`;
       R.stop();
     }
@@ -25,13 +25,13 @@ var rules = [
       R.when(this && !this.testingIsDue && this.wentHardYesterday &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
         (this.trainingDay.form <= this.adviceConstants.easyDaytNeededThreshold) &&
-        (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek) < 0)
-        //Trello: check if tomorrow is a scheduled off day.
+        (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
+        (!this.tomorrowTrainingDay || this.tomorrowTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
       );
     },
     'consequence': function(R) {
       this.trainingDay.plannedActivities[0].activityType = 'easy';
-      this.trainingDay.plannedActivities[0].rationale += ' Yesterday was hard, form is below easyDaytNeededThreshold, tomorrow is not a preferred rest day, so recommending easy.';
+      this.trainingDay.plannedActivities[0].rationale += ' Yesterday was hard, form is below easyDaytNeededThreshold, tomorrow is not a preferred rest day or off day, so recommending easy.';
       this.trainingDay.plannedActivities[0].advice += `  Yesterday was a hard day and form is somewhat low so go easy today. Intensity should be below 0.75.
  Take the day off if you feel you need to rest.`;
       R.stop();
