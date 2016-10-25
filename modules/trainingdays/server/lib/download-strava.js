@@ -14,14 +14,7 @@ require('lodash-migrate');
 module.exports = {};
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
-  // TODO: I am wary of converting to dateNumeric here since it was so painful getting it working with date.
-  // I should do it in order to remove reliance on user.timezone.
-  // perhaps start_date_local converted to numeric date would allow us to say stravaDate === dateNumeric.
-  // Sure seems like it should.
-
-  var searchDate = moment(trainingDay.date).unix(),
-    timezone = user.timezone || 'America/Denver',
-    thruDate = moment.tz(trainingDay.date, timezone).add(1, 'day'),
+  var searchDate = moment(trainingDay.dateNumeric.toString()).unix(),
     newActivity = {},
     fudgedNP,
     activityCount = 0,
@@ -41,7 +34,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
   accessToken = user.provider ==='strava'? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
   //retrieve activities from strava
-  strava.athlete.listActivities({ 'access_token': accessToken, 'after': searchDate },function(err, payload) {
+  strava.athlete.listActivities({ 'access_token': accessToken, 'after': searchDate }, function(err, payload) {
     if(err) {
       // statusMessage.text = 'Strava access failed: ' + (err.msg || '');
       // statusMessage.type = 'error';
@@ -69,18 +62,14 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     }
 
     _.forEach(payload, function(stravaActivity) {
-      // stravaActivity.start_date_local is formatted as UTC:
-      // 2016-09-29T10:17:15Z
-      // moment treats start_date_local as UTC so moment(stravaActivity.start_date_local).toDate() results in a MDT here:
-      // Thu Sep 29 2016 04:17:15 GMT-0600 (MDT)
-      // Not sure what start_date_local is good for. Maybe for comparison with dateNumeric.
+      // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
+
+      var numericStartDateLocal = dbUtil.toNumericDate(stravaActivity.start_date_local);
 
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
-      // We use stravaActivity.start_date which is UTC as is our trainingDay.date. We check within a day's span
-      // because trainingDay.date UTC could be the day before the Strava activity date.
 
       if (stravaActivity.id && stravaActivity.weighted_average_watts &&
-        moment(stravaActivity.start_date).isBetween(trainingDay.date, thruDate)) {
+        numericStartDateLocal === trainingDay.dateNumeric) {
         if (!_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
           activityCount++;
           //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
@@ -93,7 +82,6 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           console.log('===> Strava: We found a keeper for user ', user.username);
           console.log('Strava: stravaActivity.weighted_average_watts: ' + stravaActivity.weighted_average_watts);
           console.log('Strava: fudgedNP: ' + fudgedNP);
-          console.log('Strava: stravaActivity.elapsed_time: ' + stravaActivity.elapsed_time);
           console.log('Strava: stravaActivity.moving_time: ' + stravaActivity.moving_time);
           console.log('Strava: trainingDay.user.thresholdPower: ' + trainingDay.user.thresholdPower);
           console.log('Strava: intensity: ' + intensity);
@@ -112,6 +100,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     });
 
     if (activityCount < 1) {
+      console.log('No new Strava activities for the day.');
       statusMessage.text = 'We found no new Strava activities for the day. Note that activities without power data are not downloaded.';
       statusMessage.type = 'info';
       // dbUtil.sendMessageToUser(statusMessage, user);
@@ -122,7 +111,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     if (activityCount > 1) {
       countPhrase = activityCount + ' new Strava activities';
     } else {
-      countPhrase = 'one new Strava activitiy';
+      countPhrase = 'one new Strava activity';
     }
 
     trainingDay.save(function (err) {

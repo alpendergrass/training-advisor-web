@@ -7,6 +7,7 @@ module.exports = {
     // server: ['modules/core/tests/server/**/*.js'],
     // server: ['modules/trainingdays/tests/server/**/*.js'],
     // server: ['modules/trainingdays/tests/server/lib.db-util.tests.js'],
+    // server: ['modules/trainingdays/tests/server/lib.download-strava.tests.js'],
     // server: ['modules/trainingdays/tests/server/lib.download-trainingpeaks.tests.js'],
     // server: ['modules/advisor/tests/server/**/*.js'],
     // server: ['modules/advisor/tests/server/lib.advice-event.tests.js'],

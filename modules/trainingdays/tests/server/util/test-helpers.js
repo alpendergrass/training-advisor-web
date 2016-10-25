@@ -17,6 +17,7 @@ module.exports.createUser = function(callback) {
     displayName: 'Full Name',
     email: 'test@test.com',
     provider: 'strava',
+    providerData: {},
     username: 'testUsername',
     password: 'M3@n.jsI$Aw3$0m3',
     thresholdPower: 250,
