@@ -256,8 +256,10 @@ exports.update = function(req, res) {
   }
 
   trainingDay.name = req.body.name;
-  trainingDay.date = new Date(req.body.date);
-  trainingDay.dateNumeric = dbUtil.toNumericDate(req.body.date);
+  // I don't think we should ever change these dates here.
+  // Maybe at one time I allowed user to change a date of an event or start day?
+  // trainingDay.date = new Date(req.body.date);
+  // trainingDay.dateNumeric = dbUtil.toNumericDate(req.body.date);
   trainingDay.fitness = req.body.fitness;
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
