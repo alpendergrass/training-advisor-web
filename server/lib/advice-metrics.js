@@ -43,7 +43,7 @@ module.exports.updateMetrics = function(params, callback) {
         return callback(err, null);
       }
 
-      if (params.genPlan) {
+      if (params.planGenUnderway) {
         // No need to set planGenNeeded since that is what we are doing now.
         return callback(null, trainingDay);
       }
@@ -63,7 +63,7 @@ module.exports.updateMetrics = function(params, callback) {
 
 function clearRunway(params, callback) {
   //not needed if we are generating plan.
-  if (params.genPlan) {
+  if (params.planGenUnderway) {
     return callback(null, params);
   }
 
@@ -83,7 +83,7 @@ function updateFatigue(params, callback) {
     }
 
     //not needed if we are generating plan.
-    if (params.genPlan) {
+    if (params.planGenUnderway) {
       return callback(null, params.user, trainingDay);
     }
 

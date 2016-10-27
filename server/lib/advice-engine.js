@@ -138,9 +138,8 @@ module.exports.generatePlan = function(params, callback) {
     return callback(err, null);
   }
 
-  // trainingDate = new Date(params.numericDate),
   var user = params.user,
-    adviceParams = {},
+    adviceParams = params,
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
     goalDay,
     statusMessage = {
@@ -185,7 +184,7 @@ module.exports.generatePlan = function(params, callback) {
         }
 
         //if today has a ride, start with tomorrow.
-        //TODO: we should always start with tomorrow.
+        //TODO: should we always start with tomorrow?
         if (trainingDays[0].completedActivities.length > 0) {
           trainingDays.shift();
         }
@@ -194,12 +193,11 @@ module.exports.generatePlan = function(params, callback) {
         //If we errored out last time there could be some left overs.
         dbUtil.removePlanningActivities(user, trainingDays[0].dateNumeric)
           .then(function() {
+            adviceParams.planGenUnderway = true;
+
             async.eachSeries(trainingDays, function(trainingDay, callback) {
-              adviceParams = {
-                user: user,
-                numericDate: trainingDay.dateNumeric,
-                genPlan: true
-              };
+              adviceParams.numericDate = trainingDay.dateNumeric;
+              adviceParams.trainingDay = null;
 
               module.exports.advise(adviceParams, function(err, trainingDay) {
                 if (err) {
