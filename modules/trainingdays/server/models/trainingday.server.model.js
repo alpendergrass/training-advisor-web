@@ -5,6 +5,10 @@ var mongoose = require('mongoose'),
 
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
+var metricsTypes = {
+  values: 'planned|actual'.split('|'),
+  message: invalidDataErrorMessage
+};
 var plannedActivityTypes = {
   values: 'event|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
   message: invalidDataErrorMessage
@@ -130,6 +134,54 @@ var TrainingDaySchema = new Schema({
     enum: periods,
     default: ''
   },
+  metrics: [{
+    metricsType: {
+      type: String,
+      enum: metricsTypes,
+      required: 'metricsType is required'
+    },
+    fitness: {
+      type: Number,
+      min: minFitnessOrFatigueValue,
+      max: maxFitnessOrFatigueValue,
+      default: 0
+    },
+    fatigue: {
+      type: Number,
+      min: minFitnessOrFatigueValue,
+      max: maxFitnessOrFatigueValue,
+      default: 0
+    },
+    form: {
+      type: Number,
+      default: 0
+    },
+    sevenDayRampRate: {
+      type: Number,
+      default: 0
+    },
+    sevenDayTargetRampRate: {
+      type: Number,
+      default: 0
+    },
+    dailyTargetRampRate: {
+      type: Number,
+      default: 0
+    },
+    rampRateAdjustmentFactor: {
+      type: Number,
+      default: 1
+    },
+    targetAvgDailyLoad: {
+      type: Number,
+      default: 0
+    },
+    loadRating: {
+      type: String,
+      default: '',
+      enum: loadRatings
+    },
+  }],
   //fitness (CTL) ramp rates
   sevenDayRampRate: {
     type: Number,
