@@ -420,6 +420,7 @@ exports.getAdvice = function(req, res) {
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
   params.alternateActivity = req.query.alternateActivity;
+  params.adviceType = 'advised';
 
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
@@ -436,6 +437,7 @@ exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
+  params.adviceType = 'planned';
 
   adviceEngine.generatePlan(params, function(err, statusMessage) {
     if (err) {

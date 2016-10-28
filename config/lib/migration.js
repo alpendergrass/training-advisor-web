@@ -31,7 +31,8 @@ module.exports.migrate = function() {
     },
     migration = new Migration(migrationConfig);
 
-  migration.addAllFromPath(path.join(__dirname, './migrations/'));
+  // migration.addAllFromPath(path.join(__dirname, './migrations/'));
+  migration.add(path.join(__dirname, './migrations/planning-metrics.js'));
 
   return new Promise(function(resolve, reject) {
     migration.migrate(function(err, results) {
