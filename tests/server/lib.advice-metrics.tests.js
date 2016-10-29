@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path'),
+  _ = require('lodash'),
   should = require('should'),
   mongoose = require('mongoose'),
   moment = require('moment'),
@@ -29,6 +30,8 @@ describe('advice-metrics Unit Tests:', function () {
 
       trainingDate = moment().startOf('day').toDate();
       params.numericDate = dbUtil.toNumericDate(trainingDate);
+
+      params.metricsType = 'actual';
 
       testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays + adviceConstants.minimumNumberOfRaceDays, function(err) {
         if (err) {
@@ -119,7 +122,8 @@ describe('advice-metrics Unit Tests:', function () {
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.form).should.equal(0);
+          let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+          (metrics.form).should.equal(0);
           done();
         });
       });
@@ -132,7 +136,6 @@ describe('advice-metrics Unit Tests:', function () {
         }
 
         var completedActivities = [{
-          activityType: 'moderate',
           load: 100
         }];
 
@@ -166,7 +169,6 @@ describe('advice-metrics Unit Tests:', function () {
 
         var yesterday = moment(trainingDate).subtract(1, 'days');
         var completedActivities = [{
-          activityType: 'moderate',
           load: 100
         }];
 
@@ -199,7 +201,6 @@ describe('advice-metrics Unit Tests:', function () {
         }
 
         var completedActivities = [{
-          activityType: 'moderate',
           load: 100
         }];
 
@@ -209,8 +210,9 @@ describe('advice-metrics Unit Tests:', function () {
           }
 
           createdTrainingDay.fitnessAndFatigueTrueUp = true;
-          createdTrainingDay.fitness = 1;
-          createdTrainingDay.fatigue = 1;
+          let metrics = _.find(createdTrainingDay.metrics, ['metricsType', 'actual']);
+          metrics.fitness = 1;
+          metrics.fatigue = 1;
 
           testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
             if (err) {
@@ -220,8 +222,9 @@ describe('advice-metrics Unit Tests:', function () {
             return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
               should.not.exist(err);
               should.exist(trainingDay);
-              (trainingDay.fitness).should.equal(1);
-              (trainingDay.fatigue).should.equal(1);
+              let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+              (metrics.fitness).should.equal(1);
+              (metrics.fatigue).should.equal(1);
               done();
             });
           });
@@ -237,7 +240,6 @@ describe('advice-metrics Unit Tests:', function () {
 
         var yesterday = moment(trainingDate).subtract(1, 'days');
         var completedActivities = [{
-          activityType: 'moderate',
           load: 100
         }];
 
@@ -246,9 +248,9 @@ describe('advice-metrics Unit Tests:', function () {
             console.log('createTrainingDay: ' + err);
           }
 
-          createdTrainingDay.fitnessAndFatigueTrueUp = true;
-          createdTrainingDay.fitness = 1;
-          createdTrainingDay.fatigue = 1;
+          let metrics = _.find(createdTrainingDay.metrics, ['metricsType', 'actual']);
+          metrics.fitness = 1;
+          metrics.fatigue = 1;
 
           testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
             if (err) {
@@ -263,8 +265,9 @@ describe('advice-metrics Unit Tests:', function () {
               return testHelpers.getTrainingDay(createdTrainingDay.id, function(err, priorTrainingDay) {
                 should.not.exist(err);
                 should.exist(priorTrainingDay);
-                (priorTrainingDay.fitness).should.equal(1);
-                (priorTrainingDay.fatigue).should.equal(1);
+                let metrics = _.find(priorTrainingDay.metrics, ['metricsType', 'actual']);
+                (metrics.fitness).should.equal(1);
+                (metrics.fatigue).should.equal(1);
                 done();
               });
             });
@@ -282,7 +285,8 @@ describe('advice-metrics Unit Tests:', function () {
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.form).should.be.above(1);
+          let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+          (metrics.form).should.be.above(1);
           done();
         });
       });
@@ -296,7 +300,6 @@ describe('advice-metrics Unit Tests:', function () {
 
         var yesterday = moment(trainingDate).subtract(1, 'days');
         var completedActivities = [{
-          activityType: 'moderate',
           load: 100
         }];
 
@@ -308,7 +311,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.form).should.be.below(1);
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.form).should.be.below(1);
             done();
           });
         });
@@ -324,9 +328,10 @@ describe('advice-metrics Unit Tests:', function () {
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.dailyTargetRampRate).should.equal(1);
-          (trainingDay.targetAvgDailyLoad).should.equal(51);
-          (trainingDay.sevenDayRampRate).should.equal(0);
+          let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+          (metrics.dailyTargetRampRate).should.equal(1);
+          (metrics.targetAvgDailyLoad).should.equal(51);
+          (metrics.sevenDayRampRate).should.equal(0);
           done();
         });
       });
@@ -345,8 +350,9 @@ describe('advice-metrics Unit Tests:', function () {
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
+          let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
           (trainingDay.period).should.equal('peak');
-          (trainingDay.dailyTargetRampRate).should.equal(0.001);
+          (metrics.dailyTargetRampRate).should.equal(0.001);
           // We are not computing sevenDayRampRate since we disabled computeRampRateAdjustment.
           // (trainingDay.sevenDayRampRate).should.be.belowOrEqual(0);
           done();
@@ -436,7 +442,8 @@ describe('advice-metrics Unit Tests:', function () {
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.loadRating).should.equal('rest');
+          let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+          (metrics.loadRating).should.equal('rest');
           done();
         });
       });
@@ -461,7 +468,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.loadRating).should.equal('easy');
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.loadRating).should.equal('easy');
             done();
           });
         });
@@ -489,7 +497,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.loadRating).should.equal('easy');
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.loadRating).should.equal('easy');
             done();
           });
         });
@@ -516,7 +525,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.loadRating).should.equal('moderate');
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.loadRating).should.equal('moderate');
             done();
           });
         });
@@ -545,7 +555,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.loadRating).should.equal('moderate');
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.loadRating).should.equal('moderate');
             done();
           });
         });
@@ -572,7 +583,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.loadRating).should.equal('hard');
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.loadRating).should.equal('hard');
             done();
           });
         });
@@ -601,7 +613,8 @@ describe('advice-metrics Unit Tests:', function () {
           return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.loadRating).should.equal('hard');
+            let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+            (metrics.loadRating).should.equal('hard');
             done();
           });
         });

@@ -6,13 +6,12 @@ var path = require('path'),
   TrainingDay = mongoose.model('TrainingDay'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceConstants = require('./advice-constants'),
-  latestPlannedActivity,
   err;
 require('lodash-migrate');
 
 module.exports = {};
 
-module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
+module.exports.setLoadRecommendations = function(user, trainingDay, metricsType, callback) {
 
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
@@ -26,9 +25,15 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
     return callback(err, null, null);
   }
 
+  if (!metricsType) {
+    err = new TypeError('valid metricsType is required');
+    return callback(err, null, null);
+  }
+
+  let metrics = _.find(trainingDay.metrics, ['metricsType', metricsType]);
   //We are assuming that the last item in the plannedActivities array is the newest and the one
   //for which we need to compute load.
-  latestPlannedActivity = trainingDay.plannedActivities[trainingDay.plannedActivities.length - 1];
+  let latestPlannedActivity = trainingDay.plannedActivities[trainingDay.plannedActivities.length - 1];
 
   if (latestPlannedActivity.activityType === 'event' && trainingDay.estimatedLoad > 0) {
     //If an event, use estimated load, if provided, for target.
@@ -47,32 +52,32 @@ module.exports.setLoadRecommendations = function(user, trainingDay, callback) {
         latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
         latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);
       } else {
-        setTargetLoads(trainingDay);
+        setTargetLoads(trainingDay, latestPlannedActivity, metrics);
       }
 
       return callback(null, trainingDay);
     });
   }
   else {
-    setTargetLoads(trainingDay);
+    setTargetLoads(trainingDay, latestPlannedActivity, metrics);
     return callback(null, trainingDay);
   }
 };
 
-function setTargetLoads(trainingDay) {
-  trainingDay.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay);
+function setTargetLoads(trainingDay, latestPlannedActivity, metrics) {
+  metrics.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay, latestPlannedActivity, metrics);
 
   //We have different factors for different activity rankings. E.g., ranking of 1 is a goal event. 9 is an off day.
   var activityType = latestPlannedActivity.activityType === 'event' ? latestPlannedActivity.activityType + trainingDay.scheduledEventRanking : latestPlannedActivity.activityType;
 
   var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': activityType });
 
-  latestPlannedActivity.targetMinLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.lowLoadFactor * trainingDay.rampRateAdjustmentFactor);
-  latestPlannedActivity.targetMaxLoad = Math.round(trainingDay.targetAvgDailyLoad * factorSet.highLoadFactor * trainingDay.rampRateAdjustmentFactor);
+  latestPlannedActivity.targetMinLoad = Math.round(metrics.targetAvgDailyLoad * factorSet.lowLoadFactor * metrics.rampRateAdjustmentFactor);
+  latestPlannedActivity.targetMaxLoad = Math.round(metrics.targetAvgDailyLoad * factorSet.highLoadFactor * metrics.rampRateAdjustmentFactor);
   // trainingDay.targetIntensity = factorSet.intensity;
 }
 
-function computeRampRateAdjustment(trainingDay) {
+function computeRampRateAdjustment(trainingDay, latestPlannedActivity, metrics) {
   // 9/20/16: mucking with the ramp rate the way we were below is causing some weirdness in the advice,
   // at least when looking at the season chart for future days. We were getting some hard days with much lower target loads than
   // the other hard days around them. I think these were the only days where we were not tweaking the ramp rates.

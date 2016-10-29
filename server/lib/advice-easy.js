@@ -24,7 +24,7 @@ var rules = [
     'condition': function(R) {
       R.when(this && !this.testingIsDue && this.wentHardYesterday &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
-        (this.trainingDay.form <= this.adviceConstants.easyDaytNeededThreshold) &&
+        (this.metrics.form <= this.adviceConstants.easyDaytNeededThreshold) &&
         (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
         (!this.tomorrowTrainingDay || this.tomorrowTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
       );
@@ -95,7 +95,7 @@ var rules = [
     'condition': function(R) {
       R.when(this && this.testingIsDue &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
-        this.trainingDay.form <= this.adviceConstants.testingEligibleFormThreshold
+        this.metrics.form <= this.adviceConstants.testingEligibleFormThreshold
       );
     },
     'consequence': function(R) {

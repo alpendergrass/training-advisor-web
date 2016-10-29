@@ -7,7 +7,7 @@ var rules = [
       R.when(this &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
         (this.testingIsDue) &&
-        (this.trainingDay.form > this.adviceConstants.testingEligibleFormThreshold)
+        (this.metrics.form > this.adviceConstants.testingEligibleFormThreshold)
       );
     },
     'consequence': function(R) {

@@ -23,14 +23,14 @@ var path = require('path'),
   err;
 require('lodash-migrate');
 
-function generateAdvice(user, trainingDay, callback) {
+function generateAdvice(user, trainingDay, metricsType, callback) {
 
   var facts = {},
     tomorrow = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
 
   dbUtil.getExistingTrainingDayDocument(user, tomorrow)
     .then(function(tomorrowTrainingDay) {
-      dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
+      dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, metricsType, function(err, wentHard) {
         if (err) {
           return callback(err, null, null);
         }
@@ -42,6 +42,7 @@ function generateAdvice(user, trainingDay, callback) {
         facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
         facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
         facts.trainingDay = trainingDay;
+        facts.metrics = _.find(trainingDay.metrics, ['metricsType', metricsType]);
         facts.tomorrowTrainingDay = tomorrowTrainingDay;
 
         var R = new RuleEngine(adviceEvent.eventRules);
@@ -54,7 +55,7 @@ function generateAdvice(user, trainingDay, callback) {
         R.register(adviceHard.hardRules);
 
         R.execute(facts, function(result){
-          adviceLoad.setLoadRecommendations(user, trainingDay, function(err, trainingDay) {
+          adviceLoad.setLoadRecommendations(user, trainingDay, metricsType, function(err, trainingDay) {
             if (err) {
               console.log('setLoadRecommendations err: ', err);
               return callback(err);
@@ -83,7 +84,8 @@ function generateActivityFromAdvice(params, callback) {
 
   var completedActivity = {},
     trainingDay = params.trainingDay,
-    user = params.user;
+    user = params.user,
+    metrics = _.find(trainingDay.metrics, ['metricsType', params.metricsType]);
 
   if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'advised') {
     completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;
@@ -95,8 +97,8 @@ function generateActivityFromAdvice(params, callback) {
     //Do not want to zero out a starting point though.
     //This issue will go away once we start plan gen with tomorrow always
     if (!trainingDay.startingPoint) {
-      trainingDay.fitness = 0;
-      trainingDay.fatigue = 0;
+      metrics.fitness = 0;
+      metrics.fatigue = 0;
     }
 
     trainingDay.save(function(err) {
@@ -139,7 +141,7 @@ module.exports.generatePlan = function(params, callback) {
   }
 
   var user = params.user,
-    adviceParams = params,
+    adviceParams = _.clone(params),
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
     goalDay,
     statusMessage = {
@@ -183,17 +185,17 @@ module.exports.generatePlan = function(params, callback) {
           return callback(err, null);
         }
 
-        //if today has a ride, start with tomorrow.
-        //TODO: should we always start with tomorrow?
-        if (trainingDays[0].completedActivities.length > 0) {
-          trainingDays.shift();
-        }
+        //TODO:  this where we need to copy actual metrics to planned for today then save.
+
 
         //As a precaution we remove all planning data.
         //If we errored out last time there could be some left overs.
-        dbUtil.removePlanningActivities(user, trainingDays[0].dateNumeric)
+        dbUtil.removePlanningActivities(user)
           .then(function() {
             adviceParams.planGenUnderway = true;
+
+            //Always start planning with tomorrow.
+            trainingDays.shift();
 
             async.eachSeries(trainingDays, function(trainingDay, callback) {
               adviceParams.numericDate = trainingDay.dateNumeric;
@@ -229,6 +231,7 @@ module.exports.generatePlan = function(params, callback) {
                     return callback(err, null);
                   }
 
+                  //TODO: call removePlanningActivities() instead.
                   dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
                     .then(function() {
                       user.thresholdPowerTestDate = savedThresholdPowerTestDate;
@@ -274,6 +277,11 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
+  if (!params.metricsType) {
+    err = new TypeError('advise metricsType is required');
+    return callback(err, null);
+  }
+
   var user = params.user;
 
   async.series(
@@ -307,7 +315,7 @@ module.exports.advise = function(params, callback) {
         plannedActivities[0].source = 'advised';
         trainingDay.plannedActivities = plannedActivities;
 
-        generateAdvice(user, trainingDay, function(err, recommendation) {
+        generateAdvice(user, trainingDay, params.metricsType, function(err, recommendation) {
           if (err) {
             return callback(err, null);
           }
@@ -343,7 +351,7 @@ module.exports.advise = function(params, callback) {
         trainingDay.plannedActivities = plannedActivities;
 
         //Determine load.
-        adviceLoad.setLoadRecommendations(user, trainingDay, function(err, recommendation) {
+        adviceLoad.setLoadRecommendations(user, trainingDay, params.metricsType, function(err, recommendation) {
           if (err) {
             return callback(err);
           }

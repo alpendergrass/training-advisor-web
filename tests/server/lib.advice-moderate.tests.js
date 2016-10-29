@@ -28,6 +28,7 @@ describe('advice-moderate Unit Tests:', function() {
 
       user = newUser;
       params.user = user;
+      params.metricsType = 'actual';
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
       done();
@@ -46,7 +47,7 @@ describe('advice-moderate Unit Tests:', function() {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
@@ -67,7 +68,7 @@ describe('advice-moderate Unit Tests:', function() {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
@@ -105,7 +106,7 @@ describe('advice-moderate Unit Tests:', function() {
                 console.log('updateMetrics: ' + err);
               }
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 (trainingDay.plannedActivities[0].activityType).should.match(/moderate/);
@@ -148,7 +149,7 @@ describe('advice-moderate Unit Tests:', function() {
               }
 
               trainingDay.period = 'peak';
-              return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);

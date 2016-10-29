@@ -22,9 +22,9 @@ var rules = [
     'name': 'sufficientlyFatiguedToNeedRestRule',
     'condition': function(R) {
       R.when(this &&
-        this.trainingDay.form <= this.adviceConstants.restNeededThreshold ||
-        (this.trainingDay.period === 'peak' && this.trainingDay.form <= this.adviceConstants.restNeededForPeakingThreshold) ||
-        (this.trainingDay.period === 'race' && this.trainingDay.form <= this.adviceConstants.restNeededForRacingThreshold)
+        this.metrics.form <= this.adviceConstants.restNeededThreshold ||
+        (this.trainingDay.period === 'peak' && this.metrics.form <= this.adviceConstants.restNeededForPeakingThreshold) ||
+        (this.trainingDay.period === 'race' && this.metrics.form <= this.adviceConstants.restNeededForRacingThreshold)
       );
     },
     'consequence': function(R) {
@@ -71,7 +71,7 @@ var rules = [
       R.when(this &&
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
         (this.testingIsDue) &&
-        (this.trainingDay.form <= this.adviceConstants.restNeededForTestingThreshold)
+        (this.metrics.form <= this.adviceConstants.restNeededForTestingThreshold)
       );
     },
     'consequence': function(R) {

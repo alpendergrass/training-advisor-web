@@ -31,7 +31,7 @@ describe('advice-test Unit Tests:', function () {
     it('should not return test recommendation if testing is not due', function (done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match('test');
@@ -43,7 +43,7 @@ describe('advice-test Unit Tests:', function () {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/test/);
@@ -56,7 +56,7 @@ describe('advice-test Unit Tests:', function () {
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
       trainingDay.period = 'peak';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function (err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match('test');

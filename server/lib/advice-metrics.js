@@ -70,7 +70,8 @@ function clearRunway(params, callback) {
     return callback(null, params);
   }
 
-  dbUtil.clearFutureMetricsAndAdvice(params.user, params.numericDate, function(err, rawResponse) {
+  //TODO: which ones do we clear? Do we need to clear if genPlan?
+  dbUtil.clearSubsequentActualMetricsAndAdvice(params.user, params.numericDate, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
     }
@@ -113,7 +114,6 @@ function updateFatigue(params, callback) {
   });
 }
 
-// TODO: function updateMetricsForDay(params, callback) {
 function updateMetricsForDay(params, callback) {
   //Compute fitness, fatigue and form.
   //If prior day's fitness and fatigue are not populated, recursively call updateMetricsForDay
@@ -122,11 +122,9 @@ function updateMetricsForDay(params, callback) {
 
   //We use yesterday's fitness and fatigue to compute today's form.
   //This prevents today's form from changing when completed activities are added to today.
+  params.metrics = _.find(params.trainingDay.metrics, ['metricsType', params.metricsType]);
 
-  //TODO: add the appropriate (planned vs advised) set of metrics to params (?).
-  //Maybe all we have to do it determine the appropriate index.
-
-  //TODO: must convert the following to an array-based series in order to ensure order. Or not and keep fingers crossed.
+  //Must convert the following to an array-based series in order to ensure order. Or just trust the V8 engine.
   async.series({
     periodData: function(callback) {
       advicePeriod.getPeriod(params.user, params.trainingDay, function(err, periodData) {
@@ -137,15 +135,16 @@ function updateMetricsForDay(params, callback) {
         return callback(null, periodData);
       });
     },
-    priorTrainingDay: function(callback) {
+    priorDayMetrics: function(callback) {
     //TODO: return prior day metrics here instead of TD?
+      var priorDayMetrics;
 
       if (params.trainingDay.startingPoint || params.trainingDay.fitnessAndFatigueTrueUp) {
         //Special cases:
         //1. If called with the first trainingDay of the training period, no point in looking for prior day.
         //2. User has done a F&F trueup: she has manually entered these values and we do not want to recompute them.
         //We will return null for prior day and check for null prior day below.
-        if (params.trainingDay.fitness === 0 && params.trainingDay.fatigue === 0) {
+        if (params.metrics.fitness === 0 && params.metrics.fatigue === 0) {
           err = new RangeError('Starting day or F&F true-up day should not have fitness and fatigue equal to zero.');
           return callback(err, null);
         }
@@ -160,18 +159,22 @@ function updateMetricsForDay(params, callback) {
           return callback(err, null);
         }
 
-        if (priorTrainingDay.fitness === 0 && priorTrainingDay.fatigue === 0) {
+        priorDayMetrics = _.find(priorTrainingDay.metrics, ['metricsType', params.metricsType]);
+
+        if (priorDayMetrics.fitness === 0 && priorDayMetrics.fatigue === 0) {
           let priorDayParams = _.clone(params);
           priorDayParams.trainingDay = priorTrainingDay;
+          priorDayParams.metrics = null;
+
           updateMetricsForDay(priorDayParams, function(err, updatedpriorTrainingDay) {
             if (err) {
               return callback(err, null);
             }
 
-            return callback(null, updatedpriorTrainingDay);
+            return callback(null, _.find(updatedpriorTrainingDay.metrics, ['metricsType', params.metricsType]));
           });
         } else {
-          return callback(null, priorTrainingDay);
+          return callback(null, priorDayMetrics);
         }
       });
     }
@@ -193,21 +196,21 @@ function updateMetricsForDay(params, callback) {
       fatigueTimeConstant = params.user.fatigueTimeConstant || adviceConstants.defaultFatigueTimeConstant;
 
       //Compute fitness and fatigue for current trainingDay.
-      //If priorTrainingDay does not exist, params.trainingDay is our starting day or is a F&F trueup and
+      //If priorDayMetrics does not exist, params.trainingDay is our starting day or is a F&F trueup and
       //fitness and fatigue would have been supplied by the user.
-      if (results.priorTrainingDay) {
-        params.trainingDay.fitness = Math.round((results.priorTrainingDay.fitness + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
-        params.trainingDay.fatigue = Math.round((results.priorTrainingDay.fatigue + ((currentTrainingDayTotalLoad - results.priorTrainingDay.fatigue) / fatigueTimeConstant)) * 10) / 10;
+      if (results.priorDayMetrics) {
+        params.metrics.fitness = Math.round((results.priorDayMetrics.fitness + ((currentTrainingDayTotalLoad - results.priorDayMetrics.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
+        params.metrics.fatigue = Math.round((results.priorDayMetrics.fatigue + ((currentTrainingDayTotalLoad - results.priorDayMetrics.fatigue) / fatigueTimeConstant)) * 10) / 10;
         //Trello: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
         //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So:
         //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7)
         //Our adjustment of fatigueTimeConstant in theory should achieve the same thing but may not be sensitive enough.
-        priorDayFitness = results.priorTrainingDay.fitness;
-        priorDayFatigue = results.priorTrainingDay.fatigue;
+        priorDayFitness = results.priorDayMetrics.fitness;
+        priorDayFatigue = results.priorDayMetrics.fatigue;
       } else {
         //We need something to use below in computing form and targetAvgDailyLoad
-        priorDayFitness = params.trainingDay.fitness;
-        priorDayFatigue = params.trainingDay.fatigue;
+        priorDayFitness = params.metrics.fitness;
+        priorDayFatigue = params.metrics.fatigue;
       }
 
       //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
@@ -217,22 +220,22 @@ function updateMetricsForDay(params, callback) {
 
       if (params.trainingDay.period === 'peak' || params.trainingDay.period === 'race' || params.trainingDay.period === 'transition') {
         //In essence, a zero ramp.
-        params.trainingDay.dailyTargetRampRate = 0.001;
+        params.metrics.dailyTargetRampRate = 0.001;
       } else {
         //Let's break it down to make it easier to understand when I come back to it a year from now.
         percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
-        params.trainingDay.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
-        params.trainingDay.dailyTargetRampRate = Math.round((params.trainingDay.sevenDayTargetRampRate / 7) * 100) / 100;
+        params.metrics.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
+        params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       }
 
       //Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
-      params.trainingDay.targetAvgDailyLoad = Math.round(((adviceConstants.defaultFitnessTimeConstant * params.trainingDay.dailyTargetRampRate) + priorDayFitness) * 100) / 100;
+      params.metrics.targetAvgDailyLoad = Math.round(((adviceConstants.defaultFitnessTimeConstant * params.metrics.dailyTargetRampRate) + priorDayFitness) * 100) / 100;
 
       //Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
       //Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
-      //params.trainingDay.form = Math.round((params.trainingDay.fitness - params.trainingDay.fatigue) * 100) / 100;
-      params.trainingDay.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
-      params.trainingDay.loadRating = determineLoadRating(params.trainingDay.targetAvgDailyLoad, currentTrainingDayTotalLoad);
+      //params.metrics.form = Math.round((params.metrics.fitness - params.metrics.fatigue) * 100) / 100;
+      params.metrics.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
+      params.metrics.loadRating = determineLoadRating(params.metrics.targetAvgDailyLoad, currentTrainingDayTotalLoad);
 
       params.trainingDay.daysUntilNextGoalEvent = results.periodData.daysUntilNextGoalEvent;
       params.trainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
@@ -241,8 +244,8 @@ function updateMetricsForDay(params, callback) {
       // computeSevenDayRampRate(user, params.trainingDay, function (err, rampRate) {
       //ignore error...for now at least.
       //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
-        // params.trainingDay.sevenDayRampRate = rampRate;
-      params.trainingDay.sevenDayRampRate = 0;
+        // params.metrics.sevenDayRampRate = rampRate;
+      params.metrics.sevenDayRampRate = 0;
 
       params.trainingDay.save(function(err) {
         if (err) {
@@ -276,33 +279,33 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
   return 'hard';
 }
 
-function computeSevenDayRampRate(user, trainingDay, callback) {
-  //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
-  //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-  var priorDate = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
-    yesterday = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
-    rampRate;
+// function computeSevenDayRampRate(user, trainingDay, callback) {
+//   //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
+//   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
+//   var priorDate = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
+//     yesterday = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
+//     rampRate;
 
-  dbUtil.getExistingTrainingDayDocument(user, yesterday)
-    .then(function(yesterdayTrainingDay) {
-      if (!yesterdayTrainingDay) {
-        return callback(null, 0);
-      }
+//   dbUtil.getExistingTrainingDayDocument(user, yesterday)
+//     .then(function(yesterdayTrainingDay) {
+//       if (!yesterdayTrainingDay) {
+//         return callback(null, 0);
+//       }
 
-      dbUtil.getExistingTrainingDayDocument(user, priorDate)
-        .then(function(priorTrainingDay) {
-          if (!priorTrainingDay) {
-            return callback(null, 0);
-          }
+//       dbUtil.getExistingTrainingDayDocument(user, priorDate)
+//         .then(function(priorTrainingDay) {
+//           if (!priorTrainingDay) {
+//             return callback(null, 0);
+//           }
 
-          rampRate = Math.round((yesterdayTrainingDay.fitness - priorTrainingDay.fitness) * 100) / 100;
-          return callback(null, rampRate);
-        })
-        .catch(function(err) {
-          return callback(err, 0);
-        });
-    })
-    .catch(function(err) {
-      return callback(err, 0);
-    });
-}
+//           rampRate = Math.round((yesterdayTrainingDay.fitness - priorTrainingDay.fitness) * 100) / 100;
+//           return callback(null, rampRate);
+//         })
+//         .catch(function(err) {
+//           return callback(err, 0);
+//         });
+//     })
+//     .catch(function(err) {
+//       return callback(err, 0);
+//     });
+// }

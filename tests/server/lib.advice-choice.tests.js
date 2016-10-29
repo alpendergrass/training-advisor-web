@@ -31,7 +31,7 @@ describe('advice-choice Unit Tests:', function () {
   describe('Choice Rules', function () {
     it('should return choice recommendation if in transition period', function (done) {
       trainingDay.period = 'transition';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/choice/);
@@ -42,7 +42,7 @@ describe('advice-choice Unit Tests:', function () {
 
     it('should not return choice recommendation if not in transition period', function (done) {
       trainingDay.period = 'base';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match(/choice/);

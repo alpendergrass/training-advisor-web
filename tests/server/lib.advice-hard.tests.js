@@ -31,7 +31,7 @@ describe('advice-hard Unit Tests:', function () {
   describe('Hard Rules', function () {
     it('should return hard recommendation if in peak period and no other recommendation applies', function (done) {
       trainingDay.period = 'peak';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/hard/);
@@ -42,7 +42,7 @@ describe('advice-hard Unit Tests:', function () {
 
     it('should return hard recommendation if in race period and no other recommendation applies', function (done) {
       trainingDay.period = 'race';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/hard/);
@@ -52,7 +52,7 @@ describe('advice-hard Unit Tests:', function () {
     });
 
     it('should return hard recommendation if no other recommendation applies', function (done) {
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/hard/);
@@ -63,7 +63,7 @@ describe('advice-hard Unit Tests:', function () {
 
     // it('should not return choice recommendation if not in transition period', function (done) {
     //   trainingDay.period = 'base';
-    //   return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+    //   return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
     //     should.not.exist(err);
     //     should.exist(trainingDay);
     //     (trainingDay.plannedActivities[0].activityType).should.not.match(/choice/);

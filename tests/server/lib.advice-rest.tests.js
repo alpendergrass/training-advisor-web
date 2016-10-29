@@ -2,6 +2,7 @@
 
 
 var path = require('path'),
+  _ = require('lodash'),
   should = require('should'),
   mongoose = require('mongoose'),
   moment = require('moment'),
@@ -11,7 +12,7 @@ var path = require('path'),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceEngine = require('../../server/lib/advice-engine');
 
-var user, trainingDate, trainingDay;
+var user, trainingDate, trainingDay, metrics;
 
 describe('advice-rest Unit Tests:', function() {
 
@@ -24,6 +25,7 @@ describe('advice-rest Unit Tests:', function() {
       user = newUser;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
+      metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
       done();
     });
   });
@@ -32,7 +34,7 @@ describe('advice-rest Unit Tests:', function() {
     it('should return rest if today is a preferred rest day', function(done) {
       user.preferredRestDays = [moment(trainingDate).day().toString()];
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
@@ -44,9 +46,9 @@ describe('advice-rest Unit Tests:', function() {
     it('should not return rest if today is not a preferred rest day, testing is not overdue and not overly fatigued', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(1, 'days').day().toString()];
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
-      trainingDay.form = adviceConstants.restNeededThreshold + 0.1;
+      metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match(/rest/);
@@ -55,9 +57,9 @@ describe('advice-rest Unit Tests:', function() {
     });
 
     it('should return rest if overly fatigued', function(done) {
-      trainingDay.form = adviceConstants.restNeededThreshold;
+      metrics.form = adviceConstants.restNeededThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
@@ -67,10 +69,10 @@ describe('advice-rest Unit Tests:', function() {
     });
 
     it('should return rest if overly fatigued for peak period', function(done) {
-      trainingDay.form = adviceConstants.restNeededForPeakingThreshold;
+      metrics.form = adviceConstants.restNeededForPeakingThreshold;
       trainingDay.period = 'peak';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
@@ -81,9 +83,9 @@ describe('advice-rest Unit Tests:', function() {
 
     it('should not return rest if testing is not due and not overly fatigued', function(done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
-      trainingDay.form = adviceConstants.restNeededThreshold + 0.1;
+      metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match(/rest/);
@@ -93,9 +95,9 @@ describe('advice-rest Unit Tests:', function() {
 
     it('should return rest recommendation if testing is due and somewhat fatigued', function(done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
-      trainingDay.form = adviceConstants.restNeededForTestingThreshold;
+      metrics.form = adviceConstants.restNeededForTestingThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
@@ -106,10 +108,10 @@ describe('advice-rest Unit Tests:', function() {
 
     it('should not return rest if testing is due and somewhat fatigued but in peak period', function(done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
-      trainingDay.form = adviceConstants.restNeededForTestingThreshold;
+      metrics.form = adviceConstants.restNeededForTestingThreshold;
       trainingDay.period = 'peak';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match(/rest/);
@@ -122,12 +124,12 @@ describe('advice-rest Unit Tests:', function() {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
+
         trainingDay.daysUntilNextGoalEvent = 2;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          //console.log('returned trainingDay: ' + trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
           (trainingDay.plannedActivities[0].rationale).should.containEql('goal event is in two days');
           done();
@@ -140,12 +142,12 @@ describe('advice-rest Unit Tests:', function() {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
+
         trainingDay.daysUntilNextPriority2Event = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          //console.log('returned trainingDay: ' + trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
           (trainingDay.plannedActivities[0].rationale).should.containEql('priority 2 event is in one day');
           done();
