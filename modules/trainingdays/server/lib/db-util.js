@@ -62,10 +62,20 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
 
     if (!trainingDay) {
       var newTrainingDay = new TrainingDay(),
-        timezone = user.timezone || 'America/Denver';
+        timezone = user.timezone || 'America/Denver',
+        plannedMetrics = {
+          metricsType: 'planned'
+        },
+        actualMetrics = {
+          metricsType: 'actual',
+        };
+
       newTrainingDay.dateNumeric = numericDate;
       newTrainingDay.date = moment.tz(numericDate.toString(), timezone).toDate();
       newTrainingDay.user = user;
+      newTrainingDay.metrics.push(plannedMetrics);
+      newTrainingDay.metrics.push(actualMetrics);
+
       newTrainingDay.save(function(err, createdTrainingDay) {
         if (err) {
           return callback(err, null);
@@ -294,27 +304,27 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
     });
 };
 
-module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, callback) {
-  //Only clear thru tomorrow. We don't want to wipe out our plan.
+module.exports.clearSubsequentActualMetricsAndAdvice = function(user, numericDate, callback) {
+  //Only clear thru tomorrow. Should be no actual metrics past tomorrow.
   if (!user) {
-    err = new TypeError('clearFutureMetricsAndAdvice valid user is required');
+    err = new TypeError('clearSubsequentActualMetricsAndAdvice valid user is required');
     return callback(err, null);
   }
 
   if (!numericDate) {
-    err = new TypeError('clearFutureMetricsAndAdvice numericDate is required to getTrainingDay');
+    err = new TypeError('clearSubsequentActualMetricsAndAdvice numericDate is required to getTrainingDay');
     return callback(err, null);
   }
 
   if (!moment(numericDate.toString()).isValid()) {
-    err = new TypeError('clearFutureMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
+    err = new TypeError('clearSubsequentActualMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
     return callback(err, null);
   }
 
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
-  var tomorrowNumeric = toNumericDate(moment().add(1, 'day')), //potential timezone issue here.
-    startNumeric = toNumericDate(moment(numericDate.toString()).add(1, 'day'));
+  var tomorrowNumeric = toNumericDate(moment().add(1, 'day')); //potential timezone issue here.
+  var startNumeric = toNumericDate(moment(numericDate.toString()).add(1, 'day'));
 
   if (startNumeric > tomorrowNumeric) {
     return callback(null, null);
@@ -325,18 +335,19 @@ module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, callbac
     dateNumeric: { $gte: startNumeric, $lte: tomorrowNumeric },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
-    cloneOfId: null
+    cloneOfId: null,
+    'metrics.metricsType': 'actual'
   }, {
     $set: {
-      fitness: 0,
-      fatigue: 0,
-      form: 0,
-      sevenDayRampRate: 0,
-      sevenDayTargetRampRate: 0,
-      dailyTargetRampRate: 0,
-      rampRateAdjustmentFactor: 1,
-      targetAvgDailyLoad: 0,
-      loadRating: '',
+      'metrics.$.fitness': 0,
+      'metrics.$.fatigue': 0,
+      'metrics.$.form': 0,
+      'metrics.$.sevenDayRampRate': 0,
+      'metrics.$.sevenDayTargetRampRate': 0,
+      'metrics.$.dailyTargetRampRate': 0,
+      'metrics.$.rampRateAdjustmentFactor': 1,
+      'metrics.$.targetAvgDailyLoad': 0,
+      'metrics.$.loadRating': '',
       plannedActivities: []
     }
   }, {
@@ -461,9 +472,10 @@ module.exports.clearPlanningData = function(user, numericDate) {
     TrainingDay.update({
       user: user,
       dateNumeric: { $gte: numericDate },
-      cloneOfId: null
+      cloneOfId: null,
+      'metrics.metricsType': 'planned'
     }, {
-      $set: { loadRating: '', },
+      $set: { 'metrics.$.loadRating': '', },
       $pull: { completedActivities: { source: 'plangeneration' } }
     }, {
       multi: true
@@ -500,7 +512,7 @@ module.exports.removePlanningActivities = function(user) {
   });
 };
 
-module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, callback) {
+module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metricsType, callback) {
   if (!user) {
     err = new TypeError('didWeGoHardTheDayBefore valid user is required');
     return callback(err, null);
@@ -511,12 +523,15 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, callb
   // We need to check for the existence of completedActivities below
   // as the loadRating could be from a genPlan where the completedActivities
   // were generated then removed.
+  // TODO: this no longer makes sense to me. This method should work the same regardless
+  // now that we have separated planned and actual metrics.
   var query = TrainingDay
     .where('user').equals(user)
     .where('cloneOfId').equals(null)
     .where('dateNumeric').equals(numericYesterday)
-    .where('completedActivities').ne([])
-    .where('loadRating').in(['simulation', 'hard']);
+    // .where('completedActivities').ne([])
+    .where('metrics').elemMatch({ metricsType: metricsType, loadRating: 'hard' });
+    // .where('metrics.$.loadRating').in(['simulation', 'hard']);
 
   query.findOne().exec(function(err, trainingDay) {
     if (err) {

@@ -126,7 +126,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       //Update metrics for trainingDay as completedActivities likely has changed.
       params = {
         user: user,
-        numericDate: trainingDay.dateNumeric
+        numericDate: trainingDay.dateNumeric,
+        metricsType: 'actual'
       };
 
       adviceMetrics.updateMetrics(params, function(err, updatedTrainingDay) {

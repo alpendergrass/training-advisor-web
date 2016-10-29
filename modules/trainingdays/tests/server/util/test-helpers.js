@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path'),
+  _ = require('lodash'),
   moment = require('moment'),
   mongoose = require('mongoose'),
   User = mongoose.model('User'),
@@ -47,17 +48,43 @@ module.exports.updateUser = function(user, callback) {
   });
 };
 
+module.exports.createTrainingDayObject = function(trainingDate, user) {
+  var plannedActivities = [],
+    plannedMetrics = {
+      metricsType: 'planned'
+    },
+    actualMetrics = {
+      metricsType: 'actual',
+    },
+    metrics = [];
+
+  metrics.push(plannedMetrics);
+  metrics.push(actualMetrics);
+
+  plannedActivities[0] = {};
+  plannedActivities[0].activityType = '';
+
+  var trainingDay = new TrainingDay({
+    date: trainingDate,
+    dateNumeric: dbUtil.toNumericDate(trainingDate),
+    name: 'Incoming trainingDay',
+    plannedActivities: plannedActivities,
+    metrics: metrics,
+    user: user
+  });
+
+  return trainingDay;
+};
+
 module.exports.createStartingPoint = function(user, trainingDate, daysBack, fitness, fatigue, callback) {
   var computedDate = moment(trainingDate).subtract(daysBack, 'days'),
-    trainingDay = new TrainingDay({
-      date: computedDate,
-      dateNumeric: dbUtil.toNumericDate(computedDate),
-      name: 'Starting point trainingDay',
-      startingPoint: true,
-      fitness: fitness,
-      fatigue: fatigue,
-      user: user
-    });
+    trainingDay = this.createTrainingDayObject(computedDate, user),
+    metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']); // Default to actual metrics. For now.
+
+  trainingDay.name = 'Starting point trainingDay';
+  trainingDay.startingPoint = true;
+  metrics.fitness = fitness;
+  metrics.fatigue = fatigue;
 
   trainingDay.save(function (err) {
     if (err) {
@@ -71,20 +98,11 @@ module.exports.createStartingPoint = function(user, trainingDate, daysBack, fitn
 
 module.exports.createGoalEvent = function(user, trainingDate, daysForward, callback) {
   var computedDate = moment(trainingDate).add(daysForward, 'days'),
-    plannedActivities = [],
-    trainingDay;
+    trainingDay = this.createTrainingDayObject(computedDate, user);
 
-  plannedActivities[0] = {};
-
-  trainingDay = new TrainingDay({
-    date: computedDate,
-    dateNumeric: dbUtil.toNumericDate(computedDate),
-    name: 'Goal trainingDay',
-    scheduledEventRanking: 1,
-    estimatedLoad: 567,
-    plannedActivities: plannedActivities,
-    user: user
-  });
+  trainingDay.name = 'Goal trainingDay';
+  trainingDay.scheduledEventRanking = 1;
+  trainingDay.estimatedLoad = 567;
 
   trainingDay.save(function (err) {
     if (err) {
@@ -96,31 +114,12 @@ module.exports.createGoalEvent = function(user, trainingDate, daysForward, callb
   });
 };
 
-module.exports.createTrainingDayObject = function(trainingDate, user) {
-  var plannedActivities = [];
-
-  plannedActivities[0] = {};
-  plannedActivities[0].activityType = '';
-
-  var trainingDay = new TrainingDay({
-    date: trainingDate,
-    dateNumeric: dbUtil.toNumericDate(trainingDate),
-    name: 'Incoming trainingDay',
-    plannedActivities: plannedActivities,
-    user: user
-  });
-
-  return trainingDay;
-};
-
 module.exports.createTrainingDay = function(user, aDate, completedActivities, callback) {
-  var trainingDay = new TrainingDay({
-    date: moment(aDate),
-    dateNumeric: dbUtil.toNumericDate(aDate),
-    name: 'Existing trainingDay',
-    completedActivities: completedActivities || [],
-    user: user
-  });
+  var trainingDay = this.createTrainingDayObject(moment(aDate), user);
+
+  trainingDay.name = 'Existing trainingDay';
+  trainingDay.completedActivities = completedActivities || [];
+  trainingDay.plannedActivities = [];
 
   trainingDay.save(function (err) {
     if (err) {

@@ -73,6 +73,8 @@ function createTrainingDay(req, callback) {
       if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
         params.user = req.user;
         params.numericDate = trainingDay.dateNumeric;
+        params.metricsType = 'actual';
+
         adviceMetrics.updateMetrics(params, function(err, trainingDay) {
           if (err) {
             return callback(err, null);
@@ -277,6 +279,7 @@ exports.update = function(req, res) {
 
     params.user = req.user;
     params.numericDate = trainingDay.dateNumeric;
+    params.metricsType = 'actual';
 
     if (recomputeAdvice) {
       params.alternateActivity = null;
@@ -420,7 +423,7 @@ exports.getAdvice = function(req, res) {
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
   params.alternateActivity = req.query.alternateActivity;
-  params.adviceType = 'advised';
+  params.metricsType = 'actual';
 
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
@@ -437,7 +440,7 @@ exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
-  params.adviceType = 'planned';
+  params.metricsType = 'planned';
 
   adviceEngine.generatePlan(params, function(err, statusMessage) {
     if (err) {

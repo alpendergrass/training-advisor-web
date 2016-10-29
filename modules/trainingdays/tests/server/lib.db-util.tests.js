@@ -2,6 +2,7 @@
 
 
 var should = require('should'),
+  _ = require('lodash'),
   mongoose = require('mongoose'),
   moment = require('moment'),
   User = mongoose.model('User'),
@@ -521,9 +522,9 @@ describe('db-util Unit Tests:', function() {
   });
 
 
-  describe('Method clearFutureMetricsAndAdvice', function() {
+  describe('Method clearSubsequentActualMetricsAndAdvice', function() {
     it('should return error if no user', function(done) {
-      return dbUtil.clearFutureMetricsAndAdvice(null, null, function(err, rawResponse) {
+      return dbUtil.clearSubsequentActualMetricsAndAdvice(null, null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('valid user is required');
         done();
@@ -531,7 +532,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if null trainingDate', function(done) {
-      return dbUtil.clearFutureMetricsAndAdvice(user, null, function(err, rawResponse) {
+      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('numericDate is required');
         done();
@@ -539,7 +540,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if invalid trainingDate', function(done) {
-      return dbUtil.clearFutureMetricsAndAdvice(user, 'rtyy', function(err, rawResponse) {
+      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, 'rtyy', function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('not a valid date');
         done();
@@ -547,7 +548,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return null rawResponse if trainingDate is tomorrow', function(done) {
-      return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).add(1, 'day')), function(err, rawResponse) {
+      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).add(1, 'day')), function(err, rawResponse) {
         should.not.exist(err);
         should.not.exist(rawResponse);
         done();
@@ -555,7 +556,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past trainingDate', function(done) {
-      return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(1, 'day')), function(err, rawResponse) {
+      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(1, 'day')), function(err, rawResponse) {
         should.not.exist(err);
         (rawResponse.n).should.equal(0);
         (rawResponse.nModified).should.equal(0);
@@ -563,13 +564,13 @@ describe('db-util Unit Tests:', function() {
       });
     });
 
-    it('should return match count of 0 and modified count of 0 if one clean trainingDay exists past today', function(done) {
-      testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
+    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists past today', function(done) {
+      testHelpers.createTrainingDay(user, moment(trainingDate).add(1, 'day'), null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(1, 'day')), function(err, rawResponse) {
+        dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(trainingDate), function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -587,7 +588,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+        dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -602,14 +603,15 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        testTD.fitness = 99;
+        let metrics = _.find(testTD.metrics, ['metricsType', 'actual']);
+        metrics.fitness = 99;
 
         testHelpers.updateTrainingDay(testTD, function(err) {
           if (err) {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+          return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
@@ -625,7 +627,8 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        testTD.fitness = 99;
+        let metrics = _.find(testTD.metrics, ['metricsType', 'actual']);
+        metrics.fitness = 99;
 
         testHelpers.updateTrainingDay(testTD, function(err) {
           if (err) {
@@ -637,7 +640,7 @@ describe('db-util Unit Tests:', function() {
               console.log('makeSimDay: ' + err);
             }
 
-            return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+            return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
               should.not.exist(err);
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
@@ -662,7 +665,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+          return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -686,7 +689,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearFutureMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+          return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -829,19 +832,23 @@ describe('db-util Unit Tests:', function() {
         load: 999,
         source: 'plangeneration'
       }];
+
       var yesterday = moment(trainingDate).subtract(1, 'days');
+
       testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err, createdTrainingDay) {
         if (err) {
           console.log('createTrainingDay: ' + err);
         }
 
-        createdTrainingDay.loadRating = 'hard';
+        let metrics = _.find(createdTrainingDay.metrics, ['metricsType', 'actual']);
+        metrics.loadRating = 'hard';
+
         testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
           if (err) {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, 'actual', function(err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
@@ -854,31 +861,33 @@ describe('db-util Unit Tests:', function() {
       });
     });
 
-    it('should return false if yesterday was a hard day but no completedActivities', function(done) {
-      var yesterday = moment(trainingDate).subtract(1, 'days');
-      testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
-        if (err) {
-          console.log('createTrainingDay: ' + err);
-        }
+    // it('should return false if yesterday was a hard day but no completedActivities', function(done) {
+    //   var yesterday = moment(trainingDate).subtract(1, 'days');
+    //   testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
+    //     if (err) {
+    //       console.log('createTrainingDay: ' + err);
+    //     }
 
-        createdTrainingDay.loadRating = 'hard';
-        testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
-          if (err) {
-            console.log('updateTrainingDay: ' + err);
-          }
+    //     let metrics = _.find(createdTrainingDay.metrics, ['metricsType', 'actual']);
+    //     metrics.loadRating = 'hard';
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
-            if (err) {
-              console.log('didWeGoHardTheDayBefore: ' + err);
-            }
+    //     testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
+    //       if (err) {
+    //         console.log('updateTrainingDay: ' + err);
+    //       }
 
-            should.not.exist(err);
-            (wentHard).should.match(false);
-            done();
-          });
-        });
-      });
-    });
+    //       return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, 'actual', function(err, wentHard) {
+    //         if (err) {
+    //           console.log('didWeGoHardTheDayBefore: ' + err);
+    //         }
+
+    //         should.not.exist(err);
+    //         (wentHard).should.match(false);
+    //         done();
+    //       });
+    //     });
+    //   });
+    // });
 
     it('should return false if yesterday was not a hard day', function(done) {
       var completedActivities = [{
@@ -897,7 +906,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
+          return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, 'actual', function(err, wentHard) {
             if (err) {
               console.log('didWeGoHardTheDayBefore: ' + err);
             }
@@ -938,7 +947,7 @@ describe('db-util Unit Tests:', function() {
                 console.log('updateTrainingDay: ' + err);
               }
 
-              return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, function(err, wentHard) {
+              return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, 'actual', function(err, wentHard) {
                 if (err) {
                   console.log('didWeGoHardTheDayBefore: ' + err);
                 }

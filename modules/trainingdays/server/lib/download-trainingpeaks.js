@@ -76,7 +76,8 @@ module.exports.batchDownloadActivities = function(callback) {
               //update metrics for trainingDay, which should be the latest.
               params = {
                 user: user,
-                numericDate: trainingDay.dateNumeric
+                numericDate: trainingDay.dateNumeric,
+                metricsType: 'actual'
               };
 
               adviceMetrics.updateMetrics(params, function(err, trainingDay) {
@@ -169,7 +170,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           //Update metrics for trainingDay as completedActivities likely has changed.
           params = {
             user: user,
-            numericDate: trainingDay.dateNumeric
+            numericDate: trainingDay.dateNumeric,
+            metricsType: 'actual'
           };
 
           adviceMetrics.updateMetrics(params, function(err, trainingDay) {
