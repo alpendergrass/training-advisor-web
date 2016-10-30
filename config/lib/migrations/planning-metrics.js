@@ -57,6 +57,7 @@ function migrateMetrics(user) {
 }
 
 function removeMetrics(user) {
+  //Remove all except for start days and true-ups.
   return new Promise(function(resolve, reject) {
     TrainingDay.update({
       user: user,
@@ -95,16 +96,20 @@ function createNewMetrics(user) {
       return Promise.all(trainingDays.map(function(td) {
         let plannedMetrics = {
           metricsType: 'planned',
-          fitness: 0,
-          fatigue: 0
+          fitness: td.startingPoint ? td.fitness : 0,
+          fatigue: td.startingPoint ? td.fatigue : 0,
+          form: td.startingPoint ? td.form : 0
         };
 
         let actualMetrics = {
           metricsType: 'actual',
           fitness: td.fitness,
-          fatigue: td.fatigue
+          fatigue: td.fatigue,
+          form: td.form
         };
 
+        // Remove metrics if existing. Should only happen if we have to rerun migration I think.
+        td.metrics = [];
         td.metrics.push(plannedMetrics);
         td.metrics.push(actualMetrics);
         return td.save();

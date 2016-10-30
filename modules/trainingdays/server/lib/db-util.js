@@ -452,42 +452,42 @@ module.exports.revertSimulation = function(user, callback) {
   });
 };
 
-module.exports.clearPlanningData = function(user, numericDate) {
-  return new Promise(function(resolve, reject) {
-    if (!user) {
-      err = new TypeError('clearPlanningData valid user is required');
-      return reject(err);
-    }
+// module.exports.clearPlanningData = function(user, numericDate) {
+//   return new Promise(function(resolve, reject) {
+//     if (!user) {
+//       err = new TypeError('clearPlanningData valid user is required');
+//       return reject(err);
+//     }
 
-    if (!numericDate) {
-      err = new TypeError('clearPlanningData numericDate is required to getTrainingDay');
-      return reject(err);
-    }
+//     if (!numericDate) {
+//       err = new TypeError('clearPlanningData numericDate is required to getTrainingDay');
+//       return reject(err);
+//     }
 
-    if (!moment(numericDate.toString()).isValid()) {
-      err = new TypeError('clearPlanningData numericDate ' + numericDate + ' is not a valid date');
-      return reject(err);
-    }
+//     if (!moment(numericDate.toString()).isValid()) {
+//       err = new TypeError('clearPlanningData numericDate ' + numericDate + ' is not a valid date');
+//       return reject(err);
+//     }
 
-    TrainingDay.update({
-      user: user,
-      dateNumeric: { $gte: numericDate },
-      cloneOfId: null,
-      'metrics.metricsType': 'planned'
-    }, {
-      $set: { 'metrics.$.loadRating': '', },
-      $pull: { completedActivities: { source: 'plangeneration' } }
-    }, {
-      multi: true
-    }, function(err, rawResponse) {
-      if (err) {
-        return reject(err);
-      }
+//     TrainingDay.update({
+//       user: user,
+//       dateNumeric: { $gte: numericDate },
+//       cloneOfId: null,
+//       'metrics.metricsType': 'planned'
+//     }, {
+//       $set: { 'metrics.$.loadRating': '', },
+//       $pull: { completedActivities: { source: 'plangeneration' } }
+//     }, {
+//       multi: true
+//     }, function(err, rawResponse) {
+//       if (err) {
+//         return reject(err);
+//       }
 
-      return resolve(rawResponse);
-    });
-  });
-};
+//       return resolve(rawResponse);
+//     });
+//   });
+// };
 
 module.exports.removePlanningActivities = function(user) {
   return new Promise(function(resolve, reject) {
@@ -509,6 +509,64 @@ module.exports.removePlanningActivities = function(user) {
 
       return resolve(rawResponse);
     });
+  });
+};
+
+module.exports.copyActualMetricsToPlanned = function(user, numericDate) {
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('copyActualMetricsToPlanned valid user is required');
+      return reject(err);
+    }
+
+    if (!numericDate) {
+      err = new TypeError('copyActualMetricsToPlanned numericDate is required');
+      return reject(err);
+    }
+
+    if (!moment(numericDate.toString()).isValid()) {
+      err = new TypeError('copyActualMetricsToPlanned numericDate ' + numericDate + ' is not a valid date');
+      return reject(err);
+    }
+
+    var getTrainingDay = TrainingDay.findOne({
+      user: user,
+      dateNumeric: numericDate,
+      cloneOfId: null,
+      'metrics.metricsType': 'planned'
+    }).exec();
+
+    getTrainingDay
+      .then(function(trainingDay) {
+        if (!trainingDay) {
+          // This could happen if the first day of our plan gen is a start day.
+          return resolve();
+        }
+
+        let actualMetrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+        let plannedMetrics = _.find(trainingDay.metrics, ['metricsType', 'planned']);
+
+        plannedMetrics.fitness = actualMetrics.fitness;
+        plannedMetrics.fatigue = actualMetrics.fatigue;
+        plannedMetrics.form = actualMetrics.form;
+        plannedMetrics.sevenDayRampRate = actualMetrics.sevenDayRampRate;
+        plannedMetrics.sevenDayTargetRampRate = actualMetrics.sevenDayTargetRampRate;
+        plannedMetrics.dailyTargetRampRate = actualMetrics.dailyTargetRampRate;
+        plannedMetrics.rampRateAdjustmentFactor = actualMetrics.rampRateAdjustmentFactor;
+        plannedMetrics.targetAvgDailyLoad = actualMetrics.targetAvgDailyLoad;
+        plannedMetrics.loadRating = actualMetrics.loadRating;
+
+        trainingDay.save(function(err) {
+          if (err) {
+            return reject(err);
+          }
+
+          return resolve();
+        });
+      })
+      .catch(function(err) {
+        return reject(err);
+      });
   });
 };
 

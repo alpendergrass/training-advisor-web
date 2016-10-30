@@ -111,6 +111,10 @@ angular.module('trainingDays')
         });
       };
 
+      var getMetrics = function(trainingDay, metricsType) {
+        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
+      };
+
       $scope.viewCalendar = function() {
         var formatDayContent = function(trainingDay) {
           var load = 0,
@@ -324,6 +328,22 @@ angular.module('trainingDays')
           return 3;
         };
 
+        var extractForm = function(td) {
+          return getMetrics(td, 'actual').form;
+        };
+
+        var extractFitness = function(td) {
+          return getMetrics(td, 'actual').fitness;
+        };
+
+        var extractFatigue = function(td) {
+          return getMetrics(td, 'actual').fatigue;
+        };
+
+        var extractDate = function(td) {
+          return moment(td.date).format('ddd MMM D');
+        };
+
         var loadChart = function(callback) {
           getSeason(function() {
             if ($scope.season) {
@@ -331,11 +351,12 @@ angular.module('trainingDays')
               loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
               formPointRadius = _.flatMap($scope.season, setFormPointRadius);
               formPointBorderColors = _.flatMap($scope.season, setFormPointColor);
-              formArray = _.flatMap($scope.season, function(td) { return td.form; });
-              fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
-              fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
-              $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
+              formArray = _.flatMap($scope.season, extractForm);
+              fitnessArray = _.flatMap($scope.season, extractFitness);
+              fatigueArray = _.flatMap($scope.season, extractFatigue);
+              $scope.chartLabels = _.flatMap($scope.season, extractDate);
               $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+
               $scope.chartDatasetOverride = [
                 {
                   label: 'Load',
@@ -696,8 +717,8 @@ angular.module('trainingDays')
             fitnessAndFatigueTrueUp: isTrueUp,
             date: this.startDate,
             name: this.name,
-            fitness: this.fitness,
-            fatigue: this.fatigue,
+            actualFitness: this.fitness,
+            actualFatigue: this.fatigue,
             notes: this.notes
           });
 

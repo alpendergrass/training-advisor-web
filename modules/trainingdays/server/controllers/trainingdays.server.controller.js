@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path'),
+  _ = require('lodash'),
   moment = require('moment-timezone'),
   async = require('async'),
   mongoose = require('mongoose'),
@@ -26,7 +27,7 @@ function getTrainingDay(id, callback) {
 
 function createTrainingDay(req, callback) {
   //It is possible that a document already exists for this day in which case we will update.
-
+  console.log('req.body: ', req.body);
   var params = {},
     numericDate = dbUtil.toNumericDate(req.body.date);
 
@@ -35,15 +36,17 @@ function createTrainingDay(req, callback) {
       return callback(err, null);
     }
 
+    let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+
     if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
       //Preserve existing name, if any.
       trainingDay.name = trainingDay.name? trainingDay.name + ', ' + req.body.name : req.body.name;
       trainingDay.startingPoint = req.body.startingPoint;
       trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
-      trainingDay.fitness = req.body.fitness;
-      trainingDay.fatigue = req.body.fatigue;
+      metrics.fitness = req.body.actualFitness;
+      metrics.fatigue = req.body.actualFatigue;
       //Normally form is calculated using the preceding day's fitness and fatigue but we do not have prior day here.
-      trainingDay.form = Math.round((req.body.fitness - req.body.fatigue) * 100) / 100;
+      metrics.form = Math.round((req.body.actualFitness - req.body.actualFatigue) * 100) / 100;
     } else if (req.body.scheduledEventRanking) {
       trainingDay.name = req.body.name;
       trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
@@ -57,13 +60,14 @@ function createTrainingDay(req, callback) {
 
     trainingDay.notes = req.body.notes || '';
     trainingDay.period = '';
-    trainingDay.sevenDayRampRate = 0;
-    trainingDay.sevenDayTargetRampRate = 0;
-    trainingDay.dailyTargetRampRate = 0;
-    trainingDay.rampRateAdjustmentFactor = 1;
-    trainingDay.targetAvgDailyLoad = 0;
-    trainingDay.loadRating = '';
     trainingDay.plannedActivities = [];
+
+    metrics.sevenDayRampRate = 0;
+    metrics.sevenDayTargetRampRate = 0;
+    metrics.dailyTargetRampRate = 0;
+    metrics.rampRateAdjustmentFactor = 1;
+    metrics.targetAvgDailyLoad = 0;
+    metrics.loadRating = '';
 
     trainingDay.save(function(err) {
       if (err) {
