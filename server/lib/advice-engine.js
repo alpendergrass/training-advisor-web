@@ -152,7 +152,7 @@ module.exports.generatePlan = function(params, callback) {
       username: user.username
     };
 
-  //TODO: Make the following a async.series, use promises or something to clean it up. Yuck.
+  // Make the following a async.series, use promises or something to clean it up. Yuck.
 
   // Get future goal days.
   dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
@@ -168,94 +168,99 @@ module.exports.generatePlan = function(params, callback) {
     //Use last goal to generate plan.
     goalDay = goalDays[goalDays.length - 1];
 
-    //We call updateMetrics here to ensure we have good starting metrics.
-    adviceMetrics.updateMetrics(params, function(err, td) {
-      if (err) {
-        return callback(err, null);
-      }
+    let yesterdayNumeric = dbUtil.toNumericDate(moment(params.numericDate.toString()).subtract(1, 'day'));
 
-      //get all training days from trainingDate thru goal.
-      dbUtil.getTrainingDays(user, params.numericDate, goalDay.dateNumeric, function(err, trainingDays) {
-        if (err) {
-          return callback(err, null);
-        }
+    dbUtil.copyActualMetricsToPlanned(user, yesterdayNumeric)
+      .then(function() {
+        //We call updateMetrics here to ensure we have good starting metrics.
+        adviceMetrics.updateMetrics(params, function(err) {
+          if (err) {
+            return callback(err, null);
+          }
 
-        if (trainingDays.length < 1) {
-          err = new TypeError('No training days returned by getTrainingDays.');
-          return callback(err, null);
-        }
+          //As a precaution we remove all planning data.
+          //If we errored out last time there could be some left overs.
+          dbUtil.removePlanningActivities(user)
+            .then(function() {
+                //get all training days from tomorrow thru last goal.
+              let tomorrowNumeric = dbUtil.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
-        //TODO:  this where we need to copy actual metrics to planned for today then save.
-
-
-        //As a precaution we remove all planning data.
-        //If we errored out last time there could be some left overs.
-        dbUtil.removePlanningActivities(user)
-          .then(function() {
-            adviceParams.planGenUnderway = true;
-
-            //Always start planning with tomorrow.
-            trainingDays.shift();
-
-            async.eachSeries(trainingDays, function(trainingDay, callback) {
-              adviceParams.numericDate = trainingDay.dateNumeric;
-              adviceParams.trainingDay = null;
-
-              module.exports.advise(adviceParams, function(err, trainingDay) {
-                if (err) {
-                  return callback(err);
-                }
-
-                adviceParams.trainingDay = trainingDay;
-
-                generateActivityFromAdvice(adviceParams, function(err, trainingDay) {
-                  if (err) {
-                    return callback(err);
-                  }
-
-                  return callback();
-                });
-              });
-            },
-              function(err) {
+              dbUtil.getTrainingDays(user, tomorrowNumeric, goalDay.dateNumeric, function(err, trainingDays) {
                 if (err) {
                   return callback(err, null);
                 }
 
-                //We need to update metrics for last day as it will not be up to date otherwise.
-                adviceParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
-                adviceParams.trainingDay = null;
+                if (trainingDays.length < 1) {
+                  err = new TypeError('No training days returned by getTrainingDays.');
+                  return callback(err, null);
+                }
+                adviceParams.planGenUnderway = true;
 
-                adviceMetrics.updateMetrics(adviceParams, function(err, td) {
-                  if (err) {
-                    return callback(err, null);
-                  }
+                async.eachSeries(trainingDays, function(trainingDay, callback) {
+                  adviceParams.numericDate = trainingDay.dateNumeric;
+                  adviceParams.trainingDay = null;
 
-                  //TODO: call removePlanningActivities() instead.
-                  dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
-                    .then(function() {
-                      user.thresholdPowerTestDate = savedThresholdPowerTestDate;
-                      user.planGenNeeded = false;
-                      return user.save();
-                    })
-                    .then(function() {
-                      statusMessage.text = 'We have updated your season.';
-                      statusMessage.type = 'success';
-                      return callback(null, statusMessage);
-                    })
-                    .catch(function(err) {
-                      return callback(err, null);
+                  module.exports.advise(adviceParams, function(err, trainingDay) {
+                    if (err) {
+                      return callback(err);
+                    }
+
+                    adviceParams.trainingDay = trainingDay;
+
+                    generateActivityFromAdvice(adviceParams, function(err, trainingDay) {
+                      if (err) {
+                        return callback(err);
+                      }
+
+                      return callback();
                     });
-                });
-              } // end eachSeries callback
-            );
-          })
-          .catch(function(err) {
-            //from removePlanningActivities() before eachSeries
-            return callback(err, null);
-          });
+                  });
+                },
+                  function(err) {
+                    if (err) {
+                      return callback(err, null);
+                    }
+
+                    //We need to update metrics for last day as it will not be up to date otherwise.
+                    adviceParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
+                    adviceParams.trainingDay = null;
+
+                    adviceMetrics.updateMetrics(adviceParams, function(err, td) {
+                      if (err) {
+                        return callback(err, null);
+                      }
+
+                      //TODO: call removePlanningActivities() instead.
+                      // dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
+                      dbUtil.removePlanningActivities(user)
+                        .then(function() {
+                          user.thresholdPowerTestDate = savedThresholdPowerTestDate;
+                          user.planGenNeeded = false;
+                          return user.save();
+                        })
+                        .then(function() {
+                          statusMessage.text = 'We have updated your season.';
+                          statusMessage.type = 'success';
+                          return callback(null, statusMessage);
+                        })
+                        .catch(function(err) {
+                          return callback(err, null);
+                        });
+                    });
+                  } // end eachSeries callback
+                );
+              });
+            })
+            .catch(function(err) {
+              //from removePlanningActivities() before eachSeries
+              return callback(err, null);
+            });
+        });
+      })
+      .catch(function(err) {
+        //from copyActualMetricsToPlanned()
+        return callback(err, null);
       });
-    });
   });
 };
 
