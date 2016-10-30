@@ -33,6 +33,11 @@ module.exports.updateMetrics = function(params, callback) {
     return callback(err, null);
   }
 
+  if (!params.metricsType) {
+    err = new TypeError('metricsType is required to update metrics');
+    return callback(err, null);
+  }
+
   // Let's not muck up the original params while we are here.
   let waterfallParams = _.clone(params);
 
@@ -65,13 +70,13 @@ module.exports.updateMetrics = function(params, callback) {
 };
 
 function clearRunway(params, callback) {
-  //not needed if we are generating plan.
+  // Not needed if we are in the process of generating a plan.
   if (params.planGenUnderway) {
     return callback(null, params);
   }
 
-  //TODO: which ones do we clear? Do we need to clear if genPlan?
-  dbUtil.clearSubsequentActualMetricsAndAdvice(params.user, params.numericDate, function(err, rawResponse) {
+  // I think the only time we clear future planning metrics is when we are setting a new start day.
+  dbUtil.clearSubsequentMetricsAndAdvice(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
     }

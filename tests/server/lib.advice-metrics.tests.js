@@ -71,6 +71,15 @@ describe('advice-metrics Unit Tests:', function () {
       });
     });
 
+    it('should return error if missing metricsType', function (done) {
+      params.metricsType = null;
+      return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
+        should.exist(err);
+        (err.message).should.containEql('metricsType is required');
+        done();
+      });
+    });
+
     it('should return error if current trainingDay is starting point and fitness and fatigue are zero', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 0, 0, 0, function(err) {
         if (err) {

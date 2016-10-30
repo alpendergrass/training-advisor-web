@@ -140,6 +140,8 @@ module.exports.generatePlan = function(params, callback) {
     return callback(err, null);
   }
 
+  params.metricsType = 'planned';
+
   var user = params.user,
     adviceParams = _.clone(params),
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
