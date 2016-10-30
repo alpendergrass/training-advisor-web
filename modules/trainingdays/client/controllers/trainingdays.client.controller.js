@@ -111,10 +111,6 @@ angular.module('trainingDays')
         });
       };
 
-      var getMetrics = function(trainingDay, metricsType) {
-        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
-      };
-
       $scope.viewCalendar = function() {
         var formatDayContent = function(trainingDay) {
           var load = 0,
@@ -266,6 +262,10 @@ angular.module('trainingDays')
           formPointRadius,
           loadBackgroundColors;
 
+        var getChartMetrics = function(trainingDay, metricsType) {
+          return _.find(trainingDay.metrics, ['metricsType', metricsType]);
+        };
+
         var extractLoad = function(td) {
           var load = 0;
           if (td.completedActivities.length > 0) {
@@ -329,15 +329,15 @@ angular.module('trainingDays')
         };
 
         var extractForm = function(td) {
-          return getMetrics(td, 'actual').form;
+          return getChartMetrics(td, 'actual').form;
         };
 
         var extractFitness = function(td) {
-          return getMetrics(td, 'actual').fitness;
+          return getChartMetrics(td, 'actual').fitness;
         };
 
         var extractFatigue = function(td) {
-          return getMetrics(td, 'actual').fatigue;
+          return getChartMetrics(td, 'actual').fatigue;
         };
 
         var extractDate = function(td) {

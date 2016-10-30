@@ -304,39 +304,47 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
     });
 };
 
-module.exports.clearSubsequentActualMetricsAndAdvice = function(user, numericDate, callback) {
+module.exports.clearSubsequentMetricsAndAdvice = function(user, numericDate, metricsType, callback) {
   //Only clear thru tomorrow. Should be no actual metrics past tomorrow.
+  //But we might be clearing planned. we should clear all.
+
   if (!user) {
-    err = new TypeError('clearSubsequentActualMetricsAndAdvice valid user is required');
+    err = new TypeError('clearSubsequentMetricsAndAdvice valid user is required');
     return callback(err, null);
   }
 
   if (!numericDate) {
-    err = new TypeError('clearSubsequentActualMetricsAndAdvice numericDate is required to getTrainingDay');
+    err = new TypeError('clearSubsequentMetricsAndAdvice numericDate is required');
     return callback(err, null);
   }
 
   if (!moment(numericDate.toString()).isValid()) {
-    err = new TypeError('clearSubsequentActualMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
+    err = new TypeError('clearSubsequentMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  if (!metricsType) {
+    err = new TypeError('clearSubsequentMetricsAndAdvice metricsType is required');
     return callback(err, null);
   }
 
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
-  var tomorrowNumeric = toNumericDate(moment().add(1, 'day')); //potential timezone issue here.
+  // var tomorrowNumeric = toNumericDate(moment().add(1, 'day')); //potential timezone issue here.
   var startNumeric = toNumericDate(moment(numericDate.toString()).add(1, 'day'));
 
-  if (startNumeric > tomorrowNumeric) {
-    return callback(null, null);
-  }
+  // if (startNumeric > tomorrowNumeric) {
+  //   return callback(null, null);
+  // }
 
   TrainingDay.update({
     user: user,
-    dateNumeric: { $gte: startNumeric, $lte: tomorrowNumeric },
+    // dateNumeric: { $gte: startNumeric, $lte: tomorrowNumeric },
+    dateNumeric: { $gte: startNumeric },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
     cloneOfId: null,
-    'metrics.metricsType': 'actual'
+    'metrics.metricsType': metricsType
   }, {
     $set: {
       'metrics.$.fitness': 0,

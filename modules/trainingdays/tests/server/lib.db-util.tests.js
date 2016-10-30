@@ -1,6 +1,5 @@
 'use strict';
 
-
 var should = require('should'),
   _ = require('lodash'),
   mongoose = require('mongoose'),
@@ -522,9 +521,11 @@ describe('db-util Unit Tests:', function() {
   });
 
 
-  describe('Method clearSubsequentActualMetricsAndAdvice', function() {
+  describe('Method clearSubsequentMetricsAndAdvice', function() {
+    let metricsType = 'actual';
+
     it('should return error if no user', function(done) {
-      return dbUtil.clearSubsequentActualMetricsAndAdvice(null, null, function(err, rawResponse) {
+      return dbUtil.clearSubsequentMetricsAndAdvice(null, null, null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('valid user is required');
         done();
@@ -532,7 +533,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if null trainingDate', function(done) {
-      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, null, function(err, rawResponse) {
+      return dbUtil.clearSubsequentMetricsAndAdvice(user, null, null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('numericDate is required');
         done();
@@ -540,23 +541,31 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if invalid trainingDate', function(done) {
-      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, 'rtyy', function(err, rawResponse) {
+      return dbUtil.clearSubsequentMetricsAndAdvice(user, 'rtyy', null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('not a valid date');
         done();
       });
     });
 
-    it('should return null rawResponse if trainingDate is tomorrow', function(done) {
-      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).add(1, 'day')), function(err, rawResponse) {
-        should.not.exist(err);
-        should.not.exist(rawResponse);
+    it('should return error if missing metricsType', function(done) {
+      return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(trainingDate), null, function(err, rawResponse) {
+        should.exist(err);
+        (err.message).should.containEql('metricsType is required');
         done();
       });
     });
 
+    // it('should return null rawResponse if trainingDate is tomorrow', function(done) {
+    //   return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).add(1, 'day')), metricsType, function(err, rawResponse) {
+    //     should.not.exist(err);
+    //     should.not.exist(rawResponse);
+    //     done();
+    //   });
+    // });
+
     it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past trainingDate', function(done) {
-      return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(1, 'day')), function(err, rawResponse) {
+      return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(1, 'day')), metricsType, function(err, rawResponse) {
         should.not.exist(err);
         (rawResponse.n).should.equal(0);
         (rawResponse.nModified).should.equal(0);
@@ -570,7 +579,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(trainingDate), function(err, rawResponse) {
+        dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(trainingDate), metricsType, function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -588,7 +597,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+        dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -611,7 +620,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+          return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
@@ -640,7 +649,7 @@ describe('db-util Unit Tests:', function() {
               console.log('makeSimDay: ' + err);
             }
 
-            return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+            return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
               should.not.exist(err);
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
@@ -665,7 +674,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+          return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -689,7 +698,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearSubsequentActualMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), function(err, rawResponse) {
+          return dbUtil.clearSubsequentMetricsAndAdvice(user, dbUtil.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -700,76 +709,76 @@ describe('db-util Unit Tests:', function() {
     });
   });
 
-  describe('Method clearPlanningData', function() {
-    it('should return error if no user', function(done) {
-      dbUtil.clearPlanningData(null, null)
-        .catch(function(err) {
-          (err.message).should.containEql('valid user is required');
-          done();
-        });
-    });
+  // describe('Method clearPlanningData', function() {
+  //   it('should return error if no user', function(done) {
+  //     dbUtil.clearPlanningData(null, null)
+  //       .catch(function(err) {
+  //         (err.message).should.containEql('valid user is required');
+  //         done();
+  //       });
+  //   });
 
-    it('should return error if missing date', function(done) {
-      dbUtil.clearPlanningData(user, null)
-        .catch(function(err) {
-          (err.message).should.containEql('numericDate is required');
-          done();
-        });
-    });
+  //   it('should return error if missing date', function(done) {
+  //     dbUtil.clearPlanningData(user, null)
+  //       .catch(function(err) {
+  //         (err.message).should.containEql('numericDate is required');
+  //         done();
+  //       });
+  //   });
 
-    it('should return error if invalid date', function(done) {
-      dbUtil.clearPlanningData(user, 'erty')
-        .catch(function(err) {
-          (err.message).should.containEql('not a valid date');
-          done();
-        });
-    });
+  //   it('should return error if invalid date', function(done) {
+  //     dbUtil.clearPlanningData(user, 'erty')
+  //       .catch(function(err) {
+  //         (err.message).should.containEql('not a valid date');
+  //         done();
+  //       });
+  //   });
 
-    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
-      dbUtil.clearPlanningData(user, numericDate)
-        .then(function(rawResponse) {
-          (rawResponse.n).should.equal(0);
-          (rawResponse.nModified).should.equal(0);
-          done();
-        });
-    });
+  //   it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
+  //     dbUtil.clearPlanningData(user, numericDate)
+  //       .then(function(rawResponse) {
+  //         (rawResponse.n).should.equal(0);
+  //         (rawResponse.nModified).should.equal(0);
+  //         done();
+  //       });
+  //   });
 
-    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists', function(done) {
-      testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
-        if (err) {
-          console.log('createTrainingDay error: ' + err);
-        }
+  //   it('should return match count of 1 and modified count of 0 if one clean trainingDay exists', function(done) {
+  //     testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
+  //       if (err) {
+  //         console.log('createTrainingDay error: ' + err);
+  //       }
 
-        dbUtil.clearPlanningData(user, numericDate)
-          .then(function(rawResponse) {
-            (rawResponse.n).should.equal(1);
-            (rawResponse.nModified).should.equal(0);
-            done();
-          });
-      });
-    });
+  //       dbUtil.clearPlanningData(user, numericDate)
+  //         .then(function(rawResponse) {
+  //           (rawResponse.n).should.equal(1);
+  //           (rawResponse.nModified).should.equal(0);
+  //           done();
+  //         });
+  //     });
+  //   });
 
-    it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists', function(done) {
-      var completedActivities = [{
-        load: 999,
-        source: 'plangeneration'
-      }];
+  //   it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists', function(done) {
+  //     var completedActivities = [{
+  //       load: 999,
+  //       source: 'plangeneration'
+  //     }];
 
-      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
-        if (err) {
-          console.log('createTrainingDay error: ' + err);
-        }
+  //     testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
+  //       if (err) {
+  //         console.log('createTrainingDay error: ' + err);
+  //       }
 
-        dbUtil.clearPlanningData(user, numericDate)
-          .then(function(rawResponse) {
-            (rawResponse.n).should.equal(1);
-            (rawResponse.nModified).should.equal(1);
-            done();
-          });
-      });
-    });
+  //       dbUtil.clearPlanningData(user, numericDate)
+  //         .then(function(rawResponse) {
+  //           (rawResponse.n).should.equal(1);
+  //           (rawResponse.nModified).should.equal(1);
+  //           done();
+  //         });
+  //     });
+  //   });
 
-  });
+  // });
 
   describe('Method removePlanningActivities', function() {
     it('should return error if no user', function(done) {

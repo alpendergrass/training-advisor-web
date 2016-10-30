@@ -26,27 +26,35 @@ function getTrainingDay(id, callback) {
 }
 
 function createTrainingDay(req, callback) {
-  //It is possible that a document already exists for this day in which case we will update.
-  console.log('req.body: ', req.body);
-  var params = {},
-    numericDate = dbUtil.toNumericDate(req.body.date);
+  //This function is used to create start days, true-up days and events.
+  //It is possible that a document already exists for this day so we must treat this as an update.
+  let numericDate = dbUtil.toNumericDate(req.body.date);
 
   dbUtil.getTrainingDayDocument(req.user, numericDate, function(err, trainingDay) {
     if (err) {
       return callback(err, null);
     }
 
-    let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+    let actualMetrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
 
     if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
       //Preserve existing name, if any.
       trainingDay.name = trainingDay.name? trainingDay.name + ', ' + req.body.name : req.body.name;
       trainingDay.startingPoint = req.body.startingPoint;
       trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
-      metrics.fitness = req.body.actualFitness;
-      metrics.fatigue = req.body.actualFatigue;
-      //Normally form is calculated using the preceding day's fitness and fatigue but we do not have prior day here.
-      metrics.form = Math.round((req.body.actualFitness - req.body.actualFatigue) * 100) / 100;
+      actualMetrics.fitness = req.body.actualFitness;
+      actualMetrics.fatigue = req.body.actualFatigue;
+      // Normally form is calculated using the preceding day's fitness and fatigue but for a start day
+      // we do not have prior day and for a true-up day we treat as a new start.
+      actualMetrics.form = Math.round((req.body.actualFitness - req.body.actualFatigue) * 100) / 100;
+
+      if (req.body.startingPoint) {
+        // Planning metrics should not be affected by a true-up. I think.
+        let plannedMetrics = _.find(trainingDay.metrics, ['metricsType', 'planned']);
+        plannedMetrics.fitness = req.body.actualFitness;
+        plannedMetrics.fatigue = req.body.actualFatigue;
+        plannedMetrics.form = actualMetrics.form;
+      }
     } else if (req.body.scheduledEventRanking) {
       trainingDay.name = req.body.name;
       trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
@@ -62,12 +70,12 @@ function createTrainingDay(req, callback) {
     trainingDay.period = '';
     trainingDay.plannedActivities = [];
 
-    metrics.sevenDayRampRate = 0;
-    metrics.sevenDayTargetRampRate = 0;
-    metrics.dailyTargetRampRate = 0;
-    metrics.rampRateAdjustmentFactor = 1;
-    metrics.targetAvgDailyLoad = 0;
-    metrics.loadRating = '';
+    actualMetrics.sevenDayRampRate = 0;
+    actualMetrics.sevenDayTargetRampRate = 0;
+    actualMetrics.dailyTargetRampRate = 0;
+    actualMetrics.rampRateAdjustmentFactor = 1;
+    actualMetrics.targetAvgDailyLoad = 0;
+    actualMetrics.loadRating = '';
 
     trainingDay.save(function(err) {
       if (err) {
@@ -75,6 +83,7 @@ function createTrainingDay(req, callback) {
       }
 
       if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+        let params = {};
         params.user = req.user;
         params.numericDate = trainingDay.dateNumeric;
         params.metricsType = 'actual';
@@ -84,7 +93,19 @@ function createTrainingDay(req, callback) {
             return callback(err, null);
           }
 
-          return callback(null, trainingDay);
+          if (req.body.startingPoint) {
+            params.metricsType = 'planning';
+
+            adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+              if (err) {
+                return callback(err, null);
+              }
+
+              return callback(null, trainingDay);
+            });
+          } else {
+            return callback(null, trainingDay);
+          }
         });
       } else {
         return callback(null, trainingDay);
@@ -444,7 +465,6 @@ exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
-  params.metricsType = 'planned';
 
   adviceEngine.generatePlan(params, function(err, statusMessage) {
     if (err) {
