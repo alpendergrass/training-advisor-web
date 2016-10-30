@@ -80,37 +80,18 @@
     <hr />
   </div>
   <div ng-show="showFormAndFitness">
-    <!-- Let's edit in place.  -->
-    <form editable-form name="trainingDayForm" onaftersave="update(true)">
       <div>
         <label class="title">Fitness: </label>
-        <span editable-number="trainingDay.fitness" e-min="0" e-max="199" e-step="0.1" e-name="fitness" e-required>{{ trainingDay.fitness }}</span>
+        <span>{{ getMetrics().fitness }}</span>
       </div>
       <div>
         <label class="title">Fatigue: </label>
-        <span editable-number="trainingDay.fatigue" e-min="0" e-max="199" e-step="0.1" e-name="fatigue" e-required>{{ trainingDay.fatigue }}</span>
+        <span>{{ getMetrics().fatigue }}</span>
       </div>
-      <p ng-show="allowFormAndFitnessTrueUp">
-        <button type="button" class="btn btn-default btn-xs" ng-click="trainingDayForm.$show()" ng-show="!trainingDayForm.$visible">
-          True up F&F
-        </button>
-        <span ng-show="trainingDayForm.$visible">
-          <button type="submit" class="btn btn-primary btn-xs" ng-disabled="trainingDayForm.$waiting">
-            Save
-          </button>
-          <button type="button" class="btn btn-default btn-xs" ng-disabled="trainingDayForm.$waiting" ng-click="trainingDayForm.$cancel()">
-            Cancel
-          </button>
-        </span>
-      </p>
-    </form>
-    <div ng-show="error" class="text-danger">
-      <strong ng-bind="error"></strong>
-    </div>
     <p>
-      <label>Form:</label> {{ trainingDay.form }}
+      <label>Form:</label> {{ getMetrics().form }}
       <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate - today is <span ng-show="trainingDay.startingPoint">your season start</span><span ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">a true-up day</span></abbr>
-      <span ng-show="authentication.user.levelOfDetail > 2"><br/>Seven Day Fitness Ramp Rate is {{trainingDay.sevenDayRampRate}}. Target Ramp Rate is {{trainingDay.sevenDayTargetRampRate}}.</span>
+      <span ng-show="authentication.user.levelOfDetail > 2"><br/>Seven Day Fitness Ramp Rate is {{ getMetrics().sevenDayRampRate }}. Target Ramp Rate is {{ getMetrics().sevenDayTargetRampRate }}.</span>
     </p>
   </div>
   <p>
@@ -196,16 +177,16 @@
       <div>Rationale: {{trainingDay.plannedActivities[0].rationale }}</div>
       <div>startingPoint: {{trainingDay.startingPoint }}</div>
       <div>period: {{trainingDay.period }}</div>
-      <div>sevenDayRampRate: {{trainingDay.sevenDayRampRate}}</div>
-      <div>sevenDayTargetRampRate: {{trainingDay.sevenDayTargetRampRate}}</div>
-      <div>rampRateAdjustmentFactor: {{trainingDay.rampRateAdjustmentFactor}}</div>
-      <div>dailyTargetRampRate: {{trainingDay.dailyTargetRampRate}}</div>
-      <div>targetAvgDailyLoad: {{trainingDay.targetAvgDailyLoad}}</div>
       <div>loadRating: {{trainingDay.loadRating}}</div>
       <div>daysUntilNextGoalEvent: {{trainingDay.daysUntilNextGoalEvent}}</div>
       <div>daysUntilNextPriority2Event: {{trainingDay.daysUntilNextPriority2Event}}</div>
       <div>daysUntilNextPriority3Event: {{trainingDay.daysUntilNextPriority3Event}}</div>
       <div>user.fatigueTimeConstant: {{authentication.user.fatigueTimeConstant}}</div>
+      <div>sevenDayRampRate: {{getMetrics().sevenDayRampRate}}</div>
+      <div>sevenDayTargetRampRate: {{getMetrics().sevenDayTargetRampRate}}</div>
+      <div>rampRateAdjustmentFactor: {{getMetrics().rampRateAdjustmentFactor}}</div>
+      <div>dailyTargetRampRate: {{getMetrics().dailyTargetRampRate}}</div>
+      <div>targetAvgDailyLoad: {{getMetrics().targetAvgDailyLoad}}</div>
       <em class="text-muted">
         Created
         <span ng-bind="trainingDay.created | date:'medium'"></span>

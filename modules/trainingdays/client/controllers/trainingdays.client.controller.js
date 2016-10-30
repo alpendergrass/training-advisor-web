@@ -926,6 +926,20 @@ angular.module('trainingDays')
           { value: 0, text: 'Training Day' }
         ];
 
+        function prepForTDView(trainingDay) {
+          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
+          $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
+          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
+          $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          $scope.showFormAndFitness = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
+          $scope.metricsType = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') ? 'actual' : 'planned';
+        }
+
+        $scope.getMetrics = function() {
+          return _.find($scope.trainingDay.metrics, ['metricsType', $scope.metricsType]);
+        };
+
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
             dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
@@ -938,17 +952,6 @@ angular.module('trainingDays')
             $scope.trainingDay.estimatedLoad = 0;
           }
         });
-
-        function prepForTDView(trainingDay) {
-          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
-          $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
-          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
-          $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
-          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 2;
-          $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-          return trainingDay;
-        }
 
         $scope.getDay = function(date) {
           $scope.error = null;
@@ -1020,17 +1023,9 @@ angular.module('trainingDays')
           var index = _.indexOf($scope.trainingDay.completedActivities, _.find($scope.trainingDay.completedActivities, { created: created }));
           $scope.trainingDay.completedActivities.splice(index, 1, data);
 
-          $scope.trainingDay.$update(function(trainingDay) {
-            //We need to correct the date coming from server-side as it might not have self corrected yet.
-            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-            $scope.trainingDay = trainingDay;
-            $scope.checkGiveFeedback($scope.trainingDay);
-          }, function(errorResponse) {
-            if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
-            } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-              $scope.error = 'Server error prevented activity save.';
+          $scope.update(true, $scope.trainingDay, function(trainingDay) {
+            if (trainingDay) {
+              $scope.checkGiveFeedback($scope.trainingDay);
             }
           });
         };
@@ -1088,14 +1083,18 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.update = function(isValid, trainingDay) {
-        //We are being called as if we were synchronous here.
-        //TODO: we should return something, ideally a promise.
-        //And anywhere else we call trainingDay.$update should be modified to call here.
+      $scope.update = function(isValid, trainingDay, callback) {
+        //We are sometimes being called as if we were synchronous here.
+        //Note that we take a callback but do not return an error as we handle it here.
         $scope.error = null;
 
         if (!isValid) {
           $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
+
+          if (callback) {
+            return callback(null);
+          }
+
           return false;
         }
 
@@ -1107,6 +1106,9 @@ angular.module('trainingDays')
           //We need to correct the date coming from server-side as it might not have self corrected yet.
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.trainingDay = trainingDay;
+          if (callback) {
+            return callback(trainingDay);
+          }
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
@@ -1114,6 +1116,12 @@ angular.module('trainingDays')
             //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
             $scope.error = 'Server error prevented training day update.';
           }
+
+          if (callback) {
+            return callback(null);
+          }
+
+          return false;
         });
       };
 
