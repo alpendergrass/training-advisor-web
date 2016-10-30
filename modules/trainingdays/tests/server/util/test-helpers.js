@@ -79,12 +79,15 @@ module.exports.createTrainingDayObject = function(trainingDate, user) {
 module.exports.createStartingPoint = function(user, trainingDate, daysBack, fitness, fatigue, callback) {
   var computedDate = moment(trainingDate).subtract(daysBack, 'days'),
     trainingDay = this.createTrainingDayObject(computedDate, user),
-    metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']); // Default to actual metrics. For now.
+    actualMetrics = _.find(trainingDay.metrics, ['metricsType', 'actual']),
+    plannedMetrics = _.find(trainingDay.metrics, ['metricsType', 'planned']);
 
   trainingDay.name = 'Starting point trainingDay';
   trainingDay.startingPoint = true;
-  metrics.fitness = fitness;
-  metrics.fatigue = fatigue;
+  actualMetrics.fitness = fitness;
+  actualMetrics.fatigue = fatigue;
+  plannedMetrics.fitness = fitness;
+  plannedMetrics.fatigue = fatigue;
 
   trainingDay.save(function (err) {
     if (err) {

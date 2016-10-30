@@ -722,14 +722,8 @@ angular.module('trainingDays')
             notes: this.notes
           });
 
-          // Redirect after save
           trainingDay.$create(function(response) {
             toastr.success('You should update your profile now.', 'Start Created', { timeOut: 7000 });
-            // Clear form fields
-            $scope.name = '';
-            $scope.fitness = 0;
-            $scope.fatigue = 0;
-            $scope.notes = '';
             $state.go('settings.profile');
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -891,14 +885,6 @@ angular.module('trainingDays')
 
           trainingDay.$create(function(response) {
             $state.go('season');
-
-            // Clear form fields
-            $scope.name = '';
-            $scope.date = null;
-            $scope.scheduledEventRanking = '0';
-            $scope.estimatedLoad = 0;
-            $scope.recurrenceSpec = null;
-            $scope.notes = '';
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
