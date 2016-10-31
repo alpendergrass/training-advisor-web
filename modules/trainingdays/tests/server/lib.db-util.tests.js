@@ -780,9 +780,9 @@ describe('db-util Unit Tests:', function() {
 
   // });
 
-  describe('Method removePlanningActivities', function() {
+  describe('Method removePlanGenerationActivities', function() {
     it('should return error if no user', function(done) {
-      dbUtil.removePlanningActivities(null)
+      dbUtil.removePlanGenerationActivities(null)
         .catch(function(err) {
           (err.message).should.containEql('valid user is required');
           done();
@@ -790,7 +790,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
-      dbUtil.removePlanningActivities(user)
+      dbUtil.removePlanGenerationActivities(user)
         .then(function(rawResponse) {
           (rawResponse.n).should.equal(0);
           (rawResponse.nModified).should.equal(0);
@@ -804,7 +804,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanningActivities(user)
+        dbUtil.removePlanGenerationActivities(user)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(0);
@@ -813,7 +813,7 @@ describe('db-util Unit Tests:', function() {
       });
     });
 
-    it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists', function(done) {
+    it('should return match count of 1 and modified count of 1 if one trainingDay with plangeneration completedActivities exists', function(done) {
       var completedActivities = [{
         load: 999,
         source: 'plangeneration'
@@ -824,12 +824,71 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanningActivities(user)
+        dbUtil.removePlanGenerationActivities(user)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
             done();
           });
+      });
+    });
+
+    it('should return match count of 1 and modified count of 1 if one trainingDay with plangeneration plannedActivities exists', function(done) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        var plannedActivities = [{
+          source: 'plangeneration'
+        }];
+
+        testTD.plannedActivities = plannedActivities;
+
+        testHelpers.updateTrainingDay(testTD, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          dbUtil.removePlanGenerationActivities(user)
+            .then(function(rawResponse) {
+              (rawResponse.n).should.equal(1);
+              (rawResponse.nModified).should.equal(1);
+              done();
+            });
+        });
+      });
+    });
+
+    it('should return match count of 1 and modified count of 1 if one trainingDay with plangeneration plannedActivities and completedActivities exists', function(done) {
+      var completedActivities = [{
+        load: 999,
+        source: 'plangeneration'
+      }];
+
+      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        var plannedActivities = [{
+          source: 'plangeneration'
+        }];
+
+        testTD.plannedActivities = plannedActivities;
+
+        testHelpers.updateTrainingDay(testTD, function(err) {
+          if (err) {
+            console.log('updateTrainingDay: ' + err);
+          }
+
+          dbUtil.removePlanGenerationActivities(user)
+            .then(function(rawResponse) {
+              (rawResponse.n).should.equal(1);
+              (rawResponse.nModified).should.equal(1);
+              done();
+            });
+        });
       });
     });
 

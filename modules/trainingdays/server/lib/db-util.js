@@ -497,18 +497,17 @@ module.exports.revertSimulation = function(user, callback) {
 //   });
 // };
 
-module.exports.removePlanningActivities = function(user) {
+module.exports.removePlanGenerationActivities = function(user) {
   return new Promise(function(resolve, reject) {
     if (!user) {
-      err = new TypeError('removePlanningActivities valid user is required');
+      err = new TypeError('removePlanGenerationActivities valid user is required');
       return reject(err);
     }
 
     TrainingDay.update({
       user: user
     }, {
-      $pull: { plannedActivities: { source: 'plangeneration' } },
-      $pull: { completedActivities: { source: 'plangeneration' } }
+      $pull: { plannedActivities: { source: 'plangeneration' }, completedActivities: { source: 'plangeneration' } }
     }, {
       multi: true
     }, function(err, rawResponse) {

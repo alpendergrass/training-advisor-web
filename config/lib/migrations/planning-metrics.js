@@ -42,7 +42,7 @@ function migrateMetrics(user) {
         return reject(err);
       }
 
-      dbUtil.removePlanningActivities(user)
+      dbUtil.removePlanGenerationActivities(user)
         .then(function() {
           return removeMetrics(user);
         })

@@ -319,7 +319,7 @@ angular.module('trainingDays')
         };
 
         var getPlanLoad = function(td) {
-          return td.planLoad
+          return td.planLoad;
         };
 
         var getActualLoad = function(td) {
