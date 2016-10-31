@@ -719,7 +719,8 @@ angular.module('trainingDays')
       };
 
       $scope.listTrainingDays = function() {
-        // This function is no longer used in a user accessible view. Admin only.
+        // This page is now Admin only.
+
         var getAllTrainingDays = function(callback) {
           $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
             //not sure why Mongo/Mongoose returns a string for a date field but
@@ -735,22 +736,22 @@ angular.module('trainingDays')
           });
         };
 
-        $scope.nextBatch = function() {
-          if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
-            $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
-            $scope.nextChunk++;
-          }
-        };
+        // $scope.nextBatch = function() {
+        //   if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
+        //     $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
+        //     $scope.nextChunk++;
+        //   }
+        // };
 
         //The following is used on the TD list page for the Today button.
         //This page is no longer available to non-admin users.
-        $scope.scrollTo = function(id) {
-          var currentPath = $location.hash();
-          $location.hash(id);
-          $anchorScroll();
-          //reset to currentPath to keep from changing URL in browser.
-          $location.hash(currentPath);
-        };
+        // $scope.scrollTo = function(id) {
+        //   var currentPath = $location.hash();
+        //   $location.hash(id);
+        //   $anchorScroll();
+        //   //reset to currentPath to keep from changing URL in browser.
+        //   $location.hash(currentPath);
+        // };
 
         getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side.

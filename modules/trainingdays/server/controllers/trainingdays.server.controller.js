@@ -274,7 +274,9 @@ exports.update = function(req, res) {
   }
 
   //If a change was made that would affect existing advice, let's recompute.
-  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].advice &&
+  let planActivity = util.getPlannedActivity(trainingDay, 'advised');
+
+  if (planActivity && planActivity.advice &&
     (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
       trainingDay.estimatedLoad !== req.body.estimatedLoad ||
       trainingDay.completedActivities !== req.body.completedActivities
