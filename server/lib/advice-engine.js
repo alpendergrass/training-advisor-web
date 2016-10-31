@@ -87,10 +87,11 @@ function generateActivityFromAdvice(params, callback) {
     user = params.user,
     metrics = _.find(trainingDay.metrics, ['metricsType', params.metricsType]);
 
-  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'advised') {
+  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'plangeneration') {
     completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
+    trainingDay.planLoad = completedActivity.load;
 
     //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
     //when updateMetrics is called for the following day.
@@ -314,12 +315,12 @@ module.exports.advise = function(params, callback) {
         statusMessage = {};
 
       if (!params.alternateActivity) {
-        //We are advising an activity.
+        //We are advising or planning an activity.
         //Replace any existing plannedActivities.
         plannedActivities = [];
         plannedActivities[0] = {};
         plannedActivities[0].activityType = '';
-        plannedActivities[0].source = 'advised';
+        plannedActivities[0].source = params.metricsType === 'planned' ? 'plangeneration' : 'advised';
         trainingDay.plannedActivities = plannedActivities;
 
         generateAdvice(user, trainingDay, params.metricsType, function(err, recommendation) {
