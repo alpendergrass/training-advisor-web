@@ -16,7 +16,9 @@ var path = require('path'),
 var user,
   trainingDate,
   trainingDay,
+  plannedActivity,
   metrics,
+  source = 'advised',
   lowLoadFactorEasy = 0.30,
   highLoadFactorEasy = 0.60,
   lowLoadFactorModerate = 1.0,
@@ -27,9 +29,9 @@ var user,
   highLoadFactorGoal = 1.9,
   rampRateAdjustmentLimit = 0.2;
 
-describe('advice-load Unit Tests:', function () {
+describe('advice-load Unit Tests:', function() {
 
-  beforeEach(function (done) {
+  beforeEach(function(done) {
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
@@ -38,30 +40,31 @@ describe('advice-load Unit Tests:', function () {
       user = newUser;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
+      plannedActivity = util.getPlannedActivity(trainingDay, source);
       metrics = util.getMetrics(trainingDay, 'actual');
       done();
     });
   });
 
-  describe('Method setLoadRecommendations', function () {
-    it('should return error if no user', function (done) {
-      return adviceLoad.setLoadRecommendations(null, null, 'advised', function (err, trainingDay) {
+  describe('Method setLoadRecommendations', function() {
+    it('should return error if no user', function(done) {
+      return adviceLoad.setLoadRecommendations(null, null, 'advised', function(err, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
       });
     });
 
-    it('should return error if no trainingDay', function (done) {
-      return adviceLoad.setLoadRecommendations(user, null, 'advised', function (err, trainingDay) {
+    it('should return error if no trainingDay', function(done) {
+      return adviceLoad.setLoadRecommendations(user, null, 'advised', function(err, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid trainingDay is required');
         done();
       });
     });
 
-    it('should return estimatedLoad for target loads if this is an event day and estimate is provided', function (done) {
-      trainingDay.plannedActivities[0].activityType = 'event';
+    it('should return estimatedLoad for target loads if this is an event day and estimate is provided', function(done) {
+      plannedActivity.activityType = 'event';
       trainingDay.estimatedLoad = 234;
       trainingDay.scheduledEventRanking = 2;
 
@@ -69,115 +72,122 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].targetMinLoad).should.equal(234);
-        (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(234);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.targetMinLoad).should.equal(234);
+        (plannedActivity.targetMaxLoad).should.equal(234);
         done();
       });
     });
 
-    it('should return computed target loads if this is an event day but no estimate is provided', function (done) {
+    it('should return computed target loads if this is an event day but no estimate is provided', function(done) {
       trainingDay.scheduledEventRanking = 1;
-      trainingDay.plannedActivities[0].activityType = 'event';
+      plannedActivity.activityType = 'event';
 
       metrics.targetAvgDailyLoad = 100;
       metrics.sevenDayTargetRampRate = 6;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorGoal);
-        (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorGoal);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorGoal);
+        (plannedActivity.targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorGoal);
         done();
       });
     });
 
-    it('should return target loads of zero if this is a user-scheduled off day', function (done) {
+    it('should return target loads of zero if this is a user-scheduled off day', function(done) {
       trainingDay.scheduledEventRanking = 9; //off day
-      trainingDay.plannedActivities[0].activityType = 'event';
+      plannedActivity.activityType = 'event';
 
       metrics.targetAvgDailyLoad = 100;
       metrics.sevenDayTargetRampRate = 6;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].targetMinLoad).should.equal(0);
-        (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(0);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.targetMinLoad).should.equal(0);
+        (plannedActivity.targetMaxLoad).should.equal(0);
         done();
       });
     });
 
-    it('should return estimatedLoad from goal event +/- 5% for target loads if recommending simulation', function (done) {
+    it('should return estimatedLoad from goal event +/- 5% for target loads if recommending simulation', function(done) {
       testHelpers.createGoalEvent(user, new Date(), 2, function(err) {
         if (err) {
           console.log('createGoalEvent: ' + err);
         }
 
-        trainingDay.plannedActivities[0].activityType = 'simulation';
+        plannedActivity.activityType = 'simulation';
 
         metrics.targetAvgDailyLoad = 100;
         metrics.sevenDayTargetRampRate = 5;
         metrics.sevenDayRampRate = 6;
 
-        return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+        return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].targetMinLoad).should.equal(Math.round(567 * 0.95));
-          (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(Math.round(567 * 1.05));
+          let plannedActivity = util.getPlannedActivity(trainingDay, source);
+          (plannedActivity.targetMinLoad).should.equal(Math.round(567 * 0.95));
+          (plannedActivity.targetMaxLoad).should.equal(Math.round(567 * 1.05));
           done();
         });
       });
     });
 
-    it('should return unadjusted recommendation regardless of ramp rates if recommending easy workout', function (done) {
-      trainingDay.plannedActivities[0].activityType = 'easy';
+    it('should return unadjusted recommendation regardless of ramp rates if recommending easy workout', function(done) {
+      plannedActivity.activityType = 'easy';
 
       metrics.targetAvgDailyLoad = 100;
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorEasy);
-        (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorEasy);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorEasy);
+        (plannedActivity.targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorEasy);
         done();
       });
     });
 
-    it('should return unadjusted recommendation if recommending hard workout and sevenDayTargetRampRate equals sevenDayRampRate', function (done) {
-      trainingDay.plannedActivities[0].activityType = 'hard';
+    it('should return unadjusted recommendation if recommending hard workout and sevenDayTargetRampRate equals sevenDayRampRate', function(done) {
+      plannedActivity.activityType = 'hard';
 
       metrics.targetAvgDailyLoad = 100;
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 5;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorHard);
-        (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorHard);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorHard);
+        (plannedActivity.targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorHard);
         done();
       });
     });
 
-    it('should return unadjusted recommendation if recommending hard workout and sevenDayRampRate is zero', function (done) {
-      trainingDay.plannedActivities[0].activityType = 'hard';
+    it('should return unadjusted recommendation if recommending hard workout and sevenDayRampRate is zero', function(done) {
+      plannedActivity.activityType = 'hard';
 
       metrics.targetAvgDailyLoad = 100;
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 0;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorHard);
-        (trainingDay.plannedActivities[0].targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorHard);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorHard);
+        (plannedActivity.targetMaxLoad).should.equal(metrics.targetAvgDailyLoad * highLoadFactorHard);
         done();
       });
     });
@@ -185,7 +195,7 @@ describe('advice-load Unit Tests:', function () {
     //9/20/16: I'm turning off ramp rate adjustment until I have higher confidence in doing this.
 
     // it('should return increased recommendation if recommending hard workout and sevenDayTargetRampRate is slightly greater than sevenDayRampRate', function (done) {
-    //   trainingDay.plannedActivities[0].activityType = 'hard';
+    //   plannedActivity.activityType = 'hard';
     //   metrics.targetAvgDailyLoad = 100;
     //   metrics.sevenDayTargetRampRate = 6;
     //   metrics.sevenDayRampRate = 5.9;
@@ -193,14 +203,14 @@ describe('advice-load Unit Tests:', function () {
     //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
     //     should.not.exist(err);
     //     should.exist(trainingDay);
-    //     (trainingDay.plannedActivities[0].targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
-    //     (trainingDay.plannedActivities[0].targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
+    //     (plannedActivity.targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
+    //     (plannedActivity.targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
     //     done();
     //   });
     // });
 
     // it('should return decreased recommendation if recommending moderate workout and sevenDayTargetRampRate is slightlyless than sevenDayRampRate', function (done) {
-    //   trainingDay.plannedActivities[0].activityType = 'moderate';
+    //   plannedActivity.activityType = 'moderate';
     //   metrics.targetAvgDailyLoad = 100;
     //   metrics.sevenDayTargetRampRate = 5.9;
     //   metrics.sevenDayRampRate = 6;
@@ -208,14 +218,14 @@ describe('advice-load Unit Tests:', function () {
     //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
     //     should.not.exist(err);
     //     should.exist(trainingDay);
-    //     (trainingDay.plannedActivities[0].targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
-    //     (trainingDay.plannedActivities[0].targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
+    //     (plannedActivity.targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
+    //     (plannedActivity.targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
     //     done();
     //   });
     // });
 
     // it('should not increase recommendation more than limit if recommending hard workout and sevenDayTargetRampRate is greater than sevenDayRampRate', function (done) {
-    //   trainingDay.plannedActivities[0].activityType = 'hard';
+    //   plannedActivity.activityType = 'hard';
     //   metrics.targetAvgDailyLoad = 100;
     //   metrics.sevenDayTargetRampRate = 9;
     //   metrics.sevenDayRampRate = 1;
@@ -223,16 +233,16 @@ describe('advice-load Unit Tests:', function () {
     //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
     //     should.not.exist(err);
     //     should.exist(trainingDay);
-    //     (trainingDay.plannedActivities[0].targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
-    //     (trainingDay.plannedActivities[0].targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
-    //     (trainingDay.plannedActivities[0].targetMinLoad).should.be.belowOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorHard * (1 + rampRateAdjustmentLimit));
-    //     (trainingDay.plannedActivities[0].targetMaxLoad).should.be.belowOrEqual(metrics.targetAvgDailyLoad * highLoadFactorHard * (1 + rampRateAdjustmentLimit));
+    //     (plannedActivity.targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
+    //     (plannedActivity.targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
+    //     (plannedActivity.targetMinLoad).should.be.belowOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorHard * (1 + rampRateAdjustmentLimit));
+    //     (plannedActivity.targetMaxLoad).should.be.belowOrEqual(metrics.targetAvgDailyLoad * highLoadFactorHard * (1 + rampRateAdjustmentLimit));
     //     done();
     //   });
     // });
 
     // it('should return not decrease recommendation more than limit if recommending moderate workout and sevenDayTargetRampRate is less than sevenDayRampRate', function (done) {
-    //   trainingDay.plannedActivities[0].activityType = 'moderate';
+    //   plannedActivity.activityType = 'moderate';
     //   metrics.targetAvgDailyLoad = 100;
     //   metrics.sevenDayTargetRampRate = 0;
     //   metrics.sevenDayRampRate = 9;
@@ -240,18 +250,18 @@ describe('advice-load Unit Tests:', function () {
     //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
     //     should.not.exist(err);
     //     should.exist(trainingDay);
-    //     (trainingDay.plannedActivities[0].targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
-    //     (trainingDay.plannedActivities[0].targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
-    //     (trainingDay.plannedActivities[0].targetMinLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorModerate * (1 - rampRateAdjustmentLimit));
-    //     (trainingDay.plannedActivities[0].targetMaxLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * highLoadFactorModerate * (1 - rampRateAdjustmentLimit));
+    //     (plannedActivity.targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
+    //     (plannedActivity.targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
+    //     (plannedActivity.targetMinLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorModerate * (1 - rampRateAdjustmentLimit));
+    //     (plannedActivity.targetMaxLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * highLoadFactorModerate * (1 - rampRateAdjustmentLimit));
     //     done();
     //   });
     // });
 
   });
 
-  afterEach(function (done) {
-    TrainingDay.remove().exec(function () {
+  afterEach(function(done) {
+    TrainingDay.remove().exec(function() {
       User.remove().exec(done);
     });
   });

@@ -7,11 +7,16 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceEngine = require('../../server/lib/advice-engine');
 
-var user, trainingDate, trainingDay, metrics;
+var user,
+  trainingDate,
+  trainingDay,
+  source = 'advised',
+  metrics;
 
 describe('advice-rest Unit Tests:', function() {
 
@@ -33,11 +38,12 @@ describe('advice-rest Unit Tests:', function() {
     it('should return rest if today is a preferred rest day', function(done) {
       user.preferredRestDays = [moment(trainingDate).day().toString()];
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('preferred rest day');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/rest/);
+        (plannedActivity.rationale).should.containEql('preferred rest day');
         done();
       });
     });
@@ -47,10 +53,11 @@ describe('advice-rest Unit Tests:', function() {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
       metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match(/rest/);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.not.match(/rest/);
         done();
       });
     });
@@ -58,11 +65,12 @@ describe('advice-rest Unit Tests:', function() {
     it('should return rest if overly fatigued', function(done) {
       metrics.form = adviceConstants.restNeededThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('Sufficiently fatigued to recommend rest');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/rest/);
+        (plannedActivity.rationale).should.containEql('Sufficiently fatigued to recommend rest');
         done();
       });
     });
@@ -71,11 +79,12 @@ describe('advice-rest Unit Tests:', function() {
       metrics.form = adviceConstants.restNeededForPeakingThreshold;
       trainingDay.period = 'peak';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('Sufficiently fatigued to recommend rest');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/rest/);
+        (plannedActivity.rationale).should.containEql('Sufficiently fatigued to recommend rest');
         done();
       });
     });
@@ -84,10 +93,11 @@ describe('advice-rest Unit Tests:', function() {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
       metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match(/rest/);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.not.match(/rest/);
         done();
       });
     });
@@ -96,11 +106,12 @@ describe('advice-rest Unit Tests:', function() {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
       metrics.form = adviceConstants.restNeededForTestingThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('Rest recommended in preparation for testing');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/rest/);
+        (plannedActivity.rationale).should.containEql('Rest recommended in preparation for testing');
         done();
       });
     });
@@ -110,10 +121,11 @@ describe('advice-rest Unit Tests:', function() {
       metrics.form = adviceConstants.restNeededForTestingThreshold;
       trainingDay.period = 'peak';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match(/rest/);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.not.match(/rest/);
         done();
       });
     });
@@ -126,11 +138,12 @@ describe('advice-rest Unit Tests:', function() {
 
         trainingDay.daysUntilNextGoalEvent = 2;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
-          (trainingDay.plannedActivities[0].rationale).should.containEql('goal event is in two days');
+          let plannedActivity = util.getPlannedActivity(trainingDay, source);
+          (plannedActivity.activityType).should.match(/rest/);
+          (plannedActivity.rationale).should.containEql('goal event is in two days');
           done();
         });
       });
@@ -144,11 +157,12 @@ describe('advice-rest Unit Tests:', function() {
 
         trainingDay.daysUntilNextPriority2Event = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.match(/rest/);
-          (trainingDay.plannedActivities[0].rationale).should.containEql('priority 2 event is in one day');
+          let plannedActivity = util.getPlannedActivity(trainingDay, source);
+          (plannedActivity.activityType).should.match(/rest/);
+          (plannedActivity.rationale).should.containEql('priority 2 event is in one day');
           done();
         });
       });

@@ -7,11 +7,15 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceEngine = require('../../server/lib/advice-engine');
 
-var user, trainingDate, trainingDay;
+var user,
+  trainingDate,
+  trainingDay,
+  source = 'advised';
 
 describe('advice-choice Unit Tests:', function () {
 
@@ -31,21 +35,23 @@ describe('advice-choice Unit Tests:', function () {
   describe('Choice Rules', function () {
     it('should return choice recommendation if in transition period', function (done) {
       trainingDay.period = 'transition';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/choice/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('Is transition period, user can slack off');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/choice/);
+        (plannedActivity.rationale).should.containEql('Is transition period, user can slack off');
         done();
       });
     });
 
     it('should not return choice recommendation if not in transition period', function (done) {
       trainingDay.period = 'base';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match(/choice/);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.not.match(/choice/);
         done();
       });
     });

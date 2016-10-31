@@ -7,6 +7,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
@@ -16,6 +17,7 @@ var path = require('path'),
 var user,
   trainingDate,
   trainingDay,
+  source = 'advised',
   params = {};
 
 describe('advice-moderate Unit Tests:', function() {
@@ -47,10 +49,11 @@ describe('advice-moderate Unit Tests:', function() {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
+          let plannedActivity = util.getPlannedActivity(trainingDay, source);
+          (plannedActivity.activityType).should.not.match(/moderate/);
           done();
         });
       });
@@ -68,10 +71,11 @@ describe('advice-moderate Unit Tests:', function() {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
-          (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
+          let plannedActivity = util.getPlannedActivity(trainingDay, source);
+          (plannedActivity.activityType).should.not.match(/moderate/);
           done();
         });
       });
@@ -106,11 +110,12 @@ describe('advice-moderate Unit Tests:', function() {
                 console.log('updateMetrics: ' + err);
               }
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
-                (trainingDay.plannedActivities[0].activityType).should.match(/moderate/);
-                (trainingDay.plannedActivities[0].rationale).should.containEql('Yesterday was a hard day, tomorrow is a preferred rest day');
+                let plannedActivity = util.getPlannedActivity(trainingDay, source);
+                (plannedActivity.activityType).should.match(/moderate/);
+                (plannedActivity.rationale).should.containEql('Yesterday was a hard day, tomorrow is a preferred rest day');
                 done();
               });
             });
@@ -149,10 +154,11 @@ describe('advice-moderate Unit Tests:', function() {
               }
 
               trainingDay.period = 'peak';
-              return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
-                (trainingDay.plannedActivities[0].activityType).should.not.match(/moderate/);
+                let plannedActivity = util.getPlannedActivity(trainingDay, source);
+                (plannedActivity.activityType).should.not.match(/moderate/);
                 done();
               });
             });

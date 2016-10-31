@@ -6,14 +6,18 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceEngine = require('../../server/lib/advice-engine');
 
-var user, trainingDate, trainingDay;
+var user,
+  trainingDate,
+  trainingDay,
+  source = 'advised';
 
-describe('advice-event Unit Tests:', function () {
+describe('advice-event Unit Tests:', function() {
 
-  beforeEach(function (done) {
+  beforeEach(function(done) {
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
@@ -26,8 +30,8 @@ describe('advice-event Unit Tests:', function () {
     });
   });
 
-  describe('Event Rules', function () {
-    it('should return goal rationale if today is a priority 1 event', function (done) {
+  describe('Event Rules', function() {
+    it('should return goal rationale if today is a priority 1 event', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -40,19 +44,19 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 1;
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/event/);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('priority 1 (goal) event');
+            let plannedActivity = util.getPlannedActivity(trainingDay, source);
+            (plannedActivity.activityType).should.match(/event/);
+            (plannedActivity.rationale).should.containEql('priority 1 (goal) event');
             done();
           });
         });
       });
     });
 
-    it('should return medium priority rationale if today is a priority 2 event', function (done) {
+    it('should return medium priority rationale if today is a priority 2 event', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -65,19 +69,19 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 2;
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/event/);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('medium priority');
+            let plannedActivity = util.getPlannedActivity(trainingDay, source);
+            (plannedActivity.activityType).should.match(/event/);
+            (plannedActivity.rationale).should.containEql('medium priority');
             done();
           });
         });
       });
     });
 
-    it('should return low priority rationale if today is a priority 3 event', function (done) {
+    it('should return low priority rationale if today is a priority 3 event', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -90,19 +94,19 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 3;
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            //console.log('returned trainingDay: ' + trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.match(/event/);
-            (trainingDay.plannedActivities[0].rationale).should.containEql('low priority');
+            let plannedActivity = util.getPlannedActivity(trainingDay, source);
+            (plannedActivity.activityType).should.match(/event/);
+            (plannedActivity.rationale).should.containEql('low priority');
             done();
           });
         });
       });
     });
 
-    it('should not return goal if today is not a priority (goal) event', function (done) {
+    it('should not return goal if today is not a priority (goal) event', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -113,17 +117,18 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
+            let plannedActivity = util.getPlannedActivity(trainingDay, source);
+            (plannedActivity.activityType).should.not.match(/event/);
             done();
           });
         });
       });
     });
 
-    it('should not return goal if today is a priority 2 event but in peak period', function (done) {
+    it('should not return goal if today is a priority 2 event but in peak period', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -137,17 +142,18 @@ describe('advice-event Unit Tests:', function () {
           trainingDay.scheduledEventRanking = 2;
           trainingDay.period = 'peak';
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
+            let plannedActivity = util.getPlannedActivity(trainingDay, source);
+            (plannedActivity.activityType).should.not.match(/event/);
             done();
           });
         });
       });
     });
 
-    it('should not return goal if today is a priority 3 event but in peak period', function (done) {
+    it('should not return goal if today is a priority 3 event but in peak period', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -161,10 +167,11 @@ describe('advice-event Unit Tests:', function () {
           trainingDay.scheduledEventRanking = 3;
           trainingDay.period = 'peak';
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
-            (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
+            let plannedActivity = util.getPlannedActivity(trainingDay, source);
+            (plannedActivity.activityType).should.not.match(/event/);
             done();
           });
         });
@@ -173,8 +180,8 @@ describe('advice-event Unit Tests:', function () {
 
   });
 
-  afterEach(function (done) {
-    TrainingDay.remove().exec(function () {
+  afterEach(function(done) {
+    TrainingDay.remove().exec(function() {
       User.remove().exec(done);
     });
   });

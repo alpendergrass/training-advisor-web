@@ -7,11 +7,15 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceEngine = require('../../server/lib/advice-engine');
 
-var user, trainingDate, trainingDay;
+var user,
+  trainingDate,
+  trainingDay,
+  source = 'advised';
 
 describe('advice-hard Unit Tests:', function () {
 
@@ -31,32 +35,35 @@ describe('advice-hard Unit Tests:', function () {
   describe('Hard Rules', function () {
     it('should return hard recommendation if in peak period and no other recommendation applies', function (done) {
       trainingDay.period = 'peak';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/hard/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('recommending hard ride but load will be smaller');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/hard/);
+        (plannedActivity.rationale).should.containEql('recommending hard ride but load will be smaller');
         done();
       });
     });
 
     it('should return hard recommendation if in race period and no other recommendation applies', function (done) {
       trainingDay.period = 'race';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/hard/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('recommending hard ride but load will be smaller');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/hard/);
+        (plannedActivity.rationale).should.containEql('recommending hard ride but load will be smaller');
         done();
       });
     });
 
     it('should return hard recommendation if no other recommendation applies', function (done) {
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/hard/);
-        (trainingDay.plannedActivities[0].rationale).should.containEql('No other recommendation, so hard');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/hard/);
+        (plannedActivity.rationale).should.containEql('No other recommendation, so hard');
         done();
       });
     });

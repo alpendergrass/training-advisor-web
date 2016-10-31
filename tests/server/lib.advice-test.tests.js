@@ -7,11 +7,15 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceEngine = require('../../server/lib/advice-engine');
 
-var user, trainingDate, trainingDay;
+var user,
+  source = 'advised',
+  trainingDate,
+  trainingDay;
 
 describe('advice-test Unit Tests:', function () {
   beforeEach(function (done) {
@@ -31,10 +35,11 @@ describe('advice-test Unit Tests:', function () {
     it('should not return test recommendation if testing is not due', function (done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match('test');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.not.match('test');
         done();
       });
     });
@@ -43,10 +48,11 @@ describe('advice-test Unit Tests:', function () {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.match(/test/);
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.match(/test/);
         done();
       });
     });
@@ -56,10 +62,11 @@ describe('advice-test Unit Tests:', function () {
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
       trainingDay.period = 'peak';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
-        (trainingDay.plannedActivities[0].activityType).should.not.match('test');
+        let plannedActivity = util.getPlannedActivity(trainingDay, source);
+        (plannedActivity.activityType).should.not.match('test');
         done();
       });
     });

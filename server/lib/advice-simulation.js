@@ -31,7 +31,7 @@ var rules = [{
 //     }
 
 //     if (count < 1) {
-//       trainingDay.plannedActivities[0].rationale += ' Simulation is overdue.';
+//       this.plannedActivity.rationale += ' Simulation is overdue.';
 //     }
 
 //     return callback(null, count < 1);
