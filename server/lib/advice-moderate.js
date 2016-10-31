@@ -13,15 +13,15 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'moderate';
-      this.trainingDay.plannedActivities[0].rationale += ' Yesterday was a hard day, tomorrow is a preferred rest day so recommending moderate.';
-      this.trainingDay.plannedActivities[0].advice += ' Yesterday was a hard day and tomorrow is a planned rest day, so';
+      this.plannedActivity.activityType = 'moderate';
+      this.plannedActivity.rationale += ' Yesterday was a hard day, tomorrow is a preferred rest day so recommending moderate.';
+      this.plannedActivity.advice += ' Yesterday was a hard day and tomorrow is a planned rest day, so';
       if (this.trainingDay.period === 'base' || this.trainingDay.period === 'transition') {
-        this.trainingDay.plannedActivities[0].rationale += ` We are in ${this.trainingDay.period} so recommending endurance ride.`;
-        this.trainingDay.plannedActivities[0].advice += ' do an endurance ride today. Intensity should be around 0.80.';
+        this.plannedActivity.rationale += ` We are in ${this.trainingDay.period} so recommending endurance ride.`;
+        this.plannedActivity.advice += ' do an endurance ride today. Intensity should be around 0.80.';
       } else {
-        this.trainingDay.plannedActivities[0].rationale += ` We are in ${this.trainingDay.period} so recommending tempo ride.`;
-        this.trainingDay.plannedActivities[0].advice += ' ride tempo today. Intensity should be around 0.85.';
+        this.plannedActivity.rationale += ` We are in ${this.trainingDay.period} so recommending tempo ride.`;
+        this.plannedActivity.advice += ' ride tempo today. Intensity should be around 0.85.';
       }
       R.stop();
     }

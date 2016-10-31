@@ -12,9 +12,9 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'rest';
-      this.trainingDay.plannedActivities[0].rationale += ' This is a preferred rest day.';
-      this.trainingDay.plannedActivities[0].advice += ' Today is one of your planned rest days, so rest.';
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' This is a preferred rest day.';
+      this.plannedActivity.advice += ' Today is one of your planned rest days, so rest.';
       R.stop();
     }
   },
@@ -28,9 +28,9 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'rest';
-      this.trainingDay.plannedActivities[0].rationale += ' Sufficiently fatigued to recommend rest.';
-      this.trainingDay.plannedActivities[0].advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.';
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' Sufficiently fatigued to recommend rest.';
+      this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.';
       R.stop();
     }
   },
@@ -42,9 +42,9 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'rest';
-      this.trainingDay.plannedActivities[0].rationale += ' Rest recommended as goal event is in two days.';
-      this.trainingDay.plannedActivities[0].advice += ' Rest is needed as your goal event is in two days. If you ride, go very easy, just loosen the legs.';
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' Rest recommended as goal event is in two days.';
+      this.plannedActivity.advice += ' Rest is needed as your goal event is in two days. If you ride, go very easy, just loosen the legs.';
       R.stop();
     }
   },
@@ -57,9 +57,9 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'rest';
-      this.trainingDay.plannedActivities[0].rationale += ' Rest recommended as priority 2 event is in one day.';
-      this.trainingDay.plannedActivities[0].advice += ' Rest is recommended as you have a medium priority event tomorrow. If you ride, go easy.';
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' Rest recommended as priority 2 event is in one day.';
+      this.plannedActivity.advice += ' Rest is recommended as you have a medium priority event tomorrow. If you ride, go easy.';
       R.stop();
     }
   },
@@ -75,9 +75,9 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.trainingDay.plannedActivities[0].activityType = 'rest';
-      this.trainingDay.plannedActivities[0].rationale += ' Testing is due. Rest recommended in preparation for testing.';
-      this.trainingDay.plannedActivities[0].advice += ' Testing is due but form is not sufficiently recovered for testing. Rest is needed in preparation for testing, so rest today.';
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' Testing is due. Rest recommended in preparation for testing.';
+      this.plannedActivity.advice += ' Testing is due but form is not sufficiently recovered for testing. Rest is needed in preparation for testing, so rest today.';
       R.stop();
     }
   }

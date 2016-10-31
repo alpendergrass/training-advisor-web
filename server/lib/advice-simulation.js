@@ -9,9 +9,9 @@ var rules = [{
     );
   },
   'consequence': function(R) {
-    this.trainingDay.plannedActivities[0].activityType = 'simulation';
-    this.trainingDay.plannedActivities[0].rationale += ' We are in a build period, we are sufficiently rested and today is our preferred simulation day.';
-    this.trainingDay.plannedActivities[0].advice += ' Today is your preferred simulation day, so do a ride similar to your goal event.';
+    this.plannedActivity.activityType = 'simulation';
+    this.plannedActivity.rationale += ' We are in a build period, we are sufficiently rested and today is our preferred simulation day.';
+    this.plannedActivity.advice += ' Today is your preferred simulation day, so do a ride similar to your goal event.';
     R.stop();
   }
 // Trello: re-implement simulation overdue rule.
