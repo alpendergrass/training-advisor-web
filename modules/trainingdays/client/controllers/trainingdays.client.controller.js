@@ -301,7 +301,9 @@ angular.module('trainingDays')
             return '#BD7E7D';
           }
 
-          if (td.plannedActivities[0] && td.plannedActivities[0].activityType === 'test') {
+          let planActivity = getPlannedActivity(td, 'plangeneration');
+
+          if (planActivity && planActivity.activityType === 'test') {
             return '#B2DBDA';
           }
 
@@ -977,6 +979,31 @@ angular.module('trainingDays')
         var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
         var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
 
+        $scope.getAdvice = function(isValid) {
+          $scope.error = null;
+
+          if (!isValid) {
+            $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
+            return false;
+          }
+
+          let getAdviceDate = moment(this.adviceDate).startOf('day').toDate();
+
+          TrainingDays.getAdvice({
+            trainingDate: getAdviceDate.toISOString(),
+            alternateActivity: null
+          }, function(trainingDay) {
+            $location.path('trainingDays/' + trainingDay._id);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented advice retrieval.';
+            }
+          });
+        };
+
         $scope.adviceDateOptions = {
           formatYear: 'yy',
           startingDay: 1,
@@ -1010,16 +1037,20 @@ angular.module('trainingDays')
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
           $scope.showFormAndFitness = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
-          $scope.metricsType = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') ? 'actual' : 'planned';
+          $scope.source = moment(trainingDay.date).isSameOrBefore($scope.today, 'day') ? 'advised' : 'plangeneration';
+          $scope.metricsType = moment(trainingDay.date).isSameOrBefore($scope.today, 'day') ? 'actual' : 'planned';
+          resetViewObjects(trainingDay);
         }
 
-        $scope.getMetrics = function() {
-          return _.find($scope.trainingDay.metrics, ['metricsType', $scope.metricsType]);
-        };
+        function resetViewObjects(trainingDay) {
+          $scope.plannedActivity = getPlannedActivity(trainingDay, $scope.source);
+          $scope.requestedActivity = getPlannedActivity(trainingDay, 'requested');
+          $scope.metrics = getMetrics($scope.trainingDay, $scope.metricsType);
+        }
 
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
+            dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Nothing Planned';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
@@ -1074,7 +1105,11 @@ angular.module('trainingDays')
           }
 
           if (String(n) === priority && (n >= 0 && n <= 3) || n === 9) {
-            return $scope.update(true);
+            return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+              if (trainingDay) {
+                resetViewObjects(trainingDay);
+              }
+            });
           }
 
           return 'Valid eventRankings are 0, 1, 2 and 3. And 9.';
@@ -1089,7 +1124,11 @@ angular.module('trainingDays')
           }
 
           if (String(n) === estimate && n >= 0 && n <= 999) {
-            return $scope.update(true);
+            return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+              if (trainingDay) {
+                resetViewObjects(trainingDay);
+              }
+            });
           }
 
           return 'Estimated load must be a positive whole number less than 1000.';
@@ -1102,6 +1141,7 @@ angular.module('trainingDays')
 
           $scope.update(true, $scope.trainingDay, function(trainingDay) {
             if (trainingDay) {
+              resetViewObjects(trainingDay);
               $scope.checkGiveFeedback($scope.trainingDay);
             }
           });
@@ -1118,7 +1158,11 @@ angular.module('trainingDays')
 
         $scope.deleteCompletedActivity = function(index) {
           $scope.trainingDay.completedActivities.splice(index, 1);
-          return $scope.update(true);
+          return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+            if (trainingDay) {
+              resetViewObjects(trainingDay);
+            }
+          });
         };
 
         $scope.downloadActivities = function(provider) {
@@ -1131,6 +1175,7 @@ angular.module('trainingDays')
             //We need to correct the date coming from server-side as it might not have self corrected yet.
             trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
             $scope.trainingDay = trainingDay;
+            resetViewObjects(trainingDay);
             toastr[trainingDay.lastStatus.type](trainingDay.lastStatus.text, trainingDay.lastStatus.title);
             if (trainingDay.lastStatus.type === 'success') {
               $scope.checkGiveFeedback($scope.trainingDay);
@@ -1142,6 +1187,24 @@ angular.module('trainingDays')
             } else {
               //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
               $scope.error = 'Server error prevented activity download.';
+            }
+          });
+        };
+
+        $scope.advise = function() {
+          TrainingDays.getAdvice({
+            trainingDate: $scope.trainingDay.date.toISOString(),
+            alternateActivity: $scope.alternateActivity || null
+          }, function(trainingDay) {
+            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+            $scope.trainingDay = trainingDay;
+            resetViewObjects(trainingDay);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented advice retrieval.';
             }
           });
         };
@@ -1199,39 +1262,6 @@ angular.module('trainingDays')
           }
 
           return false;
-        });
-      };
-
-      $scope.getAdvice = function(isValid, adviceDate) {
-        $scope.error = null;
-        var getAdviceDate;
-
-        if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
-          return false;
-        }
-
-        //Use adviceDate if passed in. Use this.adviceDate otherwise, which is likely the date
-        //selected on the getAdvice page.
-        getAdviceDate = adviceDate || this.adviceDate;
-        getAdviceDate = moment(getAdviceDate).startOf('day').toDate();
-
-        TrainingDays.getAdvice({
-          trainingDate: getAdviceDate.toISOString(),
-          alternateActivity: $scope.alternateActivity || null
-        }, function(trainingDay) {
-          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-          // We reload the trainingDay in case we are on the view TD page.
-          $scope.trainingDay = trainingDay;
-          // We do location.path in case we are on the getAdvice page.
-          $location.path('trainingDays/' + trainingDay._id);
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented advice retrieval.';
-          }
         });
       };
 

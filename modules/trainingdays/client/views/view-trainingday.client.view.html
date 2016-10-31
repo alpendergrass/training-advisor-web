@@ -13,9 +13,9 @@
     </h4>
   </div>
   <div class="pull-right">
-    <a ng-show="trainingDay.completedActivities.length < 1 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="getAdvice(true, trainingDay.date)" title="Get advice">
-      <span ng-show="trainingDay.plannedActivities.length < 1">Get Advice</span>
-      <span ng-show="trainingDay.plannedActivities.length > 0">Update Advice</span>
+    <a ng-show="trainingDay.completedActivities.length < 1 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="advise()" title="Get advice">
+      <span ng-hide="plannedActivity">Get Advice</span>
+      <span ng-show="plannedActivity">Update Advice</span>
     </a>
     <a class="btn btn-default btn-sm" ng-click="remove();" title="Delete training day">
       <i class="glyphicon glyphicon-trash"></i>
@@ -33,48 +33,48 @@
       <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9"><small>Estimated Training Load: <a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedLoad}}</a></small></span>
     </h4>
   </div>
-  <div ng-show="trainingDay.plannedActivities[0].activityType">
+  <div ng-show="plannedActivity.activityType">
     <p>
       <div>
         <label>Today's Advice:
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'choice'">You decide. Cross-training is a viable alternative today.</span>
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'rest'">You should rest.</span>
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'easy'">You should go easy.</span>
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'moderate'">You should do a moderate ride.</span>
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'hard'">You should go hard.</span>
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'test'">You should do a threshold power test.</span>
-          <span ng-show="trainingDay.plannedActivities[0].activityType === 'simulation'">You should do a goal event simulation.</span>
+          <span ng-show="plannedActivity.activityType === 'choice'">You decide. Cross-training is a viable alternative today.</span>
+          <span ng-show="plannedActivity.activityType === 'rest'">You should rest.</span>
+          <span ng-show="plannedActivity.activityType === 'easy'">You should go easy.</span>
+          <span ng-show="plannedActivity.activityType === 'moderate'">You should do a moderate ride.</span>
+          <span ng-show="plannedActivity.activityType === 'hard'">You should go hard.</span>
+          <span ng-show="plannedActivity.activityType === 'test'">You should do a threshold power test.</span>
+          <span ng-show="plannedActivity.activityType === 'simulation'">You should do a goal event simulation.</span>
         </label>
       </div>
       <div>
-        {{trainingDay.plannedActivities[0].advice}}
-        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], trainingDay.plannedActivities[0].activityType) || trainingDay.estimatedLoad === trainingDay.plannedActivities[0].targetMinLoad">
-          Today's load should be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
+        {{plannedActivity.advice}}
+        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], plannedActivity.activityType) || trainingDay.estimatedLoad === plannedActivity.targetMinLoad">
+          Today's load should be between <strong><u>{{plannedActivity.targetMinLoad}}</u></strong> and <strong><u>{{plannedActivity.targetMaxLoad}}</u></strong>.
         </span>
-        <span ng-show="trainingDay.plannedActivities[0].activityType == 'event' && trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9 && trainingDay.estimatedLoad < 1">
-          You provided no load estimate for this event. Our load recommendation for a workout today would be between <strong><u>{{trainingDay.plannedActivities[0].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[0].targetMaxLoad}}</u></strong>.
+        <span ng-show="plannedActivity.activityType == 'event' && trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9 && trainingDay.estimatedLoad < 1">
+          You provided no load estimate for this event. Our load recommendation for a workout today would be between <strong><u>{{plannedActivity.targetMinLoad}}</u></strong> and <strong><u>{{plannedActivity.targetMaxLoad}}</u></strong>.
         </span>
-         <span ng-show="trainingDay.plannedActivities[0].activityType == 'event' && trainingDay.estimatedLoad">
+         <span ng-show="plannedActivity.activityType == 'event' && trainingDay.estimatedLoad">
           Your load estimate for this event is <strong><u>{{trainingDay.estimatedLoad}}</u></strong>.
         </span>
-        <span ng-show="_.includes(['easy'], trainingDay.plannedActivities[0].activityType)">
-          Keep Training Load below <strong>{{trainingDay.plannedActivities[0].targetMaxLoad}}</strong>.
+        <span ng-show="_.includes(['easy'], plannedActivity.activityType)">
+          Keep Training Load below <strong>{{plannedActivity.targetMaxLoad}}</strong>.
         </span>
       </div>
     </p>
     <p>
       <div class="form-inline form-group" ng-show="showGetAdvice">
         <label for="alternativeActivityType">I want to </label>
-        <select name="alternativeActivityType" class="form-control" ng-model="alternateActivity" ng-options="activity.value as activity.text for activity in activityTypes | filter: {value: '!' + trainingDay.plannedActivities[0].activityType }" ng-change="getAdvice(true, trainingDay.date)">
+        <select name="alternativeActivityType" class="form-control" ng-model="alternateActivity" ng-options="activity.value as activity.text for activity in activityTypes | filter: {value: '!' + plannedActivity.activityType }" ng-change="advise()">
           <option value="">Pick an alternative</option>
         </select>
         <label>instead.</label>
       </div>
-      <div ng-show="trainingDay.plannedActivities[1]">
-        <span ng-show="trainingDay.plannedActivities[1].activityType !== 'test' && trainingDay.plannedActivities[1].activityType !== 'simulation'">If you do a <strong>{{trainingDay.plannedActivities[1].activityType}} ride</strong> your Training Load should be between <strong><u>{{trainingDay.plannedActivities[1].targetMinLoad}}</u></strong> and <strong><u>{{trainingDay.plannedActivities[1].targetMaxLoad}}</u></strong>.</span>
-        <span ng-show="trainingDay.plannedActivities[1].activityType === 'simulation' && trainingDay.plannedActivities[1].targetMinLoad > 0">If you do a <strong>goal event simulation</strong>, your Training Load should be approximately <strong><u>{{trainingDay.plannedActivities[1].targetMinLoad}}</u></strong> TSS®.</span>
-        <span ng-show="trainingDay.plannedActivities[1].activityType === 'simulation' && trainingDay.plannedActivities[1].targetMinLoad === 0">A <strong>goal event simulation</strong> is not possible as no future goal events exist in the current season.</span>
-        <span ng-show="trainingDay.plannedActivities[1].activityType === 'test'">If you do a <strong>threshold power test</strong>, be sure to record your new FTP and test date on your My Profile page.</span>
+      <div ng-show="requestedActivity">
+        <span ng-show="requestedActivity.activityType !== 'test' && requestedActivity.activityType !== 'simulation'">If you do a <strong>{{requestedActivity.activityType}} ride</strong> your Training Load should be between <strong><u>{{requestedActivity.targetMinLoad}}</u></strong> and <strong><u>{{requestedActivity.targetMaxLoad}}</u></strong>.</span>
+        <span ng-show="requestedActivity.activityType === 'simulation' && requestedActivity.targetMinLoad > 0">If you do a <strong>goal event simulation</strong>, your Training Load should be approximately <strong><u>{{requestedActivity.targetMinLoad}}</u></strong> TSS®.</span>
+        <span ng-show="requestedActivity.activityType === 'simulation' && requestedActivity.targetMinLoad === 0">A <strong>goal event simulation</strong> is not possible as no future goal events exist in the current season.</span>
+        <span ng-show="requestedActivity.activityType === 'test'">If you do a <strong>threshold power test</strong>, be sure to record your new FTP and test date on your My Profile page.</span>
       </div>
     </p>
     <hr />
@@ -82,16 +82,16 @@
   <div ng-show="showFormAndFitness">
       <div>
         <label class="title">Fitness: </label>
-        <span>{{ getMetrics().fitness }}</span>
+        <span>{{ metrics.fitness }}</span>
       </div>
       <div>
         <label class="title">Fatigue: </label>
-        <span>{{ getMetrics().fatigue }}</span>
+        <span>{{ metrics.fatigue }}</span>
       </div>
     <p>
-      <label>Form:</label> {{ getMetrics().form }}
+      <label>Form:</label> {{ metrics.form }}
       <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate - today is <span ng-show="trainingDay.startingPoint">your season start</span><span ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">a true-up day</span></abbr>
-      <span ng-show="authentication.user.levelOfDetail > 2"><br/>Seven Day Fitness Ramp Rate is {{ getMetrics().sevenDayRampRate }}. Target Ramp Rate is {{ getMetrics().sevenDayTargetRampRate }}.</span>
+      <span ng-show="authentication.user.levelOfDetail > 2"><br/>Seven Day Fitness Ramp Rate is {{ metrics.sevenDayRampRate }}. Target Ramp Rate is {{ metrics.sevenDayTargetRampRate }}.</span>
     </p>
   </div>
   <p>
@@ -174,7 +174,7 @@
   <div ng-show="authentication.user.levelOfDetail > 2">
     <small>
       <div>dateNumeric: {{trainingDay.dateNumeric}}</div>
-      <div>Rationale: {{trainingDay.plannedActivities[0].rationale }}</div>
+      <div>Rationale: {{plannedActivity.rationale }}</div>
       <div>startingPoint: {{trainingDay.startingPoint }}</div>
       <div>period: {{trainingDay.period }}</div>
       <div>loadRating: {{trainingDay.loadRating}}</div>
@@ -182,11 +182,11 @@
       <div>daysUntilNextPriority2Event: {{trainingDay.daysUntilNextPriority2Event}}</div>
       <div>daysUntilNextPriority3Event: {{trainingDay.daysUntilNextPriority3Event}}</div>
       <div>user.fatigueTimeConstant: {{authentication.user.fatigueTimeConstant}}</div>
-      <div>sevenDayRampRate: {{getMetrics().sevenDayRampRate}}</div>
-      <div>sevenDayTargetRampRate: {{getMetrics().sevenDayTargetRampRate}}</div>
-      <div>rampRateAdjustmentFactor: {{getMetrics().rampRateAdjustmentFactor}}</div>
-      <div>dailyTargetRampRate: {{getMetrics().dailyTargetRampRate}}</div>
-      <div>targetAvgDailyLoad: {{getMetrics().targetAvgDailyLoad}}</div>
+      <div>sevenDayRampRate: {{metrics.sevenDayRampRate}}</div>
+      <div>sevenDayTargetRampRate: {{metrics.sevenDayTargetRampRate}}</div>
+      <div>rampRateAdjustmentFactor: {{metrics.rampRateAdjustmentFactor}}</div>
+      <div>dailyTargetRampRate: {{metrics.dailyTargetRampRate}}</div>
+      <div>targetAvgDailyLoad: {{metrics.targetAvgDailyLoad}}</div>
       <em class="text-muted">
         Created
         <span ng-bind="trainingDay.created | date:'medium'"></span>
