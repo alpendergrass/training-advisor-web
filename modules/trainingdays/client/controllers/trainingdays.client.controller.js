@@ -254,32 +254,22 @@ angular.module('trainingDays')
 
 
       $scope.viewSeason = function() {
-        var loadArray,
-          formArray,
-          fitnessArray,
-          fatigueArray,
-          formPointBorderColors,
-          formPointRadius,
-          loadBackgroundColors;
+        var actualLoadArray,
+          actualFormArray,
+          actualFitnessArray,
+          actualFatigueArray,
+          actualFormPointBorderColors,
+          actualFormPointRadius,
+          planLoadArray,
+          planFormArray,
+          planFitnessArray,
+          planLoadBackgroundColors;
 
         var getChartMetrics = function(trainingDay, metricsType) {
           return _.find(trainingDay.metrics, ['metricsType', metricsType]);
         };
 
-        var extractLoad = function(td) {
-          var load = 0;
-          if (td.completedActivities.length > 0) {
-            load = _.sumBy(td.completedActivities, function(activity) {
-              return activity.load;
-            });
-          } else if (td.plannedActivities.length > 0) {
-            load = (td.plannedActivities[0].targetMinLoad + td.plannedActivities[0].targetMaxLoad) / 2;
-          }
-
-          return load;
-        };
-
-        var setLoadBackgroundColor = function(td) {
+        var setPlanLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return '#FFA07A';
@@ -310,7 +300,7 @@ angular.module('trainingDays')
           return '#EAF1F5';
         };
 
-        var setFormPointColor = function(td) {
+        var setActualFormPointColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return '#FFA07A';
@@ -319,25 +309,67 @@ angular.module('trainingDays')
           return '#FFFFFF';
         };
 
-        var setFormPointRadius = function(td) {
+        var setActualFormPointRadius = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return 6;
           }
 
-          return 3;
+          return 0;
         };
 
-        var extractForm = function(td) {
-          return getChartMetrics(td, 'actual').form;
+        var getPlanLoad = function(td) {
+          return td.planLoad
         };
 
-        var extractFitness = function(td) {
+        var getActualLoad = function(td) {
+          var load = 0;
+
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return load;
+          }
+
+
+          if (td.completedActivities.length > 0) {
+            load = _.sumBy(td.completedActivities, function(activity) {
+              return activity.load;
+            });
+          }
+
+          return load;
+        };
+
+        var getPlanFitness = function(td) {
+          return getChartMetrics(td, 'planned').fitness;
+        };
+
+
+        var getActualFitness = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return null;
+          }
+
           return getChartMetrics(td, 'actual').fitness;
         };
 
-        var extractFatigue = function(td) {
+        var getActualFatigue = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return null;
+          }
+
           return getChartMetrics(td, 'actual').fatigue;
+        };
+
+        var getPlanForm = function(td) {
+          return getChartMetrics(td, 'planned').form;
+        };
+
+        var getActualForm = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return null;
+          }
+
+          return getChartMetrics(td, 'actual').form;
         };
 
         var extractDate = function(td) {
@@ -347,38 +379,61 @@ angular.module('trainingDays')
         var loadChart = function(callback) {
           getSeason(function() {
             if ($scope.season) {
-              loadArray = _.flatMap($scope.season, extractLoad);
-              loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
-              formPointRadius = _.flatMap($scope.season, setFormPointRadius);
-              formPointBorderColors = _.flatMap($scope.season, setFormPointColor);
-              formArray = _.flatMap($scope.season, extractForm);
-              fitnessArray = _.flatMap($scope.season, extractFitness);
-              fatigueArray = _.flatMap($scope.season, extractFatigue);
+              planLoadArray = _.flatMap($scope.season, getPlanLoad);
+              planFormArray = _.flatMap($scope.season, getPlanForm);
+              planFitnessArray = _.flatMap($scope.season, getPlanFitness);
+              actualLoadArray = _.flatMap($scope.season, getActualLoad);
+              actualFitnessArray = _.flatMap($scope.season, getActualFitness);
+              actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
+              actualFormArray = _.flatMap($scope.season, getActualForm);
+              planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
+              actualFormPointRadius = _.flatMap($scope.season, setActualFormPointRadius);
+              actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
               $scope.chartLabels = _.flatMap($scope.season, extractDate);
-              $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+              $scope.chartData = [planLoadArray, actualLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFormArray, planFitnessArray];
 
               $scope.chartDatasetOverride = [
                 {
-                  label: 'Load',
+                  label: 'Load - Planned',
                   borderWidth: 1,
-                  backgroundColor: loadBackgroundColors,
+                  backgroundColor: planLoadBackgroundColors,
                   type: 'bar'
                 },
                 {
-                  label: 'Fitness',
+                  label: 'Load - Actual',
+                  borderWidth: 1,
+                  // backgroundColor: actualLoadBackgroundColors,
+                  type: 'bar'
+                },
+                {
+                  label: 'Fatigue - Actual',
                   borderWidth: 3,
+                  pointRadius: 0,
                   type: 'line'
                 },
                 {
-                  label: 'Fatigue',
+                  label: 'Fitness - Actual',
                   borderWidth: 3,
+                  pointRadius: 0,
                   type: 'line'
                 },
                 {
-                  label: 'Form',
+                  label: 'Form - Actual',
                   borderWidth: 3,
-                  pointRadius: formPointRadius,
-                  pointBorderColor:  formPointBorderColors,
+                  pointRadius: actualFormPointRadius,
+                  pointBorderColor: actualFormPointBorderColors,
+                  type: 'line'
+                },
+                {
+                  label: 'Form - Planned',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  type: 'line'
+                },
+                {
+                  label: 'Fitness - Planned',
+                  borderWidth: 3,
+                  pointRadius: 0,
                   type: 'line'
                 }
               ];

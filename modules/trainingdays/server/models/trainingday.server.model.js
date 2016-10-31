@@ -14,7 +14,7 @@ var plannedActivityTypes = {
   message: invalidDataErrorMessage
 };
 var plannedActivitySources = {
-  values: 'advised|requested'.split('|'),
+  values: 'advised|requested|plangeneration'.split('|'),
   message: invalidDataErrorMessage
 };
 var loadRatings = {
@@ -182,7 +182,7 @@ var TrainingDaySchema = new Schema({
       enum: loadRatings
     },
   }],
-  //fitness (CTL) ramp rates
+  // Legacy below
   sevenDayRampRate: {
     type: Number,
     default: 0
@@ -207,6 +207,11 @@ var TrainingDaySchema = new Schema({
     type: String,
     default: '',
     enum: loadRatings
+  },
+  // Legacy above
+  planLoad: {
+    type: Number,
+    default: 0
   },
   trainingEffortFeedback: {
     type: Number,

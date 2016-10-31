@@ -507,6 +507,7 @@ module.exports.removePlanningActivities = function(user) {
     TrainingDay.update({
       user: user
     }, {
+      $pull: { plannedActivities: { source: 'plangeneration' } },
       $pull: { completedActivities: { source: 'plangeneration' } }
     }, {
       multi: true
