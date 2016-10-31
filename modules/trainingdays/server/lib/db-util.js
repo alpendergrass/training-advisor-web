@@ -520,6 +520,29 @@ module.exports.removePlanGenerationActivities = function(user) {
   });
 };
 
+module.exports.removePlanGenerationCompletedActivities = function(user) {
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('removePlanGenerationActivities valid user is required');
+      return reject(err);
+    }
+
+    TrainingDay.update({
+      user: user
+    }, {
+      $pull: { completedActivities: { source: 'plangeneration' } }
+    }, {
+      multi: true
+    }, function(err, rawResponse) {
+      if (err) {
+        return reject(err);
+      }
+
+      return resolve(rawResponse);
+    });
+  });
+};
+
 module.exports.copyActualMetricsToPlanned = function(user, numericDate) {
   return new Promise(function(resolve, reject) {
     if (!user) {
@@ -540,8 +563,7 @@ module.exports.copyActualMetricsToPlanned = function(user, numericDate) {
     var getTrainingDay = TrainingDay.findOne({
       user: user,
       dateNumeric: numericDate,
-      cloneOfId: null,
-      'metrics.metricsType': 'planned'
+      cloneOfId: null
     }).exec();
 
     getTrainingDay

@@ -11,10 +11,6 @@ module.exports = {
     // server: ['modules/trainingdays/tests/server/lib.download-strava.tests.js'],
     // server: ['modules/trainingdays/tests/server/lib.download-trainingpeaks.tests.js'],
     // server: ['modules/advisor/tests/server/**/*.js'],
-    // server: ['modules/advisor/tests/server/lib.advice-engine.tests.js'],
-    // server: ['modules/advisor/tests/server/lib.advice-load.tests.js'],
-    // server: ['modules/advisor/tests/server/lib.advice-easy.tests.js'],
-    // server: ['modules/advisor/tests/server/lib.advice-metrics.tests.js'],
     // server: ['modules/advisor/tests/server/lib.advice-util.tests.js'],
     // server: ['modules/users/tests/server/**/*.js'],
     e2e: ['modules/*/tests/e2e/**/*.js']

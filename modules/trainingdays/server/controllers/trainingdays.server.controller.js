@@ -6,6 +6,7 @@ var path = require('path'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require('../lib/util'),
   dbUtil = require('../lib/db-util'),
   downloadStrava = require('../lib/download-strava'),
   downloadTrainingPeaks = require('../lib/download-trainingpeaks'),
@@ -35,7 +36,7 @@ function createTrainingDay(req, callback) {
       return callback(err, null);
     }
 
-    let actualMetrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+    let actualMetrics = util.getMetrics(trainingDay, 'actual');
 
     if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
       //Preserve existing name, if any.
@@ -50,7 +51,7 @@ function createTrainingDay(req, callback) {
 
       if (req.body.startingPoint) {
         // Planning metrics should not be affected by a true-up. I think.
-        let plannedMetrics = _.find(trainingDay.metrics, ['metricsType', 'planned']);
+        let plannedMetrics = util.getMetrics(trainingDay, 'planned');
         plannedMetrics.fitness = req.body.actualFitness;
         plannedMetrics.fatigue = req.body.actualFatigue;
         plannedMetrics.form = actualMetrics.form;
@@ -304,9 +305,9 @@ exports.update = function(req, res) {
 
     params.user = req.user;
     params.numericDate = trainingDay.dateNumeric;
-    params.metricsType = 'actual';
 
     if (recomputeAdvice) {
+      params.source = 'advised';
       params.alternateActivity = null;
       // params.alertUser = true;
 
@@ -321,6 +322,7 @@ exports.update = function(req, res) {
       });
     } else {
       // update metrics for trainingDay just in case.
+      params.metricsType = 'actual';
       adviceMetrics.updateMetrics(params, function(err, trainingDay) {
         if (err) {
           return res.status(400).send({
@@ -448,7 +450,7 @@ exports.getAdvice = function(req, res) {
   params.user = req.user;
   params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
   params.alternateActivity = req.query.alternateActivity;
-  params.metricsType = 'actual';
+  params.source = params.alternateActivity ? 'requested' : 'advised';
 
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {

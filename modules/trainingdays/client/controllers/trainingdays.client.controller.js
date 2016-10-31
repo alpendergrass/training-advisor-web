@@ -50,6 +50,15 @@ angular.module('trainingDays')
         return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
       };
 
+      var getMetrics = function(trainingDay, metricsType) {
+        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
+      };
+
+      var getPlannedActivity = function(trainingDay, source) {
+        return _.find(trainingDay.plannedActivities, ['source', source]);
+      };
+
+
       var getSeason = function(callback) {
         $scope.hasStart = true;
         $scope.hasEnd = true;
@@ -114,6 +123,8 @@ angular.module('trainingDays')
       $scope.viewCalendar = function() {
         var formatDayContent = function(trainingDay) {
           var load = 0,
+            loadRating = '',
+            planActivity,
             content = '<div class="td-calendar-content',
             lengthOfFixedContent = 33;
 
@@ -154,19 +165,28 @@ angular.module('trainingDays')
           }
 
           //Display future advice
-          if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].activityType !== 'event' && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
+
+          if (moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
-            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day planned</i>';
+            planActivity = getPlannedActivity(trainingDay, 'plangeneration');
+            if (planActivity) {
+              content += '<i>' + planActivity.activityType + ' day planned</i>';
+            }
           }
+
 
           if (trainingDay.completedActivities.length > 0) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
-            content += 'Load: ';
             _.forEach(trainingDay.completedActivities, function(activity) {
               load += activity.load;
             });
-            content += load + ' - ' + trainingDay.loadRating + ' day';
+            loadRating = getMetrics(trainingDay, 'actual').loadRating;
+            content += load ? ' Load: ' + load + ' - ' + loadRating + ' day' : '';
+          } else if (!trainingDay.scheduledEventRanking) {
+            load = trainingDay.planLoad;
+            content += ' Planned load: ' + trainingDay.planLoad;
           }
+
 
           // if (trainingDay.form !== 0) {
           //   content += '<br><i>Form: ' + trainingDay.form + '</i>';
@@ -265,10 +285,6 @@ angular.module('trainingDays')
           planFitnessArray,
           planLoadBackgroundColors;
 
-        var getChartMetrics = function(trainingDay, metricsType) {
-          return _.find(trainingDay.metrics, ['metricsType', metricsType]);
-        };
-
         var setPlanLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
@@ -340,7 +356,7 @@ angular.module('trainingDays')
         };
 
         var getPlanFitness = function(td) {
-          return getChartMetrics(td, 'planned').fitness;
+          return getMetrics(td, 'planned').fitness;
         };
 
 
@@ -349,7 +365,7 @@ angular.module('trainingDays')
             return null;
           }
 
-          return getChartMetrics(td, 'actual').fitness;
+          return getMetrics(td, 'actual').fitness;
         };
 
         var getActualFatigue = function(td) {
@@ -357,11 +373,11 @@ angular.module('trainingDays')
             return null;
           }
 
-          return getChartMetrics(td, 'actual').fatigue;
+          return getMetrics(td, 'actual').fatigue;
         };
 
         var getPlanForm = function(td) {
-          return getChartMetrics(td, 'planned').form;
+          return getMetrics(td, 'planned').form;
         };
 
         var getActualForm = function(td) {
@@ -369,7 +385,7 @@ angular.module('trainingDays')
             return null;
           }
 
-          return getChartMetrics(td, 'actual').form;
+          return getMetrics(td, 'actual').form;
         };
 
         var extractDate = function(td) {
@@ -481,6 +497,11 @@ angular.module('trainingDays')
 
         $scope.chartOptions = {
           legend: { display: true },
+          scales: {
+            xAxes: [{
+              stacked: true
+            }]
+          },
           tooltips: {
             callbacks: {
               beforeTitle: function(tooltipItems) {
@@ -511,16 +532,17 @@ angular.module('trainingDays')
               },
               footer: function(tooltipItems) {
                 var text = '',
-                  td = $scope.season[tooltipItems[0].index];
+                  td = $scope.season[tooltipItems[0].index],
+                  planActivity;
 
-                if (td.plannedActivities[0] && moment(td.date).isAfter($scope.yesterday, 'day')) {
-                  //Display future advice
-                  if (td.plannedActivities[0].activityType !== 'event') {
-                    text = td.plannedActivities[0].activityType + ' day';
+                // Display load rating for passed days, activity type for plan days.
+                if (moment(td.date).isSameOrBefore($scope.today, 'day')) {
+                  text = getMetrics(td, 'actual').loadRating + ' day';
+                } else if (!td.scheduledEventRanking) {
+                  planActivity = getPlannedActivity(td, 'plangeneration');
+                  if (planActivity) {
+                    text = planActivity.activityType + ' day';
                   }
-                } else {
-                  //Display load rating
-                  text = td.loadRating + ' day';
                 }
 
                 return text;
