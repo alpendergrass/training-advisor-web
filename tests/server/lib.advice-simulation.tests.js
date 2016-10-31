@@ -31,7 +31,7 @@ describe('advice-simulation Unit Tests:', function () {
   describe('Simulation Rules', function () {
     it('should not return simulation if not build period', function (done) {
       trainingDay.period = 'base';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.not.match(/simulation/);
@@ -53,7 +53,7 @@ describe('advice-simulation Unit Tests:', function () {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.not.match(/simulation/);
@@ -65,7 +65,7 @@ describe('advice-simulation Unit Tests:', function () {
     it('should return simulation recommendation if in build period and today is our preferred simulation day', function (done) {
       trainingDay.period = 'build';
       user.preferredSimulationDay = [moment(trainingDate).day().toString()];
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/simulation/);
@@ -86,7 +86,7 @@ describe('advice-simulation Unit Tests:', function () {
     //       console.log('createTrainingDay: ' + err);
     //     }
 
-    //     return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+    //     return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
     //       should.not.exist(err);
     //       should.exist(trainingDay);
     //       (trainingDay.plannedActivities[0].activityType).should.not.match(/simulation/);
@@ -107,7 +107,7 @@ describe('advice-simulation Unit Tests:', function () {
   //         console.log('createTrainingDay: ' + err);
   //       }
 
-        // return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+        // return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
   //         should.not.exist(err);
   //         should.exist(trainingDay);
   //         (trainingDay.plannedActivities[0].activityType).should.match(/simulation/);

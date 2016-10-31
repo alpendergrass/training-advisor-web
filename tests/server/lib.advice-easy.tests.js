@@ -8,6 +8,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
@@ -71,10 +72,10 @@ describe('advice-easy Unit Tests:', function() {
 
               testHelpers.getTrainingDay(createdTrainingDay.id, function(err, priorTrainingDay) {
 
-                let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+                let metrics = util.getMetrics(trainingDay, 'actual');
                 metrics.form = adviceConstants.easyDaytNeededThreshold;
 
-                return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+                return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
                   should.not.exist(err);
                   should.exist(trainingDay);
                   (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
@@ -129,10 +130,10 @@ describe('advice-easy Unit Tests:', function() {
                     console.log('updateMetrics: ' + err);
                   }
 
-                  let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+                  let metrics = util.getMetrics(trainingDay, 'actual');
                   metrics.form = adviceConstants.easyDaytNeededThreshold;
 
-                  return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+                  return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
                     should.not.exist(err);
                     should.exist(trainingDay);
                     (trainingDay.plannedActivities[0].activityType).should.not.match(/easy/);
@@ -174,10 +175,10 @@ describe('advice-easy Unit Tests:', function() {
                 console.log('updateMetrics: ' + err);
               }
 
-              let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+              let metrics = util.getMetrics(trainingDay, 'actual');
               metrics.form = adviceConstants.easyDaytNeededThreshold + 1;
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 (trainingDay.plannedActivities[0].activityType).should.not.match(/easy/);
@@ -219,7 +220,7 @@ describe('advice-easy Unit Tests:', function() {
               //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
               trainingDay.period = 'peak';
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
@@ -233,10 +234,10 @@ describe('advice-easy Unit Tests:', function() {
 
     it('should return easy recommendation if testing is due and somewhat fatigued', function(done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
-      let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+      let metrics = util.getMetrics(trainingDay, 'actual');
       metrics.form = adviceConstants.testingEligibleFormThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
@@ -251,7 +252,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextGoalEvent = 3;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
@@ -268,7 +269,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextGoalEvent = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
@@ -285,7 +286,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextPriority2Event = 2;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/easy/);
@@ -302,7 +303,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextPriority3Event = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].activityType).should.match(/easy/);

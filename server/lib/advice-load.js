@@ -4,6 +4,7 @@ var path = require('path'),
   _ = require('lodash'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceConstants = require('./advice-constants'),
   err;
@@ -11,7 +12,7 @@ require('lodash-migrate');
 
 module.exports = {};
 
-module.exports.setLoadRecommendations = function(user, trainingDay, metricsType, callback) {
+module.exports.setLoadRecommendations = function(user, trainingDay, source, callback) {
 
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
@@ -25,22 +26,20 @@ module.exports.setLoadRecommendations = function(user, trainingDay, metricsType,
     return callback(err, null, null);
   }
 
-  if (!metricsType) {
-    err = new TypeError('valid metricsType is required');
+  if (!source) {
+    err = new TypeError('valid source is required');
     return callback(err, null, null);
   }
 
-  let metrics = _.find(trainingDay.metrics, ['metricsType', metricsType]);
-  //We are assuming that the last item in the plannedActivities array is the newest and the one
-  //for which we need to compute load.
-  let latestPlannedActivity = trainingDay.plannedActivities[trainingDay.plannedActivities.length - 1];
+  let plannedActivity = util.getPlannedActivity(trainingDay, source);
+  let metrics = util.getMetrics(trainingDay, util.setMetricsType(source));
 
-  if (latestPlannedActivity.activityType === 'event' && trainingDay.estimatedLoad > 0) {
+  if (plannedActivity.activityType === 'event' && trainingDay.estimatedLoad > 0) {
     //If an event, use estimated load, if provided, for target.
-    latestPlannedActivity.targetMinLoad = trainingDay.estimatedLoad;
-    latestPlannedActivity.targetMaxLoad = trainingDay.estimatedLoad;
+    plannedActivity.targetMinLoad = trainingDay.estimatedLoad;
+    plannedActivity.targetMaxLoad = trainingDay.estimatedLoad;
     return callback(null, trainingDay);
-  } else if (latestPlannedActivity.activityType === 'simulation') {
+  } else if (plannedActivity.activityType === 'simulation') {
     //We use the goal event estimate for simulations. We have to go find the next goal day.
     dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, goalDays) {
       if (err) {
@@ -49,35 +48,34 @@ module.exports.setLoadRecommendations = function(user, trainingDay, metricsType,
 
       //Note that it is possible that no goal exists or that no estimate was provided.
       if (goalDays.length > 0 && goalDays[0].estimatedLoad) {
-        latestPlannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
-        latestPlannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);
+        plannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
+        plannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);
       } else {
-        setTargetLoads(trainingDay, latestPlannedActivity, metrics);
+        setTargetLoads(trainingDay, plannedActivity, metrics);
       }
 
       return callback(null, trainingDay);
     });
   }
   else {
-    setTargetLoads(trainingDay, latestPlannedActivity, metrics);
+    setTargetLoads(trainingDay, plannedActivity, metrics);
     return callback(null, trainingDay);
   }
 };
 
-function setTargetLoads(trainingDay, latestPlannedActivity, metrics) {
-  metrics.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay, latestPlannedActivity, metrics);
+function setTargetLoads(trainingDay, plannedActivity, metrics) {
+  metrics.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay, plannedActivity, metrics);
 
   //We have different factors for different activity rankings. E.g., ranking of 1 is a goal event. 9 is an off day.
-  var activityType = latestPlannedActivity.activityType === 'event' ? latestPlannedActivity.activityType + trainingDay.scheduledEventRanking : latestPlannedActivity.activityType;
+  var activityType = plannedActivity.activityType === 'event' ? plannedActivity.activityType + trainingDay.scheduledEventRanking : plannedActivity.activityType;
 
   var factorSet = _.find(adviceConstants.loadAdviceLookups, { 'activityType': activityType });
 
-  latestPlannedActivity.targetMinLoad = Math.round(metrics.targetAvgDailyLoad * factorSet.lowLoadFactor * metrics.rampRateAdjustmentFactor);
-  latestPlannedActivity.targetMaxLoad = Math.round(metrics.targetAvgDailyLoad * factorSet.highLoadFactor * metrics.rampRateAdjustmentFactor);
-  // trainingDay.targetIntensity = factorSet.intensity;
+  plannedActivity.targetMinLoad = Math.round(metrics.targetAvgDailyLoad * factorSet.lowLoadFactor * metrics.rampRateAdjustmentFactor);
+  plannedActivity.targetMaxLoad = Math.round(metrics.targetAvgDailyLoad * factorSet.highLoadFactor * metrics.rampRateAdjustmentFactor);
 }
 
-function computeRampRateAdjustment(trainingDay, latestPlannedActivity, metrics) {
+function computeRampRateAdjustment(trainingDay, plannedActivity, metrics) {
   // 9/20/16: mucking with the ramp rate the way we were below is causing some weirdness in the advice,
   // at least when looking at the season chart for future days. We were getting some hard days with much lower target loads than
   // the other hard days around them. I think these were the only days where we were not tweaking the ramp rates.
@@ -94,7 +92,7 @@ function computeRampRateAdjustment(trainingDay, latestPlannedActivity, metrics) 
   var adjustmentFactor = 1;
 
   //sevenDayRampRate of zero probably means we do not have a prior week to use to compute.
-  // if (trainingDay.sevenDayRampRate !== 0 && (latestPlannedActivity.activityType === 'hard' || latestPlannedActivity.activityType === 'moderate')) {
+  // if (trainingDay.sevenDayRampRate !== 0 && (plannedActivity.activityType === 'hard' || plannedActivity.activityType === 'moderate')) {
   //   adjustmentFactor = Math.abs((trainingDay.sevenDayTargetRampRate - trainingDay.sevenDayRampRate) / trainingDay.sevenDayTargetRampRate);
 
   //   // Cap adjustment at limit.

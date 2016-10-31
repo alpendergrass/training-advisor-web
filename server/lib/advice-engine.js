@@ -19,14 +19,15 @@ var path = require('path'),
   adviceLoad = require('./advice-load'),
   adviceConstants = require('./advice-constants'),
   adviceUtil = require('./advice-util'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
 require('lodash-migrate');
 
-function generateAdvice(user, trainingDay, metricsType, callback) {
-
-  var facts = {},
-    tomorrow = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+function generateAdvice(user, trainingDay, source, callback) {
+  var facts = {};
+  var tomorrow = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var metricsType = util.setMetricsType(source);
 
   dbUtil.getExistingTrainingDayDocument(user, tomorrow)
     .then(function(tomorrowTrainingDay) {
@@ -42,7 +43,9 @@ function generateAdvice(user, trainingDay, metricsType, callback) {
         facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
         facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
         facts.trainingDay = trainingDay;
-        facts.metrics = _.find(trainingDay.metrics, ['metricsType', metricsType]);
+        facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
+        facts.metrics = util.getMetrics(trainingDay, metricsType);
+
         facts.tomorrowTrainingDay = tomorrowTrainingDay;
 
         var R = new RuleEngine(adviceEvent.eventRules);
@@ -55,7 +58,7 @@ function generateAdvice(user, trainingDay, metricsType, callback) {
         R.register(adviceHard.hardRules);
 
         R.execute(facts, function(result){
-          adviceLoad.setLoadRecommendations(user, trainingDay, metricsType, function(err, trainingDay) {
+          adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {
             if (err) {
               console.log('setLoadRecommendations err: ', err);
               return callback(err);
@@ -85,10 +88,11 @@ function generateActivityFromAdvice(params, callback) {
   var completedActivity = {},
     trainingDay = params.trainingDay,
     user = params.user,
-    metrics = _.find(trainingDay.metrics, ['metricsType', params.metricsType]);
+    metrics = util.getMetrics(trainingDay, 'planned'),
+    planActivity = util.getPlannedActivity(trainingDay, 'plangeneration');
 
-  if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].source === 'plangeneration') {
-    completedActivity.load = ((trainingDay.plannedActivities[0].targetMaxLoad - trainingDay.plannedActivities[0].targetMinLoad) / 2) + trainingDay.plannedActivities[0].targetMinLoad;
+  if (planActivity) {
+    completedActivity.load = ((planActivity.targetMaxLoad - planActivity.targetMinLoad) / 2) + planActivity.targetMinLoad;
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
     trainingDay.planLoad = completedActivity.load;
@@ -107,7 +111,7 @@ function generateActivityFromAdvice(params, callback) {
         return callback(err, null);
       }
 
-      if (trainingDay.plannedActivities[0].activityType === 'test') {
+      if (planActivity.activityType === 'test') {
         //Make it look as if the user tested when recommended.
         user.thresholdPowerTestDate = moment(trainingDay.dateNumeric.toString()).toDate();
         user.save(function(err) {
@@ -141,7 +145,7 @@ module.exports.generatePlan = function(params, callback) {
     return callback(err, null);
   }
 
-  params.metricsType = 'planned';
+  params.source = 'plangeneration';
 
   var user = params.user,
     adviceParams = _.clone(params),
@@ -176,7 +180,12 @@ module.exports.generatePlan = function(params, callback) {
     dbUtil.copyActualMetricsToPlanned(user, yesterdayNumeric)
       .then(function() {
         //We call updateMetrics here to ensure we have good starting metrics.
-        adviceMetrics.updateMetrics(params, function(err) {
+        let metricsParams = {
+          user: params.user,
+          numericDate: params.numericDate,
+          metricsType: util.setMetricsType(params.source)
+        };
+        adviceMetrics.updateMetrics(metricsParams, function(err) {
           if (err) {
             return callback(err, null);
           }
@@ -233,7 +242,7 @@ module.exports.generatePlan = function(params, callback) {
                         return callback(err, null);
                       }
 
-                      dbUtil.removePlanGenerationActivities(user)
+                      dbUtil.removePlanGenerationCompletedActivities(user)
                         .then(function() {
                           user.thresholdPowerTestDate = savedThresholdPowerTestDate;
                           user.planGenNeeded = false;
@@ -283,18 +292,22 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
-  if (!params.metricsType) {
-    err = new TypeError('advise metricsType is required');
+  if (!params.source) {
+    err = new TypeError('advise source is required');
     return callback(err, null);
   }
 
-  var user = params.user;
+  let metricsParams = {
+    user: params.user,
+    numericDate: params.numericDate,
+    metricsType: util.setMetricsType(params.source)
+  };
 
   async.series(
     //series of one.
     [
       function(callback) {
-        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+        adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
           if (err) {
             return callback(err);
           }
@@ -308,20 +321,48 @@ module.exports.advise = function(params, callback) {
         return callback(err, null);
       }
 
-      var trainingDay = results[0],
-        plannedActivities,
-        statusMessage = {};
+      var trainingDay = results[0];
+      var plannedActivity = {};
+      var plannedActivities = [];
+      var source;
+      var statusMessage = {};
 
-      if (!params.alternateActivity) {
-        //We are advising or planning an activity.
-        //Replace any existing plannedActivities.
-        plannedActivities = [];
-        plannedActivities[0] = {};
-        plannedActivities[0].activityType = '';
-        plannedActivities[0].source = params.metricsType === 'planned' ? 'plangeneration' : 'advised';
+      //Replace any existing requested, planned or advised activity.
+      _.remove(trainingDay.plannedActivities, function(activity) {
+        return activity.source === params.source;
+      });
+
+      if (params.source === 'requested') {
+        //User has requested advice for a specific activity type.
+        //We just need to compute load for the requested activity.
+
+        //Create planned activity for requested activity.
+        plannedActivity.activityType = params.alternateActivity;
+        plannedActivity.source = params.source;
+        plannedActivities.push(plannedActivity);
         trainingDay.plannedActivities = plannedActivities;
 
-        generateAdvice(user, trainingDay, params.metricsType, function(err, recommendation) {
+        //Determine load.
+        adviceLoad.setLoadRecommendations(params.user, trainingDay, params.source, function(err, recommendation) {
+          if (err) {
+            return callback(err);
+          }
+
+          recommendation.save(function(err) {
+            if (err) {
+              return callback(err, null);
+            }
+
+            return callback(null, recommendation);
+          });
+        });
+      } else {
+        //We are advising or planning an activity.
+
+        plannedActivity.source = params.source;
+        trainingDay.plannedActivities.push(plannedActivity);
+
+        generateAdvice(params.user, trainingDay, params.source, function(err, recommendation) {
           if (err) {
             return callback(err, null);
           }
@@ -339,36 +380,6 @@ module.exports.advise = function(params, callback) {
           // }
 
           return callback(null, recommendation);
-        });
-      } else {
-        //User has requested advice for a specific activity type.
-        //We just need to compute load for the requested activity.
-
-        //Remove any previously requested specific activity advice.
-        plannedActivities = _.filter(trainingDay.plannedActivities, function(activity) {
-          return activity.source !== 'requested';
-        });
-
-        //Create planned activity for requested activity.
-        var plannedActivity = {};
-        plannedActivity.activityType = params.alternateActivity;
-        plannedActivity.source = 'requested';
-        plannedActivities.push(plannedActivity);
-        trainingDay.plannedActivities = plannedActivities;
-
-        //Determine load.
-        adviceLoad.setLoadRecommendations(user, trainingDay, params.metricsType, function(err, recommendation) {
-          if (err) {
-            return callback(err);
-          }
-
-          recommendation.save(function(err) {
-            if (err) {
-              return callback(err, null);
-            }
-
-            return callback(null, recommendation);
-          });
         });
       }
     }

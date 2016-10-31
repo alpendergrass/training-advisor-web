@@ -6,6 +6,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
@@ -24,9 +25,11 @@ describe('advice-engine Unit Tests:', function () {
       user = newUser;
       params = {};
       params.user = user;
-      params.metricsType = 'actual';
+      params.source = 'advised';
 
-      trainingDate = new Date().toISOString();
+      trainingDate = new Date();
+      params.numericDate = dbUtil.toNumericDate(trainingDate);
+
       done();
     });
   });
@@ -43,6 +46,8 @@ describe('advice-engine Unit Tests:', function () {
     });
 
     it('should return error if no adviceDate', function (done) {
+      params.numericDate = null;
+
       return adviceEngine.advise(params, function (err, trainingDay) {
         should.exist(err);
         (err.message).should.containEql('numericDate is required');
@@ -61,7 +66,6 @@ describe('advice-engine Unit Tests:', function () {
     });
 
     it('should return error if start day does not exist', function (done) {
-      params.numericDate = dbUtil.toNumericDate(trainingDate);
 
       return adviceEngine.advise(params, function (err, trainingDay) {
         should.exist(err);
@@ -75,8 +79,6 @@ describe('advice-engine Unit Tests:', function () {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
-
-        params.numericDate = dbUtil.toNumericDate(trainingDate);
 
         return adviceEngine.advise(params, function (err, trainingDay) {
           should.not.exist(err);
@@ -96,13 +98,12 @@ describe('advice-engine Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          params.numericDate = dbUtil.toNumericDate(trainingDate);
-
           return adviceEngine.advise(params, function (err, trainingDay) {
             should.not.exist(err);
-            (trainingDay.plannedActivities[0].activityType).should.not.match('');
-            (trainingDay.plannedActivities[0].source).should.match('advised');
-            (trainingDay.plannedActivities[0].targetMinLoad).should.be.above(0);
+            let plannedActivity = util.getPlannedActivity(trainingDay, params.source);
+            (plannedActivity.activityType).should.not.match('');
+            (plannedActivity.source).should.match('advised');
+            (plannedActivity.targetMinLoad).should.be.above(0);
             done();
           });
         });
@@ -120,14 +121,15 @@ describe('advice-engine Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          params.numericDate = dbUtil.toNumericDate(trainingDate);
           params.alternateActivity = 'hard';
+          params.source = 'requested';
 
           return adviceEngine.advise(params, function (err, trainingDay) {
             should.not.exist(err);
-            (trainingDay.plannedActivities[0].activityType).should.match(params.alternateActivity);
-            (trainingDay.plannedActivities[0].source).should.match('requested');
-            (trainingDay.plannedActivities[0].targetMinLoad).should.be.above(0);
+            let plannedActivity = util.getPlannedActivity(trainingDay, params.source);
+            (plannedActivity.activityType).should.match(params.alternateActivity);
+            (plannedActivity.source).should.match('requested');
+            (plannedActivity.targetMinLoad).should.be.above(0);
             // console.log('trainingDay:' + trainingDay);
             done();
           });
@@ -146,16 +148,18 @@ describe('advice-engine Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          params.numericDate = dbUtil.toNumericDate(trainingDate);
-
           adviceEngine.advise(params, function (err, trainingDay) {
+
             params.alternateActivity = 'moderate';
+            params.source = 'requested';
+
             return adviceEngine.advise(params, function (err, trainingDay) {
               // console.log('trainingDay:' + trainingDay);
               should.not.exist(err);
-              (trainingDay.plannedActivities[1].activityType).should.match(params.alternateActivity);
-              (trainingDay.plannedActivities[1].source).should.match('requested');
-              (trainingDay.plannedActivities[1].targetMinLoad).should.be.above(0);
+              let plannedActivity = util.getPlannedActivity(trainingDay, params.source);
+              (plannedActivity.activityType).should.match(params.alternateActivity);
+              (plannedActivity.source).should.match('requested');
+              (plannedActivity.targetMinLoad).should.be.above(0);
               done();
             });
           });

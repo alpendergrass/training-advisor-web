@@ -40,7 +40,7 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 1;
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
@@ -65,7 +65,7 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 2;
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
@@ -90,7 +90,7 @@ describe('advice-event Unit Tests:', function () {
 
           trainingDay.scheduledEventRanking = 3;
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             //console.log('returned trainingDay: ' + trainingDay);
@@ -113,7 +113,7 @@ describe('advice-event Unit Tests:', function () {
             console.log('createGoalEvent: ' + err);
           }
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
@@ -137,7 +137,7 @@ describe('advice-event Unit Tests:', function () {
           trainingDay.scheduledEventRanking = 2;
           trainingDay.period = 'peak';
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);
@@ -161,7 +161,7 @@ describe('advice-event Unit Tests:', function () {
           trainingDay.scheduledEventRanking = 3;
           trainingDay.period = 'peak';
 
-          return adviceEngine._testGenerateAdvice(user, trainingDay, 'actual', function(err, trainingDay) {
+          return adviceEngine._testGenerateAdvice(user, trainingDay, 'advised', function(err, trainingDay) {
             should.not.exist(err);
             should.exist(trainingDay);
             (trainingDay.plannedActivities[0].activityType).should.not.match(/event/);

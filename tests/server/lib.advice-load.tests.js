@@ -8,6 +8,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceLoad = require('../../server/lib/advice-load');
@@ -37,14 +38,14 @@ describe('advice-load Unit Tests:', function () {
       user = newUser;
       trainingDate = moment().startOf('day').toDate();
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
-      metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
+      metrics = util.getMetrics(trainingDay, 'actual');
       done();
     });
   });
 
   describe('Method setLoadRecommendations', function () {
     it('should return error if no user', function (done) {
-      return adviceLoad.setLoadRecommendations(null, null, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(null, null, 'advised', function (err, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid user is required');
         done();
@@ -52,7 +53,7 @@ describe('advice-load Unit Tests:', function () {
     });
 
     it('should return error if no trainingDay', function (done) {
-      return adviceLoad.setLoadRecommendations(user, null, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, null, 'advised', function (err, trainingDay) {
         should.exist(err);
         (err.message).should.match('valid trainingDay is required');
         done();
@@ -68,7 +69,7 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].targetMinLoad).should.equal(234);
@@ -85,7 +86,7 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 6;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorGoal);
@@ -102,7 +103,7 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 6;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].targetMinLoad).should.equal(0);
@@ -123,7 +124,7 @@ describe('advice-load Unit Tests:', function () {
         metrics.sevenDayTargetRampRate = 5;
         metrics.sevenDayRampRate = 6;
 
-        return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+        return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           (trainingDay.plannedActivities[0].targetMinLoad).should.equal(Math.round(567 * 0.95));
@@ -140,7 +141,7 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorEasy);
@@ -156,7 +157,7 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 5;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorHard);
@@ -172,7 +173,7 @@ describe('advice-load Unit Tests:', function () {
       metrics.sevenDayTargetRampRate = 5;
       metrics.sevenDayRampRate = 0;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'actual', function (err, trainingDay) {
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         (trainingDay.plannedActivities[0].targetMinLoad).should.equal(metrics.targetAvgDailyLoad * lowLoadFactorHard);
