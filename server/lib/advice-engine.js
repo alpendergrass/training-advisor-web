@@ -183,7 +183,7 @@ module.exports.generatePlan = function(params, callback) {
 
           //As a precaution we remove all planning data.
           //If we errored out last time there could be some left overs.
-          dbUtil.removePlanningActivities(user)
+          dbUtil.removePlanGenerationActivities(user)
             .then(function() {
                 //get all training days from tomorrow thru last goal.
               let tomorrowNumeric = dbUtil.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
@@ -233,9 +233,7 @@ module.exports.generatePlan = function(params, callback) {
                         return callback(err, null);
                       }
 
-                      //TODO: call removePlanningActivities() instead.
-                      // dbUtil.clearPlanningData(user, trainingDays[0].dateNumeric)
-                      dbUtil.removePlanningActivities(user)
+                      dbUtil.removePlanGenerationActivities(user)
                         .then(function() {
                           user.thresholdPowerTestDate = savedThresholdPowerTestDate;
                           user.planGenNeeded = false;
@@ -255,7 +253,7 @@ module.exports.generatePlan = function(params, callback) {
               });
             })
             .catch(function(err) {
-              //from removePlanningActivities() before eachSeries
+              //from removePlanGenerationActivities() before eachSeries
               return callback(err, null);
             });
         });
