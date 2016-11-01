@@ -28,7 +28,7 @@ describe('advice-engine Unit Tests:', function () {
       params.source = 'advised';
 
       trainingDate = new Date();
-      params.numericDate = dbUtil.toNumericDate(trainingDate);
+      params.numericDate = util.toNumericDate(trainingDate);
 
       done();
     });

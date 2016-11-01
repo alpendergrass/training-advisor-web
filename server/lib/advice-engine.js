@@ -26,7 +26,7 @@ require('lodash-migrate');
 
 function generateAdvice(user, trainingDay, source, callback) {
   var facts = {};
-  var tomorrow = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var tomorrow = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
   var metricsType = util.setMetricsType(source);
 
   dbUtil.getExistingTrainingDayDocument(user, tomorrow)
@@ -175,7 +175,9 @@ module.exports.generatePlan = function(params, callback) {
     //Use last goal to generate plan.
     goalDay = goalDays[goalDays.length - 1];
 
-    let yesterdayNumeric = dbUtil.toNumericDate(moment(params.numericDate.toString()).subtract(1, 'day'));
+    // TODO: why not start with today's metrics?
+    //And shouldn't we recompute actual metrics before we copy? They could be out of date.
+    let yesterdayNumeric = util.toNumericDate(moment(params.numericDate.toString()).subtract(1, 'day'));
 
     dbUtil.copyActualMetricsToPlanned(user, yesterdayNumeric)
       .then(function() {
@@ -195,7 +197,7 @@ module.exports.generatePlan = function(params, callback) {
           dbUtil.removePlanGenerationActivities(user)
             .then(function() {
                 //get all training days from tomorrow thru last goal.
-              let tomorrowNumeric = dbUtil.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
+              let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
               dbUtil.getTrainingDays(user, tomorrowNumeric, goalDay.dateNumeric, function(err, trainingDays) {
                 if (err) {
@@ -234,10 +236,9 @@ module.exports.generatePlan = function(params, callback) {
                     }
 
                     //We need to update metrics for last day as it will not be up to date otherwise.
-                    adviceParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
-                    adviceParams.trainingDay = null;
+                    metricsParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
 
-                    adviceMetrics.updateMetrics(adviceParams, function(err, td) {
+                    adviceMetrics.updateMetrics(metricsParams, function(err, td) {
                       if (err) {
                         return callback(err, null);
                       }

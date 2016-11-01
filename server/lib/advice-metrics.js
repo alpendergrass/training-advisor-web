@@ -7,6 +7,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   advicePeriod = require('./advice-period'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceConstants = require('./advice-constants'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
@@ -51,20 +52,20 @@ module.exports.updateMetrics = function(params, callback) {
         return callback(err, null);
       }
 
-      if (params.planGenUnderway) {
+      // if (params.planGenUnderway) {
         // No need to set planGenNeeded since that is what we are doing now.
-        return callback(null, trainingDay);
-      }
+      return callback(null, trainingDay);
+      // }
 
-      params.user.planGenNeeded = true;
+      // params.user.planGenNeeded = true;
 
-      params.user.save(function(err) {
-        if (err) {
-          return callback(err, null);
-        }
+      // params.user.save(function(err) {
+      //   if (err) {
+      //     return callback(err, null);
+      //   }
 
-        return callback(null, trainingDay);
-      });
+      //   return callback(null, trainingDay);
+      // });
     }
   );
 };
@@ -157,7 +158,7 @@ function updateMetricsForDay(params, callback) {
         return callback(null, null);
       }
 
-      var numericPriorDate = dbUtil.toNumericDate(moment(params.trainingDay.dateNumeric.toString()).subtract(1, 'day'));
+      var numericPriorDate = util.toNumericDate(moment(params.trainingDay.dateNumeric.toString()).subtract(1, 'day'));
 
       dbUtil.getTrainingDayDocument(params.user, numericPriorDate, function(err, priorTrainingDay) {
         if (err) {
@@ -287,8 +288,8 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 // function computeSevenDayRampRate(user, trainingDay, callback) {
 //   //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
 //   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-//   var priorDate = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
-//     yesterday = dbUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
+//   var priorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
+//     yesterday = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
 //     rampRate;
 
 //   dbUtil.getExistingTrainingDayDocument(user, yesterday)

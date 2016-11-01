@@ -62,7 +62,7 @@ describe('advice-easy Unit Tests:', function() {
               console.log('createTrainingDay: ' + err);
             }
 
-            params.numericDate = dbUtil.toNumericDate(yesterday);
+            params.numericDate = util.toNumericDate(yesterday);
             params.metricsType = 'actual';
 
             adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
@@ -124,7 +124,7 @@ describe('advice-easy Unit Tests:', function() {
                   console.log('updateTrainingDay: ' + err);
                 }
 
-                params.numericDate = dbUtil.toNumericDate(yesterday);
+                params.numericDate = util.toNumericDate(yesterday);
 
                 adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
                   //we have to update metrics in order for yesterday's loadRating to be assigned.
@@ -170,7 +170,7 @@ describe('advice-easy Unit Tests:', function() {
               console.log('createTrainingDay: ' + err);
             }
 
-            params.numericDate = dbUtil.toNumericDate(yesterday);
+            params.numericDate = util.toNumericDate(yesterday);
 
             return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
@@ -214,7 +214,7 @@ describe('advice-easy Unit Tests:', function() {
               console.log('createTrainingDay: ' + err);
             }
 
-            params.numericDate = dbUtil.toNumericDate(yesterday);
+            params.numericDate = util.toNumericDate(yesterday);
 
             return adviceMetrics.updateMetrics(params, function(err, metricizedTrainingDay) {
               //we have to update metrics in order for yesterday's loadRating to be assigned.
