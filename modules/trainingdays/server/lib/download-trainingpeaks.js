@@ -6,6 +6,7 @@ var path = require('path'),
   moment = require('moment-timezone'),
   async = require('async'),
   soap = require('soap'),
+  util = require('./util'),
   dbUtil = require('./db-util'),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
@@ -307,7 +308,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
       offset = moment.tz(workout.WorkoutDay, timezone).format('Z'); //-06:00
       trainingDate = trainingDate + offset; //2016-07-23T09:36:05-06:00
 
-      dbUtil.getTrainingDayDocument(user, dbUtil.toNumericDate(trainingDate), function(err, retrievedTrainingDay) {
+      dbUtil.getTrainingDayDocument(user, util.toNumericDate(trainingDate), function(err, retrievedTrainingDay) {
         if (err) {
           statusMessage.text = 'TrainingPeaks download failed - getTrainingDayDocument returned error: ' + (err.msg || '');
           statusMessage.type = 'error';

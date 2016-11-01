@@ -29,7 +29,7 @@ function getTrainingDay(id, callback) {
 function createTrainingDay(req, callback) {
   //This function is used to create start days, true-up days and events.
   //It is possible that a document already exists for this day so we must treat this as an update.
-  let numericDate = dbUtil.toNumericDate(req.body.date);
+  let numericDate = util.toNumericDate(req.body.date);
 
   dbUtil.getTrainingDayDocument(req.user, numericDate, function(err, trainingDay) {
     if (err) {
@@ -102,6 +102,7 @@ function createTrainingDay(req, callback) {
                 return callback(err, null);
               }
 
+              //TODO: likely need to regen plan.
               return callback(null, trainingDay);
             });
           } else {
@@ -252,7 +253,7 @@ exports.read = function(req, res) {
 };
 
 exports.getDay = function(req, res) {
-  dbUtil.getTrainingDayDocument(req.user, dbUtil.toNumericDate(req.params.trainingDate), function(err, trainingDay) {
+  dbUtil.getTrainingDayDocument(req.user, util.toNumericDate(req.params.trainingDate), function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -274,22 +275,30 @@ exports.update = function(req, res) {
   }
 
   //If a change was made that would affect existing advice, let's recompute.
-  let planActivity = util.getPlannedActivity(trainingDay, 'advised');
+  //TODO: we should only do this for current or future days
+  let advisedActivity = util.getPlannedActivity(trainingDay, 'advised');
 
-  if (planActivity && planActivity.advice &&
+  if (advisedActivity && advisedActivity.advice && !trainingDay.completedActivities &&
     (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
-      trainingDay.estimatedLoad !== req.body.estimatedLoad ||
-      trainingDay.completedActivities !== req.body.completedActivities
+      trainingDay.estimatedLoad !== req.body.estimatedLoad
     )
   ) {
     recomputeAdvice = true;
   }
 
+  // //TODO: If a change was made that would affect season plan, let's regen.
+  // //We should only do this for current or future days
+  // let planGenActivity = util.getPlannedActivity(trainingDay, 'plangeneration');
+
+  // if (planGenActivity && planGenActivity.advice && !trainingDay.completedActivities &&
+  //   (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
+  //     trainingDay.estimatedLoad !== req.body.estimatedLoad
+  //   )
+  // ) {
+  //   regeneratePlan = true;
+  // }
+
   trainingDay.name = req.body.name;
-  // I don't think we should ever change these dates here.
-  // Maybe at one time I allowed user to change a date of an event or start day?
-  // trainingDay.date = new Date(req.body.date);
-  // trainingDay.dateNumeric = dbUtil.toNumericDate(req.body.date);
   trainingDay.fitness = req.body.fitness;
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
@@ -359,7 +368,9 @@ exports.delete = function(req, res) {
       });
     }
 
+    //TODO: regen only needed if future day.
     user.planGenNeeded = true;
+
     user.save(function(err) {
       if (err) {
         return res.status(400).send({
@@ -399,7 +410,7 @@ exports.list = function(req, res) {
 
 exports.getSeason = function(req, res) {
   var user = req.user,
-    numericToday = dbUtil.toNumericDate(req.params.today),
+    numericToday = util.toNumericDate(req.params.today),
     numericEffectiveStartDate,
     numericEffectiveGoalDate,
     dates = {};
@@ -416,7 +427,7 @@ exports.getSeason = function(req, res) {
     if (startDay) {
       numericEffectiveStartDate = startDay.dateNumeric;
     } else {
-      numericEffectiveStartDate = dbUtil.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
+      numericEffectiveStartDate = util.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
     }
 
     //Get future goal days to determine end of season.
@@ -431,7 +442,7 @@ exports.getSeason = function(req, res) {
         //Use last goal to end season.
         numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
       } else {
-        numericEffectiveGoalDate = dbUtil.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
+        numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
       }
 
       dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {
@@ -450,7 +461,7 @@ exports.getSeason = function(req, res) {
 exports.getAdvice = function(req, res) {
   var params = {};
   params.user = req.user;
-  params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
+  params.numericDate = util.toNumericDate(req.params.trainingDate);
   params.alternateActivity = req.query.alternateActivity;
   params.source = params.alternateActivity ? 'requested' : 'advised';
 
@@ -468,7 +479,7 @@ exports.getAdvice = function(req, res) {
 exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
-  params.numericDate = dbUtil.toNumericDate(req.params.trainingDate);
+  params.numericDate = util.toNumericDate(req.params.trainingDate);
 
   adviceEngine.generatePlan(params, function(err, statusMessage) {
     if (err) {

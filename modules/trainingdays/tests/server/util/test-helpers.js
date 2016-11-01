@@ -6,6 +6,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
 
@@ -66,7 +67,7 @@ module.exports.createTrainingDayObject = function(trainingDate, user) {
 
   var trainingDay = new TrainingDay({
     date: trainingDate,
-    dateNumeric: dbUtil.toNumericDate(trainingDate),
+    dateNumeric: util.toNumericDate(trainingDate),
     name: 'Incoming trainingDay',
     plannedActivities: plannedActivities,
     metrics: metrics,

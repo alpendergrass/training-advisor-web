@@ -408,15 +408,10 @@ angular.module('trainingDays')
               actualFormPointRadius = _.flatMap($scope.season, setActualFormPointRadius);
               actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
               $scope.chartLabels = _.flatMap($scope.season, extractDate);
-              $scope.chartData = [planLoadArray, actualLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFormArray, planFitnessArray];
+              // $scope.chartData = [actualLoadArray, planLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
+              $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
 
               $scope.chartDatasetOverride = [
-                {
-                  label: 'Load - Planned',
-                  borderWidth: 1,
-                  backgroundColor: planLoadBackgroundColors,
-                  type: 'bar'
-                },
                 {
                   label: 'Load - Actual',
                   borderWidth: 1,
@@ -424,11 +419,17 @@ angular.module('trainingDays')
                   type: 'bar'
                 },
                 {
-                  label: 'Fatigue - Actual',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  type: 'line'
+                  label: 'Load - Planned',
+                  borderWidth: 1,
+                  backgroundColor: planLoadBackgroundColors,
+                  type: 'bar'
                 },
+                // {
+                //   label: 'Fatigue',
+                //   borderWidth: 3,
+                //   pointRadius: 0,
+                //   type: 'line'
+                // },
                 {
                   label: 'Fitness - Actual',
                   borderWidth: 3,
@@ -443,13 +444,13 @@ angular.module('trainingDays')
                   type: 'line'
                 },
                 {
-                  label: 'Form - Planned',
+                  label: 'Fitness - Planned',
                   borderWidth: 3,
                   pointRadius: 0,
                   type: 'line'
                 },
                 {
-                  label: 'Fitness - Planned',
+                  label: 'Form - Planned',
                   borderWidth: 3,
                   pointRadius: 0,
                   type: 'line'
@@ -537,9 +538,16 @@ angular.module('trainingDays')
                   td = $scope.season[tooltipItems[0].index],
                   planActivity;
 
-                // Display load rating for passed days, activity type for plan days.
-                if (moment(td.date).isSameOrBefore($scope.today, 'day')) {
+                // Display load rating for passed days,
+                // advised activity type for today or tomorrow,
+                // planned activity type for future days.
+                if (moment(td.date).isBefore($scope.today, 'day')) {
                   text = getMetrics(td, 'actual').loadRating + ' day';
+                } else if (!td.scheduledEventRanking && moment(td.date).isBetween($scope.today, $scope.tomorrow, 'day', '[]')) {
+                  planActivity = getPlannedActivity(td, 'advised');
+                  if (planActivity) {
+                    text = planActivity.activityType + ' day';
+                  }
                 } else if (!td.scheduledEventRanking) {
                   planActivity = getPlannedActivity(td, 'plangeneration');
                   if (planActivity) {
@@ -1037,9 +1045,9 @@ angular.module('trainingDays')
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-          $scope.showFormAndFitness = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
-          $scope.source = moment(trainingDay.date).isSameOrBefore($scope.today, 'day') ? 'advised' : 'plangeneration';
-          $scope.metricsType = moment(trainingDay.date).isSameOrBefore($scope.today, 'day') ? 'actual' : 'planned';
+          $scope.showFormAndFitness = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
+          $scope.source = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'advised' : 'plangeneration';
+          $scope.metricsType = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'actual' : 'planned';
           resetViewObjects(trainingDay);
         }
 

@@ -10,14 +10,14 @@ var path = require('path'),
 mongoose.Promise = global.Promise;
 
 module.exports = {
-  id: 'planning-metrics.js',
+  id: 'restructure-metrics',
 
   up: function(db, callback) {
     var getUsers = User.find({}).sort('-created').exec();
 
     getUsers.then(function(users) {
       return Promise.all(users.map(function(user) {
-        return migrateMetrics(user);
+        return restructureMetrics(user);
       }));
     })
     .then(function(results) {
@@ -35,7 +35,7 @@ module.exports = {
   }
 };
 
-function migrateMetrics(user) {
+function restructureMetrics(user) {
   return new Promise(function(resolve, reject) {
     dbUtil.revertSimulation(user, function(err) {
       if (err) {
@@ -96,9 +96,9 @@ function createNewMetrics(user) {
       return Promise.all(trainingDays.map(function(td) {
         let plannedMetrics = {
           metricsType: 'planned',
-          fitness: td.startingPoint ? td.fitness : 0,
-          fatigue: td.startingPoint ? td.fatigue : 0,
-          form: td.startingPoint ? td.form : 0
+          fitness: (td.startingPoint || td.fitnessAndFatigueTrueUp) ? td.fitness : 0,
+          fatigue: (td.startingPoint || td.fitnessAndFatigueTrueUp) ? td.fatigue : 0,
+          form: (td.startingPoint || td.fitnessAndFatigueTrueUp) ? td.form : 0
         };
 
         let actualMetrics = {

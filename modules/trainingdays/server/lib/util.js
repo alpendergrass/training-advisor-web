@@ -1,8 +1,16 @@
 'use strict';
 
 var _ = require('lodash');
+var moment = require('moment-timezone');
+
+function toNumericDate(date) {
+  var dateString = moment(date).format('YYYYMMDD');
+  return parseInt(dateString, 10);
+}
 
 module.exports = {};
+
+module.exports.toNumericDate = toNumericDate;
 
 module.exports.getMetrics = function(trainingDay, metricsType) {
   //metricsType planned|actual
@@ -28,4 +36,15 @@ module.exports.setMetricsType = function(source) {
   }
 };
 
+// module.exports.sendMessageToUser = function (message, user) {
+//   var socketIDlookup = _.find(global.userSocketIDs, function(sock) {
+//     return sock.username === user.username;
+//   });
 
+//   if (socketIDlookup) {
+//     console.log('Emitting trainingDayMessage "' + message.text + '" to ' + user.username + ' on socketID ' + socketIDlookup.socketID);
+//     global.io.to(socketIDlookup.socketID).emit('trainingDayMessage', message);
+//   } else {
+//     console.log('socketIDlookup failed for username ' + user.username);
+//   }
+// };

@@ -6,6 +6,7 @@ var path = require('path'),
   moment = require('moment-timezone'),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
+  util = require('./util'),
   dbUtil = require('./db-util'),
   strava = require('strava-v3'),
   err;
@@ -64,7 +65,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     _.forEach(payload, function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
 
-      var numericStartDateLocal = dbUtil.toNumericDate(stravaActivity.start_date_local);
+      var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
 
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
 

@@ -5,7 +5,9 @@ var moment = require('moment-timezone'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
+  util = require('./util'),
   err;
+
 require('lodash-migrate');
 
 mongoose.Promise = global.Promise;
@@ -40,14 +42,7 @@ function getTrainingDay(user, numericDate, callback) {
   });
 }
 
-function toNumericDate(date) {
-  var dateString = moment(date).format('YYYYMMDD');
-  return parseInt(dateString, 10);
-}
-
 module.exports = {};
-
-module.exports.toNumericDate = toNumericDate;
 
 module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
   //If requested training day does not exist it will be created and returned.
@@ -142,7 +137,7 @@ module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate
           return callback(err, null);
         }
         trainingDays.push(trainingDay);
-        currentNumeric = toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
+        currentNumeric = util.toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
         callback(null, trainingDay);
       });
     },
@@ -211,7 +206,7 @@ module.exports.getFuturePriorityDays = function(user, numericSearchDate, priorit
     return callback(err, null);
   }
 
-  var numericMaxDate = toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
+  var numericMaxDate = util.toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
 
   var query = {
     user: user,
@@ -247,7 +242,7 @@ module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority
     return callback(err, null);
   }
 
-  var numericMinDate = toNumericDate(moment(numericSearchDate.toString()).subtract(numberOfDaysBack, 'days'));
+  var numericMinDate = util.toNumericDate(moment(numericSearchDate.toString()).subtract(numberOfDaysBack, 'days'));
 
   var query = {
     user: user,
@@ -330,8 +325,8 @@ module.exports.clearSubsequentMetricsAndAdvice = function(user, numericDate, met
 
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
-  // var tomorrowNumeric = toNumericDate(moment().add(1, 'day')); //potential timezone issue here.
-  var startNumeric = toNumericDate(moment(numericDate.toString()).add(1, 'day'));
+  // var tomorrowNumeric = util.toNumericDate(moment().add(1, 'day')); //potential timezone issue here.
+  var startNumeric = util.toNumericDate(moment(numericDate.toString()).add(1, 'day'));
 
   // if (startNumeric > tomorrowNumeric) {
   //   return callback(null, null);
@@ -606,7 +601,7 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
     return callback(err, null);
   }
 
-  var numericYesterday = toNumericDate(moment(numericSearchDate.toString()).subtract(1, 'day'));
+  var numericYesterday = util.toNumericDate(moment(numericSearchDate.toString()).subtract(1, 'day'));
 
   // We need to check for the existence of completedActivities below
   // as the loadRating could be from a genPlan where the completedActivities
@@ -632,16 +627,3 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
     return callback(null, true);
   });
 };
-
-// module.exports.sendMessageToUser = function (message, user) {
-//   var socketIDlookup = _.find(global.userSocketIDs, function(sock) {
-//     return sock.username === user.username;
-//   });
-
-//   if (socketIDlookup) {
-//     console.log('Emitting trainingDayMessage "' + message.text + '" to ' + user.username + ' on socketID ' + socketIDlookup.socketID);
-//     global.io.to(socketIDlookup.socketID).emit('trainingDayMessage', message);
-//   } else {
-//     console.log('socketIDlookup failed for username ' + user.username);
-//   }
-// };
