@@ -326,7 +326,8 @@ module.exports.clearSubsequentMetricsAndAdvice = function(user, numericDate, met
   // If trainingDate is tomorrow (in user's timezone) or later, we do not want to do anything.
   // Normally this should never happen but let's make sure.
   // var tomorrowNumeric = util.toNumericDate(moment().add(1, 'day')); //potential timezone issue here.
-  var startNumeric = util.toNumericDate(moment(numericDate.toString()).add(1, 'day'));
+  let startNumeric = util.toNumericDate(moment(numericDate.toString()).add(1, 'day'));
+  let source = metricsType === 'actual' ? 'advised' : 'plangeneration';
 
   // if (startNumeric > tomorrowNumeric) {
   //   return callback(null, null);
@@ -339,7 +340,8 @@ module.exports.clearSubsequentMetricsAndAdvice = function(user, numericDate, met
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
     cloneOfId: null,
-    'metrics.metricsType': metricsType
+    'metrics.metricsType': metricsType,
+    'plannedActivities.source': source
   }, {
     $set: {
       'metrics.$.fitness': 0,
@@ -351,7 +353,7 @@ module.exports.clearSubsequentMetricsAndAdvice = function(user, numericDate, met
       'metrics.$.rampRateAdjustmentFactor': 1,
       'metrics.$.targetAvgDailyLoad': 0,
       'metrics.$.loadRating': '',
-      plannedActivities: []
+      'plannedActivities.$': {}
     }
   }, {
     multi: true
