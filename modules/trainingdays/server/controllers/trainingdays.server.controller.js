@@ -84,31 +84,30 @@ function createTrainingDay(req, callback) {
       }
 
       if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
-        let params = {};
-        params.user = req.user;
-        params.numericDate = trainingDay.dateNumeric;
-        params.metricsType = 'actual';
+        adviceEngine.refreshAdvice(req.user, trainingDay)
+          .then(function(trainingDay) {
+            if (req.body.startingPoint) {
+              // Refresh plan metrics from start.
+              // TODO: likely need to regen plan.
+              let params = {};
+              params.user = req.user;
+              params.numericDate = trainingDay.dateNumeric;
+              params.metricsType = 'planning';
 
-        adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-          if (err) {
-            return callback(err, null);
-          }
+              adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+                if (err) {
+                  return callback(err, null);
+                }
 
-          if (req.body.startingPoint) {
-            params.metricsType = 'planning';
-
-            adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-              if (err) {
-                return callback(err, null);
-              }
-
-              //TODO: likely need to regen plan.
+                return callback(null, trainingDay);
+              });
+            } else {
               return callback(null, trainingDay);
-            });
-          } else {
-            return callback(null, trainingDay);
-          }
-        });
+            }
+          })
+          .catch(function(err) {
+            return callback(err, null);
+          });
       } else {
         return callback(null, trainingDay);
       }
@@ -274,28 +273,15 @@ exports.update = function(req, res) {
     trainingDay.fitnessAndFatigueTrueUp = true;
   }
 
-  //If a change was made that would affect existing advice, let's recompute.
-  //TODO: we should only do this for current or future days
-  let advisedActivity = util.getPlannedActivity(trainingDay, 'advised');
+  // //If a change was made that would affect existing advice, let's recompute.
+  // let advisedActivity = util.getPlannedActivity(trainingDay, 'advised');
 
-  if (advisedActivity && advisedActivity.advice && !trainingDay.completedActivities &&
-    (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
-      trainingDay.estimatedLoad !== req.body.estimatedLoad
-    )
-  ) {
-    recomputeAdvice = true;
-  }
-
-  // //TODO: If a change was made that would affect season plan, let's regen.
-  // //We should only do this for current or future days
-  // let planGenActivity = util.getPlannedActivity(trainingDay, 'plangeneration');
-
-  // if (planGenActivity && planGenActivity.advice && !trainingDay.completedActivities &&
+  // if (advisedActivity && advisedActivity.advice && !trainingDay.completedActivities &&
   //   (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
   //     trainingDay.estimatedLoad !== req.body.estimatedLoad
   //   )
   // ) {
-  //   regeneratePlan = true;
+  //   recomputeAdvice = true;
   // }
 
   trainingDay.name = req.body.name;
@@ -314,45 +300,15 @@ exports.update = function(req, res) {
       });
     }
 
-    params.user = req.user;
-    params.numericDate = trainingDay.dateNumeric;
-
-    if (recomputeAdvice) {
-      params.source = 'advised';
-      params.alternateActivity = null;
-      // params.alertUser = true;
-
-      adviceEngine.advise(params, function(err, trainingDay) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        }
-
+    adviceEngine.refreshAdvice(req.user, trainingDay)
+      .then(function(trainingDay) {
         return res.json(trainingDay);
+      })
+      .catch(function() {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
       });
-    } else {
-      // update metrics for trainingDay just in case.
-      params.metricsType = 'actual';
-      adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        }
-
-        // var statusMessage = {
-        //   type: 'info',
-        //   text: 'Your training day has been updated. You should update your season.',
-        //   title: 'Season Update',
-        //   created: Date.now(),
-        //   username: req.user.username
-        // };
-
-        // dbUtil.sendMessageToUser(statusMessage, req.user);
-        return res.json(trainingDay);
-      });
-    }
   });
 };
 
