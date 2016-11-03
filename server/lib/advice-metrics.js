@@ -76,14 +76,19 @@ function clearRunway(params, callback) {
     return callback(null, params);
   }
 
-  // I think the only time we clear future planning metrics is when we are setting a new start day.
-  dbUtil.clearSubsequentMetricsAndAdvice(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
-    if (err) {
-      return callback(err, null);
-    }
+  dbUtil.clearSubsequentPlannedActivities(params.user, params.numericDate, params.metricsType)
+    .then(function(rawResponse) {
+      dbUtil.clearSubsequentMetrics(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
+        if (err) {
+          return callback(err, null);
+        }
 
-    return callback(null, params);
-  });
+        return callback(null, params);
+      });
+    })
+    .catch(function(err) {
+      return callback(err, null);
+    });
 }
 
 function updateFatigue(params, callback) {

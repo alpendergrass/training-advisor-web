@@ -275,6 +275,75 @@ module.exports.generatePlan = function(params, callback) {
   });
 };
 
+module.exports.refreshAdvice = function(user, td) {
+  // if TD is not beyond tomorrow we should update metrics for td (which will clear future)
+  // and then advise for today (maybe) and tomorrow.
+
+  let tdDate = moment(td.dateNumeric.toString());
+  let timezone = user.timezone || 'America/New_York';
+  let today = moment().tz(timezone);
+  let tomorrow = today.add(1, 'day');
+
+  return new Promise(function(resolve, reject) {
+    if (tdDate.isAfter(tomorrow)) {
+      return resolve(td);
+    }
+
+    let metricsParams = {
+      user: user,
+      numericDate: td.dateNumeric,
+      metricsType: 'actual'
+    };
+
+    adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
+      // updateMetrics will clear future metrics and advice.
+      // Calling advise below will regenerate metrics from trainingDay until today/tomorrow.
+      // TODO: perhaps we should not remove future advice here. User might want to see what was advised on a particular day
+      if (err) {
+        return reject(err);
+      }
+
+      let adviceParams = {};
+      adviceParams.user = user;
+      adviceParams.source = 'advised';
+      adviceParams.alternateActivity = null;
+
+      if (tdDate.isSameOrBefore(today)) {
+        //getAdvice for today and tomorrow.
+        //TODO: we should not re-advise today if it has completedActivities.
+        adviceParams.numericDate = util.toNumericDate(today);
+
+        module.exports.advise(adviceParams, function(err, advisedToday) {
+          if (err) {
+            return reject(err);
+          }
+
+          adviceParams.numericDate = util.toNumericDate(tomorrow);
+
+          module.exports.advise(adviceParams, function(err, advisedTomorrow) {
+            if (err) {
+              return reject(err);
+            }
+
+            return resolve(trainingDay);
+          });
+        });
+      } else {
+        //tdDate is tomorrow -> getAdvice for tomorrow.
+        adviceParams.numericDate = util.toNumericDate(tomorrow);
+
+        module.exports.advise(adviceParams, function(err, advisedTomorrow) {
+          if (err) {
+            return reject(err);
+          }
+
+          return resolve(trainingDay);
+        });
+      }
+    });
+  });
+};
+
 module.exports.advise = function(params, callback) {
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
