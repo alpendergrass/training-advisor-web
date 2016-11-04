@@ -166,6 +166,10 @@ function updateMetricsForDay(params, callback) {
 
         priorDayMetrics = _.find(priorTrainingDay.metrics, ['metricsType', params.metricsType]);
 
+        if (!priorDayMetrics) {
+          return callback(new Error(`priorDayMetrics not found for ${params.user.username}. metricsType: ${params.metricsType}. priorTrainingDay: ${priorTrainingDay}`), null);
+        }
+
         if (priorDayMetrics.fitness === 0 && priorDayMetrics.fatigue === 0) {
           let priorDayParams = _.clone(params);
           priorDayParams.trainingDay = priorTrainingDay;

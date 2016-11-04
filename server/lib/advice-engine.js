@@ -296,7 +296,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
 
     // if trainingDay is today, we do not need to update metrics as that will happen in advise.
     adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
-      // updateMetrics will clear future metrics and advice.
+      // updateMetrics will clear future metrics and advice starting with trainingDay.
       // Calling advise below will regenerate metrics from trainingDay until today/tomorrow.
       // TODO: perhaps we should not remove future advice here. User might want to see what was advised on a particular day
       if (err) {
