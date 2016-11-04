@@ -64,11 +64,11 @@ function refreshMetrics(user) {
 
   return new Promise(function(resolve, reject) {
     let timezone = user.timezone || 'America/New_York';
-    let today = moment().tz(timezone);
+    let today = util.getTodayInTimezone(timezone);
 
     console.log('user.username: ', user.username);
     console.log('timezone: ', timezone);
-    console.log('today: ', today.format());
+    console.log('today: ', today);
 
     let todayNumeric = util.toNumericDate(today);
 
