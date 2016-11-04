@@ -76,7 +76,7 @@ function clearRunway(params, callback) {
     return callback(null, params);
   }
 
-  dbUtil.clearMetricsAndAdvice(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
+  dbUtil.clearFutureMetricsAndAdvice(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
     if (err) {
       return callback(err, null);
     }
