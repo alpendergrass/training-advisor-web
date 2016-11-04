@@ -76,19 +76,13 @@ function clearRunway(params, callback) {
     return callback(null, params);
   }
 
-  dbUtil.clearSubsequentPlannedActivities(params.user, params.numericDate, params.metricsType)
-    .then(function(rawResponse) {
-      dbUtil.clearSubsequentMetrics(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
-        if (err) {
-          return callback(err, null);
-        }
-
-        return callback(null, params);
-      });
-    })
-    .catch(function(err) {
+  dbUtil.clearMetricsAndAdvice(params.user, params.numericDate, params.metricsType, function(err, rawResponse) {
+    if (err) {
       return callback(err, null);
-    });
+    }
+
+    return callback(null, params);
+  });
 }
 
 function updateFatigue(params, callback) {

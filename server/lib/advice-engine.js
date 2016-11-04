@@ -100,7 +100,6 @@ function generateActivityFromAdvice(params, callback) {
     //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
     //when updateMetrics is called for the following day.
     //Do not want to zero out a starting point though.
-    //This issue will go away once we start plan gen with tomorrow always
     if (!trainingDay.startingPoint) {
       metrics.fitness = 0;
       metrics.fatigue = 0;
@@ -238,7 +237,7 @@ module.exports.generatePlan = function(params, callback) {
                     //We need to update metrics for last day as it will not be up to date otherwise.
                     metricsParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
 
-                    adviceMetrics.updateMetrics(metricsParams, function(err, td) {
+                    adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
                       if (err) {
                         return callback(err, null);
                       }
@@ -275,26 +274,27 @@ module.exports.generatePlan = function(params, callback) {
   });
 };
 
-module.exports.refreshAdvice = function(user, td) {
-  // if TD is not beyond tomorrow we should update metrics for td (which will clear future)
+module.exports.refreshAdvice = function(user, trainingDay) {
+  // if trainingDay is not beyond tomorrow we should update metrics for trainingDay (which will clear future)
   // and then advise for today (maybe) and tomorrow.
 
-  let tdDate = moment(td.dateNumeric.toString());
+  let tdDate = moment(trainingDay.dateNumeric.toString()); //Thu Nov 03 2016 00:00:00 GMT+0000 (UTC)
   let timezone = user.timezone || 'America/New_York';
-  let today = moment().tz(timezone);
-  let tomorrow = today.add(1, 'day');
+  let today = util.getTodayInTimezone(timezone);
+  let tomorrow = moment(today).add(1, 'day').startOf('day').toDate(); //Fri Nov 04 2016 00:00:00 GMT+0000
 
   return new Promise(function(resolve, reject) {
     if (tdDate.isAfter(tomorrow)) {
-      return resolve(td);
+      return resolve(trainingDay);
     }
 
     let metricsParams = {
       user: user,
-      numericDate: td.dateNumeric,
+      numericDate: trainingDay.dateNumeric,
       metricsType: 'actual'
     };
 
+    // if trainingDay is today, we do not need to update metrics as that will happen in advise.
     adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
       // updateMetrics will clear future metrics and advice.
       // Calling advise below will regenerate metrics from trainingDay until today/tomorrow.
@@ -310,7 +310,6 @@ module.exports.refreshAdvice = function(user, td) {
 
       if (tdDate.isSameOrBefore(today)) {
         //getAdvice for today and tomorrow.
-        //TODO: we should not re-advise today if it has completedActivities.
         adviceParams.numericDate = util.toNumericDate(today);
 
         module.exports.advise(adviceParams, function(err, advisedToday) {
@@ -325,7 +324,11 @@ module.exports.refreshAdvice = function(user, td) {
               return reject(err);
             }
 
-            return resolve(trainingDay);
+            if (trainingDay.dateNumeric === advisedToday.dateNumeric) {
+              return resolve(advisedToday);
+            } else {
+              return resolve(trainingDay);
+            }
           });
         });
       } else {
@@ -393,14 +396,8 @@ module.exports.advise = function(params, callback) {
 
       var trainingDay = results[0];
       var plannedActivity = {};
-      var plannedActivities = [];
       var source;
       var statusMessage = {};
-
-      //Replace any existing requested, planned or advised activity.
-      _.remove(trainingDay.plannedActivities, function(activity) {
-        return activity.source === params.source;
-      });
 
       if (params.source === 'requested') {
         //User has requested advice for a specific activity type.
@@ -409,8 +406,7 @@ module.exports.advise = function(params, callback) {
         //Create planned activity for requested activity.
         plannedActivity.activityType = params.alternateActivity;
         plannedActivity.source = params.source;
-        plannedActivities.push(plannedActivity);
-        trainingDay.plannedActivities = plannedActivities;
+        trainingDay.plannedActivities.push(plannedActivity);
 
         //Determine load.
         adviceLoad.setLoadRecommendations(params.user, trainingDay, params.source, function(err, recommendation) {
