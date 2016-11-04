@@ -6,7 +6,9 @@ var path = require('path'),
   moment = require('moment-timezone'),
   async = require('async'),
   soap = require('soap'),
+  util = require('./util'),
   dbUtil = require('./db-util'),
+  adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util'));
@@ -24,8 +26,7 @@ var url = 'http://www.trainingpeaks.com/tpwebservices/service.asmx?WSDL',
   },
   offlineMode,
   err,
-  individualUserErrors,
-  params = {};
+  individualUserErrors;
 
 module.exports = {};
 
@@ -73,26 +74,21 @@ module.exports.batchDownloadActivities = function(callback) {
               logStatus();
               return callback();
             } else {
-              //update metrics for trainingDay, which should be the latest.
-              params = {
-                user: user,
-                numericDate: trainingDay.dateNumeric
-              };
-
-              adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-                if (err) {
+              //trainingDay should be the last day for which workouts were downloaded.
+              adviceEngine.refreshAdvice(user, trainingDay)
+                .then(function(trainingDay) {
+                  statusMessage.text = 'We downloaded ' + activityCount + ' new TrainingPeaks workouts.';
+                  statusMessage.type = 'success';
+                  logStatus();
+                  return callback();
+                })
+                .catch(function(err) {
                   statusMessage.text = 'We downloaded ' + activityCount + ' new TrainingPeaks workouts but encountered an error when we tried to update metrics.';
                   statusMessage.type = 'warning';
                   logStatus();
                   individualUserErrors.push(err);
                   return callback();
-                }
-
-                statusMessage.text = 'We downloaded ' + activityCount + ' new TrainingPeaks workouts.';
-                statusMessage.type = 'success';
-                logStatus();
-                return callback();
-              });
+                });
             }
           }
         );
@@ -111,7 +107,7 @@ function logStatus() {
 }
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
-  //This method is called for download intiated from the UI.
+  //This method is called for download initiated from the UI.
   offlineMode = false;
   activityCount = 0;
   statusMessage.type = '';
@@ -166,27 +162,22 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
             return callback(new Error('We downloaded ' + countPhrase + ' but encountered an error when we tried to save the data.'), null);
           }
 
-          //Update metrics for trainingDay as completedActivities likely has changed.
-          params = {
-            user: user,
-            numericDate: trainingDay.dateNumeric
-          };
-
-          adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-            if (err) {
+          //refreshAdvice as completedActivities likely has changed.
+          adviceEngine.refreshAdvice(user, trainingDay)
+            .then(function(trainingDay) {
+              statusMessage.text = 'We downloaded ' + countPhrase + '.';
+              statusMessage.type = 'success';
+              // dbUtil.sendMessageToUser(statusMessage, user);
+              trainingDay.lastStatus = statusMessage;
+              return callback(null, trainingDay);
+            })
+            .catch(function(err) {
               statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
               statusMessage.type = 'warning';
               // dbUtil.sendMessageToUser(statusMessage, user);
               trainingDay.lastStatus = statusMessage;
               return callback(null, trainingDay);
-            }
-
-            statusMessage.text = 'We downloaded ' + countPhrase + '.';
-            statusMessage.type = 'success';
-            // dbUtil.sendMessageToUser(statusMessage, user);
-            trainingDay.lastStatus = statusMessage;
-            return callback(null, trainingDay);
-          });
+            });
         });
       }
     );
@@ -305,7 +296,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
       offset = moment.tz(workout.WorkoutDay, timezone).format('Z'); //-06:00
       trainingDate = trainingDate + offset; //2016-07-23T09:36:05-06:00
 
-      dbUtil.getTrainingDayDocument(user, dbUtil.toNumericDate(trainingDate), function(err, retrievedTrainingDay) {
+      dbUtil.getTrainingDayDocument(user, util.toNumericDate(trainingDate), function(err, retrievedTrainingDay) {
         if (err) {
           statusMessage.text = 'TrainingPeaks download failed - getTrainingDayDocument returned error: ' + (err.msg || '');
           statusMessage.type = 'error';
@@ -326,7 +317,21 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
               return callback(err);
             }
 
-            return callback();
+            let params = {
+              user: user,
+              numericDate: trainingDay.dateNumeric,
+              metricsType: 'actual'
+            };
+
+            adviceMetrics.updateMetrics(params, function(err) {
+              if (err) {
+                statusMessage.text = 'We processed workoutId ' + workout.WorkoutId + ' but encountered an error when we tried to updateMetrics for ' + trainingDay.dateNumeric + '.';
+                statusMessage.type = 'error';
+                return callback(err);
+              }
+
+              return callback();
+            });
           });
         });
       });
@@ -372,13 +377,14 @@ function processWorkout(client, args, trainingDay, callback) {
         newActivity.notes = payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.title ? payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.title : 'Timestamp: ' + payload.GetExtendedWorkoutDataForAccessibleAthleteResult.pwx.workout.time;
         trainingDay.completedActivities.push(newActivity);
         newActivity = {};
+        callback();
       } else {
         console.log('TrainingPeaks: No workout data returned for username ' + args.username + ' with workoutId ' + args.workoutId);
         statusMessage.text = 'No TrainingPeaks workout data returned for user ' + args.username + ' with workoutId of ' + args.workoutId;
         statusMessage.type = 'error';
+        return callback(new Error('No TrainingPeaks workout data returned for user ' + args.username + ' with workoutId of ' + args.workoutId));
       }
 
-      callback();
     });
   }
 

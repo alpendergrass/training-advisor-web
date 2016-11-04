@@ -280,7 +280,7 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
 
           downloadTrainingPeaks.batchDownloadActivities(function (err, individualUserErrors) {
             should.not.exist(err);
-            (individualUserErrors.length).should.be.equal(0);
+            (individualUserErrors.length).should.be.equal(1);
             return testHelpers.getTrainingDay(createdTrainingDay.id, function(err, storedTrainingDay) {
               should.not.exist(err);
               should.exist(storedTrainingDay);
@@ -569,7 +569,7 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
       });
     });
 
-    it('should return no activities when GetExtendedWorkoutDataForAccessibleAthlete does not returns payload for requested workout', function(done) {
+    it('should return error when GetExtendedWorkoutDataForAccessibleAthlete does not returns payload for requested workout', function(done) {
       getAccessibleAthletesStub = function(args, callback) {
         return callback(null, { GetAccessibleAthletesResult: { PersonBase: [ { PersonId: 123 }] } });
       };
@@ -588,8 +588,7 @@ describe('TrainingDay Download TrainingPeaks Unit Tests:', function () {
       };
 
       return downloadTrainingPeaks.downloadActivities(user, trainingDay, function (err, trainingDay) {
-        should.not.exist(err);
-        (trainingDay.completedActivities.length).should.be.equal(0);
+        should.exist(err);
         done();
       });
     });

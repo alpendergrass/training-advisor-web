@@ -1,5 +1,7 @@
 'use strict';
 
+// https://github.com/awapps/mongration
+
 var path = require('path'),
   chalk = require('chalk'),
   config = require('../config'),
@@ -31,9 +33,12 @@ module.exports.migrate = function() {
     },
     migration = new Migration(migrationConfig);
 
-  migration.addAllFromPath(path.join(__dirname, './migrations/'));
+  // migration.addAllFromPath(path.join(__dirname, './migrations/'));
+  migration.add(path.join(__dirname, './migrations/restructure-metrics.js'));
+  migration.add(path.join(__dirname, './migrations/refresh-metrics.js'));
 
   return new Promise(function(resolve, reject) {
+    console.log('Starting migration: ', new Date().toString());
     migration.migrate(function(err, results) {
       if (err) {
         console.log(chalk.red('Migration failed with error: ', err));
@@ -42,6 +47,7 @@ module.exports.migrate = function() {
 
       // console.log(chalk.green('Migration results: ', results));
       console.log('Migration results: ', results);
+      console.log('Migration complete: ', new Date().toString());
       return resolve(results);
     });
   });

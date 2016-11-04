@@ -4,8 +4,9 @@
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment-timezone'),
-  adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
+  adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
+  util = require('./util'),
   dbUtil = require('./db-util'),
   strava = require('strava-v3'),
   err;
@@ -64,7 +65,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     _.forEach(payload, function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
 
-      var numericStartDateLocal = dbUtil.toNumericDate(stravaActivity.start_date_local);
+      var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
 
       // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
 
@@ -123,28 +124,23 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
         return callback(err, null);
       }
 
-      //Update metrics for trainingDay as completedActivities likely has changed.
-      params = {
-        user: user,
-        numericDate: trainingDay.dateNumeric
-      };
-
-      adviceMetrics.updateMetrics(params, function(err, updatedTrainingDay) {
-        if (err) {
-          console.log('Strava: downloadActivities updateMetrics err: ', err);
-          statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training metrics.';
+      //refreshAdvice as completedActivities likely has changed.
+      adviceEngine.refreshAdvice(user, trainingDay)
+        .then(function(updatedTrainingDay) {
+          statusMessage.text = 'We downloaded ' + countPhrase + '.';
+          statusMessage.type = 'success';
+          // dbUtil.sendMessageToUser(statusMessage, user);
+          updatedTrainingDay.lastStatus = statusMessage;
+          return callback(null, updatedTrainingDay);
+        })
+        .catch(function(err) {
+          console.log('Strava: downloadActivities refreshAdvice err: ', err);
+          statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training advice.';
           statusMessage.type = 'warning';
           // dbUtil.sendMessageToUser(statusMessage, user);
           trainingDay.lastStatus = statusMessage;
           return callback(null, trainingDay);
-        }
-
-        statusMessage.text = 'We downloaded ' + countPhrase + '.';
-        statusMessage.type = 'success';
-        // dbUtil.sendMessageToUser(statusMessage, user);
-        updatedTrainingDay.lastStatus = statusMessage;
-        return callback(null, updatedTrainingDay);
-      });
+        });
     });
   });
 };

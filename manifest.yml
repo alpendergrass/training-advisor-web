@@ -11,4 +11,4 @@ applications:
   - training-advisor-mongodb
   env:
     NODE_ENV: cloud-foundry
-    RUN_MIGRATIONS: false
+    RUN_MIGRATIONS: true

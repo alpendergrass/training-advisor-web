@@ -5,12 +5,16 @@ var mongoose = require('mongoose'),
 
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
+var metricsTypes = {
+  values: 'planned|actual'.split('|'),
+  message: invalidDataErrorMessage
+};
 var plannedActivityTypes = {
   values: 'event|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
   message: invalidDataErrorMessage
 };
 var plannedActivitySources = {
-  values: 'advised|requested'.split('|'),
+  values: 'advised|requested|plangeneration'.split('|'),
   message: invalidDataErrorMessage
 };
 var loadRatings = {
@@ -29,9 +33,9 @@ var completedActivitySources = {
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
 var minFitnessOrFatigueValue = [0, minMessage];
-var maxFitnessOrFatigueValue = [199, maxMessage];
+var maxFitnessOrFatigueValue = [999, maxMessage];
 var minLoadValue = [0, minMessage];
-var maxLoadValue = [999, maxMessage];
+var maxLoadValue = [9999, maxMessage];
 var minDurationValue = [0, minMessage];
 var maxDurationValue = [9999, maxMessage];
 var minTrainingEffortFeedback = [-2, minMessage];
@@ -130,7 +134,55 @@ var TrainingDaySchema = new Schema({
     enum: periods,
     default: ''
   },
-  //fitness (CTL) ramp rates
+  metrics: [{
+    metricsType: {
+      type: String,
+      enum: metricsTypes,
+      required: 'metricsType is required'
+    },
+    fitness: {
+      type: Number,
+      min: minFitnessOrFatigueValue,
+      max: maxFitnessOrFatigueValue,
+      default: 0
+    },
+    fatigue: {
+      type: Number,
+      min: minFitnessOrFatigueValue,
+      max: maxFitnessOrFatigueValue,
+      default: 0
+    },
+    form: {
+      type: Number,
+      default: 0
+    },
+    sevenDayRampRate: {
+      type: Number,
+      default: 0
+    },
+    sevenDayTargetRampRate: {
+      type: Number,
+      default: 0
+    },
+    dailyTargetRampRate: {
+      type: Number,
+      default: 0
+    },
+    rampRateAdjustmentFactor: {
+      type: Number,
+      default: 1
+    },
+    targetAvgDailyLoad: {
+      type: Number,
+      default: 0
+    },
+    loadRating: {
+      type: String,
+      default: '',
+      enum: loadRatings
+    },
+  }],
+  // Legacy below
   sevenDayRampRate: {
     type: Number,
     default: 0
@@ -155,6 +207,11 @@ var TrainingDaySchema = new Schema({
     type: String,
     default: '',
     enum: loadRatings
+  },
+  // Legacy above
+  planLoad: {
+    type: Number,
+    default: 0
   },
   trainingEffortFeedback: {
     type: Number,

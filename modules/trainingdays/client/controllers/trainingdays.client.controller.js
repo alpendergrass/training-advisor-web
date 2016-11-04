@@ -50,6 +50,15 @@ angular.module('trainingDays')
         return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
       };
 
+      var getMetrics = function(trainingDay, metricsType) {
+        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
+      };
+
+      var getPlannedActivity = function(trainingDay, source) {
+        return _.find(trainingDay.plannedActivities, ['source', source]);
+      };
+
+
       var getSeason = function(callback) {
         $scope.hasStart = true;
         $scope.hasEnd = true;
@@ -114,6 +123,8 @@ angular.module('trainingDays')
       $scope.viewCalendar = function() {
         var formatDayContent = function(trainingDay) {
           var load = 0,
+            loadRating = '',
+            planActivity,
             content = '<div class="td-calendar-content',
             lengthOfFixedContent = 33;
 
@@ -154,19 +165,28 @@ angular.module('trainingDays')
           }
 
           //Display future advice
-          if (trainingDay.plannedActivities[0] && trainingDay.plannedActivities[0].activityType !== 'event' && moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
+
+          if (moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
-            content += '<i>' + trainingDay.plannedActivities[0].activityType + ' day planned</i>';
+            planActivity = getPlannedActivity(trainingDay, 'plangeneration');
+            if (planActivity) {
+              content += '<i>' + planActivity.activityType + ' day planned</i>';
+            }
           }
+
 
           if (trainingDay.completedActivities.length > 0) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
-            content += 'Load: ';
             _.forEach(trainingDay.completedActivities, function(activity) {
               load += activity.load;
             });
-            content += load + ' - ' + trainingDay.loadRating + ' day';
+            loadRating = getMetrics(trainingDay, 'actual').loadRating;
+            content += load ? ' Load: ' + load + ' - ' + loadRating + ' day' : '';
+          } else if (!trainingDay.scheduledEventRanking) {
+            load = trainingDay.planLoad;
+            content += ' Planned load: ' + trainingDay.planLoad;
           }
+
 
           // if (trainingDay.form !== 0) {
           //   content += '<br><i>Form: ' + trainingDay.form + '</i>';
@@ -254,28 +274,18 @@ angular.module('trainingDays')
 
 
       $scope.viewSeason = function() {
-        var loadArray,
-          formArray,
-          fitnessArray,
-          fatigueArray,
-          formPointBorderColors,
+        var actualLoadArray,
+          actualFormArray,
+          actualFitnessArray,
+          actualFatigueArray,
+          actualFormPointBorderColors,
           formPointRadius,
-          loadBackgroundColors;
+          planLoadArray,
+          planFormArray,
+          planFitnessArray,
+          planLoadBackgroundColors;
 
-        var extractLoad = function(td) {
-          var load = 0;
-          if (td.completedActivities.length > 0) {
-            load = _.sumBy(td.completedActivities, function(activity) {
-              return activity.load;
-            });
-          } else if (td.plannedActivities.length > 0) {
-            load = (td.plannedActivities[0].targetMinLoad + td.plannedActivities[0].targetMaxLoad) / 2;
-          }
-
-          return load;
-        };
-
-        var setLoadBackgroundColor = function(td) {
+        var setPlanLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return '#FFA07A';
@@ -291,7 +301,9 @@ angular.module('trainingDays')
             return '#BD7E7D';
           }
 
-          if (td.plannedActivities[0] && td.plannedActivities[0].activityType === 'test') {
+          var planActivity = getPlannedActivity(td, 'plangeneration');
+
+          if (planActivity && planActivity.activityType === 'test') {
             return '#B2DBDA';
           }
 
@@ -306,7 +318,7 @@ angular.module('trainingDays')
           return '#EAF1F5';
         };
 
-        var setFormPointColor = function(td) {
+        var setActualFormPointColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return '#FFA07A';
@@ -321,45 +333,129 @@ angular.module('trainingDays')
             return 6;
           }
 
-          return 3;
+          return 0;
+        };
+
+        var getPlanLoad = function(td) {
+          return td.planLoad;
+        };
+
+        var getActualLoad = function(td) {
+          var load = 0;
+
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return load;
+          }
+
+
+          if (td.completedActivities.length > 0) {
+            load = _.sumBy(td.completedActivities, function(activity) {
+              return activity.load;
+            });
+          }
+
+          return load;
+        };
+
+        var getPlanFitness = function(td) {
+          return getMetrics(td, 'planned').fitness;
+        };
+
+
+        var getActualFitness = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return null;
+          }
+
+          return getMetrics(td, 'actual').fitness;
+        };
+
+        var getActualFatigue = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return null;
+          }
+
+          return getMetrics(td, 'actual').fatigue;
+        };
+
+        var getPlanForm = function(td) {
+          return getMetrics(td, 'planned').form;
+        };
+
+        var getActualForm = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return null;
+          }
+
+          return getMetrics(td, 'actual').form;
+        };
+
+        var extractDate = function(td) {
+          return moment(td.date).format('ddd MMM D');
         };
 
         var loadChart = function(callback) {
           getSeason(function() {
             if ($scope.season) {
-              loadArray = _.flatMap($scope.season, extractLoad);
-              loadBackgroundColors = _.flatMap($scope.season, setLoadBackgroundColor);
+              planLoadArray = _.flatMap($scope.season, getPlanLoad);
+              planFormArray = _.flatMap($scope.season, getPlanForm);
+              planFitnessArray = _.flatMap($scope.season, getPlanFitness);
+              actualLoadArray = _.flatMap($scope.season, getActualLoad);
+              actualFitnessArray = _.flatMap($scope.season, getActualFitness);
+              actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
+              actualFormArray = _.flatMap($scope.season, getActualForm);
+              planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
               formPointRadius = _.flatMap($scope.season, setFormPointRadius);
-              formPointBorderColors = _.flatMap($scope.season, setFormPointColor);
-              formArray = _.flatMap($scope.season, function(td) { return td.form; });
-              fitnessArray = _.flatMap($scope.season, function(td) { return td.fitness; });
-              fatigueArray = _.flatMap($scope.season, function(td) { return td.fatigue; });
-              $scope.chartLabels = _.flatMap($scope.season, function extractDate(td) { return moment(td.date).format('ddd MMM D'); });
-              $scope.chartData = [loadArray, fitnessArray, fatigueArray, formArray];
+              actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
+              $scope.chartLabels = _.flatMap($scope.season, extractDate);
+              // $scope.chartData = [actualLoadArray, planLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
+              $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
+
               $scope.chartDatasetOverride = [
                 {
-                  label: 'Load',
+                  label: 'Actual Load',
                   borderWidth: 1,
-                  backgroundColor: loadBackgroundColors,
+                  // backgroundColor: actualLoadBackgroundColors,
                   type: 'bar'
                 },
                 {
-                  label: 'Fitness',
+                  label: 'Plan Load',
+                  borderWidth: 1,
+                  backgroundColor: planLoadBackgroundColors,
+                  type: 'bar'
+                },
+                {
+                  label: 'Fitness - Actual',
                   borderWidth: 3,
+                  pointRadius: 0,
                   type: 'line'
                 },
                 {
-                  label: 'Fatigue',
+                  label: 'Fitness - Plan',
                   borderWidth: 3,
+                  pointRadius: 0,
                   type: 'line'
                 },
                 {
-                  label: 'Form',
+                  label: 'Form - Actual',
                   borderWidth: 3,
                   pointRadius: formPointRadius,
-                  pointBorderColor:  formPointBorderColors,
+                  // pointBorderColor: actualFormPointBorderColors,
+                  type: 'line'
+                },
+                {
+                  label: 'Form - Plan',
+                  borderWidth: 3,
+                  pointRadius: formPointRadius,
+                  // pointBorderColor: '#4D5360',
                   type: 'line'
                 }
+                // {
+                //   label: 'Fatigue',
+                //   borderWidth: 3,
+                //   pointRadius: 0,
+                //   type: 'line'
+                // },
               ];
             }
 
@@ -403,8 +499,26 @@ angular.module('trainingDays')
 
         $scope.error = null;
 
+        $scope.chartColors = [
+          '#97BBCD', // blue
+          '#DCDCDC', // light grey
+          '#FDB45C', // yellow
+          '#949FB1', // grey
+          '#46BFBD', // green
+          '#4D5360' // dark grey
+          // '#F7464A' // red
+        ];
+
         $scope.chartOptions = {
-          legend: { display: true },
+          legend: {
+            display: true,
+            position: 'bottom'
+          },
+          scales: {
+            xAxes: [{
+              stacked: true
+            }]
+          },
           tooltips: {
             callbacks: {
               beforeTitle: function(tooltipItems) {
@@ -435,16 +549,24 @@ angular.module('trainingDays')
               },
               footer: function(tooltipItems) {
                 var text = '',
-                  td = $scope.season[tooltipItems[0].index];
+                  td = $scope.season[tooltipItems[0].index],
+                  planActivity;
 
-                if (td.plannedActivities[0] && moment(td.date).isAfter($scope.yesterday, 'day')) {
-                  //Display future advice
-                  if (td.plannedActivities[0].activityType !== 'event') {
-                    text = td.plannedActivities[0].activityType + ' day';
+                // Display load rating for passed days,
+                // advised activity type for today or tomorrow,
+                // planned activity type for future days.
+                if (moment(td.date).isBefore($scope.today, 'day')) {
+                  text = getMetrics(td, 'actual').loadRating + ' day';
+                } else if (!td.scheduledEventRanking && moment(td.date).isBetween($scope.today, $scope.tomorrow, 'day', '[]')) {
+                  planActivity = getPlannedActivity(td, 'advised');
+                  if (planActivity) {
+                    text = planActivity.activityType + ' day';
                   }
-                } else {
-                  //Display load rating
-                  text = td.loadRating + ' day';
+                } else if (!td.scheduledEventRanking) {
+                  planActivity = getPlannedActivity(td, 'plangeneration');
+                  if (planActivity) {
+                    text = planActivity.activityType + ' day';
+                  }
                 }
 
                 return text;
@@ -619,7 +741,8 @@ angular.module('trainingDays')
       };
 
       $scope.listTrainingDays = function() {
-        // This function is no longer used in a user accessible view. Admin only.
+        // This page is now Admin only.
+
         var getAllTrainingDays = function(callback) {
           $scope.trainingDaysAll = TrainingDays.query({ clientDate: moment().startOf('day').toDate() }, function() {
             //not sure why Mongo/Mongoose returns a string for a date field but
@@ -635,22 +758,22 @@ angular.module('trainingDays')
           });
         };
 
-        $scope.nextBatch = function() {
-          if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
-            $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
-            $scope.nextChunk++;
-          }
-        };
+        // $scope.nextBatch = function() {
+        //   if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
+        //     $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
+        //     $scope.nextChunk++;
+        //   }
+        // };
 
         //The following is used on the TD list page for the Today button.
         //This page is no longer available to non-admin users.
-        $scope.scrollTo = function(id) {
-          var currentPath = $location.hash();
-          $location.hash(id);
-          $anchorScroll();
-          //reset to currentPath to keep from changing URL in browser.
-          $location.hash(currentPath);
-        };
+        // $scope.scrollTo = function(id) {
+        //   var currentPath = $location.hash();
+        //   $location.hash(id);
+        //   $anchorScroll();
+        //   //reset to currentPath to keep from changing URL in browser.
+        //   $location.hash(currentPath);
+        // };
 
         getAllTrainingDays(function() {
           //Doing infinite scrolling all client-side.
@@ -696,19 +819,13 @@ angular.module('trainingDays')
             fitnessAndFatigueTrueUp: isTrueUp,
             date: this.startDate,
             name: this.name,
-            fitness: this.fitness,
-            fatigue: this.fatigue,
+            actualFitness: this.fitness,
+            actualFatigue: this.fatigue,
             notes: this.notes
           });
 
-          // Redirect after save
           trainingDay.$create(function(response) {
             toastr.success('You should update your profile now.', 'Start Created', { timeOut: 7000 });
-            // Clear form fields
-            $scope.name = '';
-            $scope.fitness = 0;
-            $scope.fatigue = 0;
-            $scope.notes = '';
             $state.go('settings.profile');
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -870,14 +987,6 @@ angular.module('trainingDays')
 
           trainingDay.$create(function(response) {
             $state.go('season');
-
-            // Clear form fields
-            $scope.name = '';
-            $scope.date = null;
-            $scope.scheduledEventRanking = '0';
-            $scope.estimatedLoad = 0;
-            $scope.recurrenceSpec = null;
-            $scope.notes = '';
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -892,6 +1001,31 @@ angular.module('trainingDays')
       $scope.requestAdvice = function() {
         var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
         var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
+
+        $scope.getAdvice = function(isValid) {
+          $scope.error = null;
+
+          if (!isValid) {
+            $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
+            return false;
+          }
+
+          var getAdviceDate = moment(this.adviceDate).startOf('day').toDate();
+
+          TrainingDays.getAdvice({
+            trainingDate: getAdviceDate.toISOString(),
+            alternateActivity: null
+          }, function(trainingDay) {
+            $location.path('trainingDays/' + trainingDay._id);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented advice retrieval.';
+            }
+          });
+        };
 
         $scope.adviceDateOptions = {
           formatYear: 'yy',
@@ -919,9 +1053,27 @@ angular.module('trainingDays')
           { value: 0, text: 'Training Day' }
         ];
 
+        function prepForTDView(trainingDay) {
+          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
+          $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
+          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
+          $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          $scope.showFormAndFitness = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
+          $scope.source = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'advised' : 'plangeneration';
+          $scope.metricsType = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'actual' : 'planned';
+          resetViewObjects(trainingDay);
+        }
+
+        function resetViewObjects(trainingDay) {
+          $scope.plannedActivity = getPlannedActivity(trainingDay, $scope.source);
+          $scope.requestedActivity = getPlannedActivity(trainingDay, 'requested');
+          $scope.metrics = getMetrics($scope.trainingDay, $scope.metricsType);
+        }
+
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.trainingDay.plannedActivities && $scope.trainingDay.plannedActivities[0] ? $scope.trainingDay.plannedActivities[0].activityType.charAt(0).toUpperCase() + $scope.trainingDay.plannedActivities[0].activityType.slice(1) + ' Day' : 'Nothing Planned';
+            dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Nothing Planned';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
@@ -931,17 +1083,6 @@ angular.module('trainingDays')
             $scope.trainingDay.estimatedLoad = 0;
           }
         });
-
-        function prepForTDView(trainingDay) {
-          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-          $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
-          $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
-          $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
-          $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
-          $scope.allowFormAndFitnessTrueUp = moment(trainingDay.date).isBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 2;
-          $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-          return trainingDay;
-        }
 
         $scope.getDay = function(date) {
           $scope.error = null;
@@ -987,7 +1128,11 @@ angular.module('trainingDays')
           }
 
           if (String(n) === priority && (n >= 0 && n <= 3) || n === 9) {
-            return $scope.update(true);
+            return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+              if (trainingDay) {
+                resetViewObjects(trainingDay);
+              }
+            });
           }
 
           return 'Valid eventRankings are 0, 1, 2 and 3. And 9.';
@@ -1002,7 +1147,11 @@ angular.module('trainingDays')
           }
 
           if (String(n) === estimate && n >= 0 && n <= 999) {
-            return $scope.update(true);
+            return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+              if (trainingDay) {
+                resetViewObjects(trainingDay);
+              }
+            });
           }
 
           return 'Estimated load must be a positive whole number less than 1000.';
@@ -1013,17 +1162,10 @@ angular.module('trainingDays')
           var index = _.indexOf($scope.trainingDay.completedActivities, _.find($scope.trainingDay.completedActivities, { created: created }));
           $scope.trainingDay.completedActivities.splice(index, 1, data);
 
-          $scope.trainingDay.$update(function(trainingDay) {
-            //We need to correct the date coming from server-side as it might not have self corrected yet.
-            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-            $scope.trainingDay = trainingDay;
-            $scope.checkGiveFeedback($scope.trainingDay);
-          }, function(errorResponse) {
-            if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
-            } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-              $scope.error = 'Server error prevented activity save.';
+          $scope.update(true, $scope.trainingDay, function(trainingDay) {
+            if (trainingDay) {
+              resetViewObjects(trainingDay);
+              $scope.checkGiveFeedback($scope.trainingDay);
             }
           });
         };
@@ -1039,7 +1181,11 @@ angular.module('trainingDays')
 
         $scope.deleteCompletedActivity = function(index) {
           $scope.trainingDay.completedActivities.splice(index, 1);
-          return $scope.update(true);
+          return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+            if (trainingDay) {
+              resetViewObjects(trainingDay);
+            }
+          });
         };
 
         $scope.downloadActivities = function(provider) {
@@ -1052,6 +1198,7 @@ angular.module('trainingDays')
             //We need to correct the date coming from server-side as it might not have self corrected yet.
             trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
             $scope.trainingDay = trainingDay;
+            resetViewObjects(trainingDay);
             toastr[trainingDay.lastStatus.type](trainingDay.lastStatus.text, trainingDay.lastStatus.title);
             if (trainingDay.lastStatus.type === 'success') {
               $scope.checkGiveFeedback($scope.trainingDay);
@@ -1063,6 +1210,24 @@ angular.module('trainingDays')
             } else {
               //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
               $scope.error = 'Server error prevented activity download.';
+            }
+          });
+        };
+
+        $scope.advise = function() {
+          TrainingDays.getAdvice({
+            trainingDate: $scope.trainingDay.date.toISOString(),
+            alternateActivity: $scope.alternateActivity || null
+          }, function(trainingDay) {
+            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+            $scope.trainingDay = trainingDay;
+            resetViewObjects(trainingDay);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              $scope.error = 'Server error prevented advice retrieval.';
             }
           });
         };
@@ -1081,14 +1246,18 @@ angular.module('trainingDays')
         });
       };
 
-      $scope.update = function(isValid, trainingDay) {
-        //We are being called as if we were synchronous here.
-        //TODO: we should return something, ideally a promise.
-        //And anywhere else we call trainingDay.$update should be modified to call here.
+      $scope.update = function(isValid, trainingDay, callback) {
+        //We are sometimes being called as if we were synchronous here.
+        //Note that we take a callback but do not return an error as we handle it here.
         $scope.error = null;
 
         if (!isValid) {
           $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
+
+          if (callback) {
+            return callback(null);
+          }
+
           return false;
         }
 
@@ -1100,6 +1269,9 @@ angular.module('trainingDays')
           //We need to correct the date coming from server-side as it might not have self corrected yet.
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.trainingDay = trainingDay;
+          if (callback) {
+            return callback(trainingDay);
+          }
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
@@ -1107,39 +1279,12 @@ angular.module('trainingDays')
             //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
             $scope.error = 'Server error prevented training day update.';
           }
-        });
-      };
 
-      $scope.getAdvice = function(isValid, adviceDate) {
-        $scope.error = null;
-        var getAdviceDate;
-
-        if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
-          return false;
-        }
-
-        //Use adviceDate if passed in. Use this.adviceDate otherwise, which is likely the date
-        //selected on the getAdvice page.
-        getAdviceDate = adviceDate || this.adviceDate;
-        getAdviceDate = moment(getAdviceDate).startOf('day').toDate();
-
-        TrainingDays.getAdvice({
-          trainingDate: getAdviceDate.toISOString(),
-          alternateActivity: $scope.alternateActivity || null
-        }, function(trainingDay) {
-          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-          // We reload the trainingDay in case we are on the view TD page.
-          $scope.trainingDay = trainingDay;
-          // We do location.path in case we are on the getAdvice page.
-          $location.path('trainingDays/' + trainingDay._id);
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
-            $scope.error = 'Server error prevented advice retrieval.';
+          if (callback) {
+            return callback(null);
           }
+
+          return false;
         });
       };
 
