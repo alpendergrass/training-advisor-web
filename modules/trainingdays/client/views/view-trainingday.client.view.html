@@ -182,17 +182,31 @@
       <div>daysUntilNextPriority2Event: {{trainingDay.daysUntilNextPriority2Event}}</div>
       <div>daysUntilNextPriority3Event: {{trainingDay.daysUntilNextPriority3Event}}</div>
       <div>user.fatigueTimeConstant: {{authentication.user.fatigueTimeConstant}}</div>
-      <div>sevenDayRampRate: {{metrics.sevenDayRampRate}}</div>
-      <div>sevenDayTargetRampRate: {{metrics.sevenDayTargetRampRate}}</div>
-      <div>rampRateAdjustmentFactor: {{metrics.rampRateAdjustmentFactor}}</div>
-      <div>dailyTargetRampRate: {{metrics.dailyTargetRampRate}}</div>
-      <div>targetAvgDailyLoad: {{metrics.targetAvgDailyLoad}}</div>
+      <div>
+        <u>Metrics:</u><br>
+        <div ng-repeat="metrics in trainingDay.metrics" class="">
+          <span>{{metrics}}</span>
+        </div>
+      </div>
+      <div>
+        <u>Planned Activities:</u><br>
+        <div ng-repeat="plannedActivity in trainingDay.plannedActivities" class="">
+          <span>{{plannedActivity}}</span>
+        </div>
+      </div>
+      <div><u>Completed Activities</u>
+        <div ng-repeat="completedActivity in trainingDay.completedActivities" class="">
+          <span>{{completedActivity}}</span>
+        </div>
+      </div>
+      <div>
       <em class="text-muted">
         Created
         <span ng-bind="trainingDay.created | date:'medium'"></span>
         by
         <span ng-bind="trainingDay.user.displayName"></span>
       </em>
+      </div>
     </small>
   </div>
 </section>

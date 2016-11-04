@@ -299,38 +299,37 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
     });
 };
 
-module.exports.clearMetricsAndAdvice = function(user, numericDate, metricsType, callback) {
+module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, metricsType, callback) {
   //For actual metrics we only need to clear thru tomorrow. Should be no actual metrics past tomorrow.
   //But for planned we should clear all.
   //For now we clear all in either scenario.
 
   if (!user) {
-    err = new TypeError('clearMetricsAndAdvice valid user is required');
+    err = new TypeError('clearFutureMetricsAndAdvice valid user is required');
     return callback(err, null);
   }
 
   if (!numericDate) {
-    err = new TypeError('clearMetricsAndAdvice numericDate is required');
+    err = new TypeError('clearFutureMetricsAndAdvice numericDate is required');
     return callback(err, null);
   }
 
   if (!moment(numericDate.toString()).isValid()) {
-    err = new TypeError('clearMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
+    err = new TypeError('clearFutureMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
     return callback(err, null);
   }
 
   if (!metricsType) {
-    err = new TypeError('clearMetricsAndAdvice metricsType is required');
+    err = new TypeError('clearFutureMetricsAndAdvice metricsType is required');
     return callback(err, null);
   }
 
-  //let startNumeric = util.toNumericDate(moment(numericDate.toString()).add(1, 'day'));
+  let startNumeric = util.toNumericDate(moment(numericDate.toString()).add(1, 'day'));
   let source = metricsType === 'actual' ? 'advised' : 'plangeneration';
 
   TrainingDay.update({
     user: user,
-    // dateNumeric: { $gte: startNumeric },
-    dateNumeric: { $gte: numericDate },
+    dateNumeric: { $gte: startNumeric },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
     cloneOfId: null,

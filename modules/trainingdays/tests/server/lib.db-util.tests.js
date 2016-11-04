@@ -523,11 +523,11 @@ describe('db-util Unit Tests:', function() {
   });
 
 
-  describe('Method clearMetricsAndAdvice', function() {
+  describe('Method clearFutureMetricsAndAdvice', function() {
     let metricsType = 'actual';
 
     it('should return error if no user', function(done) {
-      return dbUtil.clearMetricsAndAdvice(null, null, null, function(err, rawResponse) {
+      return dbUtil.clearFutureMetricsAndAdvice(null, null, null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('valid user is required');
         done();
@@ -535,7 +535,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if null trainingDate', function(done) {
-      return dbUtil.clearMetricsAndAdvice(user, null, null, function(err, rawResponse) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, null, null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('numericDate is required');
         done();
@@ -543,7 +543,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if invalid trainingDate', function(done) {
-      return dbUtil.clearMetricsAndAdvice(user, 'rtyy', null, function(err, rawResponse) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, 'rtyy', null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('not a valid date');
         done();
@@ -551,7 +551,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     it('should return error if missing metricsType', function(done) {
-      return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(trainingDate), null, function(err, rawResponse) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(trainingDate), null, function(err, rawResponse) {
         should.exist(err);
         (err.message).should.containEql('metricsType is required');
         done();
@@ -559,7 +559,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     // it('should return null rawResponse if trainingDate is tomorrow', function(done) {
-    //   return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).add(1, 'day')), metricsType, function(err, rawResponse) {
+    //   return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).add(1, 'day')), metricsType, function(err, rawResponse) {
     //     should.not.exist(err);
     //     should.not.exist(rawResponse);
     //     done();
@@ -567,7 +567,7 @@ describe('db-util Unit Tests:', function() {
     // });
 
     it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past trainingDate', function(done) {
-      return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(1, 'day')), metricsType, function(err, rawResponse) {
+      return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(1, 'day')), metricsType, function(err, rawResponse) {
         should.not.exist(err);
         (rawResponse.n).should.equal(0);
         (rawResponse.nModified).should.equal(0);
@@ -581,7 +581,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(trainingDate), metricsType, function(err, rawResponse) {
+        dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(trainingDate), metricsType, function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -599,7 +599,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
+        dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
           (rawResponse.nModified).should.equal(0);
@@ -622,7 +622,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
+          return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
@@ -651,7 +651,7 @@ describe('db-util Unit Tests:', function() {
               console.log('makeSimDay: ' + err);
             }
 
-            return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
+            return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
               should.not.exist(err);
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
@@ -676,7 +676,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
+          return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
@@ -700,7 +700,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          return dbUtil.clearMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
+          return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).subtract(2, 'days')), metricsType, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
