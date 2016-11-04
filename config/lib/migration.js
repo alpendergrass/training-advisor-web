@@ -38,6 +38,7 @@ module.exports.migrate = function() {
   migration.add(path.join(__dirname, './migrations/refresh-metrics.js'));
 
   return new Promise(function(resolve, reject) {
+    console.log('Starting migration: ', new Date().toString());
     migration.migrate(function(err, results) {
       if (err) {
         console.log(chalk.red('Migration failed with error: ', err));
@@ -46,6 +47,7 @@ module.exports.migrate = function() {
 
       // console.log(chalk.green('Migration results: ', results));
       console.log('Migration results: ', results);
+      console.log('Migration complete: ', new Date().toString());
       return resolve(results);
     });
   });

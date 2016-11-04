@@ -450,43 +450,6 @@ module.exports.revertSimulation = function(user, callback) {
   });
 };
 
-// module.exports.clearPlanningData = function(user, numericDate) {
-//   return new Promise(function(resolve, reject) {
-//     if (!user) {
-//       err = new TypeError('clearPlanningData valid user is required');
-//       return reject(err);
-//     }
-
-//     if (!numericDate) {
-//       err = new TypeError('clearPlanningData numericDate is required to getTrainingDay');
-//       return reject(err);
-//     }
-
-//     if (!moment(numericDate.toString()).isValid()) {
-//       err = new TypeError('clearPlanningData numericDate ' + numericDate + ' is not a valid date');
-//       return reject(err);
-//     }
-
-//     TrainingDay.update({
-//       user: user,
-//       dateNumeric: { $gte: numericDate },
-//       cloneOfId: null,
-//       'metrics.metricsType': 'planned'
-//     }, {
-//       $set: { 'metrics.$.loadRating': '', },
-//       $pull: { completedActivities: { source: 'plangeneration' } }
-//     }, {
-//       multi: true
-//     }, function(err, rawResponse) {
-//       if (err) {
-//         return reject(err);
-//       }
-
-//       return resolve(rawResponse);
-//     });
-//   });
-// };
-
 module.exports.removePlanGenerationActivities = function(user) {
   return new Promise(function(resolve, reject) {
     if (!user) {

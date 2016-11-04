@@ -13,6 +13,7 @@ module.exports = {
   id: 'restructure-metrics',
 
   up: function(db, callback) {
+    console.log('Starting restructure-metrics migration: ', new Date().toString());
     var getUsers = User.find({}).sort('-created').exec();
 
     getUsers.then(function(users) {
@@ -22,6 +23,7 @@ module.exports = {
     })
     .then(function(results) {
       console.log(`${results.length} users processed.`);
+      console.log('restructure-metrics migration complete: ', new Date().toString());
       return callback(null);
     })
     .catch(function(err) {
@@ -30,7 +32,7 @@ module.exports = {
   },
 
   down: function(db, callback) {
-    console.log('Rollback not possible.');
+    console.log('migration.down called. Rollback not possible.');
     callback();
   }
 };
@@ -39,10 +41,13 @@ function restructureMetrics(user) {
   return new Promise(function(resolve, reject) {
     dbUtil.revertSimulation(user, function(err) {
       if (err) {
-        return reject(err);
+        console.log('revertSimulation failed for user: ', user.username);
+        console.log('err: ', err);
+        return resolve();
+        // return reject(err);
       }
 
-      dbUtil.removePlanGenerationActivities(user)
+      dbUtil.removePlanGenerationCompletedActivities(user)
         .then(function() {
           return removeMetrics(user);
         })
@@ -50,7 +55,10 @@ function restructureMetrics(user) {
           return resolve(createNewMetrics(user));
         })
         .catch(function(err) {
-          return reject(err);
+          console.log('removePlanGenerationCompletedActivities failed for user: ', user.username);
+          console.log('err: ', err);
+          return resolve();
+          // return reject(err);
         });
     });
   });
@@ -80,7 +88,9 @@ function removeMetrics(user) {
       multi: true
     }, function(err, rawResponse) {
       if (err) {
-        return reject(err);
+        console.log('removeMetrics failed for user: ', user.username);
+        console.log('err: ', err);
+        // return reject(err);
       }
 
       return resolve();
@@ -120,7 +130,10 @@ function createNewMetrics(user) {
       return resolve(true);
     })
     .catch(function(err) {
-      return reject(err);
+      console.log('createNewMetrics failed for user: ', user.username);
+      console.log('err: ', err);
+      return resolve();
+      // return reject(err);
     });
   });
 }

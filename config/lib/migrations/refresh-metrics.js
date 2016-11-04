@@ -16,6 +16,7 @@ module.exports = {
   id: 'refresh-metrics',
 
   up: function(db, callback) {
+    console.log('Starting refresh-metrics migration: ', new Date().toString());
     var getUsers = User.find({}).sort('-created').exec();
 
     getUsers
@@ -26,6 +27,7 @@ module.exports = {
       })
       .then(function(results) {
         console.log(`${results.length} users processed.`);
+        console.log('refresh-metrics migration complete: ', new Date().toString());
         return callback(null);
       })
       .catch(function(err) {
@@ -66,9 +68,7 @@ function refreshMetrics(user) {
     let timezone = user.timezone || 'America/New_York';
     let today = util.getTodayInTimezone(timezone);
 
-    console.log('user.username: ', user.username);
-    console.log('timezone: ', timezone);
-    console.log('today: ', today);
+    console.log(`user.username: ${user.username} timezone: ${timezone} today: ${today} started: ${new Date().toString()}`);
 
     let todayNumeric = util.toNumericDate(today);
 
@@ -83,8 +83,6 @@ function refreshMetrics(user) {
         console.log(`updateMetrics error for user ${user.username}. Skipping generatePlan. ${err}`);
         return resolve();
       }
-
-      console.log(`updateMetrics succeeded for user ${user.username}.`);
 
       getPlanStartDay(user, todayNumeric, function(err, startDay) {
         if (err) {
@@ -104,8 +102,6 @@ function refreshMetrics(user) {
               return resolve();
             }
 
-            console.log(`generatePlan succeeded for user ${user.username}.`);
-
             //getAdvice for today.
             params = {};
             params.user = user;
@@ -120,7 +116,7 @@ function refreshMetrics(user) {
               }
             });
 
-            console.log(`advise succeeded for user ${user.username}.`);
+            console.log(`migration succeeded for user ${user.username} ${new Date().toString()}`);
             return resolve();
           });
         } else {

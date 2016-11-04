@@ -285,16 +285,6 @@ angular.module('trainingDays')
           planFitnessArray,
           planLoadBackgroundColors;
 
-        Chart.defaults.global.colors = [
-          '#DCDCDC', // light grey
-          '#97BBCD', // blue
-          '#949FB1', // grey
-          '#FDB45C', // yellow
-          '#4D5360',  // dark grey
-          '#46BFBD', // green
-          '#F7464A', // red
-        ];
-
         var setPlanLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
@@ -311,7 +301,7 @@ angular.module('trainingDays')
             return '#BD7E7D';
           }
 
-          let planActivity = getPlannedActivity(td, 'plangeneration');
+          var planActivity = getPlannedActivity(td, 'plangeneration');
 
           if (planActivity && planActivity.activityType === 'test') {
             return '#B2DBDA';
@@ -419,26 +409,20 @@ angular.module('trainingDays')
               actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
               $scope.chartLabels = _.flatMap($scope.season, extractDate);
               // $scope.chartData = [actualLoadArray, planLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
-              $scope.chartData = [planLoadArray, actualLoadArray, planFitnessArray, actualFitnessArray, planFormArray, actualFormArray];
+              $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
 
               $scope.chartDatasetOverride = [
                 {
-                  label: 'Load - Plan',
-                  borderWidth: 1,
-                  backgroundColor: planLoadBackgroundColors,
-                  type: 'bar'
-                },
-                {
-                  label: 'Load - Actual',
+                  label: 'Actual Load',
                   borderWidth: 1,
                   // backgroundColor: actualLoadBackgroundColors,
                   type: 'bar'
                 },
                 {
-                  label: 'Fitness - Plan',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  type: 'line'
+                  label: 'Plan Load',
+                  borderWidth: 1,
+                  backgroundColor: planLoadBackgroundColors,
+                  type: 'bar'
                 },
                 {
                   label: 'Fitness - Actual',
@@ -447,10 +431,9 @@ angular.module('trainingDays')
                   type: 'line'
                 },
                 {
-                  label: 'Form - Plan',
+                  label: 'Fitness - Plan',
                   borderWidth: 3,
-                  pointRadius: formPointRadius,
-                  // pointBorderColor: '#4D5360',
+                  pointRadius: 0,
                   type: 'line'
                 },
                 {
@@ -458,6 +441,13 @@ angular.module('trainingDays')
                   borderWidth: 3,
                   pointRadius: formPointRadius,
                   // pointBorderColor: actualFormPointBorderColors,
+                  type: 'line'
+                },
+                {
+                  label: 'Form - Plan',
+                  borderWidth: 3,
+                  pointRadius: formPointRadius,
+                  // pointBorderColor: '#4D5360',
                   type: 'line'
                 }
                 // {
@@ -508,6 +498,16 @@ angular.module('trainingDays')
         };
 
         $scope.error = null;
+
+        $scope.chartColors = [
+          '#97BBCD', // blue
+          '#DCDCDC', // light grey
+          '#FDB45C', // yellow
+          '#949FB1', // grey
+          '#46BFBD', // green
+          '#4D5360' // dark grey
+          // '#F7464A' // red
+        ];
 
         $scope.chartOptions = {
           legend: {
@@ -1010,7 +1010,7 @@ angular.module('trainingDays')
             return false;
           }
 
-          let getAdviceDate = moment(this.adviceDate).startOf('day').toDate();
+          var getAdviceDate = moment(this.adviceDate).startOf('day').toDate();
 
           TrainingDays.getAdvice({
             trainingDate: getAdviceDate.toISOString(),
