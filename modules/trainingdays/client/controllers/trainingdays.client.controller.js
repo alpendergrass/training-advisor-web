@@ -279,11 +279,21 @@ angular.module('trainingDays')
           actualFitnessArray,
           actualFatigueArray,
           actualFormPointBorderColors,
-          actualFormPointRadius,
+          formPointRadius,
           planLoadArray,
           planFormArray,
           planFitnessArray,
           planLoadBackgroundColors;
+
+        Chart.defaults.global.colors = [
+          '#DCDCDC', // light grey
+          '#97BBCD', // blue
+          '#949FB1', // grey
+          '#FDB45C', // yellow
+          '#4D5360',  // dark grey
+          '#46BFBD', // green
+          '#F7464A', // red
+        ];
 
         var setPlanLoadBackgroundColor = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
@@ -327,7 +337,7 @@ angular.module('trainingDays')
           return '#FFFFFF';
         };
 
-        var setActualFormPointRadius = function(td) {
+        var setFormPointRadius = function(td) {
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return 6;
@@ -405,13 +415,19 @@ angular.module('trainingDays')
               actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
               actualFormArray = _.flatMap($scope.season, getActualForm);
               planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
-              actualFormPointRadius = _.flatMap($scope.season, setActualFormPointRadius);
+              formPointRadius = _.flatMap($scope.season, setFormPointRadius);
               actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
               $scope.chartLabels = _.flatMap($scope.season, extractDate);
               // $scope.chartData = [actualLoadArray, planLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
-              $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
+              $scope.chartData = [planLoadArray, actualLoadArray, planFitnessArray, actualFitnessArray, planFormArray, actualFormArray];
 
               $scope.chartDatasetOverride = [
+                {
+                  label: 'Load - Plan',
+                  borderWidth: 1,
+                  backgroundColor: planLoadBackgroundColors,
+                  type: 'bar'
+                },
                 {
                   label: 'Load - Actual',
                   borderWidth: 1,
@@ -419,17 +435,11 @@ angular.module('trainingDays')
                   type: 'bar'
                 },
                 {
-                  label: 'Load - Planned',
-                  borderWidth: 1,
-                  backgroundColor: planLoadBackgroundColors,
-                  type: 'bar'
+                  label: 'Fitness - Plan',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  type: 'line'
                 },
-                // {
-                //   label: 'Fatigue',
-                //   borderWidth: 3,
-                //   pointRadius: 0,
-                //   type: 'line'
-                // },
                 {
                   label: 'Fitness - Actual',
                   borderWidth: 3,
@@ -437,24 +447,25 @@ angular.module('trainingDays')
                   type: 'line'
                 },
                 {
+                  label: 'Form - Plan',
+                  borderWidth: 3,
+                  pointRadius: formPointRadius,
+                  // pointBorderColor: '#4D5360',
+                  type: 'line'
+                },
+                {
                   label: 'Form - Actual',
                   borderWidth: 3,
-                  pointRadius: actualFormPointRadius,
-                  pointBorderColor: actualFormPointBorderColors,
-                  type: 'line'
-                },
-                {
-                  label: 'Fitness - Planned',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  type: 'line'
-                },
-                {
-                  label: 'Form - Planned',
-                  borderWidth: 3,
-                  pointRadius: 0,
+                  pointRadius: formPointRadius,
+                  // pointBorderColor: actualFormPointBorderColors,
                   type: 'line'
                 }
+                // {
+                //   label: 'Fatigue',
+                //   borderWidth: 3,
+                //   pointRadius: 0,
+                //   type: 'line'
+                // },
               ];
             }
 
@@ -499,7 +510,10 @@ angular.module('trainingDays')
         $scope.error = null;
 
         $scope.chartOptions = {
-          legend: { display: true },
+          legend: {
+            display: true,
+            position: 'bottom'
+          },
           scales: {
             xAxes: [{
               stacked: true
