@@ -92,7 +92,7 @@ function createTrainingDay(req, callback) {
               let params = {};
               params.user = req.user;
               params.numericDate = trainingDay.dateNumeric;
-              params.metricsType = 'planning';
+              params.metricsType = 'planned';
 
               adviceMetrics.updateMetrics(params, function(err, trainingDay) {
                 if (err) {
