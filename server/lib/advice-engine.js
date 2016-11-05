@@ -144,8 +144,6 @@ module.exports.generatePlan = function(params, callback) {
     return callback(err, null);
   }
 
-  params.source = 'plangeneration';
-
   var user = params.user,
     adviceParams = _.clone(params),
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
@@ -174,22 +172,22 @@ module.exports.generatePlan = function(params, callback) {
     //Use last goal to generate plan.
     goalDay = goalDays[goalDays.length - 1];
 
-    // TODO: why not start with today's metrics?
-    //And shouldn't we recompute actual metrics before we copy? They could be out of date.
-    let yesterdayNumeric = util.toNumericDate(moment(params.numericDate.toString()).subtract(1, 'day'));
+    let metricsParams = {
+      user: params.user,
+      numericDate: params.numericDate,
+    };
 
-    dbUtil.copyActualMetricsToPlanned(user, yesterdayNumeric)
-      .then(function() {
-        //We call updateMetrics here to ensure we have good starting metrics.
-        let metricsParams = {
-          user: params.user,
-          numericDate: params.numericDate,
-          metricsType: util.setMetricsType(params.source)
-        };
-        adviceMetrics.updateMetrics(metricsParams, function(err) {
-          if (err) {
-            return callback(err, null);
-          }
+    metricsParams.metricsType = 'actual';
+
+    // We recompute actual metrics before we copy as they could be out of date.
+    adviceMetrics.updateMetrics(metricsParams, function(err) {
+      if (err) {
+        return callback(err, null);
+      }
+
+      dbUtil.copyActualMetricsToPlanned(user, params.numericDate)
+        .then(function() {
+          //We call updateMetrics here to ensure we have good starting metrics.
 
           //As a precaution we remove all planning data.
           //If we errored out last time there could be some left overs.
@@ -207,20 +205,27 @@ module.exports.generatePlan = function(params, callback) {
                   err = new TypeError('No training days returned by getTrainingDays.');
                   return callback(err, null);
                 }
+
+                let adviceParams = {};
+                adviceParams.user = user;
+                adviceParams.source = 'plangeneration';
+                adviceParams.alternateActivity = null;
                 adviceParams.planGenUnderway = true;
+
+                let genActivityParams = {};
+                genActivityParams.user = user;
 
                 async.eachSeries(trainingDays, function(trainingDay, callback) {
                   adviceParams.numericDate = trainingDay.dateNumeric;
-                  adviceParams.trainingDay = null;
 
                   module.exports.advise(adviceParams, function(err, trainingDay) {
                     if (err) {
                       return callback(err);
                     }
 
-                    adviceParams.trainingDay = trainingDay;
+                    genActivityParams.trainingDay = trainingDay;
 
-                    generateActivityFromAdvice(adviceParams, function(err, trainingDay) {
+                    generateActivityFromAdvice(genActivityParams, function(err, trainingDay) {
                       if (err) {
                         return callback(err);
                       }
@@ -235,7 +240,11 @@ module.exports.generatePlan = function(params, callback) {
                     }
 
                     //We need to update metrics for last day as it will not be up to date otherwise.
-                    metricsParams.numericDate = trainingDays[trainingDays.length - 1].dateNumeric;
+                    // But if we call it for today we will clear the plannedActivity we just assigned to this day.
+                    // So we call it for tomorrow.
+                    let nextDateNumeric = util.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
+                    metricsParams.numericDate = nextDateNumeric;
+                    metricsParams.metricsType = 'planned';
 
                     adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
                       if (err) {
@@ -265,12 +274,12 @@ module.exports.generatePlan = function(params, callback) {
               //from removePlanGenerationActivities() before eachSeries
               return callback(err, null);
             });
+        })
+        .catch(function(err) {
+          //from copyActualMetricsToPlanned()
+          return callback(err, null);
         });
-      })
-      .catch(function(err) {
-        //from copyActualMetricsToPlanned()
-        return callback(err, null);
-      });
+    });
   });
 };
 

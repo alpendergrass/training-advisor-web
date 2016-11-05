@@ -7,7 +7,7 @@ var rules = [
   {
     'name': 'preferredRestDayRule',
     'condition': function(R) {
-      R.when(this &&
+      R.when(this && this.trainingDay.scheduledEventRanking === 0 &&
         (_.indexOf(this.trainingDay.user.preferredRestDays, this.todayDayOfWeek) > -1)
       );
     },
