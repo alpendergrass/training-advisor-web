@@ -13,7 +13,7 @@
     </h4>
   </div>
   <div class="pull-right">
-    <a ng-show="trainingDay.completedActivities.length < 1 && showGetAdvice" class="btn btn-primary btn-sm" ng-click="advise()" title="Get advice">
+    <a ng-show="showGetAdvice" class="btn btn-primary btn-sm" ng-click="advise()" title="Get advice">
       <span ng-hide="plannedActivity">Get Advice</span>
       <span ng-show="plannedActivity">Update Advice</span>
     </a>

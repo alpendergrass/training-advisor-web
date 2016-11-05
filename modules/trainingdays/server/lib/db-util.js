@@ -300,9 +300,10 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
 };
 
 module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, metricsType, callback) {
-  //For actual metrics we only need to clear thru tomorrow. Should be no actual metrics past tomorrow.
-  //But for planned we should clear all.
-  //For now we clear all in either scenario.
+  // Note: we clear numericDate and following day metrics. We used to start with the day after numericDate.
+  // For actual metrics we only need to clear thru tomorrow. Should be no actual metrics past tomorrow.
+  // But for planned we should clear all.
+  // For now we clear all in either scenario.
 
   if (!user) {
     err = new TypeError('clearFutureMetricsAndAdvice valid user is required');
@@ -324,12 +325,11 @@ module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, metrics
     return callback(err, null);
   }
 
-  let startNumeric = util.toNumericDate(moment(numericDate.toString()).add(1, 'day'));
   let source = metricsType === 'actual' ? 'advised' : 'plangeneration';
 
   TrainingDay.update({
     user: user,
-    dateNumeric: { $gte: startNumeric },
+    dateNumeric: { $gte: numericDate },
     fitnessAndFatigueTrueUp: false,
     startingPoint: false,
     cloneOfId: null,
