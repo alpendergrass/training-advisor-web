@@ -6,7 +6,6 @@ var config = require('../config'),
   express = require('./express'),
   chalk = require('chalk'),
   seed = require('./seed'),
-  migration = require('./migration'),
   later = require('later'),
   nodemailer = require('nodemailer');
 
@@ -108,37 +107,30 @@ module.exports.start = function start(callback) {
       return;
     }
 
-    migration.migrate()
-      .then(function() {
-        // Start the app by listening on <port>
-        app.listen(config.port, function() {
+    // Start the app by listening on <port>
+    app.listen(config.port, function() {
 
-          // Logging initialization
-          console.log('--');
-          console.log(chalk.green(config.app.title));
-          console.log(chalk.green('Environment:\t\t\t' + process.env.NODE_ENV));
-          console.log(chalk.green('Port:\t\t\t\t' + config.port));
-          console.log(chalk.green('Database:\t\t\t\t' + config.db.uri));
-          if (process.env.NODE_ENV === 'secure') {
-            console.log(chalk.green('HTTPs:\t\t\t\ton'));
-          }
-          console.log(chalk.green('App version:\t\t\t' + config.meanjs.version));
-          console.log('--');
+      // Logging initialization
+      console.log('--');
+      console.log(chalk.green(config.app.title));
+      console.log(chalk.green('Environment:\t\t\t' + process.env.NODE_ENV));
+      console.log(chalk.green('Port:\t\t\t\t' + config.port));
+      console.log(chalk.green('Database:\t\t\t\t' + config.db.uri));
+      if (process.env.NODE_ENV === 'secure') {
+        console.log(chalk.green('HTTPs:\t\t\t\ton'));
+      }
+      console.log(chalk.green('App version:\t\t\t' + config.meanjs.version));
+      console.log('--');
 
-          mailOptions.subject = mailSubjectPrefix + ': Started';
-          mailOptions.text = 'App instance has been started.';
-          smtpTransport.sendMail(mailOptions, function(err) {
-            if (err) {
-              console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-            }
-          });
-
-          if (callback) callback(app, db, config);
-        });
-      })
-      .catch(function(err) {
-        if (callback) callback(err);
+      mailOptions.subject = mailSubjectPrefix + ': Started';
+      mailOptions.text = 'App instance has been started.';
+      smtpTransport.sendMail(mailOptions, function(err) {
+        if (err) {
+          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+        }
       });
+    });
 
+    if (callback) callback(app, db, config);
   });
 };

@@ -99,7 +99,7 @@ var UserSchema = new Schema({
   thresholdPowerTestDate: {
     type: Date,
     required: 'Please provide threshold power test date',
-    default: moment().subtract(1, 'month')
+    default: Date.now
   },
   preferredRestDays: [{
     type: String
