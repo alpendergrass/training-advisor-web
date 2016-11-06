@@ -33,7 +33,7 @@
       <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9"><small>Estimated Training Load: <a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedLoad}}</a></small></span>
     </h4>
   </div>
-  <div ng-show="plannedActivity.activityType">
+  <div ng-show="source === 'advised' && plannedActivity.activityType">
     <p>
       <div>
         <label>Today's Advice:
@@ -54,7 +54,7 @@
         <span ng-show="plannedActivity.activityType == 'event' && trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9 && trainingDay.estimatedLoad < 1">
           You provided no load estimate for this event. Our load recommendation for a workout today would be between <strong><u>{{plannedActivity.targetMinLoad}}</u></strong> and <strong><u>{{plannedActivity.targetMaxLoad}}</u></strong>.
         </span>
-         <span ng-show="plannedActivity.activityType == 'event' && trainingDay.estimatedLoad">
+        <span ng-show="plannedActivity.activityType == 'event' && trainingDay.estimatedLoad">
           Your load estimate for this event is <strong><u>{{trainingDay.estimatedLoad}}</u></strong>.
         </span>
         <span ng-show="_.includes(['easy'], plannedActivity.activityType)">
@@ -80,19 +80,33 @@
     <hr />
   </div>
   <div ng-show="showFormAndFitness">
-      <div>
-        <label class="title">Fitness: </label>
-        <span>{{ metrics.fitness }}</span>
-      </div>
-      <div>
-        <label class="title">Fatigue: </label>
-        <span>{{ metrics.fatigue }}</span>
-      </div>
-    <p>
-      <label>Form:</label> {{ metrics.form }}
-      <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate - today is <span ng-show="trainingDay.startingPoint">your season start</span><span ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">a true-up day</span></abbr>
-      <span ng-show="authentication.user.levelOfDetail > 2"><br/>Seven Day Fitness Ramp Rate is {{ metrics.sevenDayRampRate }}. Target Ramp Rate is {{ metrics.sevenDayTargetRampRate }}.</span>
-    </p>
+
+    <table class="table fff-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Fitness</th>
+          <th>Fatigue</th>
+          <th>Form</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Planned</th>
+          <td>{{ plannedMetrics.fitness }}</td>
+          <td>{{ plannedMetrics.fatigue }}</td>
+          <td>{{ plannedMetrics.form }}</td>
+        </tr>
+        <tr ng-show="source === 'advised'">
+          <th>Actual</th>
+          <td>{{ actualMetrics.fitness }}</td>
+          <td>{{ actualMetrics.fatigue }}</td>
+          <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Today is season start or true-up day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate</abbr>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
   </div>
   <p>
     <label>Notes on the Day: </label>
@@ -117,34 +131,34 @@
             <td style="width:20%"></td>
           </tr>
           <tr ng-repeat="completedActivity in trainingDay.completedActivities">
-              <td>
-                <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link">View on Strava</a></span>
-                <span ng-if="completedActivity.source !== 'strava'">{{ completedActivity.source }}</span>
-              </td>
-              <td>
-                <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span>
-              </td>
-              <td>
-                <span editable-textarea="completedActivity.notes" e-rows="2" e-cols="70" e-name="notes" e-form="completedActivityForm">
+            <td>
+              <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link">View on Strava</a></span>
+              <span ng-if="completedActivity.source !== 'strava'">{{ completedActivity.source }}</span>
+            </td>
+            <td>
+              <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span>
+            </td>
+            <td>
+              <span editable-textarea="completedActivity.notes" e-rows="2" e-cols="70" e-name="notes" e-form="completedActivityForm">
                   {{ completedActivity.notes }}
                 </span>
-              </td>
-              <td style="white-space: nowrap">
-                <form editable-form name="completedActivityForm" ng-show="completedActivityForm.$visible" onbeforesave="saveCompletedActivity($data, completedActivity.created)" class="form-buttons form-inline" shown="inserted == completedActivity">
-                  <div class="buttons">
-                    <button type="submit" ng-disabled="completedActivityForm.$waiting" class="btn btn-primary btn-xs">
-                      save
-                    </button>
-                    <button type="button" ng-disabled="completedActivityForm.$waiting" ng-click="completedActivityForm.$cancel()" class="btn btn-default btn-xs">
-                      cancel
-                    </button>
-                  </div>
-                </form>
-                <div class="buttons" ng-show="!completedActivityForm.$visible">
-                  <button class="btn btn-default btn-xs" ng-click="completedActivityForm.$show()">edit</button>
-                  <button class="btn btn-default btn-xs" ng-click="deleteCompletedActivity($index)">delete</button>
+            </td>
+            <td style="white-space: nowrap">
+              <form editable-form name="completedActivityForm" ng-show="completedActivityForm.$visible" onbeforesave="saveCompletedActivity($data, completedActivity.created)" class="form-buttons form-inline" shown="inserted == completedActivity">
+                <div class="buttons">
+                  <button type="submit" ng-disabled="completedActivityForm.$waiting" class="btn btn-primary btn-xs">
+                    save
+                  </button>
+                  <button type="button" ng-disabled="completedActivityForm.$waiting" ng-click="completedActivityForm.$cancel()" class="btn btn-default btn-xs">
+                    cancel
+                  </button>
                 </div>
-              </td>
+              </form>
+              <div class="buttons" ng-show="!completedActivityForm.$visible">
+                <button class="btn btn-default btn-xs" ng-click="completedActivityForm.$show()">edit</button>
+                <button class="btn btn-default btn-xs" ng-click="deleteCompletedActivity($index)">delete</button>
+              </div>
+            </td>
           </tr>
         </table>
       </p>

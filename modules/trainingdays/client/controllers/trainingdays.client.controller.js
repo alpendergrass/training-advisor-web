@@ -1059,16 +1059,16 @@ angular.module('trainingDays')
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
-          $scope.showFormAndFitness = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') && $scope.authentication.user.levelOfDetail > 1;
+          $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
           $scope.source = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'advised' : 'plangeneration';
-          $scope.metricsType = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'actual' : 'planned';
           resetViewObjects(trainingDay);
         }
 
         function resetViewObjects(trainingDay) {
           $scope.plannedActivity = getPlannedActivity(trainingDay, $scope.source);
           $scope.requestedActivity = getPlannedActivity(trainingDay, 'requested');
-          $scope.metrics = getMetrics($scope.trainingDay, $scope.metricsType);
+          $scope.plannedMetrics = getMetrics($scope.trainingDay, 'planned');
+          $scope.actualMetrics = getMetrics($scope.trainingDay, 'actual');
         }
 
         $scope.showRanking = function() {
