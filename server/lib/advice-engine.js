@@ -92,7 +92,8 @@ function generateActivityFromAdvice(params, callback) {
     planActivity = util.getPlannedActivity(trainingDay, 'plangeneration');
 
   if (planActivity) {
-    completedActivity.load = ((planActivity.targetMaxLoad - planActivity.targetMinLoad) / 2) + planActivity.targetMinLoad;
+    let load = planActivity.activityType === 'rest' ? 0 : ((planActivity.targetMaxLoad - planActivity.targetMinLoad) / 2) + planActivity.targetMinLoad;
+    completedActivity.load = load;
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
     trainingDay.planLoad = completedActivity.load;
