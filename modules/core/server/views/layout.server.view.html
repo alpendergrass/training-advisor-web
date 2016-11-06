@@ -49,8 +49,12 @@
 <body class="ng-cloak">
   <header ng-include="'/modules/core/client/views/header.client.view.html'"></header>
   <section class="content">
-    <section class="container">
-      {% block content %}{% endblock %}
+    <section class="container-fluid">
+      <div class="row">
+        <div class="col-xs-12 col-md-10 col-md-offset-1">
+          {% block content %}{% endblock %}
+        </div>
+      </div>
     </section>
   </section>
 

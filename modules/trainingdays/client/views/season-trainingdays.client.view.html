@@ -8,54 +8,55 @@
     <span ng-hide="hasStart">To get started you need to create a <a ui-sref="trainingDays.createStart">Start Day</a>.</span>
     <span ng-hide="hasEnd"> You should create at least one <a ui-sref="trainingDays.createEvent({'scheduledEventRanking': '1'})">Goal Event</a> for the current season.</span>
   </div>
-  <div ng-show="hasStart">
-  <div>
-    <div class="pull-left">
-      <md-button ng-show="hasStart" ng-disabled="simMode || isWorking" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
-    </div>
-    <div class="pull-left">
-      <md-button ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" ng-show="hasStart && hasEnd" ng-disabled="simMode || isWorking" ng-click="genPlan()">Update Season</md-button>
-    </div>
-    <div class="pull-right">
-      <md-button ng-disabled="simMode || isWorking" ui-sref="calendar()">Calendar</md-button>
-    </div>
-  </div>
 
-  <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
-  <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
-    <strong ng-bind="error"></strong>
-  </div>
-  <div class="panel panel-default" ng-class="{'panel-warning' : simMode}">
-    <div class="panel-heading" ng-show="simMode">
-      <h1 class="panel-title text-center">SIMULATION MODE</h1>
+  <div ng-show="hasStart">
+    <div>
+      <div class="pull-left">
+        <md-button ng-show="hasStart" ng-disabled="simMode || isWorking" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
+      </div>
+      <div class="pull-left">
+        <md-button ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" ng-show="hasStart && hasEnd" ng-disabled="simMode || isWorking" ng-click="genPlan()">Update Season</md-button>
+      </div>
+      <div class="pull-right">
+        <md-button ng-disabled="simMode || isWorking" ui-sref="calendar()">Calendar</md-button>
+      </div>
     </div>
-    <div class="panel-body">
-      <canvas id="base" class="chart chart-bar" chart-options="chartOptions" chart-colors="chartColors" chart-data="chartData" chart-labels="chartLabels" chart-dataset-override="chartDatasetOverride" chart-click="onChartClick">
-      </canvas>
+
+    <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
+
+    <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
+      <strong ng-bind="error"></strong>
     </div>
-    <div class="md-toolbar-tools">
-      <span flex="4"></span>
-      <md-button ng-disabled="simMode || isWorking" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
-        What If?
-      </md-button>
-      <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run">
-        Run
-      </md-button>
-      <md-button ng-disabled="!simHasRun" ng-click="commitSim()" aria-label="Commit">
-        Commit
-      </md-button>
-      <md-button ng-disabled="!simHasRun" ng-click="revertSim()" aria-label="Revert">
-        Revert
-      </md-button>
-      <md-button ng-disabled="!simMode" ng-click="cancelSim()" aria-label="Cancel">
-        Cancel
-      </md-button>
-      <span flex=""></span>
-      <md-button aria-label="What-If Help" data-toggle="modal" data-target="#simHelp">
-        What-If Help
-      </md-button>
+
+    <div class="panel panel-default" ng-class="{'panel-warning' : simMode}">
+      <div class="panel-heading" ng-show="simMode">
+        <h1 class="panel-title text-center">SIMULATION MODE</h1>
+      </div>
+      <div class="panel-body">
+        <canvas id="base" class="chart chart-bar" chart-options="chartOptions" chart-colors="chartColors" chart-data="chartData" chart-labels="chartLabels" chart-dataset-override="chartDatasetOverride" chart-click="onChartClick">
+        </canvas>
+        <md-button ng-disabled="simMode || isWorking" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
+          What If?
+        </md-button>
+        <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run">
+          Run
+        </md-button>
+        <md-button ng-disabled="!simHasRun" ng-click="commitSim()" aria-label="Commit">
+          Commit
+        </md-button>
+        <md-button ng-disabled="!simHasRun" ng-click="revertSim()" aria-label="Revert">
+          Revert
+        </md-button>
+        <md-button ng-disabled="!simMode" ng-click="cancelSim()" aria-label="Cancel">
+          Cancel
+        </md-button>
+        <div class="pull-right">
+          <md-button aria-label="What-If Help" data-toggle="modal" data-target="#simHelp">
+            What-If Help
+          </md-button>
+        </div>
+      </div>
     </div>
-  </div>
   </div>
 
   <div class="modal fade" id="simHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
