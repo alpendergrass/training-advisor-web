@@ -295,8 +295,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
   // and then advise for today (maybe) and tomorrow.
 
   let tdDate = moment(trainingDay.dateNumeric.toString()); //Thu Nov 03 2016 00:00:00 GMT+0000 (UTC)
-  let timezone = user.timezone || 'America/New_York';
-  let today = util.getTodayInTimezone(timezone);
+  let today = util.getTodayInTimezone(user.timezone);
   let tomorrow = moment(today).add(1, 'day').startOf('day').toDate(); //Fri Nov 04 2016 00:00:00 GMT+0000
 
   return new Promise(function(resolve, reject) {
