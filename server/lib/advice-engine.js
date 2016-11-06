@@ -180,7 +180,7 @@ module.exports.generatePlan = function(params, callback) {
     metricsParams.metricsType = 'actual';
 
     // We recompute actual metrics before we copy as they could be out of date.
-    adviceMetrics.updateMetrics(metricsParams, function(err) {
+    adviceMetrics.updateMetrics(metricsParams, function(err, todayTrainingDay) {
       if (err) {
         return callback(err, null);
       }
@@ -256,6 +256,12 @@ module.exports.generatePlan = function(params, callback) {
                           user.thresholdPowerTestDate = savedThresholdPowerTestDate;
                           user.planGenNeeded = false;
                           return user.save();
+                        })
+                        .then(function() {
+                          // We need to refresh advice for today and tomorrow because
+                          // we called updateMetrics when we started which would clear
+                          // current advice for these days.
+                          return module.exports.refreshAdvice(user, todayTrainingDay);
                         })
                         .then(function() {
                           statusMessage.text = 'We have updated your season.';
