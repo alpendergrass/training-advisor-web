@@ -22,7 +22,7 @@ var path = require('path'),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
-require('lodash-migrate');
+
 
 function generateAdvice(user, trainingDay, source, callback) {
   var facts = {};

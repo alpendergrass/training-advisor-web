@@ -8,7 +8,7 @@ var path = require('path'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceConstants = require('./advice-constants'),
   err;
-require('lodash-migrate');
+
 
 module.exports = {};
 
