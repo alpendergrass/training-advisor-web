@@ -220,28 +220,34 @@ exports.create = function(req, res) {
         });
       }
 
-      user.planGenNeeded = true;
+      let today = util.getTodayInTimezone(user.timezone);
 
-      user.save(function(err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        }
+      if (moment(trainingDay.date).isAfter(today)) {
+        user.planGenNeeded = true;
 
-        // if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
-        //   statusMessage = {
-        //     type: 'info',
-        //     text: 'You should update your season.',
-        //     title: 'Training Day Added or Updated',
-        //     created: Date.now(),
-        //     username: user.username
-        //   };
+        user.save(function(err) {
+          if (err) {
+            return res.status(400).send({
+              message: errorHandler.getErrorMessage(err)
+            });
+          }
 
-        //   dbUtil.sendMessageToUser(statusMessage, user);
-        // }
+          // if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
+          //   statusMessage = {
+          //     type: 'info',
+          //     text: 'You should update your season.',
+          //     title: 'Training Day Added or Updated',
+          //     created: Date.now(),
+          //     username: user.username
+          //   };
+
+          //   dbUtil.sendMessageToUser(statusMessage, user);
+          // }
+          res.json(trainingDay);
+        });
+      } else {
         res.json(trainingDay);
-      });
+      }
     });
   }
 };
@@ -313,6 +319,8 @@ exports.update = function(req, res) {
 };
 
 exports.delete = function(req, res) {
+  // Rarely will a user be deleting a TD. I don't allow normal users to do this.
+
   var trainingDay = req.trainingDay,
     user = req.user,
     statusMessage = {};
@@ -324,7 +332,6 @@ exports.delete = function(req, res) {
       });
     }
 
-    //TODO: regen only needed if future day.
     user.planGenNeeded = true;
 
     user.save(function(err) {

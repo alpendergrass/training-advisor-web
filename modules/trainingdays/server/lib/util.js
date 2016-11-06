@@ -37,6 +37,8 @@ module.exports.setMetricsType = function(source) {
 };
 
 module.exports.getTodayInTimezone = function(timezone) {
+  let useTimezone = timezone || 'America/New_York';
+  console.log('useTimezone: ', useTimezone);
   let now = moment(); //Fri Nov 04 2016 02:13:27 GMT+0000 (UTC)
   return moment.tz(now, timezone).startOf('day').toDate(); //Thu Nov 03 2016 06:00:00 GMT+0000 (UTC)
 };
