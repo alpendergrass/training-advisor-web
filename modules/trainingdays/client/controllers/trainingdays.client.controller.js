@@ -344,7 +344,7 @@ angular.module('trainingDays')
           var load = 0;
 
           if (moment(td.date).isAfter($scope.today, 'day')) {
-            return load;
+            return [];
           }
 
 
@@ -413,13 +413,13 @@ angular.module('trainingDays')
 
               $scope.chartDatasetOverride = [
                 {
-                  label: 'Actual Load',
+                  label: 'Load - Actual',
                   borderWidth: 1,
                   // backgroundColor: actualLoadBackgroundColors,
                   type: 'bar'
                 },
                 {
-                  label: 'Plan Load',
+                  label: 'Load - Plan ',
                   borderWidth: 1,
                   backgroundColor: planLoadBackgroundColors,
                   type: 'bar'
