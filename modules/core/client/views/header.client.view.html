@@ -32,9 +32,9 @@
             <li ui-sref-active="active">
               <a ui-sref="faq">FAQ</a>
             </li>
-            <li ui-sref-active="active">
+            <!-- <li ui-sref-active="active">
               <a ui-sref="waitlist">Waitlisting</a>
-            </li>
+            </li> -->
             <li ui-sref-active="active">
               <a ui-sref="contact">Contact Us</a>
             </li>
@@ -68,9 +68,9 @@
             <li ui-sref-active="active" ng-show="authentication.user.provider === 'local' && !_.includes(authentication.user.roles, 'waitlist')">
               <a ui-sref="settings.password">Change Password</a>
             </li>
-            <li ui-sref-active="active" ng-hide="_.includes(authentication.user.roles, 'waitlist')">
+            <!-- <li ui-sref-active="active" ng-hide="_.includes(authentication.user.roles, 'waitlist')">
               <a ui-sref="settings.accounts">Manage Social Accounts</a>
-            </li>
+            </li> -->
             <li class="divider" ng-hide="_.includes(authentication.user.roles, 'waitlist')"></li>
             <li>
               <a href="/api/auth/signout" target="_self">Sign Out</a>
