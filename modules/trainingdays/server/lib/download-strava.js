@@ -10,7 +10,7 @@ var path = require('path'),
   dbUtil = require('./db-util'),
   strava = require('strava-v3'),
   err;
-require('lodash-migrate');
+
 
 module.exports = {};
 

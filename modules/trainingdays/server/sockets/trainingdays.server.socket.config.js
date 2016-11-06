@@ -1,6 +1,6 @@
 // 'use strict';
 // var _ = require('lodash');
-// require('lodash-migrate');
+//
 
 // // Create the trainingDayMessage socket configuration
 // module.exports = function (io, socket) {

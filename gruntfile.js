@@ -6,7 +6,7 @@ var _ = require('lodash'),
   testConfig = require('./config/env/test'),
   fs = require('fs'),
   path = require('path');
-require('lodash-migrate');
+
 
 module.exports = function (grunt) {
   // Project Configuration

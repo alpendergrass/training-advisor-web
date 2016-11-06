@@ -5,7 +5,7 @@ var _ = require('lodash'),
   glob = require('glob'),
   fs = require('fs'),
   path = require('path');
-require('lodash-migrate');
+
 
 /**
  * Get files by glob patterns

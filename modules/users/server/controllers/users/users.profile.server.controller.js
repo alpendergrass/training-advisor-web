@@ -8,7 +8,7 @@ var _ = require('lodash'),
   multer = require('multer'),
   config = require(path.resolve('./config/config')),
   User = mongoose.model('User');
-require('lodash-migrate');
+
 
 exports.update = function (req, res) {
   var user = req.user;

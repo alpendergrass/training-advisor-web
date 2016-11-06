@@ -5,7 +5,7 @@ var _ = require('lodash'),
   mongoose = require('mongoose'),
   chalk = require('chalk'),
   crypto = require('crypto');
-require('lodash-migrate');
+
 
 // global seed options object
 var seedOptions = {};

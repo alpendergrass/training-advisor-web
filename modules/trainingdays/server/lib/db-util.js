@@ -8,7 +8,7 @@ var moment = require('moment-timezone'),
   util = require('./util'),
   err;
 
-require('lodash-migrate');
+
 
 mongoose.Promise = global.Promise;
 

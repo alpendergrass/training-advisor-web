@@ -7,7 +7,7 @@ var path = require('path'),
   User = mongoose.model('User'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   err;
-require('lodash-migrate');
+
 
 module.exports = {};
 

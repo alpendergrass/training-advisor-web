@@ -12,7 +12,7 @@ var path = require('path'),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util'));
-require('lodash-migrate');
+
 
 // Globals
 var url = 'http://www.trainingpeaks.com/tpwebservices/service.asmx?WSDL',

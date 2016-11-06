@@ -5,7 +5,7 @@ var _ = require('lodash'),
   chalk = require('chalk'),
   fileStreamRotator = require('file-stream-rotator'),
   fs = require('fs');
-require('lodash-migrate');
+
 
 // list of valid formats for the logging
 var validFormats = ['combined', 'common', 'dev', 'short', 'tiny'];

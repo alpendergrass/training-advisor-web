@@ -5,7 +5,7 @@ var _ = require('lodash'),
   testAssets = require('./config/assets/test'),
   testConfig = require('./config/env/test'),
   karmaReporters = ['progress'];
-require('lodash-migrate');
+
 
 if (testConfig.coverage) {
   karmaReporters.push('coverage');

@@ -8,7 +8,7 @@ var path = require('path'),
   passport = require('passport'),
   Site = mongoose.model('Site'),
   User = mongoose.model('User');
-require('lodash-migrate');
+
 
 // URLs for which user can't be redirected on signin
 var noReturnUrls = [
