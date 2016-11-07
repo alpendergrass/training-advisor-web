@@ -286,6 +286,15 @@ angular.module('trainingDays')
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
+          // Highlight goal event days.
+          if (td.scheduledEventRanking === 1) {
+            return '#BD7E7D';
+          }
+
+          if (moment(td.date).isBefore($scope.today, 'day')) {
+            return '#EAF1F5';
+          }
+
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
             return '#FFA07A';
@@ -296,23 +305,19 @@ angular.module('trainingDays')
             return '#ffe4b3';
           }
 
-          // Highlight event days.
-          if (td.scheduledEventRanking === 1) {
-            return '#BD7E7D';
-          }
-
-          var planActivity = getPlannedActivity(td, 'plangeneration');
-
-          if (planActivity && planActivity.activityType === 'test') {
-            return '#B2DBDA';
-          }
-
+          // Highlight other event days.
           if (td.scheduledEventRanking === 2) {
             return '#D1A2A1';
           }
 
           if (td.scheduledEventRanking === 3) {
             return '#EBD1D1';
+          }
+
+          var planActivity = getPlannedActivity(td, 'plangeneration');
+
+          if (planActivity && planActivity.activityType === 'test') {
+            return '#B2DBDA';
           }
 
           return '#EAF1F5';
