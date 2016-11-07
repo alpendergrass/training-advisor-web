@@ -79,41 +79,6 @@
     </p>
     <hr />
   </div>
-  <div ng-show="showFormAndFitness">
-
-    <table class="table fff-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Fitness</th>
-          <th>Fatigue</th>
-          <th>Form</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Planned</th>
-          <td>{{ plannedMetrics.fitness }}</td>
-          <td>{{ plannedMetrics.fatigue }}</td>
-          <td>{{ plannedMetrics.form }}</td>
-        </tr>
-        <tr ng-show="source === 'advised'">
-          <th>Actual</th>
-          <td>{{ actualMetrics.fitness }}</td>
-          <td>{{ actualMetrics.fatigue }}</td>
-          <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Today is season start or true-up day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate</abbr>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-  </div>
-  <p>
-    <label>Notes on the Day: </label>
-    <a href="#" editable-textarea="trainingDay.notes" e-rows="7" e-cols="40" onbeforesave="update(true)">
-      <pre>{{ trainingDay.notes || 'no notes' }}</pre>
-    </a>
-  </p>
   <div ng-show="showCompletedActivities">
     <div ng-hide="trainingDay.completedActivities.length > 0">
       <label>No Completed Rides for the Day</label>
@@ -165,7 +130,7 @@
     </div>
     <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
     <p ng-show="trainingDay.completedActivities.length > 0">
-      <label>Training Load Rating: <i>{{trainingDay.loadRating}}</i></label>
+      <label>Training Load Rating: <i>{{actualMetrics.loadRating}}</i></label>
     </p>
     <p>
       <!-- only show download option if connected to Strava. -->
@@ -184,8 +149,47 @@
     <div ng-show="error" class="text-danger">
       <strong ng-bind="error"></strong>
     </div>
+    <hr />
   </div>
+
+  <p>
+    <label>Notes on the Day: </label>
+    <a href="#" editable-textarea="trainingDay.notes" e-rows="7" e-cols="40" onbeforesave="update(true)">
+      <pre>{{ trainingDay.notes || 'no notes' }}</pre>
+    </a>
+  </p>
+
+  <div ng-show="showFormAndFitness">
+    <hr />
+    <table class="table fff-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Fitness</th>
+          <th>Fatigue</th>
+          <th>Form</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Planned</th>
+          <td>{{ plannedMetrics.fitness }}</td>
+          <td>{{ plannedMetrics.fatigue }}</td>
+          <td>{{ plannedMetrics.form }}</td>
+        </tr>
+        <tr ng-show="source === 'advised'">
+          <th>Actual</th>
+          <td>{{ actualMetrics.fitness }}</td>
+          <td>{{ actualMetrics.fatigue }}</td>
+          <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Today is season start or true-up day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate</abbr>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div ng-show="authentication.user.levelOfDetail > 2">
+    <hr />
     <small>
       <div>dateNumeric: {{trainingDay.dateNumeric}}</div>
       <div>Rationale: {{plannedActivity.rationale }}</div>
