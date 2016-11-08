@@ -27,12 +27,18 @@
       Calendar
     </a>
   </div>
-  <div>
+  <div ng-show="allowEventEdit">
     <h4>
       <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::eventRankings track by s.value" onbeforesave="updateEventRanking($data)">{{showRanking()}}</a>
       <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9"><small>Estimated Training Load: <a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedLoad}}</a></small></span>
     </h4>
   </div>
+  <div ng-hide="allowEventEdit">
+    <h4>
+      {{showRanking()}}<span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9"> <small>Estimated Training Load: {{trainingDay.estimatedLoad}}</small></span>
+    </h4>
+  </div>
+
   <div ng-show="source === 'advised' && plannedActivity.activityType">
     <p>
       <div>
@@ -79,6 +85,27 @@
     </p>
     <hr />
   </div>
+
+  <div ng-show="source === 'plangeneration' && plannedActivity.activityType">
+    <p>
+      <div>
+        <span ng-hide="_.includes(['rest', 'easy', 'test', 'choice', 'event'], plannedActivity.activityType) || trainingDay.estimatedLoad === plannedActivity.targetMinLoad">
+          Target load between <strong><u>{{plannedActivity.targetMinLoad}}</u></strong> and <strong><u>{{plannedActivity.targetMaxLoad}}</u></strong>.
+        </span>
+        <span ng-show="plannedActivity.activityType == 'event' && trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking !== 9 && trainingDay.estimatedLoad < 1">
+          You provided no load estimate for this event. Our load recommendation for a workout today would be between <strong><u>{{plannedActivity.targetMinLoad}}</u></strong> and <strong><u>{{plannedActivity.targetMaxLoad}}</u></strong>.
+        </span>
+        <span ng-show="plannedActivity.activityType == 'event' && trainingDay.estimatedLoad">
+          Your load estimate for this event is <strong><u>{{trainingDay.estimatedLoad}}</u></strong>.
+        </span>
+        <span ng-show="_.includes(['easy'], plannedActivity.activityType)">
+          Training Load below <strong>{{plannedActivity.targetMaxLoad}}</strong>.
+        </span>
+      </div>
+    </p>
+    <hr />
+  </div>
+
   <div ng-show="showCompletedActivities">
     <div ng-hide="trainingDay.completedActivities.length > 0">
       <label>No Completed Rides for the Day</label>
@@ -168,6 +195,8 @@
           <th>Fitness</th>
           <th>Fatigue</th>
           <th>Form</th>
+          <th ng-show="authentication.user.levelOfDetail > 2">Target Ramp Rate</th>
+          <th ng-show="authentication.user.levelOfDetail > 2">Ramp Rate</th>
         </tr>
       </thead>
       <tbody>
@@ -176,12 +205,16 @@
           <td>{{ plannedMetrics.fitness }}</td>
           <td>{{ plannedMetrics.fatigue }}</td>
           <td>{{ plannedMetrics.form }}</td>
+          <td ng-show="authentication.user.levelOfDetail > 2">{{ plannedMetrics.sevenDayTargetRampRate }}</td>
+          <td ng-show="authentication.user.levelOfDetail > 2">{{ plannedMetrics.sevenDayRampRate }}</td>
         </tr>
         <tr ng-show="source === 'advised'">
           <th>Actual</th>
           <td>{{ actualMetrics.fitness }}</td>
           <td>{{ actualMetrics.fatigue }}</td>
           <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Today is season start or true-up day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate</abbr>
+          <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayTargetRampRate }}</td>
+          <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayRampRate }}</td>
           </td>
         </tr>
       </tbody>

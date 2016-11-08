@@ -114,7 +114,7 @@ angular.module('trainingDays')
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
             $scope.error = 'Server error prevented season retrieval';
           }
         });
@@ -254,7 +254,7 @@ angular.module('trainingDays')
                 if (errorResponse.data && errorResponse.data.message) {
                   $scope.error = errorResponse.data.message;
                 } else {
-                  //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+                  //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
                   $scope.error = 'Server error prevented trainingDay creation.';
                 }
               });
@@ -278,11 +278,13 @@ angular.module('trainingDays')
           actualFormArray,
           actualFitnessArray,
           actualFatigueArray,
-          actualFormPointBorderColors,
+          // actualFormPointBorderColors,
           formPointRadius,
           planLoadArray,
           planFormArray,
           planFitnessArray,
+          targetRampRateArray,
+          rampRateArray,
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
@@ -301,7 +303,7 @@ angular.module('trainingDays')
           }
 
           if (td.isSimDay) {
-            // Highlight sim days.
+            // Highlight sim days when in what-if mode.
             return '#ffe4b3';
           }
 
@@ -395,6 +397,20 @@ angular.module('trainingDays')
           return getMetrics(td, 'actual').form;
         };
 
+        var getTargetRampRate = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return getMetrics(td, 'planned').sevenDayTargetRampRate;
+          }
+          return getMetrics(td, 'actual').sevenDayTargetRampRate;
+        };
+
+        var getRampRate = function(td) {
+          if (moment(td.date).isAfter($scope.today, 'day')) {
+            return getMetrics(td, 'planned').sevenDayRampRate;
+          }
+          return getMetrics(td, 'actual').sevenDayRampRate;
+        };
+
         var extractDate = function(td) {
           return moment(td.date).format('ddd MMM D');
         };
@@ -407,42 +423,53 @@ angular.module('trainingDays')
               planFitnessArray = _.flatMap($scope.season, getPlanFitness);
               actualLoadArray = _.flatMap($scope.season, getActualLoad);
               actualFitnessArray = _.flatMap($scope.season, getActualFitness);
-              actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
+              // actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
               actualFormArray = _.flatMap($scope.season, getActualForm);
               planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
               formPointRadius = _.flatMap($scope.season, setFormPointRadius);
-              actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
+              // actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
               $scope.chartLabels = _.flatMap($scope.season, extractDate);
-              // $scope.chartData = [actualLoadArray, planLoadArray, actualFatigueArray, actualFitnessArray, actualFormArray, planFitnessArray, planFormArray];
-              $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
+
+              if ($scope.authentication.user.levelOfDetail > 2) {
+                targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
+                rampRateArray = _.flatMap($scope.season, getRampRate);
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, targetRampRateArray, rampRateArray];
+              } else {
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
+              }
 
               $scope.chartDatasetOverride = [
                 {
                   label: 'Load - Actual',
+                  yAxisID: 'y-axis-0',
                   borderWidth: 1,
                   // backgroundColor: actualLoadBackgroundColors,
                   type: 'bar'
                 },
                 {
                   label: 'Load - Plan ',
+                  yAxisID: 'y-axis-0',
                   borderWidth: 1,
                   backgroundColor: planLoadBackgroundColors,
                   type: 'bar'
                 },
                 {
                   label: 'Fitness - Actual',
+                  yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: 0,
                   type: 'line'
                 },
                 {
                   label: 'Fitness - Plan',
+                  yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: 0,
                   type: 'line'
                 },
                 {
                   label: 'Form - Actual',
+                  yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: formPointRadius,
                   // pointBorderColor: actualFormPointBorderColors,
@@ -450,9 +477,24 @@ angular.module('trainingDays')
                 },
                 {
                   label: 'Form - Plan',
+                  yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: formPointRadius,
                   // pointBorderColor: '#4D5360',
+                  type: 'line'
+                },
+                {
+                  label: 'Target Ramp Rate',
+                  yAxisID: 'y-axis-1',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  type: 'line'
+                },
+                {
+                  label: 'Ramp Rate',
+                  yAxisID: 'y-axis-1',
+                  borderWidth: 3,
+                  pointRadius: 0,
                   type: 'line'
                 }
                 // {
@@ -505,13 +547,14 @@ angular.module('trainingDays')
         $scope.error = null;
 
         $scope.chartColors = [
-          '#97BBCD', // blue
-          '#DCDCDC', // light grey
-          '#FDB45C', // yellow
-          '#949FB1', // grey
-          '#46BFBD', // green
-          '#4D5360' // dark grey
-          // '#F7464A' // red
+          '#97BBCD',
+          '#DCDCDC',
+          '#FDB45C',
+          '#949FB1',
+          '#46BFBD',
+          '#4D5360',
+          '#F7464A',
+          '#79B685'
         ];
 
         $scope.chartOptions = {
@@ -521,7 +564,26 @@ angular.module('trainingDays')
           },
           scales: {
             xAxes: [{
-              stacked: true
+              stacked: true,
+              gridLines: {
+                display: false
+              }
+            }],
+            yAxes: [{
+              position: 'left',
+              id: 'y-axis-0'
+            }, {
+              position: 'right',
+              id: 'y-axis-1',
+              gridLines: {
+                display: false
+              },
+              ticks: {
+                display: false,
+                max: 10,
+                min: -5,
+                stepSize: 1
+              }
             }]
           },
           tooltips: {
@@ -615,7 +677,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented season update.';
             }
           });
@@ -836,7 +898,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented starting point creation.';
             }
           });
@@ -996,7 +1058,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented event creation.';
             }
           });
@@ -1026,7 +1088,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented advice retrieval.';
             }
           });
@@ -1064,6 +1126,7 @@ angular.module('trainingDays')
           $scope.nextDay = moment(trainingDay.date).add(1, 'day').toDate();
           $scope.showGetAdvice = moment(trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day') || $scope.authentication.user.levelOfDetail > 2;
           $scope.showCompletedActivities = moment(trainingDay.date).isBefore($scope.tomorrow, 'day');
+          $scope.allowEventEdit = moment(trainingDay.date).isSameOrAfter($scope.today, 'day') || $scope.authentication.user.levelOfDetail > 2;
           $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
           $scope.source = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'advised' : 'plangeneration';
           resetViewObjects(trainingDay);
@@ -1078,7 +1141,7 @@ angular.module('trainingDays')
 
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Nothing Planned';
+            dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Training Day';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
@@ -1100,7 +1163,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented training day retrieval.';
             }
           });
@@ -1213,7 +1276,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented activity download.';
             }
           });
@@ -1231,7 +1294,7 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented advice retrieval.';
             }
           });
@@ -1245,7 +1308,7 @@ angular.module('trainingDays')
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
             $scope.error = 'Server error prevented training day retrieval.';
           }
         });
@@ -1281,7 +1344,7 @@ angular.module('trainingDays')
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
           } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ""}
+            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
             $scope.error = 'Server error prevented training day update.';
           }
 

@@ -271,24 +271,17 @@ exports.getDay = function(req, res) {
 
 exports.update = function(req, res) {
   var trainingDay = req.trainingDay,
-    recomputeAdvice = false,
+    refreshAdvice = false,
     params = {};
 
-  if (req.body.fitness !== trainingDay.fitness || req.body.fatigue !== trainingDay.fatigue) {
-    //user has updated F&F, which should only be done in a F&F true-up.
-    trainingDay.fitnessAndFatigueTrueUp = true;
+  // If a change was made that would affect current advice, let's recompute.
+  // Is not possible in the UI to change event ranking or estimated load of past events.
+  if (trainingDay.completedActivities !== req.body.completedActivities ||
+    trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
+    trainingDay.estimatedLoad !== req.body.estimatedLoad
+  ) {
+    refreshAdvice = true;
   }
-
-  // //If a change was made that would affect existing advice, let's recompute.
-  // let advisedActivity = util.getPlannedActivity(trainingDay, 'advised');
-
-  // if (advisedActivity && advisedActivity.advice && !trainingDay.completedActivities &&
-  //   (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
-  //     trainingDay.estimatedLoad !== req.body.estimatedLoad
-  //   )
-  // ) {
-  //   recomputeAdvice = true;
-  // }
 
   trainingDay.name = req.body.name;
   trainingDay.fitness = req.body.fitness;
@@ -306,15 +299,19 @@ exports.update = function(req, res) {
       });
     }
 
-    adviceEngine.refreshAdvice(req.user, trainingDay)
-      .then(function(trainingDay) {
-        return res.json(trainingDay);
-      })
-      .catch(function() {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
+    if (refreshAdvice) {
+      adviceEngine.refreshAdvice(req.user, trainingDay)
+        .then(function(trainingDay) {
+          return res.json(trainingDay);
+        })
+        .catch(function() {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
         });
-      });
+    } else {
+      return res.json(trainingDay);
+    }
   });
 };
 
