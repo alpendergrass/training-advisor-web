@@ -250,20 +250,18 @@ function updateMetricsForDay(params, callback) {
       params.trainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
       params.trainingDay.daysUntilNextPriority3Event = results.periodData.daysUntilNextPriority3Event;
 
-      // computeSevenDayRampRate(user, params.trainingDay, function (err, rampRate) {
+      computeSevenDayRampRate(params.user, params.trainingDay, params.metricsType, function (err, rampRate) {
       //ignore error...for now at least.
-      //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
-        // params.metrics.sevenDayRampRate = rampRate;
-      params.metrics.sevenDayRampRate = 0;
+        params.metrics.sevenDayRampRate = rampRate;
 
-      params.trainingDay.save(function(err) {
-        if (err) {
-          return callback(err, null);
-        } else {
-          return callback(null, params.trainingDay);
-        }
+        params.trainingDay.save(function(err) {
+          if (err) {
+            return callback(err, null);
+          } else {
+            return callback(null, params.trainingDay);
+          }
+        });
       });
-      // });
     });
 }
 
@@ -288,33 +286,37 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
   return 'hard';
 }
 
-// function computeSevenDayRampRate(user, trainingDay, callback) {
-//   //We are not using sevenDayRampRate since we disabled computeRampRateAdjustment.
-//   //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-//   var priorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
-//     yesterday = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
-//     rampRate;
+function computeSevenDayRampRate(user, trainingDay, metricsType, callback) {
+  //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
+  var priorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
+    yesterday = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
+    yesterdayMetrics,
+    priorDayMetrics,
+    rampRate;
 
-//   dbUtil.getExistingTrainingDayDocument(user, yesterday)
-//     .then(function(yesterdayTrainingDay) {
-//       if (!yesterdayTrainingDay) {
-//         return callback(null, 0);
-//       }
+  dbUtil.getExistingTrainingDayDocument(user, yesterday)
+    .then(function(yesterdayTrainingDay) {
+      if (!yesterdayTrainingDay) {
+        return callback(null, 0);
+      }
 
-//       dbUtil.getExistingTrainingDayDocument(user, priorDate)
-//         .then(function(priorTrainingDay) {
-//           if (!priorTrainingDay) {
-//             return callback(null, 0);
-//           }
+      dbUtil.getExistingTrainingDayDocument(user, priorDate)
+        .then(function(priorTrainingDay) {
+          if (!priorTrainingDay) {
+            return callback(null, 0);
+          }
 
-//           rampRate = Math.round((yesterdayTrainingDay.fitness - priorTrainingDay.fitness) * 100) / 100;
-//           return callback(null, rampRate);
-//         })
-//         .catch(function(err) {
-//           return callback(err, 0);
-//         });
-//     })
-//     .catch(function(err) {
-//       return callback(err, 0);
-//     });
-// }
+          yesterdayMetrics = _.find(yesterdayTrainingDay.metrics, ['metricsType', metricsType]);
+          priorDayMetrics = _.find(priorTrainingDay.metrics, ['metricsType', metricsType]);
+
+          rampRate = Math.round((yesterdayMetrics.fitness - priorDayMetrics.fitness) * 100) / 100;
+          return callback(null, rampRate);
+        })
+        .catch(function(err) {
+          return callback(err, 0);
+        });
+    })
+    .catch(function(err) {
+      return callback(err, 0);
+    });
+}
