@@ -50,6 +50,10 @@ angular.module('trainingDays')
         return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
       };
 
+      var toNumericDate = function(date) {
+        var dateString = moment(date).format('YYYYMMDD');
+        return parseInt(dateString, 10);
+      }
       var getMetrics = function(trainingDay, metricsType) {
         return _.find(trainingDay.metrics, ['metricsType', metricsType]);
       };
@@ -285,6 +289,7 @@ angular.module('trainingDays')
           planFitnessArray,
           targetRampRateArray,
           rampRateArray,
+          averageRateArray,
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
@@ -411,6 +416,36 @@ angular.module('trainingDays')
           return getMetrics(td, 'actual').sevenDayRampRate;
         };
 
+
+        var getAverageRampRate = function(td) {
+          // Get ramp rate for previous n days and average.
+          // create an array of the last n days
+          // average sevenDayRampRate for those days
+          let currentTD = td;
+          let n = 7;
+
+          let rampRates = _.times(n, function() {
+            let rampRate;
+
+            if (currentTD) {
+              if (moment(currentTD.date).isAfter($scope.today, 'day')) {
+                rampRate = getMetrics(currentTD, 'planned').sevenDayRampRate;
+              } else {
+                rampRate = getMetrics(currentTD, 'actual').sevenDayRampRate;
+              }
+
+              let dateNumeric = toNumericDate(moment(currentTD.date).subtract(1, 'day'));
+              currentTD = _.find($scope.season, ['dateNumeric', dateNumeric]);
+            } else {
+              rampRate = null;
+            }
+
+            return rampRate;
+          });
+
+          return Math.round((_.mean(rampRates)) * 100) / 100;
+        };
+
         var extractDate = function(td) {
           return moment(td.date).format('ddd MMM D');
         };
@@ -433,7 +468,8 @@ angular.module('trainingDays')
               if ($scope.authentication.user.levelOfDetail > 2) {
                 targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
                 rampRateArray = _.flatMap($scope.season, getRampRate);
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, targetRampRateArray, rampRateArray];
+                averageRateArray = _.flatMap($scope.season, getAverageRampRate);
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, targetRampRateArray, rampRateArray, averageRateArray];
               } else {
                 $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
               }
@@ -492,6 +528,13 @@ angular.module('trainingDays')
                 },
                 {
                   label: 'Ramp Rate',
+                  yAxisID: 'y-axis-1',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  type: 'line'
+                },
+                {
+                  label: 'Average Ramp Rate',
                   yAxisID: 'y-axis-1',
                   borderWidth: 3,
                   pointRadius: 0,
@@ -580,8 +623,8 @@ angular.module('trainingDays')
               },
               ticks: {
                 display: false,
-                max: 10,
-                min: -5,
+                max: 13,
+                min: -2,
                 stepSize: 1
               }
             }]
