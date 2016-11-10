@@ -287,34 +287,27 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 }
 
 function computeSevenDayRampRate(user, trainingDay, metricsType, callback) {
-  //compute sevenDayRampRate = Yesterday's fitness - fitness 7 days prior.
-  var priorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(8, 'days')),
-    yesterday = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'days')),
-    yesterdayMetrics,
+  // compute sevenDayRampRate = Today's fitness - fitness 7 days prior.
+  // When graphing ramp rates, we get smooth lines when comparing like days (e.g., hard to hard, rest with rest),
+  // and very jagged when comparing unlike. This is all a matter of timing. How can we smooth the line consistently?
+  // Average across 7 days?
+
+  var priorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(7, 'days')),
+    todayMetrics,
     priorDayMetrics,
     rampRate;
 
-  dbUtil.getExistingTrainingDayDocument(user, yesterday)
-    .then(function(yesterdayTrainingDay) {
-      if (!yesterdayTrainingDay) {
+  dbUtil.getExistingTrainingDayDocument(user, priorDate)
+    .then(function(priorTrainingDay) {
+      if (!priorTrainingDay) {
         return callback(null, 0);
       }
 
-      dbUtil.getExistingTrainingDayDocument(user, priorDate)
-        .then(function(priorTrainingDay) {
-          if (!priorTrainingDay) {
-            return callback(null, 0);
-          }
+      todayMetrics = util.getMetrics(trainingDay, metricsType);
+      priorDayMetrics = util.getMetrics(priorTrainingDay, metricsType);
 
-          yesterdayMetrics = _.find(yesterdayTrainingDay.metrics, ['metricsType', metricsType]);
-          priorDayMetrics = _.find(priorTrainingDay.metrics, ['metricsType', metricsType]);
-
-          rampRate = Math.round((yesterdayMetrics.fitness - priorDayMetrics.fitness) * 100) / 100;
-          return callback(null, rampRate);
-        })
-        .catch(function(err) {
-          return callback(err, 0);
-        });
+      rampRate = Math.round((todayMetrics.fitness - priorDayMetrics.fitness) * 100) / 100;
+      return callback(null, rampRate);
     })
     .catch(function(err) {
       return callback(err, 0);

@@ -81,8 +81,8 @@ function computeRampRateAdjustment(trainingDay, plannedActivity, metrics) {
   // the other hard days around them. I think these were the only days where we were not tweaking the ramp rates.
   // I'm going to turn off the adjusting until I have higher confidence in doing this.
   // Perhaps we should only adjust ramp rates when computing current advice, not when doing planGen.
-  // I think we also need to compute ramp rates over a longer period as 7 day ramp rate is very sensitive.
-  // Use 14 days to compute? Maybe go back to the last rest period if we can figure out what that was.
+  // 7 day ramp rate is very sensitive.
+  // Average across 7 days?
 
   // Adjust advice to bring actual ramp rate towards target ramp rate.
   // If below, increase daily targets by % of difference.

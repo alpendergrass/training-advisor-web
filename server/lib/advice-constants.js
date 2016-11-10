@@ -32,19 +32,19 @@ module.exports.priority2EventCutOffThreshold = 5;
 module.exports.priority3EventCutOffThreshold = 9;
 
 //If it has been this many days since FTP was updated, start nagging user to test.
-module.exports.testingNagDayCount = 21;
+module.exports.testingNagDayCount = 24;
 
 //Form must be greater than this before we will recommend testing.
-module.exports.testingEligibleFormThreshold = -7.5;
+module.exports.testingEligibleFormThreshold = -5;
 
 //If form is less than or equal to this, we recommend an easy day if...see code.
-module.exports.easyDaytNeededThreshold = -10;
+module.exports.easyDaytNeededThreshold = -25;
 
 //If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -20;
+module.exports.restNeededThreshold = -36;
 
 //If testing is due and form is less than or equal to this, we recommend rest.
-module.exports.restNeededForTestingThreshold = -11;
+module.exports.restNeededForTestingThreshold = -18;
 
 //If form is less than or equal to this during peak period, we recommend rest.
 //I made it one less than restNeededForTestingThreshold to get unit tests to work.
@@ -93,13 +93,13 @@ module.exports.loadAdviceLookups = [
     // intensity:  0.8
   }, {
     activityType: 'hard',
-    lowLoadFactor: 1.4,
-    highLoadFactor: 1.9
+    lowLoadFactor: 1.9,
+    highLoadFactor: 2.5
     // intensity:  0.9
   }, {
     activityType: 'simulation',
-    lowLoadFactor: 1.4,
-    highLoadFactor: 1.9
+    lowLoadFactor: 1.9,
+    highLoadFactor: 2.5
     // intensity:  0.9
   }, {
     activityType: 'test',
@@ -108,25 +108,26 @@ module.exports.loadAdviceLookups = [
     // intensity:  1.0
   }, {
     activityType: 'event1',
-    //goal event
-    lowLoadFactor: 1.4,
-    highLoadFactor: 1.9
+    // goal event
+    // If we do not have estimated load for the event, we are basically guessing.
+    lowLoadFactor: 2.5,
+    highLoadFactor: 2.5
     // intensity:  0.95
   }, {
     activityType: 'event2',
-    //medium priority event
-    lowLoadFactor: 1.4,
-    highLoadFactor: 1.9
+    // medium priority event
+    lowLoadFactor: 1.9,
+    highLoadFactor: 2.5
     // intensity:  0.95
   }, {
     activityType: 'event3',
-    //low priority event
-    lowLoadFactor: 1.4,
-    highLoadFactor: 1.9
+    // low priority event
+    lowLoadFactor: 1.9,
+    highLoadFactor: 2.5
     // intensity:  0.95
   }, {
     activityType: 'event9',
-    //off day
+    // off day
     lowLoadFactor: 0,
     highLoadFactor: 0
     // intensity:  0.0
