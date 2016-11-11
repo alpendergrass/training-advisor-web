@@ -76,24 +76,17 @@ function setTargetLoads(trainingDay, plannedActivity, metrics) {
 }
 
 function computeRampRateAdjustment(trainingDay, plannedActivity, metrics) {
-  // 9/20/16: mucking with the ramp rate the way we were below is causing some weirdness in the advice,
-  // at least when looking at the season chart for future days. We were getting some hard days with much lower target loads than
-  // the other hard days around them. I think these were the only days where we were not tweaking the ramp rates.
-  // I'm going to turn off the adjusting until I have higher confidence in doing this.
-  // Perhaps we should only adjust ramp rates when computing current advice, not when doing planGen.
-  // 7 day ramp rate is very sensitive.
-  // Average across 7 days?
-
-  // Adjust advice to bring actual ramp rate towards target ramp rate.
+  // Adjust advice to bring average ramp rate towards target ramp rate.
   // If below, increase daily targets by % of difference.
   // If above, decrease daily targets by % of difference.
   // Only adjust hard or moderate days.
+  // Do not adjust planned loads.
 
   var adjustmentFactor = 1;
 
-  // if (metrics.metricsType === 'planned') {
-  //   return adjustmentFactor;
-  // }
+  if (metrics.metricsType === 'planned') {
+    return adjustmentFactor;
+  }
 
   //sevenDayRampRate of zero probably means we do not have a prior week to use to compute.
   if (metrics.sevenDayAverageRampRate !== 0 && (plannedActivity.activityType === 'hard' || plannedActivity.activityType === 'moderate')) {

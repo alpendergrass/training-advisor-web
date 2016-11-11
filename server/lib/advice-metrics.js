@@ -228,8 +228,8 @@ function updateMetricsForDay(params, callback) {
       //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
 
       if (params.trainingDay.period === 'peak' || params.trainingDay.period === 'race' || params.trainingDay.period === 'transition') {
-        //In essence, a zero ramp.
-        params.metrics.dailyTargetRampRate = 0.001;
+        params.metrics.sevenDayTargetRampRate = -3.5;
+        params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else {
         //Let's break it down to make it easier to understand when I come back to it a year from now.
         percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;

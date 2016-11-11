@@ -41,7 +41,7 @@ module.exports.testingEligibleFormThreshold = -5;
 module.exports.easyDaytNeededThreshold = -25;
 
 //If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -36;
+module.exports.restNeededThreshold = -30;
 
 //If testing is due and form is less than or equal to this, we recommend rest.
 module.exports.restNeededForTestingThreshold = -18;
@@ -59,7 +59,7 @@ module.exports.stravaNPFudgeFactor = 1.055;
 
 //This is the maximum amount by which we will tweak (+/-) load advice
 //to try to bring actual ramp rate closer to target rate.
-module.exports.rampRateAdjustmentLimit = 0.2;
+module.exports.rampRateAdjustmentLimit = 0.05;
 
 //CTL Time Constant is 42 by default in TP and Strava.
 module.exports.defaultFitnessTimeConstant = 42;
@@ -94,12 +94,12 @@ module.exports.loadAdviceLookups = [
   }, {
     activityType: 'hard',
     lowLoadFactor: 1.9,
-    highLoadFactor: 2.5
+    highLoadFactor: 2.1
     // intensity:  0.9
   }, {
     activityType: 'simulation',
     lowLoadFactor: 1.9,
-    highLoadFactor: 2.5
+    highLoadFactor: 2.1
     // intensity:  0.9
   }, {
     activityType: 'test',
@@ -117,13 +117,13 @@ module.exports.loadAdviceLookups = [
     activityType: 'event2',
     // medium priority event
     lowLoadFactor: 1.9,
-    highLoadFactor: 2.5
+    highLoadFactor: 2.1
     // intensity:  0.95
   }, {
     activityType: 'event3',
     // low priority event
     lowLoadFactor: 1.9,
-    highLoadFactor: 2.5
+    highLoadFactor: 2.1
     // intensity:  0.95
   }, {
     activityType: 'event9',
