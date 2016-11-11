@@ -26,7 +26,7 @@ var rules = [
         (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race') &&
         (this.metrics.form <= this.adviceConstants.easyDaytNeededThreshold) &&
         (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
-        (!this.tomorrowTrainingDay || this.tomorrowTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
+        (!this.subsequentTrainingDay || this.subsequentTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
       );
     },
     'consequence': function(R) {

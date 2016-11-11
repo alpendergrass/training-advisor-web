@@ -26,17 +26,22 @@ var path = require('path'),
 
 function generateAdvice(user, trainingDay, source, callback) {
   var facts = {};
-  var tomorrow = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var subsequentDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var previousDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
   var metricsType = util.setMetricsType(source);
 
-  dbUtil.getExistingTrainingDayDocument(user, tomorrow)
-    .then(function(tomorrowTrainingDay) {
+  dbUtil.getExistingTrainingDayDocument(user, subsequentDate)
+    .then(function(subsequentTrainingDay) {
+      facts.subsequentTrainingDay = subsequentTrainingDay;
+
       dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, metricsType, function(err, wentHard) {
         if (err) {
           return callback(err, null, null);
         }
 
         facts.trainingState = null;
+        facts.source = source;
+        facts.metricsType = metricsType;
         facts.adviceConstants = adviceConstants;
         facts.wentHardYesterday = wentHard;
         facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
@@ -46,7 +51,6 @@ function generateAdvice(user, trainingDay, source, callback) {
         facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
         facts.metrics = util.getMetrics(trainingDay, metricsType);
 
-        facts.tomorrowTrainingDay = tomorrowTrainingDay;
 
         var R = new RuleEngine(adviceEvent.eventRules);
         R.register(adviceTest.testRules);
@@ -295,7 +299,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
   // and then advise for today (maybe) and tomorrow.
 
   let tdDate = moment(trainingDay.dateNumeric.toString()); //Thu Nov 03 2016 00:00:00 GMT+0000 (UTC)
-  let today = util.getTodayInTimezone(user.timezone);
+  let today = util.getTodayInUserTimezone(user);
   let tomorrow = moment(today).add(1, 'day').startOf('day').toDate(); //Fri Nov 04 2016 00:00:00 GMT+0000
 
   return new Promise(function(resolve, reject) {
