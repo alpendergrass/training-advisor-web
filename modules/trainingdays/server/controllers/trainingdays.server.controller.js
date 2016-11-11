@@ -220,7 +220,7 @@ exports.create = function(req, res) {
         });
       }
 
-      let today = util.getTodayInTimezone(user.timezone);
+      let today = util.getTodayInUserTimezone(user);
 
       if (moment(trainingDay.date).isAfter(today)) {
         user.planGenNeeded = true;

@@ -591,7 +591,7 @@ angular.module('trainingDays')
         $scope.chartOptions = {
           legend: {
             display: true,
-            position: 'bottom'
+            position: 'top'
           },
           scales: {
             xAxes: [{
