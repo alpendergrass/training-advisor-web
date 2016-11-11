@@ -197,6 +197,7 @@
           <th>Form</th>
           <th ng-show="authentication.user.levelOfDetail > 2">Target Ramp Rate</th>
           <th ng-show="authentication.user.levelOfDetail > 2">Ramp Rate</th>
+          <th ng-show="authentication.user.levelOfDetail > 2">Average Ramp Rate</th>
         </tr>
       </thead>
       <tbody>
@@ -207,6 +208,7 @@
           <td>{{ plannedMetrics.form }}</td>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ plannedMetrics.sevenDayTargetRampRate }}</td>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ plannedMetrics.sevenDayRampRate }}</td>
+          <td ng-show="authentication.user.levelOfDetail > 2">{{ plannedMetrics.sevenDayAverageRampRate }}</td>
         </tr>
         <tr ng-show="source === 'advised'">
           <th>Actual</th>
@@ -215,6 +217,7 @@
           <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Today is season start or true-up day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate</abbr>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayTargetRampRate }}</td>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayRampRate }}</td>
+          <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayAverageRampRate }}</td>
           </td>
         </tr>
       </tbody>
