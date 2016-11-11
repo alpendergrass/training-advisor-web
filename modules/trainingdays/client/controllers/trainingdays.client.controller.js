@@ -53,7 +53,8 @@ angular.module('trainingDays')
       var toNumericDate = function(date) {
         var dateString = moment(date).format('YYYYMMDD');
         return parseInt(dateString, 10);
-      }
+      };
+
       var getMetrics = function(trainingDay, metricsType) {
         return _.find(trainingDay.metrics, ['metricsType', metricsType]);
       };
@@ -289,7 +290,8 @@ angular.module('trainingDays')
           planFitnessArray,
           targetRampRateArray,
           rampRateArray,
-          averageRateArray,
+          actualAverageRampRateArray,
+          planAverageRampRateArray,
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
@@ -416,34 +418,12 @@ angular.module('trainingDays')
           return getMetrics(td, 'actual').sevenDayRampRate;
         };
 
+        var getActualAverageRampRate = function(td) {
+          return getMetrics(td, 'actual').sevenDayAverageRampRate;
+        };
 
-        var getAverageRampRate = function(td) {
-          // Get ramp rate for previous n days and average.
-          // create an array of the last n days
-          // average sevenDayRampRate for those days
-          let currentTD = td;
-          let n = 7;
-
-          let rampRates = _.times(n, function() {
-            let rampRate;
-
-            if (currentTD) {
-              if (moment(currentTD.date).isAfter($scope.today, 'day')) {
-                rampRate = getMetrics(currentTD, 'planned').sevenDayRampRate;
-              } else {
-                rampRate = getMetrics(currentTD, 'actual').sevenDayRampRate;
-              }
-
-              let dateNumeric = toNumericDate(moment(currentTD.date).subtract(1, 'day'));
-              currentTD = _.find($scope.season, ['dateNumeric', dateNumeric]);
-            } else {
-              rampRate = null;
-            }
-
-            return rampRate;
-          });
-
-          return Math.round((_.mean(rampRates)) * 100) / 100;
+        var getPlanAverageRampRate = function(td) {
+          return getMetrics(td, 'planned').sevenDayAverageRampRate;
         };
 
         var extractDate = function(td) {
@@ -468,8 +448,9 @@ angular.module('trainingDays')
               if ($scope.authentication.user.levelOfDetail > 2) {
                 targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
                 rampRateArray = _.flatMap($scope.season, getRampRate);
-                averageRateArray = _.flatMap($scope.season, getAverageRampRate);
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, targetRampRateArray, rampRateArray, averageRateArray];
+                planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
+                actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
               } else {
                 $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
               }
@@ -534,7 +515,14 @@ angular.module('trainingDays')
                   type: 'line'
                 },
                 {
-                  label: 'Average Ramp Rate',
+                  label: 'Average Ramp Rate - Actual',
+                  yAxisID: 'y-axis-1',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  type: 'line'
+                },
+                {
+                  label: 'Average Ramp Rate - Plan',
                   yAxisID: 'y-axis-1',
                   borderWidth: 3,
                   pointRadius: 0,

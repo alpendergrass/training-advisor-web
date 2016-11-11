@@ -160,6 +160,10 @@ var TrainingDaySchema = new Schema({
       type: Number,
       default: 0
     },
+    sevenDayAverageRampRate: {
+      type: Number,
+      default: 0
+    },
     sevenDayTargetRampRate: {
       type: Number,
       default: 0

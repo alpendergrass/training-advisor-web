@@ -8,8 +8,6 @@ var moment = require('moment-timezone'),
   util = require('./util'),
   err;
 
-
-
 mongoose.Promise = global.Promise;
 
 function getTrainingDay(user, numericDate, callback) {
@@ -558,6 +556,21 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
     return callback(err, null);
   }
 
+  if (!numericSearchDate) {
+    err = new TypeError('numericSearchDate is required by didWeGoHardTheDayBefore');
+    return callback(err, null);
+  }
+
+  if (!moment(numericSearchDate.toString()).isValid()) {
+    err = new TypeError('didWeGoHardTheDayBefore numericSearchDate ' + numericSearchDate + ' is not a valid date');
+    return callback(err, null);
+  }
+
+  if (!metricsType) {
+    err = new TypeError('metricsType is required by didWeGoHardTheDayBefore');
+    return callback(err, null);
+  }
+
   var numericYesterday = util.toNumericDate(moment(numericSearchDate.toString()).subtract(1, 'day'));
 
   // We need to check for the existence of completedActivities below
@@ -569,9 +582,8 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
     .where('user').equals(user)
     .where('cloneOfId').equals(null)
     .where('dateNumeric').equals(numericYesterday)
-    // .where('completedActivities').ne([])
     .where('metrics').elemMatch({ metricsType: metricsType, loadRating: 'hard' });
-    // .where('metrics.$.loadRating').in(['simulation', 'hard']);
+  // .where('metrics.$.loadRating').in(['simulation', 'hard']);
 
   query.findOne().exec(function(err, trainingDay) {
     if (err) {
@@ -582,5 +594,54 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
       return callback(null, false);
     }
     return callback(null, true);
+  });
+};
+
+module.exports.computeAverageRampRate = function(user, numericSearchDate, metricsType) {
+  // Compute average ramp rate for previous 7 days.
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('computeAverageRampRate valid user is required');
+      return reject(err);
+    }
+
+    if (!numericSearchDate) {
+      err = new TypeError('numericSearchDate is required to computeAverageRampRate');
+      return reject(err);
+    }
+
+    if (!moment(numericSearchDate.toString()).isValid()) {
+      err = new TypeError('computeAverageRampRate numericSearchDate ' + numericSearchDate + ' is not a valid date');
+      return reject(err);
+    }
+
+    if (!metricsType) {
+      err = new TypeError('metricsType is required to computeAverageRampRate');
+      return reject(err);
+    }
+
+    let numericStartDate = util.toNumericDate(moment(numericSearchDate.toString()).subtract(7, 'days'));
+    TrainingDay.aggregate([
+      { $match: {
+        $and: [
+          { user: user._id },
+          { dateNumeric: { $gte: numericStartDate, $lt: numericSearchDate } }
+        ]
+      } },
+      { $project: { _id: '$dateNumeric', metrics: 1 } },
+      { $unwind: '$metrics' },
+      { $match: { 'metrics.metricsType' : metricsType } },
+      { $group: {
+        _id : null,
+        averageRampRate: { $avg: '$metrics.sevenDayRampRate' },
+        dayCount: { $sum: 1 }
+      } }
+    ], function(err, results) {
+      if (err) {
+        return reject(err);
+      }
+
+      return resolve(results);
+    });
   });
 };
