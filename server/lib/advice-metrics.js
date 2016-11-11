@@ -227,8 +227,11 @@ function updateMetricsForDay(params, callback) {
       //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
       //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
 
-      if (params.trainingDay.period === 'peak' || params.trainingDay.period === 'race' || params.trainingDay.period === 'transition') {
-        params.metrics.sevenDayTargetRampRate = -3.5;
+      if (params.trainingDay.period === 'peak' || params.trainingDay.period === 'race') {
+        params.metrics.sevenDayTargetRampRate = adviceConstants.peakRaceTargetRampRate;
+        params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
+      } else if (params.trainingDay.period === 'transition') {
+        params.metrics.sevenDayTargetRampRate = adviceConstants.transitionTargetRampRate;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else {
         //Let's break it down to make it easier to understand when I come back to it a year from now.
@@ -237,12 +240,12 @@ function updateMetricsForDay(params, callback) {
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       }
 
-      //Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
-      params.metrics.targetAvgDailyLoad = Math.round(((adviceConstants.defaultFitnessTimeConstant * params.metrics.dailyTargetRampRate) + priorDayFitness) * 100) / 100;
+      // Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
+      // With a negative target ramp rate it seems possible that we could compute a negative number here, hence the Math.abs.
+      params.metrics.targetAvgDailyLoad = Math.abs(Math.round(((adviceConstants.defaultFitnessTimeConstant * params.metrics.dailyTargetRampRate) + priorDayFitness) * 100) / 100);
 
-      //Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
-      //Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
-      //params.metrics.form = Math.round((params.metrics.fitness - params.metrics.fatigue) * 100) / 100;
+      // Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
+      // Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
       params.metrics.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
       params.metrics.loadRating = determineLoadRating(params.metrics.targetAvgDailyLoad, currentTrainingDayTotalLoad);
 
@@ -255,7 +258,10 @@ function updateMetricsForDay(params, callback) {
         params.metrics.sevenDayRampRate = rampRate;
         dbUtil.computeAverageRampRate(params.user, params.trainingDay.dateNumeric, params.metricsType)
           .then(function(results) {
-            params.metrics.sevenDayAverageRampRate = Math.round((results[0].averageRampRate) * 100) / 100;
+            // For a start day we will get empty results back.
+            if (results && results.length > 0) {
+              params.metrics.sevenDayAverageRampRate = Math.round((results[0].averageRampRate) * 100) / 100;
+            }
 
             params.trainingDay.save(function(err) {
               if (err) {

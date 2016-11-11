@@ -23,11 +23,10 @@ var user,
   highLoadFactorEasy = 0.60,
   lowLoadFactorModerate = 1.0,
   highLoadFactorModerate = 1.2,
-  lowLoadFactorHard = 1.4,
-  highLoadFactorHard = 1.9,
-  lowLoadFactorGoal = 1.4,
-  highLoadFactorGoal = 1.9,
-  rampRateAdjustmentLimit = 0.2;
+  lowLoadFactorHard = 1.9,
+  highLoadFactorHard = 2.1,
+  lowLoadFactorGoal = 2.5,
+  highLoadFactorGoal = 2.5;
 
 describe('advice-load Unit Tests:', function() {
 
@@ -192,71 +191,69 @@ describe('advice-load Unit Tests:', function() {
       });
     });
 
-    //9/20/16: I'm turning off ramp rate adjustment until I have higher confidence in doing this.
+    it('should return increased recommendation if recommending hard workout and sevenDayTargetRampRate is slightly greater than sevenDayRampRate', function (done) {
+      plannedActivity.activityType = 'hard';
+      metrics.targetAvgDailyLoad = 100;
+      metrics.sevenDayTargetRampRate = 6;
+      metrics.sevenDayAverageRampRate = 5.9;
 
-    // it('should return increased recommendation if recommending hard workout and sevenDayTargetRampRate is slightly greater than sevenDayRampRate', function (done) {
-    //   plannedActivity.activityType = 'hard';
-    //   metrics.targetAvgDailyLoad = 100;
-    //   metrics.sevenDayTargetRampRate = 6;
-    //   metrics.sevenDayRampRate = 5.9;
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+        should.not.exist(err);
+        should.exist(trainingDay);
+        (plannedActivity.targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
+        (plannedActivity.targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
+        done();
+      });
+    });
 
-    //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
-    //     should.not.exist(err);
-    //     should.exist(trainingDay);
-    //     (plannedActivity.targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
-    //     (plannedActivity.targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
-    //     done();
-    //   });
-    // });
+    it('should return decreased recommendation if recommending moderate workout and sevenDayTargetRampRate is slightly less than sevenDayRampRate', function (done) {
+      plannedActivity.activityType = 'moderate';
+      metrics.targetAvgDailyLoad = 100;
+      metrics.sevenDayTargetRampRate = 5.9;
+      metrics.sevenDayAverageRampRate = 6;
 
-    // it('should return decreased recommendation if recommending moderate workout and sevenDayTargetRampRate is slightlyless than sevenDayRampRate', function (done) {
-    //   plannedActivity.activityType = 'moderate';
-    //   metrics.targetAvgDailyLoad = 100;
-    //   metrics.sevenDayTargetRampRate = 5.9;
-    //   metrics.sevenDayRampRate = 6;
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+        should.not.exist(err);
+        should.exist(trainingDay);
+        (plannedActivity.targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
+        (plannedActivity.targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
+        done();
+      });
+    });
 
-    //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
-    //     should.not.exist(err);
-    //     should.exist(trainingDay);
-    //     (plannedActivity.targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
-    //     (plannedActivity.targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
-    //     done();
-    //   });
-    // });
+    it('should not increase recommendation more than limit if recommending hard workout and sevenDayTargetRampRate is greater than sevenDayRampRate', function (done) {
+      plannedActivity.activityType = 'hard';
+      metrics.targetAvgDailyLoad = 100;
+      metrics.sevenDayTargetRampRate = 9;
+      metrics.sevenDayAverageRampRate = 1;
 
-    // it('should not increase recommendation more than limit if recommending hard workout and sevenDayTargetRampRate is greater than sevenDayRampRate', function (done) {
-    //   plannedActivity.activityType = 'hard';
-    //   metrics.targetAvgDailyLoad = 100;
-    //   metrics.sevenDayTargetRampRate = 9;
-    //   metrics.sevenDayRampRate = 1;
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+        should.not.exist(err);
+        should.exist(trainingDay);
+        (plannedActivity.targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
+        (plannedActivity.targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
+        (plannedActivity.targetMinLoad).should.be.belowOrEqual(Math.round(metrics.targetAvgDailyLoad * lowLoadFactorHard * (1 + adviceConstants.rampRateAdjustmentLimit)));
+        (plannedActivity.targetMaxLoad).should.be.belowOrEqual(Math.round(metrics.targetAvgDailyLoad * highLoadFactorHard * (1 + adviceConstants.rampRateAdjustmentLimit)));
+        done();
+      });
+    });
 
-    //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
-    //     should.not.exist(err);
-    //     should.exist(trainingDay);
-    //     (plannedActivity.targetMinLoad).should.be.above(metrics.targetAvgDailyLoad * lowLoadFactorHard);
-    //     (plannedActivity.targetMaxLoad).should.be.above(metrics.targetAvgDailyLoad * highLoadFactorHard);
-    //     (plannedActivity.targetMinLoad).should.be.belowOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorHard * (1 + rampRateAdjustmentLimit));
-    //     (plannedActivity.targetMaxLoad).should.be.belowOrEqual(metrics.targetAvgDailyLoad * highLoadFactorHard * (1 + rampRateAdjustmentLimit));
-    //     done();
-    //   });
-    // });
+    it('should return not decrease recommendation more than limit if recommending moderate workout and sevenDayTargetRampRate is less than sevenDayRampRate', function (done) {
+      plannedActivity.activityType = 'moderate';
+      metrics.targetAvgDailyLoad = 100;
+      metrics.sevenDayTargetRampRate = 0;
+      metrics.sevenDayAverageRampRate = 9;
 
-    // it('should return not decrease recommendation more than limit if recommending moderate workout and sevenDayTargetRampRate is less than sevenDayRampRate', function (done) {
-    //   plannedActivity.activityType = 'moderate';
-    //   metrics.targetAvgDailyLoad = 100;
-    //   metrics.sevenDayTargetRampRate = 0;
-    //   metrics.sevenDayRampRate = 9;
-
-    //   return adviceLoad.setLoadRecommendations(user, trainingDay, function (err, trainingDay) {
-    //     should.not.exist(err);
-    //     should.exist(trainingDay);
-    //     (plannedActivity.targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
-    //     (plannedActivity.targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
-    //     (plannedActivity.targetMinLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorModerate * (1 - rampRateAdjustmentLimit));
-    //     (plannedActivity.targetMaxLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * highLoadFactorModerate * (1 - rampRateAdjustmentLimit));
-    //     done();
-    //   });
-    // });
+      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function (err, trainingDay) {
+        should.not.exist(err);
+        should.exist(trainingDay);
+        (plannedActivity.targetMinLoad).should.be.below(metrics.targetAvgDailyLoad * lowLoadFactorModerate);
+        (plannedActivity.targetMaxLoad).should.be.below(metrics.targetAvgDailyLoad * highLoadFactorModerate);
+        (plannedActivity.targetMinLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * lowLoadFactorModerate * (1 - adviceConstants.rampRateAdjustmentLimit));
+        (plannedActivity.targetMaxLoad).should.be.aboveOrEqual(metrics.targetAvgDailyLoad * highLoadFactorModerate * (1 - adviceConstants.rampRateAdjustmentLimit));
+        done();
+      });
+    });
 
   });
 

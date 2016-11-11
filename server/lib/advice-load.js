@@ -88,7 +88,6 @@ function computeRampRateAdjustment(trainingDay, plannedActivity, metrics) {
     return adjustmentFactor;
   }
 
-  //sevenDayRampRate of zero probably means we do not have a prior week to use to compute.
   if (metrics.sevenDayAverageRampRate !== 0 && (plannedActivity.activityType === 'hard' || plannedActivity.activityType === 'moderate')) {
     adjustmentFactor = Math.abs((metrics.sevenDayTargetRampRate - metrics.sevenDayAverageRampRate) / metrics.sevenDayTargetRampRate);
 

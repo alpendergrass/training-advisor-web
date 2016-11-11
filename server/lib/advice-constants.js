@@ -57,6 +57,12 @@ module.exports.restNeededForRacingThreshold = -12;
 //to more closely match Garmin/TP.
 module.exports.stravaNPFudgeFactor = 1.055;
 
+// This is the target ramp rate we use in peak and race periods.
+module.exports.peakRaceTargetRampRate = -3.5;
+
+// This is the target ramp rate we use in transition periods.
+module.exports.transitionTargetRampRate = 0.01;
+
 //This is the maximum amount by which we will tweak (+/-) load advice
 //to try to bring actual ramp rate closer to target rate.
 module.exports.rampRateAdjustmentLimit = 0.05;
