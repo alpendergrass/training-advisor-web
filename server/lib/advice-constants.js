@@ -49,7 +49,7 @@ module.exports.restNeededForTestingThreshold = -18;
 //If form is less than or equal to this during peak period, we recommend rest.
 //I made it one less than restNeededForTestingThreshold to get unit tests to work.
 //If we find it needs to be greater then we may need to modify or remove a test.
-module.exports.restNeededForPeakingThreshold = -16;
+module.exports.restNeededForPeakingThreshold = -30;
 
 module.exports.restNeededForRacingThreshold = -12;
 

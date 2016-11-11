@@ -251,16 +251,23 @@ function updateMetricsForDay(params, callback) {
       params.trainingDay.daysUntilNextPriority3Event = results.periodData.daysUntilNextPriority3Event;
 
       computeSevenDayRampRate(params.user, params.trainingDay, params.metricsType, function (err, rampRate) {
-      //ignore error...for now at least.
+        //ignore error...for now at least.
         params.metrics.sevenDayRampRate = rampRate;
+        dbUtil.computeAverageRampRate(params.user, params.trainingDay.dateNumeric, params.metricsType)
+          .then(function(results) {
+            params.metrics.sevenDayAverageRampRate = Math.round((results[0].averageRampRate) * 100) / 100;
 
-        params.trainingDay.save(function(err) {
-          if (err) {
+            params.trainingDay.save(function(err) {
+              if (err) {
+                return callback(err, null);
+              } else {
+                return callback(null, params.trainingDay);
+              }
+            });
+          })
+          .catch(function(err) {
             return callback(err, null);
-          } else {
-            return callback(null, params.trainingDay);
-          }
-        });
+          });
       });
     });
 }
@@ -287,6 +294,7 @@ function determineLoadRating(targetAvgDailyLoad, dayTotalLoad) {
 }
 
 function computeSevenDayRampRate(user, trainingDay, metricsType, callback) {
+  // TODO: could do this via query I think, like computeAverageRampRate. Probably faster.
   // compute sevenDayRampRate = Today's fitness - fitness 7 days prior.
   // When graphing ramp rates, we get smooth lines when comparing like days (e.g., hard to hard, rest with rest),
   // and very jagged when comparing unlike. This is all a matter of timing. How can we smooth the line consistently?
