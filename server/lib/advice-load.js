@@ -91,22 +91,26 @@ function computeRampRateAdjustment(trainingDay, plannedActivity, metrics) {
 
   var adjustmentFactor = 1;
 
-  //sevenDayRampRate of zero probably means we do not have a prior week to use to compute.
-  // if (trainingDay.sevenDayRampRate !== 0 && (plannedActivity.activityType === 'hard' || plannedActivity.activityType === 'moderate')) {
-  //   adjustmentFactor = Math.abs((trainingDay.sevenDayTargetRampRate - trainingDay.sevenDayRampRate) / trainingDay.sevenDayTargetRampRate);
-
-  //   // Cap adjustment at limit.
-  //   if (adjustmentFactor > adviceConstants.rampRateAdjustmentLimit) {
-  //     adjustmentFactor = adviceConstants.rampRateAdjustmentLimit;
-  //   }
-
-  //   // If actual rate > target rate, we want to dial it back a bit.
-  //   if (trainingDay.sevenDayRampRate > trainingDay.sevenDayTargetRampRate) {
-  //     adjustmentFactor = 1 - adjustmentFactor;
-  //   } else {
-  //     adjustmentFactor = 1 + adjustmentFactor;
-  //   }
+  // if (metrics.metricsType === 'planned') {
+  //   return adjustmentFactor;
   // }
+
+  //sevenDayRampRate of zero probably means we do not have a prior week to use to compute.
+  if (metrics.sevenDayAverageRampRate !== 0 && (plannedActivity.activityType === 'hard' || plannedActivity.activityType === 'moderate')) {
+    adjustmentFactor = Math.abs((metrics.sevenDayTargetRampRate - metrics.sevenDayAverageRampRate) / metrics.sevenDayTargetRampRate);
+
+    // Cap adjustment at limit.
+    if (adjustmentFactor > adviceConstants.rampRateAdjustmentLimit) {
+      adjustmentFactor = adviceConstants.rampRateAdjustmentLimit;
+    }
+
+    // If actual rate > target rate, we want to dial it back a bit.
+    if (metrics.sevenDayAverageRampRate > metrics.sevenDayTargetRampRate) {
+      adjustmentFactor = 1 - adjustmentFactor;
+    } else {
+      adjustmentFactor = 1 + adjustmentFactor;
+    }
+  }
 
   return adjustmentFactor;
 }
