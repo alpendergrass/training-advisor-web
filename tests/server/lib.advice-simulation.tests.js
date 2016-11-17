@@ -34,7 +34,7 @@ describe('advice-simulation Unit Tests:', function() {
 
   describe('Simulation Rules', function() {
     it('should not return simulation if not build period', function(done) {
-      trainingDay.period = 'base';
+      trainingDay.period = 't3';
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
@@ -45,7 +45,7 @@ describe('advice-simulation Unit Tests:', function() {
     });
 
     it('should not return simulation if in build period but today is not our preferred simulation day', function(done) {
-      trainingDay.period = 'build';
+      trainingDay.period = 't5';
       user.preferredSimulationDay = [moment(trainingDate).add(2, 'days').day().toString()];
       //Make sure simulation is not overdue.
       var priorDay = moment(trainingDate).subtract(3, 'days');
@@ -69,7 +69,7 @@ describe('advice-simulation Unit Tests:', function() {
     });
 
     it('should return simulation recommendation if in build period and today is our preferred simulation day', function(done) {
-      trainingDay.period = 'build';
+      trainingDay.period = 't4';
       user.preferredSimulationDay = [moment(trainingDate).day().toString()];
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);

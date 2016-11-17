@@ -4,7 +4,7 @@ var rules = [{
   //Trello: we should check our TSB to make sure it is not too low to handle this.
   'name': 'simulationIfPreferredSimulationDayInBuildRule',
   'condition': function(R) {
-    R.when(this && this.trainingDay.period === 'build' &&
+    R.when(this && (this.trainingDay.period === 't4' || this.trainingDay.period === 't5') &&
       (this.trainingDay.user.preferredSimulationDay && this.trainingDay.user.preferredSimulationDay === this.todayDayOfWeek)
     );
   },

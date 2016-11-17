@@ -203,7 +203,7 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return base period if start date and trainingDate are the same', function (done) {
+    it('should return t1 period if start date and trainingDate are the same', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 0, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -216,7 +216,7 @@ describe('advice-period Unit Tests:', function () {
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('base');
+            (periodData.period).should.match('t1');
             done();
           });
         });
@@ -243,100 +243,62 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return base period if trainingDate is last day of base period', function (done) {
-      //Total period must be of sufficient length so that period lengths are not adjusted due to peak min duration.
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.basePortionOfTotalTrainingDays * 200, 1, 1, function(err) {
+    it('should return t1 period if trainingDate is last day of t1 period', function (done) {
+      // 0.815 is end of t1 from trainingPeriodLookups.
+      let daysIntoSeason = Math.round((1 - 0.815) * adviceConstants.minimumNumberOfTrainingDays);
+
+      testHelpers.createStartingPoint(user, trainingDate, daysIntoSeason, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, 200 - (adviceConstants.basePortionOfTotalTrainingDays * 200), function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, (adviceConstants.minimumNumberOfTrainingDays - daysIntoSeason) + adviceConstants.minimumNumberOfRaceDays, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('base');
+            (periodData.period).should.match('t1');
             done();
           });
         });
       });
     });
 
-    it('should return build period if trainingDate is first day of build period', function (done) {
-      testHelpers.createStartingPoint(user, trainingDate, (adviceConstants.basePortionOfTotalTrainingDays * adviceConstants.minimumNumberOfTrainingDays) + 1, 1, 1, function(err) {
+    it('should return t2 period if trainingDate is first day of t2 period', function (done) {
+      // 0.815 is start of t2 from trainingPeriodLookups.
+      let daysIntoSeason = Math.round((1 - 0.815) * adviceConstants.minimumNumberOfTrainingDays);
+
+      testHelpers.createStartingPoint(user, trainingDate, daysIntoSeason + 1, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays - ((adviceConstants.basePortionOfTotalTrainingDays * adviceConstants.minimumNumberOfTrainingDays) + 1), function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, (adviceConstants.minimumNumberOfTrainingDays - daysIntoSeason) + adviceConstants.minimumNumberOfRaceDays - 1, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('build');
+            (periodData.period).should.match('t2');
             done();
           });
         });
       });
     });
-
-    it('should return build period if trainingDate is last day of build period', function (done) {
-      var daysBack = Math.round((adviceConstants.basePortionOfTotalTrainingDays + adviceConstants.buildPortionOfTotalTrainingDays) * adviceConstants.minimumNumberOfTrainingDays);
-      var daysForward = adviceConstants.minimumNumberOfTrainingDays - daysBack;
-      // console.log('daysBack: ' + daysBack);
-      // console.log('daysForward: ' + daysForward);
-      testHelpers.createStartingPoint(user, trainingDate, daysBack, 1, 1, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-
-        testHelpers.createGoalEvent(user, trainingDate, daysForward + adviceConstants.minimumNumberOfRaceDays, function(err) {
-          if (err) {
-            console.log('createGoalEvent: ' + err);
-          }
-
-          return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
-            should.not.exist(err);
-            // console.log('periodData: ' + JSON.stringify(periodData));
-            (periodData.period).should.match('build');
-            done();
-          });
-        });
-      });
-    });
-
-    //With current minimumNumberOfTrainingDays, computed peak is always more than minimumNumberOfPeakDays.
-    // it('should return peak period if trainingDate is last day of computed build period but computed peak period is less than minimum duration', function (done) {
-    //   testHelpers.createStartingPoint(user, trainingDate, Math.round(((adviceConstants.basePortionOfTotalTrainingDays + adviceConstants.buildPortionOfTotalTrainingDays) * adviceConstants.minimumNumberOfTrainingDays) / 2), 1, 1, function(err) {
-    //     if (err) {
-    //       console.log('createStartingPoint: ' + err);
-    //     }
-
-    //     testHelpers.createGoalEvent(user, trainingDate, Math.round(adviceConstants.minimumNumberOfPeakDays / 2), function(err) {
-    //       if (err) {
-    //         console.log('createGoalEvent: ' + err);
-    //       }
-
-    //       return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
-    //         should.not.exist(err);
-    //         (periodData.period).should.match('peak');
-    //         done();
-    //       });
-    //     });
-    //   });
-    // });
 
     it('should return peak period if trainingDate is first day of peak period', function (done) {
-      testHelpers.createStartingPoint(user, trainingDate, ((adviceConstants.basePortionOfTotalTrainingDays + adviceConstants.buildPortionOfTotalTrainingDays) * adviceConstants.minimumNumberOfTrainingDays) + 1, 1, 1, function(err) {
+      // 0.075 is start of peak from trainingPeriodLookups.
+      let daysIntoSeason = Math.round((1 - 0.075) * adviceConstants.minimumNumberOfTrainingDays);
+
+      testHelpers.createStartingPoint(user, trainingDate, daysIntoSeason + 1, 1, 1, function(err, startingPoint) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
-        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.minimumNumberOfPeakDays + adviceConstants.minimumNumberOfRaceDays - 1, function(err) {
+        testHelpers.createGoalEvent(user, trainingDate, (adviceConstants.minimumNumberOfTrainingDays - daysIntoSeason) + adviceConstants.minimumNumberOfRaceDays - 1, function(err) {
           if (err) {
             console.log('createGoalEvent: ' + err);
           }
@@ -350,7 +312,7 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return peak period duration greater than or equal to minimumNumberOfPeakDays if short total training period', function (done) {
+    it('should return peak period if trainingDate is last day of peak period', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -363,28 +325,7 @@ describe('advice-period Unit Tests:', function () {
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            //console.log('periodData: ' + JSON.stringify(periodData));
-            (periodData.peakPeriodDays).should.be.aboveOrEqual(adviceConstants.minimumNumberOfPeakDays);
-            done();
-          });
-        });
-      });
-    });
-
-    it('should return peak period duration of maximumNumberOfPeakDays if long total training period', function (done) {
-      testHelpers.createStartingPoint(user, trainingDate, adviceConstants.maximumNumberOfTrainingDays, 1, 1, function(err) {
-        if (err) {
-          console.log('createStartingPoint: ' + err);
-        }
-
-        testHelpers.createGoalEvent(user, trainingDate, adviceConstants.maximumNumberOfRaceDays, function(err) {
-          if (err) {
-            console.log('createGoalEvent: ' + err);
-          }
-
-          return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
-            should.not.exist(err);
-            (periodData.peakPeriodDays).should.equal(adviceConstants.maximumNumberOfPeakDays);
+            (periodData.period).should.match('peak');
             done();
           });
         });

@@ -8,15 +8,35 @@ module.exports.minimumNumberOfTrainingDays = 105;
 //This is the maximum duration from season start to start of race period -> 25 weeks
 module.exports.maximumNumberOfTrainingDays = 182;
 
+module.exports.trainingPeriodLookups = [
+  {
+    period: 't1',
+    start: 1.0,
+    end: 0.815
+  }, {
+    period: 't2',
+    start: 0.815,
+    end: 0.63
+  }, {
+    period: 't3',
+    start: 0.63,
+    end: 0.445
+  }, {
+    period: 't4',
+    start: 0.445,
+    end: 0.26
+  }, {
+    period: 't5',
+    start: 0.26,
+    end: 0.075
+  }, {
+    period: 'peak',
+    start: 0.075,
+    end: 0.0
+  }
+];
 
-module.exports.basePortionOfTotalTrainingDays = 0.52;
-module.exports.buildPortionOfTotalTrainingDays = 0.40;
 
-//Friel says peak should be 1-2 weeks.
-module.exports.minimumNumberOfPeakDays = 7;
-module.exports.maximumNumberOfPeakDays = 14;
-
-//Friel also says that race period should be 1-3 weeks.
 module.exports.minimumNumberOfRaceDays = 7;
 module.exports.maximumNumberOfRaceDays = 21;
 
