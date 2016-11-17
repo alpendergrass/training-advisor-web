@@ -36,6 +36,7 @@ module.exports.migrate = function() {
   // migration.addAllFromPath(path.join(__dirname, './migrations/'));
   migration.add(path.join(__dirname, './migrations/restructure-metrics.js'));
   migration.add(path.join(__dirname, './migrations/refresh-metrics.js'));
+  migration.add(path.join(__dirname, './migrations/migration-rename-periods.js'));
   // List future migrations here. Leave previous in place above.
 
   return new Promise(function(resolve, reject) {

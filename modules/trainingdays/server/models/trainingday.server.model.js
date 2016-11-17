@@ -22,7 +22,7 @@ var loadRatings = {
   message: invalidDataErrorMessage
 };
 var periods = {
-  values: 'race|peak|build|base|transition|'.split('|'),
+  values: 'race|peak|t1|t2|t3|t4|t5|transition|'.split('|'),
   message: invalidDataErrorMessage
 };
 var completedActivitySources = {
@@ -94,6 +94,18 @@ var TrainingDaySchema = new Schema({
   },
   estimatedLoad: {
     type: Number,
+    default: 0
+  },
+  expectedIntensity: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 0
+  },
+  expectedTerrain: {
+    type: Number,
+    min: 0,
+    max: 5,
     default: 0
   },
   scheduledEventRanking: {
