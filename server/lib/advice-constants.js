@@ -58,10 +58,10 @@ module.exports.testingNagDayCount = 24;
 module.exports.testingEligibleFormThreshold = -5;
 
 //If form is less than or equal to this, we recommend an easy day if...see code.
-module.exports.easyDaytNeededThreshold = -25;
+module.exports.easyDaytNeededThreshold = -23;
 
 //If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -30;
+module.exports.restNeededThreshold = -28;
 
 //If testing is due and form is less than or equal to this, we recommend rest.
 module.exports.restNeededForTestingThreshold = -18;

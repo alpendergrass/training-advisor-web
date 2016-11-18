@@ -20,6 +20,7 @@ var path = require('path'),
   adviceConstants = require('./advice-constants'),
   adviceUtil = require('./advice-util'),
   workoutsT1 = require('./workouts-t1'),
+  workoutsT2 = require('./workouts-t2'),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
@@ -61,6 +62,7 @@ function generateAdvice(user, trainingDay, source, callback) {
         //R.register(adviceSimulation.simulationRules);
         R.register(adviceChoice.choiceRules);
         R.register(adviceHard.hardRules);
+        R.register(workoutsT2.t2Rules);
         R.register(workoutsT1.t1Rules);
 
         R.execute(facts, function(result){
