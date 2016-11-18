@@ -44,7 +44,6 @@ angular.module('trainingDays')
       };
       //End Datepicker stuff.
 
-
       // Check if provider is already in use with current user
       $scope.isConnectedSocialAccount = function(provider) {
         return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
@@ -63,6 +62,37 @@ angular.module('trainingDays')
         return _.find(trainingDay.plannedActivities, ['source', source]);
       };
 
+      var mapActivityTypeToVerbiage = function(activityType) {
+        var activityTypeVerbiageLookups = [
+          {
+            activityType: 'choice',
+            phrase: 'Choice Day'
+          }, {
+            activityType: 'rest',
+            phrase: 'Rest Day'
+          }, {
+            activityType: 'easy',
+            phrase: 'Low Load Day'
+          }, {
+            activityType: 'moderate',
+            phrase: 'Moderate Load Day'
+          }, {
+            activityType: 'hard',
+            phrase: 'High Load Day'
+          }, {
+            activityType: 'simulation',
+            phrase: 'Simulation Day'
+          }, {
+            activityType: 'test',
+            phrase: 'Power Testing Day'
+          }, {
+            activityType: 'event',
+            phrase: 'Event'
+          }
+        ];
+
+        return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
+      };
 
       var getSeason = function(callback) {
         $scope.hasStart = true;
@@ -171,12 +201,14 @@ angular.module('trainingDays')
 
           //Display future advice
 
-          if (moment(trainingDay.date).isAfter($scope.yesterday, 'day')) {
+          if (moment(trainingDay.date).isAfter($scope.today, 'day')) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
+            content += '<i>';
             planActivity = getPlannedActivity(trainingDay, 'plangeneration');
             if (planActivity) {
-              content += '<i>' + planActivity.activityType + ' day planned</i>';
+              content += mapActivityTypeToVerbiage(planActivity.activityType) + ' - ';
             }
+            content += 'load: ' + trainingDay.planLoad + '</i>';
           }
 
 
@@ -187,9 +219,6 @@ angular.module('trainingDays')
             });
             loadRating = getMetrics(trainingDay, 'actual').loadRating;
             content += load ? ' Load: ' + load + ' - ' + loadRating + ' day' : '';
-          } else if (!trainingDay.scheduledEventRanking) {
-            load = trainingDay.planLoad;
-            content += ' Planned load: ' + trainingDay.planLoad;
           }
 
 
@@ -276,7 +305,6 @@ angular.module('trainingDays')
       // angular.element(document).ready(function() {
       //   jQuery('.today-on-calendar').parent().parent().addClass('md-whiteframe-7dp');
       // });
-
 
       $scope.viewSeason = function() {
         var actualLoadArray,
@@ -438,7 +466,7 @@ angular.module('trainingDays')
               planFitnessArray = _.flatMap($scope.season, getPlanFitness);
               actualLoadArray = _.flatMap($scope.season, getActualLoad);
               actualFitnessArray = _.flatMap($scope.season, getActualFitness);
-              // actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
+              actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
               actualFormArray = _.flatMap($scope.season, getActualForm);
               planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
               formPointRadius = _.flatMap($scope.season, setFormPointRadius);
@@ -450,9 +478,9 @@ angular.module('trainingDays')
                 rampRateArray = _.flatMap($scope.season, getRampRate);
                 planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
                 actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
               } else {
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray];
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray];
               }
 
               $scope.chartDatasetOverride = [
@@ -475,6 +503,7 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 },
                 {
@@ -482,6 +511,7 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 },
                 {
@@ -489,6 +519,7 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: formPointRadius,
+                  hitRadius: 4,
                   // pointBorderColor: actualFormPointBorderColors,
                   type: 'line'
                 },
@@ -497,7 +528,15 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-0',
                   borderWidth: 3,
                   pointRadius: formPointRadius,
+                  hitRadius: 4,
                   // pointBorderColor: '#4D5360',
+                  type: 'line'
+                },
+                {
+                  label: 'Fatigue',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 },
                 {
@@ -505,6 +544,7 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-1',
                   borderWidth: 3,
                   pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 },
                 {
@@ -512,6 +552,7 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-1',
                   borderWidth: 3,
                   pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 },
                 {
@@ -519,6 +560,7 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-1',
                   borderWidth: 3,
                   pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 },
                 {
@@ -526,14 +568,9 @@ angular.module('trainingDays')
                   yAxisID: 'y-axis-1',
                   borderWidth: 3,
                   pointRadius: 0,
+                  hitRadius: 4,
                   type: 'line'
                 }
-                // {
-                //   label: 'Fatigue',
-                //   borderWidth: 3,
-                //   pointRadius: 0,
-                //   type: 'line'
-                // },
               ];
             }
 
@@ -578,14 +615,19 @@ angular.module('trainingDays')
         $scope.error = null;
 
         $scope.chartColors = [
-          '#97BBCD',
-          '#DCDCDC',
-          '#FDB45C',
-          '#949FB1',
-          '#46BFBD',
-          '#4D5360',
-          '#F7464A',
-          '#79B685'
+          '#97BBCD', //Load - Actual
+          '#DCDCDC', //Load - Plan
+          '#FDB45C', //Fitness - Actual
+          '#949FB1', //Fitness - Plan
+          '#46BFBD', //Form - Actual
+          '#4D5360', //Form - Plan
+          '#F7464A', //Fatigue
+          '#79B685', //Target Ramp Rate
+          '#B23E5B', //Ramp Rate
+          '#DF8B4D', //Average Ramp Rate - Actual
+          '#E2D769', //Average Ramp Rate - Plan
+          '#8AEB90'
+
         ];
 
         $scope.chartOptions = {
@@ -658,12 +700,12 @@ angular.module('trainingDays')
                 } else if (!td.scheduledEventRanking && moment(td.date).isBetween($scope.today, $scope.tomorrow, 'day', '[]')) {
                   planActivity = getPlannedActivity(td, 'advised');
                   if (planActivity) {
-                    text = planActivity.activityType + ' day';
+                    text = mapActivityTypeToVerbiage(planActivity.activityType);
                   }
                 } else if (!td.scheduledEventRanking) {
                   planActivity = getPlannedActivity(td, 'plangeneration');
                   if (planActivity) {
-                    text = planActivity.activityType + ' day';
+                    text = mapActivityTypeToVerbiage(planActivity.activityType);
                   }
                 }
 
@@ -1172,7 +1214,9 @@ angular.module('trainingDays')
 
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Training Day';
+            // dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Training Day';
+
+            dayText = $scope.plannedActivity ? mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
