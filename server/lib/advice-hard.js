@@ -22,9 +22,10 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
       this.plannedActivity.rationale += ' No other recommendation, so hard.';
-      this.plannedActivity.advice += ` If you feel up to it you should go hard today. You appear to be sufficiently rested.
- Intensity should be high but will vary based on ride duration.`;
-      R.stop();
+ //      this.plannedActivity.advice += ` If you feel up to it you should go hard today. You appear to be sufficiently rested.
+ // Intensity should be high but will vary based on ride duration.`;
+      // R.stop();
+      R.next();
     }
   }
 ];

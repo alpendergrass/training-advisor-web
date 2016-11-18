@@ -14,8 +14,8 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' Yesterday was hard, in peak or race, so recommending easy.';
-      this.plannedActivity.advice += ` Yesterday was a hard day and you are peaking so go easy today. Intensity should be below 0.75.
- As always, take the day off if you feel you need the rest.`;
+      this.plannedActivity.advice += ` Yesterday was a hard day and you are peaking so go easy today. This should be a zone 1 - 2 ride.
+ As always, take the day off if you feel you need the rest. Sufficient recovery is critical at this point in your season.`;
       R.stop();
     }
   },
@@ -32,8 +32,8 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' Yesterday was hard, form is below easyDaytNeededThreshold, tomorrow is not a preferred rest day or off day, so recommending easy.';
-      this.plannedActivity.advice += `  Yesterday was a hard day and form is somewhat low so go easy today. Intensity should be below 0.75.
- Take the day off if you feel you need to rest.`;
+      this.plannedActivity.advice += ` Yesterday was a hard day and form is somewhat low so go easy today. You should do a short endurance ride today.
+ Endurance means you should target power zone 2 but if you feel tired, make this a zone 1 recovery ride.`;
       R.stop();
     }
   },
@@ -45,7 +45,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' Easy day recommended as goal event is in three days.';
-      this.plannedActivity.advice += ' An easy day is recommended as your goal event is in three days.';
+      this.plannedActivity.advice += ' An easy day is recommended as your goal event is in three days. This should be a zone 1 - 2 ride. Resist the urge to go hard, save it for your event!';
       R.stop();
     }
   },
@@ -72,7 +72,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' Easy day recommended as priority 2 event is in two days.';
-      this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event in two days.';
+      this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event in two days. Keep the effort in zone 2 or below.';
       R.stop();
     }
   },
@@ -86,7 +86,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' Easy day recommended as priority 3 event is in one day.';
-      this.plannedActivity.advice += ' An easy day is recommended as you have a low priority event scheduled for tomorrow.';
+      this.plannedActivity.advice += ' An easy day is recommended as you have a low priority event scheduled for tomorrow. Today should be an short endurance ride.';
       R.stop();
     }
   },
@@ -94,14 +94,15 @@ var rules = [
     'name': 'easyDayNeededInPrepForTestingRule',
     'condition': function(R) {
       R.when(this && this.testingIsDue &&
-        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
+        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 't0') &&
         this.metrics.form <= this.adviceConstants.testingEligibleFormThreshold
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' Testing is due. Recommending easy in preparation for testing.';
-      this.plannedActivity.advice += ' An easy day or rest is needed in preparation for testing. Your form is not sufficiently recovered for testing.';
+      this.plannedActivity.advice += ` An easy day or rest is needed in preparation for testing. Your form is not sufficiently recovered for testing. Easy means a zone 1 - 2 ride.
+ If you are in a hurry to test take the day off.`;
       R.stop();
     }
   }

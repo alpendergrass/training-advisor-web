@@ -34,7 +34,7 @@ describe('advice-choice Unit Tests:', function () {
 
   describe('Choice Rules', function () {
     it('should return choice recommendation if in transition period', function (done) {
-      trainingDay.period = 'transition';
+      trainingDay.period = 't0';
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);

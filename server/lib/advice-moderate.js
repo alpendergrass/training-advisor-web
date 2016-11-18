@@ -16,7 +16,7 @@ var rules = [
       this.plannedActivity.activityType = 'moderate';
       this.plannedActivity.rationale += ' Yesterday was a hard day, tomorrow is a preferred rest day so recommending moderate.';
       this.plannedActivity.advice += ' Yesterday was a hard day and tomorrow is a planned rest day, so';
-      if (this.trainingDay.period === 'base' || this.trainingDay.period === 'transition') {
+      if (this.trainingDay.period === 'base' || this.trainingDay.period === 't0') {
         this.plannedActivity.rationale += ` We are in ${this.trainingDay.period} so recommending endurance ride.`;
         this.plannedActivity.advice += ' do an endurance ride today. Intensity should be around 0.80.';
       } else {

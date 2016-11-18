@@ -69,7 +69,7 @@ var rules = [
     // E.g., if restNeededForPeakingThreshold is greater than restNeededForTestingThreshold.
     'condition': function(R) {
       R.when(this &&
-        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 'transition') &&
+        (this.trainingDay.period !== 'peak' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 't0') &&
         (this.testingIsDue) &&
         (this.metrics.form <= this.adviceConstants.restNeededForTestingThreshold)
       );

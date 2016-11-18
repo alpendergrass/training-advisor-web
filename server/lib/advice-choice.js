@@ -4,7 +4,7 @@ var rules = [
   {
     'name': 'choiceInTransitionRule',
     'condition': function(R) {
-      R.when(this && (this.trainingDay.period === 'transition'));
+      R.when(this && (this.trainingDay.period === 't0'));
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'choice';

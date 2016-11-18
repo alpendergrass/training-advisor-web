@@ -130,7 +130,7 @@ function determinePeriod(user, trainingDay, callback) {
 
       if (!results.futureGoalDays) {
         //no next goal
-        periodData.period = 'transition';
+        periodData.period = 't0';
         periodData.totalTrainingDays = 0;
         periodData.daysUntilNextGoalEvent = 0;
         return callback(null, periodData);
@@ -157,15 +157,14 @@ function determinePeriod(user, trainingDay, callback) {
           //Determine how many days total between start and beginning of race period.
           periodData.totalTrainingDays = results.endOfTrainingPeriod.diff(startDate, 'days');
 
+          //Determine how many days we are into training.
           racePeriodStart = periodData.totalTrainingDays + 1;
           periodData.currentDayCount = trainingDate.diff(startDate, 'days');
 
-          //Determine how many days we are into training.
-          //TODO: if current date is prior to startDate we should be in prep/transition
+          //Assign period.
           if (moment(trainingDate).isBefore(startDate)) {
-            periodData.period = 'transition';
+            periodData.period = 't0';
           } else {
-            //Assign period.
             if (periodData.currentDayCount >= racePeriodStart) {
               periodData.period = 'race';
             } else {
@@ -176,7 +175,7 @@ function determinePeriod(user, trainingDay, callback) {
           //If we are in a training period and last goal was less than midSeasonTransitionNumberOfDays ago, reset period to transition.
           if (_.includes(['t1', 't2', 't3', 't4', 't5' ], periodData.period)) {
             if (results.numericMostRecentGoalDate && trainingDate.diff(results.numericMostRecentGoalDate.toString(), 'days') <= adviceConstants.midSeasonTransitionNumberOfDays) {
-              periodData.period = 'transition';
+              periodData.period = 't0';
             }
           }
 

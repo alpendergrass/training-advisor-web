@@ -230,7 +230,7 @@ function updateMetricsForDay(params, callback) {
       if (params.trainingDay.period === 'peak' || params.trainingDay.period === 'race') {
         params.metrics.sevenDayTargetRampRate = adviceConstants.peakRaceTargetRampRate;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
-      } else if (params.trainingDay.period === 'transition') {
+      } else if (params.trainingDay.period === 't0') {
         params.metrics.sevenDayTargetRampRate = adviceConstants.transitionTargetRampRate;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else {

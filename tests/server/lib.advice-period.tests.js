@@ -52,7 +52,7 @@ describe('advice-period Unit Tests:', function () {
 
         return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
           should.not.exist(err);
-          (periodData.period).should.match('transition');
+          (periodData.period).should.match('t0');
           done();
         });
       });
@@ -176,7 +176,7 @@ describe('advice-period Unit Tests:', function () {
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('transition');
+            (periodData.period).should.match('t0');
             done();
           });
         });
