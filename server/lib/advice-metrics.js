@@ -227,7 +227,7 @@ function updateMetricsForDay(params, callback) {
       //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
       //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
 
-      if (params.trainingDay.period === 'peak' || params.trainingDay.period === 'race') {
+      if (params.trainingDay.period === 't6' || params.trainingDay.period === 'race') {
         params.metrics.sevenDayTargetRampRate = adviceConstants.peakRaceTargetRampRate;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else if (params.trainingDay.period === 't0') {

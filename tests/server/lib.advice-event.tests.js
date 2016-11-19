@@ -128,7 +128,7 @@ describe('advice-event Unit Tests:', function() {
       });
     });
 
-    it('should not return goal if today is a priority 2 event but in peak period', function(done) {
+    it('should not return goal if today is a priority 2 event but in t6 period', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -140,7 +140,7 @@ describe('advice-event Unit Tests:', function() {
           }
 
           trainingDay.scheduledEventRanking = 2;
-          trainingDay.period = 'peak';
+          trainingDay.period = 't6';
 
           return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);
@@ -153,7 +153,7 @@ describe('advice-event Unit Tests:', function() {
       });
     });
 
-    it('should not return goal if today is a priority 3 event but in peak period', function(done) {
+    it('should not return goal if today is a priority 3 event but in t6 period', function(done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -165,7 +165,7 @@ describe('advice-event Unit Tests:', function() {
           }
 
           trainingDay.scheduledEventRanking = 3;
-          trainingDay.period = 'peak';
+          trainingDay.period = 't6';
 
           return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
             should.not.exist(err);

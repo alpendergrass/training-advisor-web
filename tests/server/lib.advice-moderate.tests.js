@@ -124,7 +124,7 @@ describe('advice-moderate Unit Tests:', function() {
       });
     });
 
-    it('should not return moderate if yesterday was a hard day and tomorrow is a preferred rest day but we are in peak period', function(done) {
+    it('should not return moderate if yesterday was a hard day and tomorrow is a preferred rest day but we are in t6 period', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(1, 'days').day().toString()];
       testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err) {
         if (err) {
@@ -153,7 +153,7 @@ describe('advice-moderate Unit Tests:', function() {
                 console.log('updateMetrics: ' + err);
               }
 
-              trainingDay.period = 'peak';
+              trainingDay.period = 't6';
               return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);

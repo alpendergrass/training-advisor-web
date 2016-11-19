@@ -222,7 +222,7 @@ describe('advice-easy Unit Tests:', function() {
                 console.log('updateMetrics: ' + err);
               }
               //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
-              trainingDay.period = 'peak';
+              trainingDay.period = 't6';
 
               return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
                 should.not.exist(err);

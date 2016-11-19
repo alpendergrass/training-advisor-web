@@ -75,9 +75,9 @@ describe('advice-rest Unit Tests:', function() {
       });
     });
 
-    it('should return rest if overly fatigued for peak period', function(done) {
+    it('should return rest if overly fatigued for t6 period', function(done) {
       metrics.form = adviceConstants.restNeededForPeakingThreshold;
-      trainingDay.period = 'peak';
+      trainingDay.period = 't6';
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
@@ -116,10 +116,10 @@ describe('advice-rest Unit Tests:', function() {
       });
     });
 
-    it('should not return rest if testing is due and somewhat fatigued but in peak period', function(done) {
+    it('should not return rest if testing is due and somewhat fatigued but in t6 period', function(done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
       metrics.form = adviceConstants.restNeededForTestingThreshold;
-      trainingDay.period = 'peak';
+      trainingDay.period = 't6';
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);

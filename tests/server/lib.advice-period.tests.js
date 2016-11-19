@@ -289,8 +289,8 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return peak period if trainingDate is first day of peak period', function (done) {
-      // 0.075 is start of peak from trainingPeriodLookups.
+    it('should return t6 period if trainingDate is first day of t6 period', function (done) {
+      // 0.075 is start of t6 from trainingPeriodLookups.
       let daysIntoSeason = Math.round((1 - 0.075) * adviceConstants.minimumNumberOfTrainingDays);
 
       testHelpers.createStartingPoint(user, trainingDate, daysIntoSeason + 1, 1, 1, function(err, startingPoint) {
@@ -305,14 +305,14 @@ describe('advice-period Unit Tests:', function () {
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('peak');
+            (periodData.period).should.match('t6');
             done();
           });
         });
       });
     });
 
-    it('should return peak period if trainingDate is last day of peak period', function (done) {
+    it('should return t6 period if trainingDate is last day of t6 period', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, adviceConstants.minimumNumberOfTrainingDays, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -325,7 +325,7 @@ describe('advice-period Unit Tests:', function () {
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('peak');
+            (periodData.period).should.match('t6');
             done();
           });
         });

@@ -57,10 +57,10 @@ describe('advice-test Unit Tests:', function () {
       });
     });
 
-    it('should not return test recommendation if testing is due and form is recovered but in peak period', function (done) {
+    it('should not return test recommendation if testing is due and form is recovered but in t6 period', function (done) {
       user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
-      trainingDay.period = 'peak';
+      trainingDay.period = 't6';
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);

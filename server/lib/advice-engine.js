@@ -7,20 +7,21 @@ var path = require('path'),
   mongoose = require('mongoose'),
   RuleEngine = require('node-rules'),
   TrainingDay = mongoose.model('TrainingDay'),
-  adviceMetrics = require('./advice-metrics'),
-  adviceEvent = require('./advice-event'),
-  adviceTest = require('./advice-test'),
-  adviceRest = require('./advice-rest'),
-  adviceEasy = require('./advice-easy'),
-  adviceModerate = require('./advice-moderate'),
-  adviceSimulation = require('./advice-simulation'),
-  adviceChoice = require('./advice-choice'),
-  adviceHard = require('./advice-hard'),
-  adviceLoad = require('./advice-load'),
   adviceConstants = require('./advice-constants'),
   adviceUtil = require('./advice-util'),
-  workoutsT1 = require('./workouts-t1'),
-  workoutsT2 = require('./workouts-t2'),
+  adviceMetrics = require('./advice-metrics'),
+  adviceLoad = require('./advice-load'),
+  adviceEvent = require('./advice-event'),
+  adviceTest = require('./advice-test'),
+  adviceSimulation = require('./advice-simulation'),
+  adviceT0 = require('./advice-t0'),
+  adviceT1 = require('./advice-t1'),
+  adviceT2 = require('./advice-t2'),
+  adviceT3 = require('./advice-t3'),
+  adviceT4 = require('./advice-t4'),
+  adviceT5 = require('./advice-t5'),
+  adviceT6 = require('./advice-t6'),
+  adviceDefault = require('./advice-default'),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
@@ -53,17 +54,17 @@ function generateAdvice(user, trainingDay, source, callback) {
         facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
         facts.metrics = util.getMetrics(trainingDay, metricsType);
 
-
         var R = new RuleEngine(adviceEvent.eventRules);
         R.register(adviceTest.testRules);
-        R.register(adviceRest.restRules);
-        R.register(adviceEasy.easyRules);
-        R.register(adviceModerate.moderateRules);
-        //R.register(adviceSimulation.simulationRules);
-        R.register(adviceChoice.choiceRules);
-        R.register(adviceHard.hardRules);
-        R.register(workoutsT2.t2Rules);
-        R.register(workoutsT1.t1Rules);
+        R.register(adviceSimulation.simulationRules);
+        R.register(adviceT0.t0Rules);
+        R.register(adviceT1.t1Rules);
+        R.register(adviceT2.t2Rules);
+        R.register(adviceT3.t3Rules);
+        R.register(adviceT4.t4Rules);
+        R.register(adviceT5.t5Rules);
+        R.register(adviceT6.t6Rules);
+        R.register(adviceDefault.defaultRules);
 
         R.execute(facts, function(result){
           adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {

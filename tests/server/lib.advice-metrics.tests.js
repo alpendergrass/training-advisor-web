@@ -348,7 +348,7 @@ describe('advice-metrics Unit Tests:', function () {
     });
 
 //Uncaught AssertionError: expected 0 to be below 0
-    it('should return dailyTargetRampRate of -0.5 and a zero or negative sevenDayRampRate if current trainingDay is last day of peak period and no intervening workouts', function (done) {
+    it('should return dailyTargetRampRate of -0.5 and a zero or negative sevenDayRampRate if current trainingDay is last day of t6 period and no intervening workouts', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 0, 9, 9, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -360,7 +360,7 @@ describe('advice-metrics Unit Tests:', function () {
           should.not.exist(err);
           should.exist(trainingDay);
           let metrics = _.find(trainingDay.metrics, ['metricsType', 'actual']);
-          (trainingDay.period).should.equal('peak');
+          (trainingDay.period).should.equal('t6');
           (metrics.dailyTargetRampRate).should.equal(-0.5);
           // We are not computing sevenDayRampRate since we disabled computeRampRateAdjustment.
           // (trainingDay.sevenDayRampRate).should.be.belowOrEqual(0);

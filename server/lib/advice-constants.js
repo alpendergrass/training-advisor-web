@@ -30,12 +30,11 @@ module.exports.trainingPeriodLookups = [
     start: 0.26,
     end: 0.075
   }, {
-    period: 'peak',
+    period: 't6',
     start: 0.075,
     end: 0.0
   }
 ];
-
 
 module.exports.minimumNumberOfRaceDays = 7;
 module.exports.maximumNumberOfRaceDays = 21;
@@ -57,27 +56,47 @@ module.exports.testingNagDayCount = 24;
 //Form must be greater than this before we will recommend testing.
 module.exports.testingEligibleFormThreshold = -5;
 
-//If form is less than or equal to this, we recommend an easy day if...see code.
-module.exports.easyDaytNeededThreshold = -23;
-
 //If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -28;
+module.exports.restNeededThreshold = -32;
 
 //If testing is due and form is less than or equal to this, we recommend rest.
 module.exports.restNeededForTestingThreshold = -18;
 
-//If form is less than or equal to this during peak period, we recommend rest.
+//If form is less than or equal to this during t6 period, we recommend rest.
 //I made it one less than restNeededForTestingThreshold to get unit tests to work.
 //If we find it needs to be greater then we may need to modify or remove a test.
-module.exports.restNeededForPeakingThreshold = -30;
 
 module.exports.restNeededForRacingThreshold = -12;
+
+//If form is less than or equal to this, we recommend an easy day if...see code.
+module.exports.easyDaytNeededThreshold = -28;
+
+module.exports.t1ModerateDayThreshold = -26;
+module.exports.t1HardDayThreshold = -18;
+
+module.exports.t2ModerateDayThreshold = -26;
+module.exports.t2HardDayThreshold = -18;
+
+module.exports.t3ModerateDayThreshold = -25;
+module.exports.t3HardDayThreshold = -18;
+
+module.exports.t4ModerateDayThreshold = -26;
+module.exports.t4HardDayThreshold = -18;
+
+module.exports.t5HardDayThreshold = -18;
+
+module.exports.t6ModerateDayThreshold = -21;
+module.exports.t6HardDayThreshold = -18;
+module.exports.t6RestNeededThreshold = -30;
+
+module.exports.raceModerateDayThreshold = -21;
+module.exports.raceHardDayThreshold = -18;
 
 //We apply this factor to make the NP (weighted_average_watts) reported by Strava
 //to more closely match Garmin/TP.
 module.exports.stravaNPFudgeFactor = 1.055;
 
-// This is the target ramp rate we use in peak and race periods.
+// This is the target ramp rate we use in t6 and race periods.
 module.exports.peakRaceTargetRampRate = -3.5;
 
 // This is the target ramp rate we use in transition periods.
@@ -119,8 +138,8 @@ module.exports.loadAdviceLookups = [
     // intensity:  0.8
   }, {
     activityType: 'hard',
-    lowLoadFactor: 1.9,
-    highLoadFactor: 2.1
+    lowLoadFactor: 1.7,
+    highLoadFactor: 1.9
     // intensity:  0.9
   }, {
     activityType: 'simulation',
@@ -136,8 +155,9 @@ module.exports.loadAdviceLookups = [
     activityType: 'event1',
     // goal event
     // If we do not have estimated load for the event, we are basically guessing.
-    lowLoadFactor: 2.5,
-    highLoadFactor: 2.5
+    // load factors are high to counteract the negative ramp rate used in race period.
+    lowLoadFactor: 2.9,
+    highLoadFactor: 3.1
     // intensity:  0.95
   }, {
     activityType: 'event2',

@@ -33,8 +33,8 @@ describe('advice-hard Unit Tests:', function () {
   });
 
   describe('Hard Rules', function () {
-    it('should return hard recommendation if in peak period and no other recommendation applies', function (done) {
-      trainingDay.period = 'peak';
+    it('should return hard recommendation if in t6 period and no other recommendation applies', function (done) {
+      trainingDay.period = 't6';
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
