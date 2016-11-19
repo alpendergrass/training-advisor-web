@@ -50,8 +50,22 @@ module.exports = {
             return callback(err);
           }
 
-          console.log('migration-rename-periods complete: ', new Date().toString());
-          return callback(null);
+          TrainingDay.update({
+            period: 'peak'
+          }, {
+            $set: {
+              period: 't6'
+            }
+          }, {
+            multi: true
+          }, function(err, rawResponse) {
+            if (err) {
+              return callback(err);
+            }
+
+            console.log('migration-rename-periods complete: ', new Date().toString());
+            return callback(null);
+          });
         });
       });
     });

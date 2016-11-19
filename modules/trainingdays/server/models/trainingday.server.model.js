@@ -22,7 +22,7 @@ var loadRatings = {
   message: invalidDataErrorMessage
 };
 var periods = {
-  values: 'race|peak|t0|t1|t2|t3|t4|t5|'.split('|'),
+  values: 'race|t0|t1|t2|t3|t4|t5|t6|'.split('|'),
   message: invalidDataErrorMessage
 };
 var completedActivitySources = {

@@ -60,6 +60,8 @@ function createTrainingDay(req, callback) {
       trainingDay.name = req.body.name;
       trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
       trainingDay.estimatedLoad = req.body.estimatedLoad;
+      trainingDay.expectedIntensity = req.body.expectedIntensity;
+      trainingDay.expectedTerrain = req.body.expectedTerrain;
 
       if (req.body.recurrenceSpec) {
         trainingDay.recurrenceSpec = req.body.recurrenceSpec;
@@ -278,7 +280,9 @@ exports.update = function(req, res) {
   // Is not possible in the UI to change event ranking or estimated load of past events.
   if (trainingDay.completedActivities !== req.body.completedActivities ||
     trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
-    trainingDay.estimatedLoad !== req.body.estimatedLoad
+    trainingDay.estimatedLoad !== req.body.estimatedLoad ||
+    trainingDay.expectedIntensity !== req.body.expectedIntensity ||
+    trainingDay.expectedTerrain !== req.body.expectedTerrain
   ) {
     refreshAdvice = true;
   }
@@ -288,6 +292,8 @@ exports.update = function(req, res) {
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
   trainingDay.estimatedLoad = req.body.estimatedLoad;
+  trainingDay.expectedIntensity = req.body.expectedIntensity;
+  trainingDay.expectedTerrain = req.body.expectedTerrain;
   trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
   trainingDay.notes = req.body.notes;
   trainingDay.completedActivities = req.body.completedActivities;

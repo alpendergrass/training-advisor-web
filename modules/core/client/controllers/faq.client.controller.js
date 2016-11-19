@@ -79,7 +79,7 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
         question: 'I have multiple season goals. How do I set those up?',
         answer: 'Choose Schedule Events from the Training Days menu and specify that the event is a goal. After you create a goal be sure to go My Season and click Update Season to see how your new goal impacts your season. You can create as many goal events as you like and we will help you prepare for them.'
       }, {
-        question: 'I have intermediate events that I do not plan to peak for but would like to include in my training. How do I set those up?',
+        question: 'I have intermediate events that I do not plan to t6 for but would like to include in my training. How do I set those up?',
         answer: 'Go to Training Days | Schedule Events to create intermediate events. On this page, in addition to goal event, you can create medium priority and low priority events. Be sure to update your season after you add events.'
       }, {
         question: 'I have a club race every Tuesday night from April until September and a team ride every Thursday evening. Can I set these up as recurring events?',
