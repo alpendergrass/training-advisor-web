@@ -5,6 +5,7 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 'preferredRestDayRule',
+    'priority': 9,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         this.trainingDay.scheduledEventRanking === 0 &&
@@ -18,26 +19,25 @@ var rules = [
       R.stop();
     }
   },
-  {
-    'name': 'sufficientlyFatiguedToNeedRestRule',
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        this.metrics.form <= this.adviceConstants.restNeededThreshold
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' Sufficiently fatigued to recommend rest.';
-      this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.';
-      R.stop();
-    }
-  },
+  // {
+  //   'name': 'sufficientlyFatiguedToNeedRestRule',
+  //   'condition': function(R) {
+  //     R.when(this && !this.plannedActivity.activityType &&
+  //       this.metrics.form <= this.adviceConstants.restNeededThreshold
+  //     );
+  //   },
+  //   'consequence': function(R) {
+  //     this.plannedActivity.activityType = 'rest';
+  //     this.plannedActivity.rationale += ' Sufficiently fatigued to recommend rest.';
+  //     this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.';
+  //     R.stop();
+  //   }
+  // },
   {
     'name': 'easyAfterHardWithRestNotScheduledForTomorrowRule',
     'priority': -7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        !this.testingIsDue && //this.wentHardYesterday &&
         (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race') &&
         (this.metrics.form <= this.adviceConstants.easyDaytNeededThreshold) &&
         (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
@@ -53,18 +53,32 @@ var rules = [
     }
   },
   {
-    'name': 'hardIsDefaultRule',
+    'name': 'restIsDefaultRule',
     'priority': -9,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType);
     },
     'consequence': function(R) {
-      this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' No other recommendation, so hard.';
-      this.plannedActivity.advice += ` If you feel up to it you should go hard today. You appear to be sufficiently rested.
- Intensity should be high but will vary based on ride duration.`;
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' No other recommendation, so rest.';
+      this.plannedActivity.advice += ` rest
+ dude.`;
       R.stop();
     }
+ //  },
+ //  {
+ //    'name': 'hardIsDefaultRule',
+ //    'priority': -9,
+ //    'condition': function(R) {
+ //      R.when(this && !this.plannedActivity.activityType);
+ //    },
+ //    'consequence': function(R) {
+ //      this.plannedActivity.activityType = 'hard';
+ //      this.plannedActivity.rationale += ' No other recommendation, so hard.';
+ //      this.plannedActivity.advice += ` If you feel up to it you should go hard today. You appear to be sufficiently rested.
+ // Intensity should be high but will vary based on ride duration.`;
+ //      R.stop();
+ //    }
   }
 ];
 

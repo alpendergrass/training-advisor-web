@@ -4,9 +4,11 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 't2HardRule',
+    'priority': 3,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't2' && !this.testingIsDue &&
-      this.metrics.form > this.adviceConstants.t2HardDayThreshold
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't2' &&
+        !this.wentHardYesterday &&
+        this.metrics.form > this.adviceConstants.t2HardDayThreshold
       );
     },
     'consequence': function(R) {
@@ -17,9 +19,10 @@ var rules = [
   },
   {
     'name': 't2ModerateRule',
+    'priority': 2,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't2' && !this.testingIsDue &&
-      this.metrics.form > this.adviceConstants.t2ModerateDayThreshold
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't2' &&
+        this.metrics.form > this.adviceConstants.t2ModerateDayThreshold
       );
     },
     'consequence': function(R) {
@@ -29,7 +32,24 @@ var rules = [
     }
   },
   {
+    'name': 't2EasyRule',
+    'priority': 1,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't2' &&
+        this.metrics.form > this.adviceConstants.t2EasyDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' Recommend easy based on t2 threshold.';
+      this.plannedActivity.advice += ' Easy dude.';
+      // R.next();
+      R.stop();
+    }
+  },
+  {
     'name': 't2TempoRule',
+    'priority': -1,
     'condition': function(R) {
       R.when(this &&
         this.trainingDay.period === 't2' &&
@@ -44,6 +64,7 @@ var rules = [
   },
   {
     'name': 't2EnduranceRule',
+    'priority': -1,
     'condition': function(R) {
       R.when(this &&
         this.trainingDay.period === 't2' &&

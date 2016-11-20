@@ -4,10 +4,9 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 'testingDueAndFormIsRecoveredRule',
+    'priority': 89,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType && this.testingIsDue &&
-        !_.includes(['t0', 't6', 'race'], this.plannedActivity.period) &&
-        // (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race' && this.trainingDay.period !== 't0') &&
         this.metrics.form > this.adviceConstants.testingEligibleFormThreshold
       );
     },
@@ -20,11 +19,26 @@ var rules = [
     }
   },
   {
-    'name': 'easyDayNeededInPrepForTestingRule',
+    'name': 'testingDueModerateDayRule',
+    'priority': 88,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType && this.testingIsDue &&
-        !_.includes(['t0', 't6', 'race'], this.plannedActivity.period) &&
-        this.metrics.form <= this.adviceConstants.testingEligibleFormThreshold
+        this.metrics.form > this.adviceConstants.testingModerateDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' Testing is due. Recommending easy in preparation for testing.';
+      this.plannedActivity.advice += ' Testing is due but you are not sufficiently rested. Do an easy-to-moderate ride.';
+      R.stop();
+    }
+  },
+  {
+    'name': 'testingDueEasyDayRule',
+    'priority': 87,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType && this.testingIsDue &&
+        this.metrics.form > this.adviceConstants.testingEasyDayThreshold
       );
     },
     'consequence': function(R) {
@@ -37,13 +51,9 @@ var rules = [
   },
   {
     'name': 'restNeededInPrepForTestingRule',
-    // Depending on values of various thresholds, we may never get here.
-    // E.g., if restNeededForPeakingThreshold is greater than restNeededForTestingThreshold.
+    'priority': 80,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.testingIsDue &&
-        !_.includes(['t0', 't6', 'race'], this.plannedActivity.period) &&
-        this.metrics.form <= this.adviceConstants.restNeededForTestingThreshold
-      );
+      R.when(this && !this.plannedActivity.activityType && this.testingIsDue);
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';

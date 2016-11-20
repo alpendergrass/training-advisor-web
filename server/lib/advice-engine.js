@@ -14,6 +14,7 @@ var path = require('path'),
   adviceEvent = require('./advice-event'),
   adviceTest = require('./advice-test'),
   adviceSimulation = require('./advice-simulation'),
+  adviceDefault = require('./advice-default'),
   adviceT0 = require('./advice-t0'),
   adviceT1 = require('./advice-t1'),
   adviceT2 = require('./advice-t2'),
@@ -21,7 +22,7 @@ var path = require('path'),
   adviceT4 = require('./advice-t4'),
   adviceT5 = require('./advice-t5'),
   adviceT6 = require('./advice-t6'),
-  adviceDefault = require('./advice-default'),
+  adviceRace = require('./advice-race'),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
@@ -54,17 +55,39 @@ function generateAdvice(user, trainingDay, source, callback) {
         facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
         facts.metrics = util.getMetrics(trainingDay, metricsType);
 
+        // It seems that the order in which I load the rules affects the order in which they are evaluated.
+        // Rule priority only seems to apply if ALL rules have priority.
         var R = new RuleEngine(adviceEvent.eventRules);
         R.register(adviceTest.testRules);
         R.register(adviceSimulation.simulationRules);
-        R.register(adviceT0.t0Rules);
-        R.register(adviceT1.t1Rules);
-        R.register(adviceT2.t2Rules);
-        R.register(adviceT3.t3Rules);
-        R.register(adviceT4.t4Rules);
-        R.register(adviceT5.t5Rules);
-        R.register(adviceT6.t6Rules);
         R.register(adviceDefault.defaultRules);
+
+        switch (trainingDay.period) {
+          case 't0':
+            R.register(adviceT0.t0Rules);
+            break;
+          case 't1':
+            R.register(adviceT1.t1Rules);
+            break;
+          case 't2':
+            R.register(adviceT2.t2Rules);
+            break;
+          case 't3':
+            R.register(adviceT3.t3Rules);
+            break;
+          case 't4':
+            R.register(adviceT4.t4Rules);
+            break;
+          case 't5':
+            R.register(adviceT5.t5Rules);
+            break;
+          case 't6':
+            R.register(adviceT6.t6Rules);
+            break;
+          case 'race':
+            R.register(adviceRace.raceRules);
+            break;
+        }
 
         R.execute(facts, function(result){
           adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {

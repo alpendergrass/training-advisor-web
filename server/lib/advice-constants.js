@@ -8,6 +8,14 @@ module.exports.minimumNumberOfTrainingDays = 105;
 //This is the maximum duration from season start to start of race period -> 25 weeks
 module.exports.maximumNumberOfTrainingDays = 182;
 
+module.exports.minimumNumberOfRaceDays = 7;
+module.exports.maximumNumberOfRaceDays = 21;
+
+module.exports.midSeasonTransitionNumberOfDays = 5;
+
+module.exports.maxDaysToLookAheadForFutureGoals = module.exports.maximumNumberOfTrainingDays + module.exports.maximumNumberOfRaceDays;
+module.exports.maxDaysToLookAheadForSeasonEnd = 366;
+
 module.exports.trainingPeriodLookups = [
   {
     period: 't1',
@@ -36,14 +44,6 @@ module.exports.trainingPeriodLookups = [
   }
 ];
 
-module.exports.minimumNumberOfRaceDays = 7;
-module.exports.maximumNumberOfRaceDays = 21;
-
-module.exports.midSeasonTransitionNumberOfDays = 5;
-
-module.exports.maxDaysToLookAheadForFutureGoals = module.exports.maximumNumberOfTrainingDays + module.exports.maximumNumberOfRaceDays;
-module.exports.maxDaysToLookAheadForSeasonEnd = 366;
-
 module.exports.TPAutoDownloadLookbackNumberOfDays = '3';
 
 //Skip lesser event if within this many days of goal event.
@@ -53,44 +53,45 @@ module.exports.priority3EventCutOffThreshold = 9;
 //If it has been this many days since FTP was updated, start nagging user to test.
 module.exports.testingNagDayCount = 24;
 
-//Form must be greater than this before we will recommend testing.
 module.exports.testingEligibleFormThreshold = -5;
+module.exports.testingEasyDayThreshold = -22;
+module.exports.testingModerateDayThreshold = -18;
 
-//If form is ever less than or equal to this, we recommend rest.
-module.exports.restNeededThreshold = -32;
+module.exports.t1HardDayThreshold = -25;
+module.exports.t1ModerateDayThreshold = -29;
+module.exports.t1EasyDayThreshold = -32;
 
-//If testing is due and form is less than or equal to this, we recommend rest.
-module.exports.restNeededForTestingThreshold = -18;
+module.exports.t2HardDayThreshold = -18;
+module.exports.t2ModerateDayThreshold = -26;
+module.exports.t2EasyDayThreshold = -32;
+
+module.exports.t3HardDayThreshold = -18;
+module.exports.t3ModerateDayThreshold = -25;
+module.exports.t3EasyDayThreshold = -32;
+
+module.exports.t4HardDayThreshold = -18;
+module.exports.t4ModerateDayThreshold = -26;
+module.exports.t4EasyDayThreshold = -32;
+
+module.exports.t5HardDayThreshold = -18;
+module.exports.t5ModerateDayThreshold = -26;
+module.exports.t5EasyDayThreshold = -32;
+
+module.exports.t6HardDayThreshold = -18;
+module.exports.t6ModerateDayThreshold = -21;
+module.exports.t6EasyDayThreshold = -32;
+
+module.exports.raceHardDayThreshold = -15;
+module.exports.raceModerateDayThreshold = -19;
+module.exports.raceEasyDayThreshold = -26;
 
 //If form is less than or equal to this during t6 period, we recommend rest.
 //I made it one less than restNeededForTestingThreshold to get unit tests to work.
 //If we find it needs to be greater then we may need to modify or remove a test.
-
 module.exports.restNeededForRacingThreshold = -12;
 
 //If form is less than or equal to this, we recommend an easy day if...see code.
-module.exports.easyDaytNeededThreshold = -28;
-
-module.exports.t1ModerateDayThreshold = -26;
-module.exports.t1HardDayThreshold = -18;
-
-module.exports.t2ModerateDayThreshold = -26;
-module.exports.t2HardDayThreshold = -18;
-
-module.exports.t3ModerateDayThreshold = -25;
-module.exports.t3HardDayThreshold = -18;
-
-module.exports.t4ModerateDayThreshold = -26;
-module.exports.t4HardDayThreshold = -18;
-
-module.exports.t5HardDayThreshold = -18;
-
-module.exports.t6ModerateDayThreshold = -21;
-module.exports.t6HardDayThreshold = -18;
-module.exports.t6RestNeededThreshold = -30;
-
-module.exports.raceModerateDayThreshold = -21;
-module.exports.raceHardDayThreshold = -18;
+module.exports.easyDaytNeededThreshold = -32;
 
 //We apply this factor to make the NP (weighted_average_watts) reported by Strava
 //to more closely match Garmin/TP.

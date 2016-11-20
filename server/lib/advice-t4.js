@@ -4,9 +4,10 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 't4HardRule',
+    'priority': 3,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't4' && !this.testingIsDue &&
-      this.metrics.form > this.adviceConstants.t4HardDayThreshold
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't4' &&
+        this.metrics.form > this.adviceConstants.t4HardDayThreshold
       );
     },
     'consequence': function(R) {
@@ -17,9 +18,10 @@ var rules = [
   },
   {
     'name': 't4ModerateRule',
+    'priority': 2,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't4' && !this.testingIsDue &&
-      this.metrics.form > this.adviceConstants.t4ModerateDayThreshold
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't4' &&
+        this.metrics.form > this.adviceConstants.t4ModerateDayThreshold
       );
     },
     'consequence': function(R) {
@@ -29,7 +31,24 @@ var rules = [
     }
   },
   {
+    'name': 't4EasyRule',
+    'priority': 1,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't4' &&
+        this.metrics.form > this.adviceConstants.t4EasyDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' Recommend easy based on t4 threshold.';
+      this.plannedActivity.advice += ' Easy dude.';
+      // R.next();
+      R.stop();
+    }
+  },
+  {
     'name': 't4TempoRule',
+    'priority': -1,
     'condition': function(R) {
       R.when(this &&
         this.trainingDay.period === 't4' &&
@@ -44,6 +63,7 @@ var rules = [
   },
   {
     'name': 't4EnduranceRule',
+    'priority': -1,
     'condition': function(R) {
       R.when(this &&
         this.trainingDay.period === 't4' &&

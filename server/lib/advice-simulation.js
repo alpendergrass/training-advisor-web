@@ -5,6 +5,7 @@ var rules = [
   {
     //Trello: we should check our TSB to make sure it is not too low to handle this.
     'name': 'simulationIfPreferredSimulationDayInBuildRule',
+    'priority': 79,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         (this.trainingDay.period === 't4' || this.trainingDay.period === 't5') &&

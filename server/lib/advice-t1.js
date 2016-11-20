@@ -4,9 +4,11 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 't1HardRule',
+    'priority': 3,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't1' && !this.testingIsDue &&
-      this.metrics.form > this.adviceConstants.t1HardDayThreshold
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't1' &&
+        !this.wentHardYesterday &&
+        this.metrics.form > this.adviceConstants.t1HardDayThreshold
       );
     },
     'consequence': function(R) {
@@ -17,9 +19,10 @@ var rules = [
   },
   {
     'name': 't1ModerateRule',
+    'priority': 2,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't1' && !this.testingIsDue &&
-      this.metrics.form > this.adviceConstants.t1ModerateDayThreshold
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't1' &&
+        this.metrics.form > this.adviceConstants.t1ModerateDayThreshold
       );
     },
     'consequence': function(R) {
@@ -29,13 +32,27 @@ var rules = [
     }
   },
   {
-    'name': 't1EnduranceRule',
-    //'priority': -9,
+    'name': 't1EasyRule',
+    'priority': 1,
     'condition': function(R) {
-      R.when(this &&
-        this.trainingDay.period === 't1' &&
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't1' &&
+        this.metrics.form > this.adviceConstants.t1EasyDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' Recommend easy based on t1 threshold.';
+      this.plannedActivity.advice += ' Easy dude.';
+      // R.next();
+      R.stop();
+    }
+  },
+  {
+    'name': 't1EnduranceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't1' &&
         _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
-        // (this.testingIsDue)
       );
     },
     'consequence': function(R) {
