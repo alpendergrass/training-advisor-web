@@ -19,21 +19,6 @@ var rules = [
     }
   },
   {
-    'name': 'testingDueModerateDayRule',
-    'priority': 88,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.testingIsDue &&
-        this.metrics.form > this.adviceConstants.testingModerateDayThreshold
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Testing is due. Recommending easy in preparation for testing.';
-      this.plannedActivity.advice += ' Testing is due but you are not sufficiently rested. Do an easy-to-moderate ride.';
-      R.stop();
-    }
-  },
-  {
     'name': 'testingDueEasyDayRule',
     'priority': 87,
     'condition': function(R) {

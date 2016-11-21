@@ -134,7 +134,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     }
   },
   {
-    'name': 'restNeededInPrepForGoalEventRule',
+    'name': 'twoDaysBeforeGoalEventRule',
     'priority': 95,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
@@ -142,14 +142,14 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' Rest recommended as goal event is in two days.';
-      this.plannedActivity.advice += ' Rest is needed as your goal event is in two days. If you ride, go very easy, just loosen the legs.';
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' twoDaysBeforeGoalEventRule.';
+      this.plannedActivity.advice += ' Easy day is recommended as your goal event is in two days. Just loosen the legs.';
       R.stop();
     }
   },
   {
-    'name': 'easyDayNeededDayBeforeGoalEventRule',
+    'name': 'dayBeforeGoalEventRule',
     'priority': 95,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
@@ -157,15 +157,15 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
       ) ;
     },
     'consequence': function(R) {
-      this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Easy day recommended as goal event is tomorrow.';
-      this.plannedActivity.advice += ` An easy day is recommended as your goal event is tomorrow.
- You may do a few 90% sprints to sharpen the legs but otherwise keep it very relaxed.`;
+      this.plannedActivity.activityType = 'moderate';
+      this.plannedActivity.rationale += ' dayBeforeGoalEventRule.';
+      this.plannedActivity.advice += ` An easy-to-moderate day is recommended as your goal event is tomorrow.
+ You may do a few 90% sprints to sharpen the legs but otherwise keep it relaxed.`;
       R.stop();
     }
   },
   {
-    'name': 'restNeededInPrepForPriority2EventRule',
+    'name': 'dayBeforeForPriority2EventRule',
     'priority': 94,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
@@ -174,59 +174,59 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' Rest recommended as priority 2 event is in one day.';
-      this.plannedActivity.advice += ' Rest is recommended as you have a medium priority event tomorrow. If you ride, go easy.';
-      R.stop();
-    }
-  },
-  {
-    'name': 'easyDayNeededInPrepForPriority2EventRule',
-    'priority': 94,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        this.trainingDay.daysUntilNextPriority2Event === 2 &&
-        (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race')
-      );
-    },
-    'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Easy day recommended as priority 2 event is in two days.';
-      this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event in two days. Keep the effort in zone 2 or below.';
+      this.plannedActivity.rationale += ' dayBeforeForPriority2EventRule.';
+      this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event tomorrow.';
       R.stop();
     }
-  },
-  {
-    'name': 'easyDayNeededThreeDaysPriorGoalEventRule',
-    'priority': 93,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        this.trainingDay.daysUntilNextGoalEvent === 3
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Easy day recommended as goal event is in three days.';
-      this.plannedActivity.advice += ' An easy day is recommended as your goal event is in three days. This should be a zone 1 - 2 ride. Resist the urge to go hard, save it for your event!';
-      R.stop();
-    }
-  },
-  {
-    'name': 'easyDayNeededInPrepForPriority3EventRule',
-    'priority': 93,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        this.trainingDay.daysUntilNextPriority3Event === 1 &&
-        (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race')
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Easy day recommended as priority 3 event is in one day.';
-      this.plannedActivity.advice += ' An easy day is recommended as you have a low priority event scheduled for tomorrow. Today should be an short endurance ride.';
-      R.stop();
-    }
-  },
+  }
+  // {
+  //   'name': 'easyDayNeededInPrepForPriority2EventRule',
+  //   'priority': 94,
+  //   'condition': function(R) {
+  //     R.when(this && !this.plannedActivity.activityType &&
+  //       this.trainingDay.daysUntilNextPriority2Event === 2 &&
+  //       (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race')
+  //     );
+  //   },
+  //   'consequence': function(R) {
+  //     this.plannedActivity.activityType = 'easy';
+  //     this.plannedActivity.rationale += ' Easy day recommended as priority 2 event is in two days.';
+  //     this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event in two days. Keep the effort in zone 2 or below.';
+  //     R.stop();
+  //   }
+  // },
+  // {
+  //   'name': 'easyDayNeededThreeDaysPriorGoalEventRule',
+  //   'priority': 93,
+  //   'condition': function(R) {
+  //     R.when(this && !this.plannedActivity.activityType &&
+  //       this.trainingDay.daysUntilNextGoalEvent === 3
+  //     );
+  //   },
+  //   'consequence': function(R) {
+  //     this.plannedActivity.activityType = 'easy';
+  //     this.plannedActivity.rationale += ' Easy day recommended as goal event is in three days.';
+  //     this.plannedActivity.advice += ' An easy day is recommended as your goal event is in three days. This should be a zone 1 - 2 ride. Resist the urge to go hard, save it for your event!';
+  //     R.stop();
+  //   }
+  // },
+  // {
+  //   'name': 'easyDayNeededInPrepForPriority3EventRule',
+  //   'priority': 93,
+  //   'condition': function(R) {
+  //     R.when(this && !this.plannedActivity.activityType &&
+  //       this.trainingDay.daysUntilNextPriority3Event === 1 &&
+  //       (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race')
+  //     );
+  //   },
+  //   'consequence': function(R) {
+  //     this.plannedActivity.activityType = 'easy';
+  //     this.plannedActivity.rationale += ' Easy day recommended as priority 3 event is in one day.';
+  //     this.plannedActivity.advice += ' An easy day is recommended as you have a low priority event scheduled for tomorrow. Today should be an short endurance ride.';
+  //     R.stop();
+  //   }
+  // },
 ];
 
 module.exports = {};

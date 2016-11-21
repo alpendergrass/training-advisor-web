@@ -19,6 +19,36 @@ var rules = [
       R.stop();
     }
   },
+  {
+    'name': 'restRule',
+    'priority': 5,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType &&
+        this.metrics.form <= this.adviceConstants.restDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'rest';
+      this.plannedActivity.rationale += ' restRule.';
+      this.plannedActivity.advice += ' Rest dude.';
+      R.stop();
+    }
+  },
+  {
+    'name': 'easyRule',
+    'priority': 4,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType &&
+        this.metrics.form <= this.adviceConstants.easyDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' easyRule.';
+      this.plannedActivity.advice += ' Easy dude.';
+      R.stop();
+    }
+  },
   // {
   //   'name': 'sufficientlyFatiguedToNeedRestRule',
   //   'condition': function(R) {
@@ -33,35 +63,35 @@ var rules = [
   //     R.stop();
   //   }
   // },
+ //  {
+ //    'name': 'easyAfterHardWithRestNotScheduledForTomorrowRule',
+ //    'priority': -7,
+ //    'condition': function(R) {
+ //      R.when(this && !this.plannedActivity.activityType &&
+ //        (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race') &&
+ //        (this.metrics.form <= this.adviceConstants.easyDaytNeededThreshold) &&
+ //        (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
+ //        (!this.subsequentTrainingDay || this.subsequentTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
+ //      );
+ //    },
+ //    'consequence': function(R) {
+ //      this.plannedActivity.activityType = 'easy';
+ //      this.plannedActivity.rationale += ' Yesterday was hard, form is below easyDaytNeededThreshold, tomorrow is not a preferred rest day or off day, so recommending easy.';
+ //      this.plannedActivity.advice += ` Yesterday was a hard day and form is somewhat low so go easy today. You should do a short endurance ride today.
+ // Endurance means you should target power zone 2 but if you feel tired, make this a zone 1 recovery ride.`;
+ //      R.stop();
+ //    }
+ //  },
   {
-    'name': 'easyAfterHardWithRestNotScheduledForTomorrowRule',
-    'priority': -7,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race') &&
-        (this.metrics.form <= this.adviceConstants.easyDaytNeededThreshold) &&
-        (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
-        (!this.subsequentTrainingDay || this.subsequentTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Yesterday was hard, form is below easyDaytNeededThreshold, tomorrow is not a preferred rest day or off day, so recommending easy.';
-      this.plannedActivity.advice += ` Yesterday was a hard day and form is somewhat low so go easy today. You should do a short endurance ride today.
- Endurance means you should target power zone 2 but if you feel tired, make this a zone 1 recovery ride.`;
-      R.stop();
-    }
-  },
-  {
-    'name': 'restIsDefaultRule',
+    'name': 'hardIsDefaultRule',
     'priority': -9,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType);
     },
     'consequence': function(R) {
-      this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' No other recommendation, so rest.';
-      this.plannedActivity.advice += ` rest
+      this.plannedActivity.activityType = 'hard';
+      this.plannedActivity.rationale += ' hardIsDefaultRule.';
+      this.plannedActivity.advice += ` hard
  dude.`;
       R.stop();
     }

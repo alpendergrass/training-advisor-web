@@ -16,8 +16,7 @@ var path = require('path'),
   adviceSimulation = require('./advice-simulation'),
   adviceDefault = require('./advice-default'),
   adviceT0 = require('./advice-t0'),
-  adviceT1 = require('./advice-t1'),
-  adviceT2 = require('./advice-t2'),
+  adviceT1T2 = require('./advice-t1t2'),
   adviceT3 = require('./advice-t3'),
   adviceT4 = require('./advice-t4'),
   adviceT5 = require('./advice-t5'),
@@ -27,83 +26,93 @@ var path = require('path'),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
 
-
 function generateAdvice(user, trainingDay, source, callback) {
   var facts = {};
-  var subsequentDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
-  var previousDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
+  // var subsequentDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var oneDayPriorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
+  var twoDaysPriorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(2, 'days'));
   var metricsType = util.setMetricsType(source);
 
-  dbUtil.getExistingTrainingDayDocument(user, subsequentDate)
-    .then(function(subsequentTrainingDay) {
-      facts.subsequentTrainingDay = subsequentTrainingDay;
+  // dbUtil.getExistingTrainingDayDocument(user, subsequentDate)
+  //   .then(function(subsequentTrainingDay) {
+  //     facts.subsequentTrainingDay = subsequentTrainingDay;
+  //     return dbUtil.getExistingTrainingDayDocument(user, oneDayPriorDate);
+  //   })
+  dbUtil.getExistingTrainingDayDocument(user, oneDayPriorDate)
+    .then(function(oneDayPrior) {
+      if (oneDayPrior) {
+        facts.oneDayPrior = oneDayPrior;
+        facts.metricsOneDayPrior = util.getMetrics(oneDayPrior, metricsType);
+      }
+      return dbUtil.getExistingTrainingDayDocument(user, twoDaysPriorDate);
+    })
+    .then(function(twoDaysPrior) {
+      if (twoDaysPrior) {
+        facts.twoDaysPrior = twoDaysPrior;
+        facts.metricsTwoDaysPrior = util.getMetrics(twoDaysPrior, metricsType);
+      }
 
-      dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, metricsType, function(err, wentHard) {
-        if (err) {
-          return callback(err, null, null);
-        }
 
-        facts.trainingState = null;
-        facts.source = source;
-        facts.metricsType = metricsType;
-        facts.adviceConstants = adviceConstants;
-        facts.wentHardYesterday = wentHard;
-        facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
-        facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
-        facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
-        facts.trainingDay = trainingDay;
-        facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
-        facts.metrics = util.getMetrics(trainingDay, metricsType);
+      facts.trainingState = null;
+      facts.source = source;
+      // facts.metricsType = metricsType;
+      facts.adviceConstants = adviceConstants;
+      facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
+      facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
+      facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
+      facts.trainingDay = trainingDay;
+      facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
+      facts.metrics = util.getMetrics(trainingDay, metricsType);
 
-        // It seems that the order in which I load the rules affects the order in which they are evaluated.
-        // Rule priority only seems to apply if ALL rules have priority.
-        var R = new RuleEngine(adviceEvent.eventRules);
-        R.register(adviceTest.testRules);
-        R.register(adviceSimulation.simulationRules);
-        R.register(adviceDefault.defaultRules);
+      // It seems that the order in which I load the rules affects the order in which they are evaluated.
+      // Rule priority only seems to apply if ALL rules have (non-zero) priority. Done.
+      var R = new RuleEngine(adviceEvent.eventRules);
+      R.register(adviceTest.testRules);
+      R.register(adviceSimulation.simulationRules);
+      R.register(adviceDefault.defaultRules);
 
-        switch (trainingDay.period) {
-          case 't0':
-            R.register(adviceT0.t0Rules);
-            break;
-          case 't1':
-            R.register(adviceT1.t1Rules);
-            break;
-          case 't2':
-            R.register(adviceT2.t2Rules);
-            break;
-          case 't3':
-            R.register(adviceT3.t3Rules);
-            break;
-          case 't4':
-            R.register(adviceT4.t4Rules);
-            break;
-          case 't5':
-            R.register(adviceT5.t5Rules);
-            break;
-          case 't6':
-            R.register(adviceT6.t6Rules);
-            break;
-          case 'race':
-            R.register(adviceRace.raceRules);
-            break;
-        }
+      switch (trainingDay.period) {
+        case 't0':
+          R.register(adviceT0.t0Rules);
+          break;
+        case 't1':
+          R.register(adviceT1T2.t1t2Rules);
+          break;
+        case 't2':
+          R.register(adviceT1T2.t1t2Rules);
+          // R.register(adviceT2.t2Rules);
+          break;
+        case 't3':
+          R.register(adviceT3.t3Rules);
+          break;
+        case 't4':
+          R.register(adviceT4.t4Rules);
+          break;
+        case 't5':
+          R.register(adviceT5.t5Rules);
+          break;
+        case 't6':
+          R.register(adviceT6.t6Rules);
+          break;
+        case 'race':
+          R.register(adviceRace.raceRules);
+          break;
+      }
 
-        R.execute(facts, function(result){
-          adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {
+      R.execute(facts, function(result) {
+        adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {
+          if (err) {
+            console.log('setLoadRecommendations err: ', err);
+            return callback(err);
+          }
+
+          trainingDay.save(function(err) {
             if (err) {
-              console.log('setLoadRecommendations err: ', err);
-              return callback(err);
+              console.log('trainingDay.save err: ', err);
+              return callback(err, null);
+            } else {
+              return callback(null, trainingDay);
             }
-
-            trainingDay.save(function(err) {
-              if (err) {
-                console.log('trainingDay.save err: ', err);
-                return callback(err, null);
-              } else {
-                return callback(null, trainingDay);
-              }
-            });
           });
         });
       });
@@ -226,7 +235,7 @@ module.exports.generatePlan = function(params, callback) {
           //If we errored out last time there could be some left overs.
           dbUtil.removePlanGenerationActivities(user)
             .then(function() {
-                //get all training days from tomorrow thru last goal.
+              //get all training days from tomorrow thru last goal.
               let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
               dbUtil.getTrainingDays(user, tomorrowNumeric, goalDay.dateNumeric, function(err, trainingDays) {

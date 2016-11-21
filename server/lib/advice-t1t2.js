@@ -3,69 +3,85 @@ var _ = require('lodash');
 
 var rules = [
   {
-    'name': 't3HardRule',
+    'name': 't1HardRule',
     'priority': 3,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t3'], this.trainingDay.period) &&
-        this.metrics.form > this.adviceConstants.t3HardDayThreshold
+        _.includes(['t1'], this.trainingDay.period) &&
+        this.metrics.form > this.adviceConstants.t1HardDayThreshold
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t3HardRule.';
+      this.plannedActivity.rationale += ' t1HardRule.';
       R.next();
     }
   },
   {
-    'name': 't3HardAfterModerateRule',
-    'priority': 2,
+    'name': 't2HardRule',
+    'priority': 3,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t3'], this.trainingDay.period) &&
-        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'moderate'
+        _.includes(['t2'], this.trainingDay.period) &&
+        this.metrics.form > this.adviceConstants.t2HardDayThreshold
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t3HardAfterModerateRule.';
+      this.plannedActivity.rationale += ' t2HardRule.';
       R.next();
     }
   },
   {
-    'name': 't3HardAfterRestRule',
+    'name': 't1t2HardAfterTwoModerateRule',
     'priority': 2,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t3'], this.trainingDay.period) &&
+        _.includes(['t1', 't2'], this.trainingDay.period) &&
+        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'moderate' &&
+        this.metricsTwoDaysPrior && this.metricsTwoDaysPrior.loadRating === 'moderate'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'hard';
+      this.plannedActivity.rationale += ' t1t2HardAfterTwoModerateRule.';
+      R.next();
+    }
+  },
+  {
+    'name': 't1t2HardAfterRestRule',
+    'priority': 2,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType &&
+        _.includes(['t1', 't2'], this.trainingDay.period) &&
         this.metricsOneDayPrior && (this.metricsOneDayPrior.loadRating === 'rest')
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t3HardAfterRestRule.';
+      this.plannedActivity.rationale += ' t1t2HardAfterRestRule.';
       R.next();
     }
   },
   {
-    'name': 't3ModerateDefaultRule',
+    'name': 't1ModerateDefaultRule',
     'priority': 1,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t3'], this.trainingDay.period)
+        _.includes(['t1', 't2'], this.trainingDay.period)
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
-      this.plannedActivity.rationale += ' t3ModerateDefaultRule.';
+      this.plannedActivity.rationale += ' t1t2ModerateDefaultRule.';
       R.next();
     }
   },
   {
-    'name': 't3EnduranceRule',
+    'name': 't1EnduranceRule',
     'priority': -1,
     'condition': function(R) {
-      R.when(this && this.trainingDay.period === 't3' &&
+      R.when(this && this.trainingDay.period === 't1' &&
         _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
       );
     },
@@ -81,4 +97,4 @@ var rules = [
 
 module.exports = {};
 
-module.exports.t3Rules = rules;
+module.exports.t1t2Rules = rules;
