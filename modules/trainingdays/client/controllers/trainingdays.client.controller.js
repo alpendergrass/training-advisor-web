@@ -475,11 +475,11 @@ angular.module('trainingDays')
 
               if ($scope.authentication.user.levelOfDetail > 2) {
                 targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
-                rampRateArray = _.flatMap($scope.season, getRampRate);
+                // rampRateArray = _.flatMap($scope.season, getRampRate);
                 planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
                 actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
-                $scope.chartData = [actualLoadArray, planLoadArray, planFormArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
-                // $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, actualFatigueArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
+                // $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
               } else {
                 $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray];
               }
@@ -499,31 +499,31 @@ angular.module('trainingDays')
                   backgroundColor: planLoadBackgroundColors,
                   type: 'bar'
                 },
-                // {
-                //   label: 'Fitness - Actual',
-                //   yAxisID: 'y-axis-0',
-                //   borderWidth: 3,
-                //   pointRadius: 0,
-                //   hitRadius: 4,
-                //   type: 'line'
-                // },
-                // {
-                //   label: 'Fitness - Plan',
-                //   yAxisID: 'y-axis-0',
-                //   borderWidth: 3,
-                //   pointRadius: 0,
-                //   hitRadius: 4,
-                //   type: 'line'
-                // },
-                // {
-                //   label: 'Form - Actual',
-                //   yAxisID: 'y-axis-0',
-                //   borderWidth: 3,
-                //   pointRadius: formPointRadius,
-                //   hitRadius: 4,
-                //   // pointBorderColor: actualFormPointBorderColors,
-                //   type: 'line'
-                // },
+                {
+                  label: 'Fitness - Actual',
+                  yAxisID: 'y-axis-0',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  hitRadius: 4,
+                  type: 'line'
+                },
+                {
+                  label: 'Fitness - Plan',
+                  yAxisID: 'y-axis-0',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  hitRadius: 4,
+                  type: 'line'
+                },
+                {
+                  label: 'Form - Actual',
+                  yAxisID: 'y-axis-0',
+                  borderWidth: 3,
+                  pointRadius: formPointRadius,
+                  hitRadius: 4,
+                  // pointBorderColor: actualFormPointBorderColors,
+                  type: 'line'
+                },
                 {
                   label: 'Form - Plan',
                   yAxisID: 'y-axis-0',
@@ -533,13 +533,13 @@ angular.module('trainingDays')
                   // pointBorderColor: '#4D5360',
                   type: 'line'
                 },
-                // {
-                //   label: 'Fatigue',
-                //   borderWidth: 3,
-                //   pointRadius: 0,
-                //   hitRadius: 4,
-                //   type: 'line'
-                // },
+                {
+                  label: 'Fatigue',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  hitRadius: 4,
+                  type: 'line'
+                },
                 {
                   label: 'Target Ramp Rate',
                   yAxisID: 'y-axis-1',
@@ -548,14 +548,14 @@ angular.module('trainingDays')
                   hitRadius: 4,
                   type: 'line'
                 },
-                {
-                  label: 'Ramp Rate',
-                  yAxisID: 'y-axis-1',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line'
-                },
+                // {
+                //   label: 'Ramp Rate',
+                //   yAxisID: 'y-axis-1',
+                //   borderWidth: 3,
+                //   pointRadius: 0,
+                //   hitRadius: 4,
+                //   type: 'line'
+                // },
                 {
                   label: 'Average Ramp Rate - Actual',
                   yAxisID: 'y-axis-1',
@@ -709,6 +709,7 @@ angular.module('trainingDays')
                     text = mapActivityTypeToVerbiage(planActivity.activityType);
                     if ($scope.authentication.user.levelOfDetail > 2) {
                       text += ' period: ' + td.period;
+                      text += ' rationale: ' + planActivity.rationale;
                     }
                   }
                 }
