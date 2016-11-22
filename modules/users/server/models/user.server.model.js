@@ -104,10 +104,9 @@ var UserSchema = new Schema({
   preferredRestDays: [{
     type: String
   }],
-  //TODO: add validation: preferredSimulationDay cannot be in preferredRestDays
-  preferredSimulationDay: {
-    type: String
-  },
+  // preferredSimulationDay: {
+  //   type: String
+  // },
   levelOfDetail: {
     type: Number,
     min: 1,

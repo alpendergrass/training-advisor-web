@@ -10,7 +10,7 @@ var metricsTypes = {
   message: invalidDataErrorMessage
 };
 var plannedActivityTypes = {
-  values: 'event|simulation|test|hard|moderate|easy|rest|choice|'.split('|'),
+  values: 'event|test|hard|moderate|easy|rest|choice|'.split('|'),
   message: invalidDataErrorMessage
 };
 var plannedActivitySources = {

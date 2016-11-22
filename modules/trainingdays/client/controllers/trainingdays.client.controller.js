@@ -79,9 +79,9 @@ angular.module('trainingDays')
           }, {
             activityType: 'hard',
             phrase: 'High Load Day'
-          }, {
-            activityType: 'simulation',
-            phrase: 'Simulation Day'
+          // }, {
+          //   activityType: 'simulation',
+          //   phrase: 'Simulation Day'
           }, {
             activityType: 'test',
             phrase: 'Power Testing Day'
@@ -1191,7 +1191,7 @@ angular.module('trainingDays')
           { value: 'easy', text: 'Do an easy ride' },
           { value: 'moderate', text: 'Do a moderate ride' },
           { value: 'hard', text: 'Do a hard ride' },
-          { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
+          // { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
           { value: 'test', text: 'Do a threshold power test' }
         ];
 
@@ -1374,6 +1374,7 @@ angular.module('trainingDays')
           }, function(trainingDay) {
             trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
             $scope.trainingDay = trainingDay;
+            $scope.alternateActivity = null;
             resetViewObjects(trainingDay);
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
