@@ -666,23 +666,28 @@ angular.module('trainingDays')
                 return $scope.season[tooltipItems[0].index].name;
               },
               afterTitle: function(tooltipItems) {
-                var text = '',
+                // By using an array here each element will be on a new line.
+                var text,
                   td = $scope.season[tooltipItems[0].index];
 
                 if (td.scheduledEventRanking) {
                   switch (td.scheduledEventRanking) {
                     case 1:
-                      text = 'Goal Event';
+                      text = ['Goal Event'];
                       break;
                     case 2:
-                      text = 'Medium Priority Event';
+                      text = ['Medium Priority Event'];
                       break;
                     case 3:
-                      text = 'Low Priority Event';
+                      text = ['Low Priority Event'];
                       break;
                     case 9:
-                      text = 'Scheduled Off Day';
+                      text = ['Scheduled Off Day'];
                       break;
+                  }
+
+                  if (td.estimatedLoad > 0) {
+                    text.push('Estimated Load ' + td.estimatedLoad);
                   }
                 }
 
