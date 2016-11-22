@@ -297,53 +297,46 @@ module.exports.getMostRecentGoalDay = function(user, numericSearchDate, callback
     });
 };
 
-module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, metricsType, callback) {
+module.exports.clearFutureMetricsAndAdvice = function(params, callback) {
   // Note: we clear numericDate and following day metrics. We used to start with the day after numericDate.
   // For actual metrics we only need to clear thru tomorrow. Should be no actual metrics past tomorrow.
   // But for planned we should clear all.
   // For now we clear all in either scenario.
 
-  if (!user) {
+  if (!params.user) {
     err = new TypeError('clearFutureMetricsAndAdvice valid user is required');
     return callback(err, null);
   }
 
-  if (!numericDate) {
+  if (!params.numericDate) {
     err = new TypeError('clearFutureMetricsAndAdvice numericDate is required');
     return callback(err, null);
   }
 
-  if (!moment(numericDate.toString()).isValid()) {
-    err = new TypeError('clearFutureMetricsAndAdvice numericDate ' + numericDate + ' is not a valid date');
+  if (!moment(params.numericDate.toString()).isValid()) {
+    err = new TypeError('clearFutureMetricsAndAdvice numericDate ' + params.numericDate + ' is not a valid date');
     return callback(err, null);
   }
 
-  if (!metricsType) {
+  if (!params.metricsType) {
     err = new TypeError('clearFutureMetricsAndAdvice metricsType is required');
     return callback(err, null);
   }
 
-  let source = metricsType === 'actual' ? 'advised' : 'plangeneration';
+  let source;
+
+  if (params.source) {
+    //'advised', 'plangeneration' or 'requested'
+    source = params.source;
+  } else {
+    source = params.metricsType === 'actual' ? 'advised' : 'plangeneration';
+  }
 
   TrainingDay.update({
-    user: user,
-    dateNumeric: { $gte: numericDate },
-    fitnessAndFatigueTrueUp: false,
-    startingPoint: false,
-    cloneOfId: null,
-    'metrics.metricsType': metricsType,
+    user: params.user,
+    dateNumeric: { $gte: params.numericDate },
+    cloneOfId: null
   }, {
-    $set: {
-      'metrics.$.fitness': 0,
-      'metrics.$.fatigue': 0,
-      'metrics.$.form': 0,
-      'metrics.$.sevenDayRampRate': 0,
-      'metrics.$.sevenDayTargetRampRate': 0,
-      'metrics.$.dailyTargetRampRate': 0,
-      'metrics.$.rampRateAdjustmentFactor': 1,
-      'metrics.$.targetAvgDailyLoad': 0,
-      'metrics.$.loadRating': '',
-    },
     $pull: { plannedActivities: { source: source } }
   }, {
     multi: true
@@ -352,7 +345,34 @@ module.exports.clearFutureMetricsAndAdvice = function(user, numericDate, metrics
       return callback(err, null);
     }
 
-    return callback(null, rawResponse);
+    TrainingDay.update({
+      user: params.user,
+      dateNumeric: { $gte: params.numericDate },
+      fitnessAndFatigueTrueUp: false,
+      startingPoint: false,
+      cloneOfId: null,
+      'metrics.metricsType': params.metricsType,
+    }, {
+      $set: {
+        'metrics.$.fitness': 0,
+        'metrics.$.fatigue': 0,
+        'metrics.$.form': 0,
+        'metrics.$.sevenDayRampRate': 0,
+        'metrics.$.sevenDayTargetRampRate': 0,
+        'metrics.$.dailyTargetRampRate': 0,
+        'metrics.$.rampRateAdjustmentFactor': 1,
+        'metrics.$.targetAvgDailyLoad': 0,
+        'metrics.$.loadRating': '',
+      }
+    }, {
+      multi: true
+    }, function(err, rawResponse) {
+      if (err) {
+        return callback(err, null);
+      }
+
+      return callback(null, rawResponse);
+    });
   });
 };
 
