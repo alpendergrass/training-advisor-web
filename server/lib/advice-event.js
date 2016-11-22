@@ -165,7 +165,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     }
   },
   {
-    'name': 'dayBeforeForPriority2EventRule',
+    'name': 'dayBeforePriority2EventRule',
     'priority': 94,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
@@ -175,7 +175,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' dayBeforeForPriority2EventRule.';
+      this.plannedActivity.rationale += ' dayBeforePriority2EventRule.';
       this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event tomorrow.';
       R.stop();
     }

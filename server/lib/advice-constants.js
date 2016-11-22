@@ -142,13 +142,13 @@ module.exports.loadAdviceLookups = [
   }, {
     activityType: 'event2',
     // medium priority event
-    lowLoadFactor: 1.9,
-    highLoadFactor: 2.1
+    lowLoadFactor: 1.4,
+    highLoadFactor: 1.9
   }, {
     activityType: 'event3',
     // low priority event
-    lowLoadFactor: 1.9,
-    highLoadFactor: 2.1
+    lowLoadFactor: 1.4,
+    highLoadFactor: 1.9
   }, {
     activityType: 'event9',
     // off day

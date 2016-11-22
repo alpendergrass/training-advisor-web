@@ -62,24 +62,24 @@ describe('advice-load Unit Tests:', function() {
       });
     });
 
-    it('should return estimatedLoad for target loads if this is an event day and estimate is provided', function(done) {
-      plannedActivity.activityType = 'event';
-      trainingDay.estimatedLoad = 234;
-      trainingDay.scheduledEventRanking = 2;
+    // it('should return estimatedLoad for target loads if this is an event day and estimate is provided', function(done) {
+    //   plannedActivity.activityType = 'event';
+    //   trainingDay.estimatedLoad = 234;
+    //   trainingDay.scheduledEventRanking = 2;
 
-      metrics.targetAvgDailyLoad = 100;
-      metrics.sevenDayTargetRampRate = 5;
-      metrics.sevenDayRampRate = 6;
+    //   metrics.targetAvgDailyLoad = 100;
+    //   metrics.sevenDayTargetRampRate = 5;
+    //   metrics.sevenDayRampRate = 6;
 
-      return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
-        should.not.exist(err);
-        should.exist(trainingDay);
-        let plannedActivity = util.getPlannedActivity(trainingDay, source);
-        (plannedActivity.targetMinLoad).should.equal(234);
-        (plannedActivity.targetMaxLoad).should.equal(234);
-        done();
-      });
-    });
+    //   return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
+    //     should.not.exist(err);
+    //     should.exist(trainingDay);
+    //     let plannedActivity = util.getPlannedActivity(trainingDay, source);
+    //     (plannedActivity.targetMinLoad).should.equal(234);
+    //     (plannedActivity.targetMaxLoad).should.equal(234);
+    //     done();
+    //   });
+    // });
 
     it('should return computed target loads if this is an event day but no estimate is provided', function(done) {
       trainingDay.scheduledEventRanking = 1;
