@@ -126,10 +126,10 @@ module.exports.loadAdviceLookups = [
     lowLoadFactor: 1.4,
     highLoadFactor: 1.9
   }, {
-    activityType: 'simulation',
-    lowLoadFactor: 1.9,
-    highLoadFactor: 2.1
-  }, {
+  //   activityType: 'simulation',
+  //   lowLoadFactor: 1.9,
+  //   highLoadFactor: 2.1
+  // }, {
     activityType: 'test',
     lowLoadFactor: 1,
     highLoadFactor: 1

@@ -41,28 +41,28 @@ module.exports.setLoadRecommendations = function(user, trainingDay, source, call
   //   return callback(null, trainingDay);
   // } else
 
-  if (plannedActivity.activityType === 'simulation') {
-    //We use the goal event estimate for simulations. We have to go find the next goal day.
-    dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, goalDays) {
-      if (err) {
-        return callback(err, null);
-      }
+  // if (plannedActivity.activityType === 'simulation') {
+  //   //We use the goal event estimate for simulations. We have to go find the next goal day.
+  //   dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, goalDays) {
+  //     if (err) {
+  //       return callback(err, null);
+  //     }
 
-      //Note that it is possible that no goal exists or that no estimate was provided.
-      if (goalDays.length > 0 && goalDays[0].estimatedLoad) {
-        plannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
-        plannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);
-      } else {
-        setTargetLoads(trainingDay, plannedActivity, metrics);
-      }
+  //     //Note that it is possible that no goal exists or that no estimate was provided.
+  //     if (goalDays.length > 0 && goalDays[0].estimatedLoad) {
+  //       plannedActivity.targetMinLoad = Math.round(0.95 * goalDays[0].estimatedLoad);
+  //       plannedActivity.targetMaxLoad = Math.round(1.05 * goalDays[0].estimatedLoad);
+  //     } else {
+  //       setTargetLoads(trainingDay, plannedActivity, metrics);
+  //     }
 
-      return callback(null, trainingDay);
-    });
-  }
-  else {
-    setTargetLoads(trainingDay, plannedActivity, metrics);
-    return callback(null, trainingDay);
-  }
+  //     return callback(null, trainingDay);
+  //   });
+  // }
+  // else {
+  setTargetLoads(trainingDay, plannedActivity, metrics);
+  return callback(null, trainingDay);
+  // }
 };
 
 function setTargetLoads(trainingDay, plannedActivity, metrics) {

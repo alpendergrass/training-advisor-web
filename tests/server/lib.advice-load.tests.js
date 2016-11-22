@@ -117,28 +117,28 @@ describe('advice-load Unit Tests:', function() {
       });
     });
 
-    it('should return estimatedLoad from goal event +/- 5% for target loads if recommending simulation', function(done) {
-      testHelpers.createGoalEvent(user, new Date(), 2, function(err) {
-        if (err) {
-          console.log('createGoalEvent: ' + err);
-        }
+    // it('should return estimatedLoad from goal event +/- 5% for target loads if recommending simulation', function(done) {
+    //   testHelpers.createGoalEvent(user, new Date(), 2, function(err) {
+    //     if (err) {
+    //       console.log('createGoalEvent: ' + err);
+    //     }
 
-        plannedActivity.activityType = 'simulation';
+    //     plannedActivity.activityType = 'simulation';
 
-        metrics.targetAvgDailyLoad = 100;
-        metrics.sevenDayTargetRampRate = 5;
-        metrics.sevenDayRampRate = 6;
+    //     metrics.targetAvgDailyLoad = 100;
+    //     metrics.sevenDayTargetRampRate = 5;
+    //     metrics.sevenDayRampRate = 6;
 
-        return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
-          should.not.exist(err);
-          should.exist(trainingDay);
-          let plannedActivity = util.getPlannedActivity(trainingDay, source);
-          (plannedActivity.targetMinLoad).should.equal(Math.round(567 * 0.95));
-          (plannedActivity.targetMaxLoad).should.equal(Math.round(567 * 1.05));
-          done();
-        });
-      });
-    });
+    //     return adviceLoad.setLoadRecommendations(user, trainingDay, 'advised', function(err, trainingDay) {
+    //       should.not.exist(err);
+    //       should.exist(trainingDay);
+    //       let plannedActivity = util.getPlannedActivity(trainingDay, source);
+    //       (plannedActivity.targetMinLoad).should.equal(Math.round(567 * 0.95));
+    //       (plannedActivity.targetMaxLoad).should.equal(Math.round(567 * 1.05));
+    //       done();
+    //     });
+    //   });
+    // });
 
     it('should return unadjusted recommendation regardless of ramp rates if recommending easy workout', function(done) {
       plannedActivity.activityType = 'easy';

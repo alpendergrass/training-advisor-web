@@ -13,7 +13,7 @@ var path = require('path'),
   adviceLoad = require('./advice-load'),
   adviceEvent = require('./advice-event'),
   adviceTest = require('./advice-test'),
-  adviceSimulation = require('./advice-simulation'),
+  // adviceSimulation = require('./advice-simulation'),
   adviceDefault = require('./advice-default'),
   adviceT0 = require('./advice-t0'),
   adviceT1T2 = require('./advice-t1t2'),
@@ -68,7 +68,7 @@ function generateAdvice(user, trainingDay, source, callback) {
       // Rule priority only seems to apply if ALL rules have (non-zero) priority. Done.
       var R = new RuleEngine(adviceEvent.eventRules);
       R.register(adviceTest.testRules);
-      R.register(adviceSimulation.simulationRules);
+      // R.register(adviceSimulation.simulationRules);
       R.register(adviceDefault.defaultRules);
 
       switch (trainingDay.period) {
@@ -80,7 +80,6 @@ function generateAdvice(user, trainingDay, source, callback) {
           break;
         case 't2':
           R.register(adviceT1T2.t1t2Rules);
-          // R.register(adviceT2.t2Rules);
           break;
         case 't3':
           R.register(adviceT3.t3Rules);
@@ -429,7 +428,8 @@ module.exports.advise = function(params, callback) {
   let metricsParams = {
     user: params.user,
     numericDate: params.numericDate,
-    metricsType: util.setMetricsType(params.source)
+    metricsType: util.setMetricsType(params.source),
+    source: params.source
   };
 
   async.series(

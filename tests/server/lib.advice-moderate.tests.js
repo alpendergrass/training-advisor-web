@@ -63,7 +63,7 @@ describe('advice-moderate Unit Tests:', function() {
       user.preferredRestDays = [moment(trainingDate).add(2, 'days').day().toString()];
       var yesterday = moment(trainingDate).subtract(1, 'days');
       var completedActivities = [{
-        activityType: 'simulation'
+        activityType: 'hard'
       }];
 
       testHelpers.createTrainingDay(user, yesterday, completedActivities, function(err) {
