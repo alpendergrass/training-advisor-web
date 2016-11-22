@@ -136,10 +136,9 @@ module.exports.loadAdviceLookups = [
   }, {
     activityType: 'event1',
     // goal event
-    // If we do not have estimated load for the event, we are basically guessing.
     // load factors are high to counteract the negative ramp rate used in race period.
-    lowLoadFactor: 2.9,
-    highLoadFactor: 3.1
+    lowLoadFactor: 2.1,
+    highLoadFactor: 2.6
   }, {
     activityType: 'event2',
     // medium priority event
