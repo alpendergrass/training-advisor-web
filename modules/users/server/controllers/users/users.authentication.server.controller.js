@@ -16,9 +16,6 @@ var noReturnUrls = [
   '/authentication/signup'
 ];
 
-/**
- * Signup
- */
 exports.signup = function(req, res) {
   // For security measurement we remove the roles from the req.body object
   delete req.body.roles;
@@ -31,6 +28,7 @@ exports.signup = function(req, res) {
   user.provider = 'local';
   user.displayName = user.firstName + ' ' + user.lastName;
   user.lastLogin = Date.now();
+  user.preferredRestDays = ['1'];
 
   // Then save the user
   user.save(function(err) {
@@ -54,9 +52,7 @@ exports.signup = function(req, res) {
   });
 };
 
-/**
- * Signin after passport authentication
- */
+// Signin after passport authentication
 exports.signin = function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err || !user) {
@@ -86,9 +82,7 @@ exports.signout = function(req, res) {
   res.redirect('/authentication/signin');
 };
 
-/**
- * OAuth provider call
- */
+// OAuth provider call
 exports.oauthCall = function(strategy, scope) {
   return function(req, res, next) {
     // Set redirection path on session.
@@ -101,9 +95,6 @@ exports.oauthCall = function(strategy, scope) {
   };
 };
 
-/**
- * OAuth callback
- */
 exports.oauthCallback = function(strategy) {
   return function(req, res, next) {
     // Pop redirect URL from session
@@ -138,9 +129,7 @@ exports.oauthCallback = function(strategy) {
   };
 };
 
-/**
- * Helper function to save or update a OAuth user profile
- */
+// Helper function to save or update a OAuth user profile
 exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
   if (!req.user) {
     Site.findOne().exec(function(err, site) {
@@ -184,6 +173,7 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
                 provider: providerUserProfile.provider,
                 providerData: providerUserProfile.providerData,
                 waitListed: !site.allowRegistrations,
+                preferredRestDays: ['1'],
                 lastLogin: Date.now()
               });
 
@@ -236,9 +226,6 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
   }
 };
 
-/**
- * Remove OAuth provider
- */
 exports.removeOAuthProvider = function(req, res, next) {
   var user = req.user;
   var provider = req.query.provider;
