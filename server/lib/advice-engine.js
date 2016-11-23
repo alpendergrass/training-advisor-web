@@ -16,7 +16,8 @@ var path = require('path'),
   // adviceSimulation = require('./advice-simulation'),
   adviceDefault = require('./advice-default'),
   adviceT0 = require('./advice-t0'),
-  adviceT1T2 = require('./advice-t1t2'),
+  adviceT1 = require('./advice-t1'),
+  adviceT2 = require('./advice-t2'),
   adviceT3 = require('./advice-t3'),
   adviceT4 = require('./advice-t4'),
   adviceT5 = require('./advice-t5'),
@@ -64,11 +65,16 @@ function generateAdvice(user, trainingDay, source, callback) {
       facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
       facts.metrics = util.getMetrics(trainingDay, metricsType);
 
-      // It seems that the order in which I load the rules affects the order in which they are evaluated.
-      // Rule priority only seems to apply if ALL rules have (non-zero) priority. Done.
+      // Rule priority guide:
+      // Event priorities are 90 - 99.
+      // Test: 80 - 89.
+      // Default: 70 - 79, 1 for catch-all load rule.
+      // By period activityType rules: 2 - 9.
+      // By period chained advice rules: < 0..
+      // Rule priority only applies if ALL rules have (non-zero) priority. Done.
+
       var R = new RuleEngine(adviceEvent.eventRules);
       R.register(adviceTest.testRules);
-      // R.register(adviceSimulation.simulationRules);
       R.register(adviceDefault.defaultRules);
 
       switch (trainingDay.period) {
@@ -76,10 +82,10 @@ function generateAdvice(user, trainingDay, source, callback) {
           R.register(adviceT0.t0Rules);
           break;
         case 't1':
-          R.register(adviceT1T2.t1t2Rules);
+          R.register(adviceT1.t1Rules);
           break;
         case 't2':
-          R.register(adviceT1T2.t1t2Rules);
+          R.register(adviceT2.t2Rules);
           break;
         case 't3':
           R.register(adviceT3.t3Rules);

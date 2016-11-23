@@ -4,7 +4,7 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 't6HardRule',
-    'priority': 3,
+    'priority': 9,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't6' &&
         this.metrics.form > this.adviceConstants.t6HardDayThreshold
@@ -19,7 +19,7 @@ var rules = [
   },
   {
     'name': 't6ModerateAfterTwoHardRule',
-    'priority': 2,
+    'priority': 7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t6'], this.trainingDay.period) &&

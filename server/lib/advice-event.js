@@ -11,7 +11,7 @@ var rules = [
     'consequence': function(R) {
       this.result = true;
       this.plannedActivity.activityType = 'event';
-      this.plannedActivity.rationale += ' Today is a scheduled off day.';
+      this.plannedActivity.rationale += ' offDayRule.';
       this.plannedActivity.advice += ' You have scheduled the day off. Enjoy your day.';
       R.stop();
     }
@@ -25,7 +25,7 @@ var rules = [
     'consequence': function(R) {
       this.result = true;
       this.plannedActivity.activityType = 'event';
-      this.plannedActivity.rationale += ' Today is a priority 1 (goal) event.';
+      this.plannedActivity.rationale += ' goalEventRule.';
       this.plannedActivity.advice += ' Today is a goal event. Give it your all. Good luck!';
       R.stop();
     }
@@ -42,7 +42,7 @@ var rules = [
     'consequence': function(R) {
       this.result = true;
       this.plannedActivity.activityType = 'event';
-      this.plannedActivity.rationale += ' Today is a medium priority event.';
+      this.plannedActivity.rationale += ' mediumPriorityEventRule.';
       this.plannedActivity.advice += ` You have a medium priority event scheduled for today.
 If you feel good go for the podium but if you do not have the legs, sit in. You do not want to risk your season today.`;
       R.stop();
@@ -60,7 +60,7 @@ If you feel good go for the podium but if you do not have the legs, sit in. You 
     'consequence': function(R) {
       this.result = true;
       this.plannedActivity.activityType = 'event';
-      this.plannedActivity.rationale += ' Today is a low priority event.';
+      this.plannedActivity.rationale += ' lowPriorityEventRule.';
       this.plannedActivity.advice += ` You have a low priority event scheduled for today.
 Your primary objective today is to get a quality, race-pace workout. If you feel good go hard but if not, sit in or drop out.
 Race results are not important. Remember that your future goals are the reason you are riding today.`;
@@ -78,7 +78,7 @@ Race results are not important. Remember that your future goals are the reason y
     },
     'consequence': function(R) {
       this.result = true;
-      this.plannedActivity.rationale += ` Today is a priority ${this.trainingDay.scheduledEventRanking} event but testing is due. Recommending skipping.`;
+      this.plannedActivity.rationale += ` nonGoalEventButTestingDueRule. Event is priority ${this.trainingDay.scheduledEventRanking}.`;
       this.plannedActivity.advice += ` You have a non-goal event scheduled for today. However, testing is due.
  You should skip this event.`;
       R.next();
@@ -96,7 +96,7 @@ Race results are not important. Remember that your future goals are the reason y
     'consequence': function(R) {
       this.result = true;
       this.trainingState = 'nonGoalEventInPeakOrRace';
-      this.plannedActivity.rationale += ` Today is a priority ${this.trainingDay.scheduledEventRanking} event. In ${this.trainingDay.period} period.
+      this.plannedActivity.rationale += ` nonGoalEventInPeakOrRaceRule. Event is priority ${this.trainingDay.scheduledEventRanking}. In ${this.trainingDay.period} period.
 Goal event is ${this.trainingDay.daysUntilNextGoalEvent} days away.`;
       this.plannedActivity.advice += ` You have a non-goal event scheduled for today.
 However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent} days away.`;
@@ -113,7 +113,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     },
     'consequence': function(R) {
       this.result = true;
-      this.plannedActivity.rationale += ' Recommending skipping.';
+      this.plannedActivity.rationale += ' skipEventForImpendingGoalRule.';
       this.plannedActivity.advice += ' You should skip this event.';
       R.next();
     }
@@ -128,7 +128,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     },
     'consequence': function(R) {
       this.result = true;
-      this.plannedActivity.rationale += ' Recommending caution.';
+      this.plannedActivity.rationale += ' cautionDueToImpendingGoalRule.';
       this.plannedActivity.advice += ' Only do this event if you feel certain it will help you prepare for your goal event.';
       R.next();
     }
@@ -180,53 +180,6 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
       R.stop();
     }
   }
-  // {
-  //   'name': 'easyDayNeededInPrepForPriority2EventRule',
-  //   'priority': 94,
-  //   'condition': function(R) {
-  //     R.when(this && !this.plannedActivity.activityType &&
-  //       this.trainingDay.daysUntilNextPriority2Event === 2 &&
-  //       (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race')
-  //     );
-  //   },
-  //   'consequence': function(R) {
-  //     this.plannedActivity.activityType = 'easy';
-  //     this.plannedActivity.rationale += ' Easy day recommended as priority 2 event is in two days.';
-  //     this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event in two days. Keep the effort in zone 2 or below.';
-  //     R.stop();
-  //   }
-  // },
-  // {
-  //   'name': 'easyDayNeededThreeDaysPriorGoalEventRule',
-  //   'priority': 93,
-  //   'condition': function(R) {
-  //     R.when(this && !this.plannedActivity.activityType &&
-  //       this.trainingDay.daysUntilNextGoalEvent === 3
-  //     );
-  //   },
-  //   'consequence': function(R) {
-  //     this.plannedActivity.activityType = 'easy';
-  //     this.plannedActivity.rationale += ' Easy day recommended as goal event is in three days.';
-  //     this.plannedActivity.advice += ' An easy day is recommended as your goal event is in three days. This should be a zone 1 - 2 ride. Resist the urge to go hard, save it for your event!';
-  //     R.stop();
-  //   }
-  // },
-  // {
-  //   'name': 'easyDayNeededInPrepForPriority3EventRule',
-  //   'priority': 93,
-  //   'condition': function(R) {
-  //     R.when(this && !this.plannedActivity.activityType &&
-  //       this.trainingDay.daysUntilNextPriority3Event === 1 &&
-  //       (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race')
-  //     );
-  //   },
-  //   'consequence': function(R) {
-  //     this.plannedActivity.activityType = 'easy';
-  //     this.plannedActivity.rationale += ' Easy day recommended as priority 3 event is in one day.';
-  //     this.plannedActivity.advice += ' An easy day is recommended as you have a low priority event scheduled for tomorrow. Today should be an short endurance ride.';
-  //     R.stop();
-  //   }
-  // },
 ];
 
 module.exports = {};

@@ -12,7 +12,7 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'test';
-      this.plannedActivity.rationale += ' Testing is due and form is sufficiently recovered for testing.';
+      this.plannedActivity.rationale += ' testingDueAndFormIsRecoveredRule.';
       this.plannedActivity.advice += ` Testing is due and form is sufficiently recovered for testing. Do a functional threshold power (FTP) test.
  Be sure to update your Tacit Training profile with your new threshold and the date you did the test.`;
       R.stop();
@@ -28,7 +28,7 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' Testing is due. Recommending easy in preparation for testing.';
+      this.plannedActivity.rationale += ' testingDueEasyDayRule.';
       this.plannedActivity.advice += ` An easy day or rest is needed in preparation for testing. Your form is not sufficiently recovered for testing.
  Easy means a zone 1 - 2 ride.`;
       R.stop();
@@ -42,7 +42,7 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' Testing is due. Rest recommended in preparation for testing.';
+      this.plannedActivity.rationale += ' restNeededInPrepForTestingRule.';
       this.plannedActivity.advice += ' Testing is due but form is not sufficiently recovered for testing. Rest is needed in preparation for testing, so rest today.';
       R.stop();
     }

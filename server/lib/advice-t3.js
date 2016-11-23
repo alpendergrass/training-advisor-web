@@ -4,7 +4,7 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 't3HardRule',
-    'priority': 3,
+    'priority': 9,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t3'], this.trainingDay.period) &&
@@ -19,7 +19,7 @@ var rules = [
   },
   {
     'name': 't3HardAfterModerateRule',
-    'priority': 2,
+    'priority': 7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t3'], this.trainingDay.period) &&
@@ -34,7 +34,7 @@ var rules = [
   },
   {
     'name': 't3HardAfterRestRule',
-    'priority': 2,
+    'priority': 7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t3'], this.trainingDay.period) &&
@@ -49,7 +49,7 @@ var rules = [
   },
   {
     'name': 't3ModerateDefaultRule',
-    'priority': 1,
+    'priority': 5,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t3'], this.trainingDay.period)

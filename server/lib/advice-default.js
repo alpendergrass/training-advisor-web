@@ -5,7 +5,7 @@ var _ = require('lodash');
 var rules = [
   {
     'name': 'preferredRestDayRule',
-    'priority': 9,
+    'priority': 77,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         this.trainingDay.scheduledEventRanking === 0 &&
@@ -14,14 +14,14 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' This is a preferred rest day.';
-      this.plannedActivity.advice += ' Today is one of your planned rest days, so rest.';
+      this.plannedActivity.rationale += ' preferredRestDayRule.';
+      this.plannedActivity.advice += ' Today is one of your planned rest days, so rest. Put your feet up.';
       R.stop();
     }
   },
   {
-    'name': 'restRule',
-    'priority': 5,
+    'name': 'defaultRestRule',
+    'priority': 75,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         this.metrics.form <= this.adviceConstants.restDayThreshold
@@ -29,14 +29,14 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' restRule.';
-      this.plannedActivity.advice += ' Rest dude.';
+      this.plannedActivity.rationale += ' defaultRestRule.';
+      this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin. The focus of this workout is recovery.';
       R.stop();
     }
   },
   {
-    'name': 'easyRule',
-    'priority': 4,
+    'name': 'defaultEasyRule',
+    'priority': 73,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         this.metrics.form <= this.adviceConstants.easyDayThreshold
@@ -44,47 +44,16 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' easyRule.';
-      this.plannedActivity.advice += ' Easy dude.';
+      this.plannedActivity.rationale += ' defaultEasyRule.';
+      this.plannedActivity.advice += ` Your form suggests you go easy today. You should do a easy endurance ride today.
+ Easy endurance means you should target lower power zone 2 but if you feel tired, make this a zone 1 recovery ride.
+ When in doubt, go easy. Recovery is what enables you to go faster and farther when it is time to go hard again.`;
       R.stop();
     }
   },
-  // {
-  //   'name': 'sufficientlyFatiguedToNeedRestRule',
-  //   'condition': function(R) {
-  //     R.when(this && !this.plannedActivity.activityType &&
-  //       this.metrics.form <= this.adviceConstants.restNeededThreshold
-  //     );
-  //   },
-  //   'consequence': function(R) {
-  //     this.plannedActivity.activityType = 'rest';
-  //     this.plannedActivity.rationale += ' Sufficiently fatigued to recommend rest.';
-  //     this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.';
-  //     R.stop();
-  //   }
-  // },
- //  {
- //    'name': 'easyAfterHardWithRestNotScheduledForTomorrowRule',
- //    'priority': -7,
- //    'condition': function(R) {
- //      R.when(this && !this.plannedActivity.activityType &&
- //        (this.trainingDay.period !== 't6' && this.trainingDay.period !== 'race') &&
- //        (this.metrics.form <= this.adviceConstants.easyDaytNeededThreshold) &&
- //        (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek)) < 0 &&
- //        (!this.subsequentTrainingDay || this.subsequentTrainingDay.scheduledEventRanking !== 9) // tomorrow is not a scheduled off day.
- //      );
- //    },
- //    'consequence': function(R) {
- //      this.plannedActivity.activityType = 'easy';
- //      this.plannedActivity.rationale += ' Yesterday was hard, form is below easyDaytNeededThreshold, tomorrow is not a preferred rest day or off day, so recommending easy.';
- //      this.plannedActivity.advice += ` Yesterday was a hard day and form is somewhat low so go easy today. You should do a short endurance ride today.
- // Endurance means you should target power zone 2 but if you feel tired, make this a zone 1 recovery ride.`;
- //      R.stop();
- //    }
- //  },
   {
     'name': 'hardIsDefaultRule',
-    'priority': -9,
+    'priority': 1,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType);
     },
@@ -93,22 +62,8 @@ var rules = [
       this.plannedActivity.rationale += ' hardIsDefaultRule.';
       this.plannedActivity.advice += ` hard
  dude.`;
-      R.stop();
+      R.next();
     }
- //  },
- //  {
- //    'name': 'hardIsDefaultRule',
- //    'priority': -9,
- //    'condition': function(R) {
- //      R.when(this && !this.plannedActivity.activityType);
- //    },
- //    'consequence': function(R) {
- //      this.plannedActivity.activityType = 'hard';
- //      this.plannedActivity.rationale += ' No other recommendation, so hard.';
- //      this.plannedActivity.advice += ` If you feel up to it you should go hard today. You appear to be sufficiently rested.
- // Intensity should be high but will vary based on ride duration.`;
- //      R.stop();
- //    }
   }
 ];
 

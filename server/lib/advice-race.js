@@ -2,6 +2,37 @@
 var _ = require('lodash');
 
 var rules = [
+  {
+    'name': 'raceHardRule',
+    'priority': 9,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 'race' &&
+        this.metrics.form > this.adviceConstants.raceHardDayThreshold
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'hard';
+      this.plannedActivity.rationale += ' raceHardRule.';
+      this.plannedActivity.advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
+      R.next();
+    }
+  },
+  {
+    'name': 'raceModerateAfterTwoHardRule',
+    'priority': 7,
+    'condition': function(R) {
+      R.when(this && !this.plannedActivity.activityType &&
+        _.includes(['race'], this.trainingDay.period) &&
+        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'hard' &&
+        this.metricsTwoDaysPrior && this.metricsTwoDaysPrior.loadRating === 'hard'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'moderate';
+      this.plannedActivity.rationale += ' raceModerateAfterTwoHardRule.';
+      R.next();
+    }
+  },
  //  {
  //    'name': 'sufficientlyFatiguedInRaceToNeedRestRule',
  //    'condition': function(R) {
@@ -29,50 +60,6 @@ var rules = [
  //      R.stop();
  //    }
  //  },
- //  {
- //    'name': 'hardInRacePeriodRule',
- //    'priority': -1,
- //    'condition': function(R) {
- //      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 'race');
- //    },
- //    'consequence': function(R) {
- //      this.plannedActivity.activityType = 'hard';
- //      this.plannedActivity.rationale += ` Is ${this.trainingDay.period} period, recommending hard ride but load will be smaller than typical hard ride.`;
- //      this.plannedActivity.advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
- //      R.stop();
- //    }
- //  },
-  {
-    'name': 'raceHardRule',
-    'priority': 3,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 'race' &&
-        this.metrics.form > this.adviceConstants.raceHardDayThreshold
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' raceHardRule.';
-      this.plannedActivity.advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
-      R.next();
-    }
-  },
-  {
-    'name': 'raceModerateAfterTwoHardRule',
-    'priority': 2,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['race'], this.trainingDay.period) &&
-        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'hard' &&
-        this.metricsTwoDaysPrior && this.metricsTwoDaysPrior.loadRating === 'hard'
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'moderate';
-      this.plannedActivity.rationale += ' raceModerateAfterTwoHardRule.';
-      R.next();
-    }
-  },
 ];
 
 module.exports = {};
