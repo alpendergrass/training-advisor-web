@@ -67,13 +67,13 @@ var rules = [
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't1' &&
-        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+        _.includes(['hard'], this.plannedActivity.activityType)
       );
     },
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t1HardAdviceRule.';
       this.plannedActivity.advice += ` You should do a long endurance workout today.
- Endurance means most of your time should be spent in power zone 2. Intensity will be low but if you hit your target load you will be fatigued after this ride.
+ Endurance means most of your time should be spent in power zone 2.
  Cross-training is still an option at this point in the season, just focus on endurance. If power data is not available for your selected activity you will need to estimate your training load.`;
       R.stop();
     }
@@ -83,7 +83,7 @@ var rules = [
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't1' &&
-        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+        _.includes(['moderate'], this.plannedActivity.activityType)
       );
     },
     'consequence': function(R) {

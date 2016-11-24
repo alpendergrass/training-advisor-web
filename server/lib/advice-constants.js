@@ -170,3 +170,5 @@ module.exports.loadRatingLookups = [
   }
 ];
 
+module.exports.moderateClimbingDay = 400; //meters at least.
+

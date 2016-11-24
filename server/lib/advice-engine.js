@@ -53,10 +53,8 @@ function generateAdvice(user, trainingDay, source, callback) {
         facts.metricsTwoDaysPrior = util.getMetrics(twoDaysPrior, metricsType);
       }
 
-
       facts.trainingState = null;
       facts.source = source;
-      // facts.metricsType = metricsType;
       facts.adviceConstants = adviceConstants;
       facts.testingIsDue = adviceUtil.isTestingDue(user, trainingDay);
       facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();

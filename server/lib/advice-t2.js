@@ -14,11 +14,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
       this.plannedActivity.rationale += ' t2HardRule.';
-      this.plannedActivity.advice += ` You should do a long endurance ride today as you appear to be sufficiently rested.
- Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target load you will be fatigued after this ride.
- During your ride you should periodically increase your cadence beyond your normal confort range. Learing to spin a higher cadence will make
- you a more efficient cyclist.`;
-      R.stop();
+      R.next();
     }
   },
   {
@@ -67,18 +63,55 @@ var rules = [
     }
   },
   {
-    'name': 't1EnduranceRule',
+    'name': 't2HardAdviceRule',
     'priority': -1,
     'condition': function(R) {
-      R.when(this && this.trainingDay.period === 't1' &&
-        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+      R.when(this && this.trainingDay.period === 't2' &&
+        _.includes(['hard'], this.plannedActivity.activityType)
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.advice += ` You should do a long endurance ride today as you appear to be sufficiently rested.
- Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target load you will be fatigued after this ride.
- During your ride you should periodically increase your cadence beyond your normal confort range. Learing to spin a higher cadence will make
- you a more efficient cyclist.`;
+      this.plannedActivity.rationale += ' t2HardAdviceRule.';
+      this.plannedActivity.advice += ` A long endurance ride is called for today.
+ Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target Training Load you will be fatigued after this ride.
+ If riding in hilly terrain effort will naturally rise above zone 2 on the climbs but strive to keep the effort moderate.
+ During your ride, on climbs and on the flats, you should periodically increase your cadence beyond your normal confort range.
+ Learing to spin a higher cadence will make you a more efficient cyclist.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't2ModerateHillsAdviceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't2' &&
+        _.includes(['moderate'], this.plannedActivity.activityType) &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t2ModerateTempoAdviceRule.';
+      this.plannedActivity.advice += ` Today you should do rolling hills at a moderate pace. Climb steady at a high cadence and try to keep power in Zone 3 - 4 when climbing.
+ It is easy for effort to rise higher than intended when climbing.
+ If hills are not an option in your area a brisk headwind will suffice.
+ Monitor Training Load during your ride to make sure you stay under your upper load target.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't2ModerateTempoAdviceRule',
+    'priority': -5,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't2' &&
+        _.includes(['moderate'], this.plannedActivity.activityType)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t2ModerateTempoAdviceRule.';
+      this.plannedActivity.advice += ` A tempo ride of moderate duration would be a good choice for today.
+ Tempo means a good portion of your ride should be in power zone 3.
+ Keep tabs on Training Load during your ride to ensure you do not overdo it.`;
       R.stop();
     }
   }

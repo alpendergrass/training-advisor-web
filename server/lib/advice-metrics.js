@@ -248,6 +248,7 @@ function updateMetricsForDay(params, callback) {
       // Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
       params.metrics.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
       params.metrics.loadRating = determineLoadRating(params.metrics.targetAvgDailyLoad, currentTrainingDayTotalLoad);
+      params.metrics.totalElevationGain = sumBy(params.trainingDay.completedActivities, 'elevationGain');
 
       params.trainingDay.daysUntilNextGoalEvent = results.periodData.daysUntilNextGoalEvent;
       params.trainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
