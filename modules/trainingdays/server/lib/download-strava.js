@@ -79,7 +79,9 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
           // TSS = [(s x W x IF) / (FTP x 3600)] x 100
           // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
+          newActivity.intensity = intensity;
           newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+          newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
           console.log('===> Strava: We found a keeper for user ', user.username);
           console.log('Strava: stravaActivity.weighted_average_watts: ' + stravaActivity.weighted_average_watts);
           console.log('Strava: fudgedNP: ' + fudgedNP);
@@ -90,7 +92,6 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
           newActivity.source = 'strava';
           newActivity.sourceID = stravaActivity.id;
           newActivity.name = stravaActivity.name;
-          //newActivity.intensity = intensity;
           newActivity.notes = stravaActivity.name;
           // newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
           // newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';

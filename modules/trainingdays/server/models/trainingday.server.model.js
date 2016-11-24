@@ -197,6 +197,11 @@ var TrainingDaySchema = new Schema({
       default: '',
       enum: loadRatings
     },
+    totalElevationGain: {
+       // in meters
+      type: Number,
+      default: 0
+    },
   }],
   // Legacy below
   sevenDayRampRate: {
@@ -302,6 +307,16 @@ var TrainingDaySchema = new Schema({
       type: Number,
       min: 0,
       max: 999,
+      default: 0
+    },
+    intensity: {
+      type: Number,
+      min: 0,
+      max: 9,
+      default: 0
+    },
+    elevationGain: {
+      type: Number,
       default: 0
     },
     notes: {
