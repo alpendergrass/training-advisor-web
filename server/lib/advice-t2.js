@@ -63,7 +63,7 @@ var rules = [
     }
   },
   {
-    'name': 't2HardAdviceRule',
+    'name': 't2EnduranceAdviceRule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't2' &&
@@ -71,7 +71,7 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t2HardAdviceRule.';
+      this.plannedActivity.rationale += ' t2EnduranceAdviceRule.';
       this.plannedActivity.advice += ` A long endurance ride is called for today.
  Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target Training Load you will be fatigued after this ride.
  If riding in hilly terrain effort will naturally rise above zone 2 on the climbs but strive to keep the effort moderate.
@@ -91,7 +91,7 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t2ModerateTempoAdviceRule.';
+      this.plannedActivity.rationale += ' t2ModerateHillsAdviceRule.';
       this.plannedActivity.advice += ` Today you should do rolling hills at a moderate pace. Climb steady at a high cadence and try to keep power in Zone 3 - 4 when climbing.
  It is easy for effort to rise higher than intended when climbing.
  If hills are not an option in your area a brisk headwind will suffice.
@@ -100,7 +100,7 @@ var rules = [
     }
   },
   {
-    'name': 't2ModerateTempoAdviceRule',
+    'name': 't2TempoAdviceRule',
     'priority': -5,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't2' &&
@@ -108,10 +108,10 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t2ModerateTempoAdviceRule.';
+      this.plannedActivity.rationale += ' t2TempoAdviceRule.';
       this.plannedActivity.advice += ` A tempo ride of moderate duration would be a good choice for today.
  Tempo means a good portion of your ride should be in power zone 3.
- Keep tabs on Training Load during your ride to ensure you do not overdo it.`;
+ Keep tabs on Training Load during your ride to ensure you do sufficient work without overdoing it.`;
       R.stop();
     }
   }

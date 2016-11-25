@@ -62,21 +62,80 @@ var rules = [
     }
   },
   {
-    'name': 't3EnduranceRule',
+    'name': 't3LongHillsAdviceRule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't3' &&
-        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+        this.plannedActivity.activityType === 'hard' &&
+        (this.nextGoal && this.nextGoal.eventTerrain > 3) &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.bigClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.bigClimbingDay)
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.advice += ` You should do a long endurance ride today as you appear to be sufficiently rested.
- Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target load you will be fatigued after this ride.
- During your ride you should periodically increase your cadence beyond your normal confort range. Learing to spin a higher cadence will make
- you a more efficient cyclist.`;
+      this.plannedActivity.rationale += ' t3LongHillsAdviceRule.';
+      this.plannedActivity.advice += ` Today you should do a long climbing ride at a moderate pace. Do longer climbs if they are available.
+ Climb steady at a high cadence and keep power in Zone 4 or below when climbing.
+ Keep an eye on your Training Load to make sure you do not overdo it.`;
       R.stop();
     }
-  }
+  },
+  {
+    'name': 't3MediumHillsAdviceRule',
+    'priority': -3,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't3' &&
+        this.plannedActivity.activityType === 'hard' &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t3MediumHillsAdviceRule.';
+      this.plannedActivity.advice += ` Today you should do a long ride with some shorter climbs at a moderate pace.
+ Keep cadence high and power in Zone 4 or below when climbing.
+ Monitor your Training Load to make sure you stay within your daily Load targets.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't3TempoAdviceRule',
+    'priority': -5,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't3' &&
+        this.plannedActivity.activityType === 'hard' &&
+        (this.nextGoal && this.nextGoal.eventTerrain < 2) &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t3TempoAdviceRule.';
+      this.plannedActivity.advice += ` Today you should do a long tempo ride.
+ Tempo means you should spend much of your ride in power zone 3. Early in your ride zone 3 will feel easy
+ but resist the temptation to go harder. Sustaining a tempo pace for an extended time is challenging.
+ If your route includes hills keep effort in Zone 4 or below while climbing.
+ As allways, keep cadence high.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't3EnduranceAdviceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't3' &&
+        this.plannedActivity.activityType === 'moderate'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t3EnduranceAdviceRule.';
+      this.plannedActivity.advice += ` Today you should do an endurance ride of moderate duration.
+ Remember, endurance means spending most of your time in zone 2. When climbing your effort will rise beyond zone 2
+ but stay out of zone 5. On the descents you should let effort fall into zone 1.
+ Whenever you think about it, increase your cadence a bit.`;
+      R.stop();
+    }
+  },
 ];
 
 module.exports = {};
