@@ -126,13 +126,24 @@
         </div>
       </div>
 
-      <div class="row" ng-show="trainingDay.scheduledEventRanking != 0 && trainingDay.scheduledEventRanking != 9">
+      <div class="row" ng-show="trainingDay.scheduledEventRanking == 1">
         <div class="col-xs-5">
           <h4 class="text-right">Estimated Load:</h4>
         </div>
         <div class="col-xs-7">
           <h4>
               <span><a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5">{{trainingDay.estimatedLoad}}</a></span>
+          </h4>
+        </div>
+      </div>
+
+      <div class="row" ng-show="trainingDay.scheduledEventRanking == 1">
+        <div class="col-xs-5">
+          <h4 class="text-right">Expected Terrain</h4>
+        </div>
+        <div class="col-xs-7">
+          <h4>
+              <a href="#" editable-radiolist="trainingDay.eventTerrain" e-ng-options="s.value as s.text for s in ::eventTerrains track by s.value">{{showTerrain()}}</a>
           </h4>
         </div>
       </div>

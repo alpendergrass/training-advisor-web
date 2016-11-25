@@ -61,7 +61,7 @@ function createTrainingDay(req, callback) {
       trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
       trainingDay.estimatedLoad = req.body.estimatedLoad;
       trainingDay.expectedIntensity = req.body.expectedIntensity;
-      trainingDay.expectedTerrain = req.body.expectedTerrain;
+      trainingDay.eventTerrain = req.body.eventTerrain;
 
       if (req.body.recurrenceSpec) {
         trainingDay.recurrenceSpec = req.body.recurrenceSpec;
@@ -282,7 +282,7 @@ exports.update = function(req, res) {
     trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
     trainingDay.estimatedLoad !== req.body.estimatedLoad ||
     trainingDay.expectedIntensity !== req.body.expectedIntensity ||
-    trainingDay.expectedTerrain !== req.body.expectedTerrain
+    trainingDay.eventTerrain !== req.body.eventTerrain
   ) {
     refreshAdvice = true;
   }
@@ -293,7 +293,7 @@ exports.update = function(req, res) {
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
   trainingDay.estimatedLoad = req.body.estimatedLoad;
   trainingDay.expectedIntensity = req.body.expectedIntensity;
-  trainingDay.expectedTerrain = req.body.expectedTerrain;
+  trainingDay.eventTerrain = req.body.eventTerrain;
   trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
   trainingDay.notes = req.body.notes;
   trainingDay.completedActivities = req.body.completedActivities;

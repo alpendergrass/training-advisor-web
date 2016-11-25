@@ -96,13 +96,13 @@ var TrainingDaySchema = new Schema({
     type: Number,
     default: 0
   },
-  expectedIntensity: {
+  estimatedIntensity: {
     type: Number,
     min: 0,
     max: 5,
     default: 0
   },
-  expectedTerrain: {
+  eventTerrain: {
     type: Number,
     min: 0,
     max: 5,

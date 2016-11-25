@@ -843,15 +843,29 @@ angular.module('trainingDays')
                 { value: 9, text: 'Off Day' }
               ];
 
+              $scope.eventTerrains = [
+                { value: 1, text: 'Flat' },
+                { value: 2, text: 'Slightly Hilly' },
+                { value: 3, text: 'Hilly' },
+                { value: 4, text: 'Very Hilly' },
+                { value: 5, text: 'Mountainous' }
+              ];
+
               $scope.showRanking = function() {
                 var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking });
                 return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : 'Training Day';
               };
 
+              $scope.showTerrain = function() {
+                var selected = $filter('filter')($scope.eventTerrains, { value: $scope.trainingDay.eventTerrain });
+                return ($scope.trainingDay.eventTerrain && selected.length) ? selected[0].text : 'Not Specified';
+              };
+
               $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
-                // If off day or a not a scheduled event, zero out estimate.
-                if (String(ranking) === '9' || String(ranking) === '0') {
+                // If not a goal event, zero out estimate.
+                if (String(ranking) !== '1') {
                   $scope.trainingDay.estimatedLoad = 0;
+                  $scope.trainingDay.eventTerrain = 0;
                 }
               });
 
@@ -872,6 +886,9 @@ angular.module('trainingDays')
               },
               showRanking: function() {
                 return $scope.showRanking;
+              },
+              showTerrain: function() {
+                return $scope.showTerrain;
               }
             }
           });
@@ -1009,8 +1026,9 @@ angular.module('trainingDays')
         };
 
         $scope.$watch('scheduledEventRanking', function(ranking) {
-          if (ranking === '9') {
+          if (ranking !== '1') {
             $scope.estimatedLoad = 0;
+            $scope.eventTerrain = 0;
           }
         });
 
@@ -1203,6 +1221,14 @@ angular.module('trainingDays')
           { value: 0, text: 'Training Day' }
         ];
 
+        $scope.eventTerrains = [
+          { value: 1, text: 'Flat' },
+          { value: 2, text: 'Slightly Hilly' },
+          { value: 3, text: 'Hilly' },
+          { value: 4, text: 'Very Hilly' },
+          { value: 5, text: 'Mountainous' }
+        ];
+
         function prepForTDView(trainingDay) {
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
@@ -1224,16 +1250,20 @@ angular.module('trainingDays')
 
         $scope.showRanking = function() {
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            // dayText = $scope.plannedActivity ? $scope.plannedActivity.activityType.charAt(0).toUpperCase() + $scope.plannedActivity.activityType.slice(1) + ' Day' : 'Training Day';
-
             dayText = $scope.plannedActivity ? mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
+        $scope.showTerrain = function() {
+          var selected = $filter('filter')($scope.eventTerrains, { value: $scope.trainingDay.eventTerrain });
+          return ($scope.trainingDay.eventTerrain && selected.length) ? selected[0].text : 'Not Specified';
+        };
+
         $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
-          // If off day or a not a scheduled event, zero out estimate.
-          if (ranking === 9) {
+          // If not a goal event, zero out estimates.
+          if (ranking !== 1) {
             $scope.trainingDay.estimatedLoad = 0;
+            $scope.trainingDay.eventTerrain = 0;
           }
         });
 
@@ -1308,6 +1338,25 @@ angular.module('trainingDays')
           }
 
           return 'Estimated load must be a positive whole number less than 1000.';
+        };
+
+        $scope.updateEventTerrain = function(terrain) {
+          var n = ~~Number(terrain);
+
+          if (n === $scope.trainingDay.eventTerrain) {
+            //no change.
+            return;
+          }
+
+          if (String(n) === terrain && n >= 0 && n <= 5) {
+            return $scope.update(true, $scope.trainingDay, function(trainingDay) {
+              if (trainingDay) {
+                resetViewObjects(trainingDay);
+              }
+            });
+          }
+
+          return 'Terrain must be a whole number between 0 and 5.';
         };
 
         $scope.saveCompletedActivity = function(data, created) {

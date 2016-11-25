@@ -5,7 +5,7 @@
   <form name="trainingDayForm" class="form-horizontal" ng-submit="createEvent(trainingDayForm.$valid)" novalidate>
     <fieldset>
       <div class="form-group" show-errors>
-        <div class="col-md-12">
+        <div class="col-md-4">
           <label for="name">Event Name</label>
           <input name="name" type="text" ng-model="name" id="name" class="form-control" placeholder="Name">
         </div>
@@ -70,13 +70,40 @@
 
       <div class="form-group" show-errors>
         <div class="col-md-4">
-          <label for="estimatedLoad"><a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Estimated Load" data-content="If you have a good idea of the Training Load for the event, enter it here. It will be used to monitor your progress in preparing for the event. Leave it blank if you have no idea - you can always provide it later.">Estimated Event Load</a></label>
-          <input name="estimatedLoad" type="number" min="0" max="999" step="10" ng-model="estimatedLoad" ng-disabled="scheduledEventRanking === '9'" id="estimatedLoad" class="form-control" placeholder="Estimated Load">
+          <label for="estimatedLoad"><a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Estimated Load" data-content="If you have a good idea of the Training Load for your goal event, enter it here. It will be used to monitor your progress in preparing for the event. Leave it blank if you have no idea - you can always provide it later.">Estimated Goal Event Load</a></label>
+          <input name="estimatedLoad" type="number" min="0" max="999" step="10" ng-model="estimatedLoad" ng-disabled="scheduledEventRanking !== '1'" id="estimatedLoad" class="form-control" placeholder="Estimated Load">
+        </div>
+      </div>
+
+      <div class="form-group" show-errors>
+        <div class="col-md-4">
+          <label for="eventTerrain"><a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Event Terrain" data-content="Characterize the nature of the route from flat to mountainous. Your input will be used to tailor your advice to help you prepare for the demands of the event. You can update this setting at any time.">Goal Event Terrain</a></label>
+          <!-- <input name="eventTerrain" type="number" min="0" max="5" step="1" ng-model="eventTerrain" ng-disabled="scheduledEventRanking === '9'" id="eventTerrain" class="form-control" placeholder="Event Terrain"> -->
+          <div layout>
+            <div flex="5"></div>
+            <md-slider class="md-warn md-hue-2" flex ng-model="eventTerrain" step="1" min="1" max="5" ng-disabled="scheduledEventRanking !== '1'"></md-slider>
+            <div flex="5"></div>
+          </div>
+          <div layout>
+            <div flex="5"></div>
+            <div flex="10" layout layout-align="left center">
+              <span class="md-body-1"><strong>Flat</strong></span>
+            </div>
+            <div flex></div>
+            <div flex="10" layout layout-align="center center">
+              <span class="md-body-1"><strong>Hills</strong></span>
+            </div>
+            <div flex></div>
+            <div flex="10" layout="" layout-align="right center">
+              <span class="md-body-1"><strong>Mountains</strong></span>
+            </div>
+            <div flex="5"></div>
+          </div>
         </div>
       </div>
 
       <div class="form-group">
-        <div class="col-md-12">
+        <div class="col-md-6">
           <label for="notes">Notes to Myself</label>
           <textarea name="notes" ng-model="notes" id="notes" class="form-control" cols="30" rows="5" placeholder="Notes"></textarea>
         </div>
