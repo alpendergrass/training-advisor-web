@@ -340,35 +340,38 @@ describe('db-util Unit Tests:', function() {
 
   describe('Method getFuturePriorityDays', function() {
     it('should return error if no user', function(done) {
-      return dbUtil.getFuturePriorityDays(null, null, null, null, function(err, priorityDays) {
-        should.exist(err);
-        (err.message).should.containEql('valid user is required');
-        done();
-      });
+      dbUtil.getFuturePriorityDays(null, null, null, null)
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('valid user is required');
+          done();
+        });
     });
 
     it('should return error if missing trainingDate', function(done) {
-      return dbUtil.getFuturePriorityDays(user, null, null, null, function(err, priorityDays) {
-        should.exist(err);
-        (err.message).should.containEql('numericSearchDate is required');
-        done();
-      });
+      dbUtil.getFuturePriorityDays(user, null, null, null)
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('numericSearchDate is required');
+          done();
+        });
     });
 
     it('should return error if invalid trainingDate', function(done) {
-      return dbUtil.getFuturePriorityDays(user, 'asdf', null, null, function(err, priorityDays) {
-        should.exist(err);
-        (err.message).should.containEql('is not a valid date');
-        done();
-      });
+      dbUtil.getFuturePriorityDays(user, 'asdf', null, null)
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('is not a valid date');
+          done();
+        });
     });
 
     it('should return empty array if no priority days exist', function(done) {
-      return dbUtil.getFuturePriorityDays(user, numericDate, 1, 10, function(err, priorityDays) {
-        should.not.exist(err);
-        priorityDays.should.have.length(0);
-        done();
-      });
+      dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
+        .then(function(priorityDays) {
+          priorityDays.should.have.length(0);
+          done();
+        });
     });
 
     it('should return empty array if no days of requested priority exist', function(done) {
@@ -377,11 +380,11 @@ describe('db-util Unit Tests:', function() {
           console.log('createGoalEvent: ' + err);
         }
 
-        return dbUtil.getFuturePriorityDays(user, numericDate, 2, 11, function(err, priorityDays) {
-          should.not.exist(err);
-          priorityDays.should.have.length(0);
-          done();
-        });
+        dbUtil.getFuturePriorityDays(user, numericDate, 2, 11)
+          .then(function(priorityDays) {
+            priorityDays.should.have.length(0);
+            done();
+          });
       });
     });
 
@@ -391,12 +394,12 @@ describe('db-util Unit Tests:', function() {
           console.log('createGoalEvent: ' + err);
         }
 
-        return dbUtil.getFuturePriorityDays(user, numericDate, 1, 10, function(err, priorityDays) {
-          should.not.exist(err);
-          priorityDays.should.have.length(1);
-          (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
-          done();
-        });
+        dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
+          .then(function(priorityDays) {
+            priorityDays.should.have.length(1);
+            (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
+            done();
+          });
       });
     });
 
@@ -411,14 +414,14 @@ describe('db-util Unit Tests:', function() {
             console.log('makeSimDay: ' + err);
           }
 
-          return dbUtil.getFuturePriorityDays(user, numericDate, 1, 10, function(err, priorityDays) {
-            should.not.exist(err);
-            priorityDays.should.have.length(1);
-            (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
-            (priorityDays[0]._id).should.match(simDay._id);
-            (priorityDays[0].isSimDay).should.match(true);
-            done();
-          });
+          dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
+            .then(function(priorityDays) {
+              priorityDays.should.have.length(1);
+              (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
+              (priorityDays[0]._id).should.match(simDay._id);
+              (priorityDays[0].isSimDay).should.match(true);
+              done();
+            });
         });
       });
     });
@@ -434,13 +437,13 @@ describe('db-util Unit Tests:', function() {
             console.log('createGoalEvent: ' + err);
           }
 
-          return dbUtil.getFuturePriorityDays(user, numericDate, 1, 20, function(err, priorityDays) {
-            should.not.exist(err);
-            priorityDays.should.have.length(2);
-            (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
-            (priorityDays[1].date.toString()).should.be.equal(newGoalDay2.date.toString());
-            done();
-          });
+          dbUtil.getFuturePriorityDays(user, numericDate, 1, 20)
+            .then(function(priorityDays) {
+              priorityDays.should.have.length(2);
+              (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
+              (priorityDays[1].date.toString()).should.be.equal(newGoalDay2.date.toString());
+              done();
+            });
         });
       });
     });

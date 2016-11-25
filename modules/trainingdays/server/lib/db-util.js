@@ -187,40 +187,42 @@ module.exports.getStartDay = function(user, numericSearchDate, callback) {
     });
 };
 
-module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut, callback) {
+module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut) {
   //select priority n trainingDays after searchDate. Include searchDate
-  if (!user) {
-    err = new TypeError('getFuturePriorityDays valid user is required');
-    return callback(err, null);
-  }
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('getFuturePriorityDays valid user is required');
+      return reject(err);
+    }
 
-  if (!numericSearchDate) {
-    err = new TypeError('numericSearchDate is required to getFuturePriorityDays');
-    return callback(err, null);
-  }
+    if (!numericSearchDate) {
+      err = new TypeError('numericSearchDate is required to getFuturePriorityDays');
+      return reject(err);
+    }
 
-  if (!moment(numericSearchDate.toString()).isValid()) {
-    err = new TypeError('getFuturePriorityDays numericSearchDate ' + numericSearchDate + ' is not a valid date');
-    return callback(err, null);
-  }
+    if (!moment(numericSearchDate.toString()).isValid()) {
+      err = new TypeError('getFuturePriorityDays numericSearchDate ' + numericSearchDate + ' is not a valid date');
+      return reject(err);
+    }
 
-  var numericMaxDate = util.toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
+    var numericMaxDate = util.toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
 
-  var query = {
-    user: user,
-    scheduledEventRanking: priority,
-    dateNumeric: { $gte: numericSearchDate, $lte: numericMaxDate },
-    cloneOfId: null
-  };
+    var query = {
+      user: user,
+      scheduledEventRanking: priority,
+      dateNumeric: { $gte: numericSearchDate, $lte: numericMaxDate },
+      cloneOfId: null
+    };
 
-  TrainingDay.find(query).sort({ dateNumeric: 1 })
-    .exec(function(err, priorityDays) {
-      if (err) {
-        return callback(err, null);
-      }
+    TrainingDay.find(query).sort({ dateNumeric: 1 })
+      .exec(function(err, priorityDays) {
+        if (err) {
+          return reject(err);
+        }
 
-      return callback(null, priorityDays);
-    });
+        return resolve(priorityDays);
+      });
+  });
 };
 
 module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority, numberOfDaysBack, callback) {

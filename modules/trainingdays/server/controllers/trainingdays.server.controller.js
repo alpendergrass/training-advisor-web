@@ -397,30 +397,30 @@ exports.getSeason = function(req, res) {
     }
 
     //Get future goal days to determine end of season.
-    dbUtil.getFuturePriorityDays(user, numericToday, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
-      if (err) {
+    dbUtil.getFuturePriorityDays(user, numericToday, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd)
+      .then(function(goalDays) {
+        if (goalDays.length > 0) {
+          //Use last goal to end season.
+          numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
+        } else {
+          numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
+        }
+
+        dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {
+          if (err) {
+            return res.status(400).send({
+              message: errorHandler.getErrorMessage(err)
+            });
+          } else {
+            res.json(trainingDays);
+          }
+        });
+      })
+      .catch(function(err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      }
-
-      if (goalDays.length > 0) {
-        //Use last goal to end season.
-        numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
-      } else {
-        numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
-      }
-
-      dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } else {
-          res.json(trainingDays);
-        }
       });
-    });
   });
 };
 
