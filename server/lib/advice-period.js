@@ -48,43 +48,43 @@ function determinePeriod(user, trainingDay, callback) {
         });
       },
       futureGoalDays: function(callback) {
-        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
-          if (err) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals)
+          .then(function(priorityDays) {
+            if (priorityDays.length > 0) {
+              return callback(null, priorityDays);
+            }
+
+            return callback(null, null);
+          })
+          .catch(function(err) {
             return callback(err, null);
-          }
-
-          if (priorityDays.length > 0) {
-            return callback(null, priorityDays);
-          }
-
-          return callback(null, null);
-        });
+          });
       },
       numericNextPriority2Date: function(callback) {
-        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 2, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
-          if (err) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 2, adviceConstants.maxDaysToLookAheadForFutureGoals)
+          .then(function(priorityDays) {
+            if (priorityDays.length > 0) {
+              return callback(null, priorityDays[0].dateNumeric);
+            }
+
+            return callback(null, null);
+          })
+          .catch(function(err) {
             return callback(err, null);
-          }
-
-          if (priorityDays.length > 0) {
-            return callback(null, priorityDays[0].dateNumeric);
-          }
-
-          return callback(null, null);
-        });
+          });
       },
       numericNextPriority3Date: function(callback) {
-        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 3, adviceConstants.maxDaysToLookAheadForFutureGoals, function(err, priorityDays) {
-          if (err) {
+        dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 3, adviceConstants.maxDaysToLookAheadForFutureGoals)
+          .then(function(priorityDays) {
+            if (priorityDays.length > 0) {
+              return callback(null, priorityDays[0].dateNumeric);
+            }
+
+            return callback(null, null);
+          })
+          .catch(function(err) {
             return callback(err, null);
-          }
-
-          if (priorityDays.length > 0) {
-            return callback(null, priorityDays[0].dateNumeric);
-          }
-
-          return callback(null, null);
-        });
+          });
       },
       numericMostRecentGoalDate: function(callback) {
         dbUtil.getMostRecentGoalDay(user, trainingDay.dateNumeric, function(err, goalDay) {

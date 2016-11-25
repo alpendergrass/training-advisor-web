@@ -34,12 +34,15 @@ function generateAdvice(user, trainingDay, source, callback) {
   var twoDaysPriorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(2, 'days'));
   var metricsType = util.setMetricsType(source);
 
-  // dbUtil.getExistingTrainingDayDocument(user, subsequentDate)
-  //   .then(function(subsequentTrainingDay) {
-  //     facts.subsequentTrainingDay = subsequentTrainingDay;
-  //     return dbUtil.getExistingTrainingDayDocument(user, oneDayPriorDate);
-  //   })
-  dbUtil.getExistingTrainingDayDocument(user, oneDayPriorDate)
+  dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals)
+    .then(function(goalDays) {
+      if (goalDays.length < 1) {
+        facts.nextGoal = null;
+      } else {
+        facts.nextGoal = goalDays[0];
+      }
+      return dbUtil.getExistingTrainingDayDocument(user, oneDayPriorDate);
+    })
     .then(function(oneDayPrior) {
       if (oneDayPrior) {
         facts.oneDayPrior = oneDayPrior;
@@ -204,134 +207,135 @@ module.exports.generatePlan = function(params, callback) {
   // Make the following a async.series, use promises or something to clean it up. Yuck.
 
   // Get future goal days.
-  dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd, function(err, goalDays) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    if (goalDays.length < 1) {
-      err = new TypeError('A goal is required in order to generate a season view.');
-      return callback(err, null);
-    }
-
-    //Use last goal to generate plan.
-    goalDay = goalDays[goalDays.length - 1];
-
-    let metricsParams = {
-      user: params.user,
-      numericDate: params.numericDate,
-    };
-
-    metricsParams.metricsType = 'actual';
-
-    // We recompute actual metrics before we copy as they could be out of date.
-    adviceMetrics.updateMetrics(metricsParams, function(err, todayTrainingDay) {
-      if (err) {
+  dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd)
+    .then(function(goalDays) {
+      if (goalDays.length < 1) {
+        err = new TypeError('A goal is required in order to generate a season view.');
         return callback(err, null);
       }
 
-      dbUtil.copyActualMetricsToPlanned(user, params.numericDate)
-        .then(function() {
-          //We call updateMetrics here to ensure we have good starting metrics.
+      //Use last goal to generate plan.
+      goalDay = goalDays[goalDays.length - 1];
 
-          //As a precaution we remove all planning data.
-          //If we errored out last time there could be some left overs.
-          dbUtil.removePlanGenerationActivities(user)
-            .then(function() {
-              //get all training days from tomorrow thru last goal.
-              let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
+      let metricsParams = {
+        user: params.user,
+        numericDate: params.numericDate,
+      };
 
-              dbUtil.getTrainingDays(user, tomorrowNumeric, goalDay.dateNumeric, function(err, trainingDays) {
-                if (err) {
-                  return callback(err, null);
-                }
+      metricsParams.metricsType = 'actual';
 
-                if (trainingDays.length < 1) {
-                  err = new TypeError('No training days returned by getTrainingDays.');
-                  return callback(err, null);
-                }
+      // We recompute actual metrics before we copy as they could be out of date.
+      adviceMetrics.updateMetrics(metricsParams, function(err, todayTrainingDay) {
+        if (err) {
+          return callback(err, null);
+        }
 
-                let adviceParams = {};
-                adviceParams.user = user;
-                adviceParams.source = 'plangeneration';
-                adviceParams.alternateActivity = null;
-                adviceParams.planGenUnderway = true;
+        dbUtil.copyActualMetricsToPlanned(user, params.numericDate)
+          .then(function() {
+            //We call updateMetrics here to ensure we have good starting metrics.
 
-                let genActivityParams = {};
-                genActivityParams.user = user;
+            //As a precaution we remove all planning data.
+            //If we errored out last time there could be some left overs.
+            dbUtil.removePlanGenerationActivities(user)
+              .then(function() {
+                //get all training days from tomorrow thru last goal.
+                let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
-                async.eachSeries(trainingDays, function(trainingDay, callback) {
-                  adviceParams.numericDate = trainingDay.dateNumeric;
+                dbUtil.getTrainingDays(user, tomorrowNumeric, goalDay.dateNumeric, function(err, trainingDays) {
+                  if (err) {
+                    return callback(err, null);
+                  }
 
-                  module.exports.advise(adviceParams, function(err, trainingDay) {
-                    if (err) {
-                      return callback(err);
-                    }
+                  if (trainingDays.length < 1) {
+                    err = new TypeError('No training days returned by getTrainingDays.');
+                    return callback(err, null);
+                  }
 
-                    genActivityParams.trainingDay = trainingDay;
+                  let adviceParams = {};
+                  adviceParams.user = user;
+                  adviceParams.source = 'plangeneration';
+                  adviceParams.alternateActivity = null;
+                  adviceParams.planGenUnderway = true;
 
-                    generateActivityFromAdvice(genActivityParams, function(err, trainingDay) {
+                  let genActivityParams = {};
+                  genActivityParams.user = user;
+
+                  async.eachSeries(trainingDays, function(trainingDay, callback) {
+                    adviceParams.numericDate = trainingDay.dateNumeric;
+
+                    module.exports.advise(adviceParams, function(err, trainingDay) {
                       if (err) {
                         return callback(err);
                       }
 
-                      return callback();
+                      genActivityParams.trainingDay = trainingDay;
+
+                      generateActivityFromAdvice(genActivityParams, function(err, trainingDay) {
+                        if (err) {
+                          return callback(err);
+                        }
+
+                        return callback();
+                      });
                     });
-                  });
-                },
-                  function(err) {
-                    if (err) {
-                      return callback(err, null);
-                    }
-
-                    //We need to update metrics for last day as it will not be up to date otherwise.
-                    // But if we call it for today we will clear the plannedActivity we just assigned to this day.
-                    // So we call it for tomorrow.
-                    let nextDateNumeric = util.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
-                    metricsParams.numericDate = nextDateNumeric;
-                    metricsParams.metricsType = 'planned';
-
-                    adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
+                  },
+                    function(err) {
                       if (err) {
                         return callback(err, null);
                       }
 
-                      dbUtil.removePlanGenerationCompletedActivities(user)
-                        .then(function() {
-                          user.thresholdPowerTestDate = savedThresholdPowerTestDate;
-                          user.planGenNeeded = false;
-                          return user.save();
-                        })
-                        .then(function() {
-                          // We need to refresh advice for today and tomorrow because
-                          // we called updateMetrics when we started which would clear
-                          // current advice for these days.
-                          return module.exports.refreshAdvice(user, todayTrainingDay);
-                        })
-                        .then(function() {
-                          statusMessage.text = 'We have updated your season.';
-                          statusMessage.type = 'success';
-                          return callback(null, statusMessage);
-                        })
-                        .catch(function(err) {
+                      //We need to update metrics for last day as it will not be up to date otherwise.
+                      // But if we call it for today we will clear the plannedActivity we just assigned to this day.
+                      // So we call it for tomorrow.
+                      let nextDateNumeric = util.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
+                      metricsParams.numericDate = nextDateNumeric;
+                      metricsParams.metricsType = 'planned';
+
+                      adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
+                        if (err) {
                           return callback(err, null);
-                        });
-                    });
-                  } // end eachSeries callback
-                );
+                        }
+
+                        dbUtil.removePlanGenerationCompletedActivities(user)
+                          .then(function() {
+                            user.thresholdPowerTestDate = savedThresholdPowerTestDate;
+                            user.planGenNeeded = false;
+                            return user.save();
+                          })
+                          .then(function() {
+                            // We need to refresh advice for today and tomorrow because
+                            // we called updateMetrics when we started which would clear
+                            // current advice for these days.
+                            return module.exports.refreshAdvice(user, todayTrainingDay);
+                          })
+                          .then(function() {
+                            statusMessage.text = 'We have updated your season.';
+                            statusMessage.type = 'success';
+                            return callback(null, statusMessage);
+                          })
+                          .catch(function(err) {
+                            return callback(err, null);
+                          });
+                      });
+                    } // end eachSeries callback
+                  );
+                });
+              })
+              .catch(function(err) {
+                //from removePlanGenerationActivities() before eachSeries
+                return callback(err, null);
               });
-            })
-            .catch(function(err) {
-              //from removePlanGenerationActivities() before eachSeries
-              return callback(err, null);
-            });
-        })
-        .catch(function(err) {
-          //from copyActualMetricsToPlanned()
-          return callback(err, null);
-        });
+          })
+          .catch(function(err) {
+            //from copyActualMetricsToPlanned()
+            return callback(err, null);
+          });
+      });
+    })
+    .catch(function(err) {
+      //from getFuturePriorityDays()
+      return callback(err, null);
     });
-  });
 };
 
 module.exports.refreshAdvice = function(user, trainingDay) {
