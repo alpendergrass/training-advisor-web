@@ -75,7 +75,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t3LongHillsAdviceRule.';
       this.plannedActivity.advice += ` Today you should do a long climbing ride at a moderate pace. Do longer climbs if they are available.
- Climb steady at a high cadence and keep power in Zone 4 or below when climbing.
+ Maximum power may rise into Zone 5 but do not stay there for long, you do not want to overdo it.
  Keep an eye on your Training Load to make sure you do not overdo it.`;
       R.stop();
     }
@@ -93,7 +93,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t3MediumHillsAdviceRule.';
       this.plannedActivity.advice += ` Today you should do a long ride with some shorter climbs at a moderate pace.
- Keep cadence high and power in Zone 4 or below when climbing.
+ Keep cadence high and power in Zone 4/low zone 5 when climbing.
  Monitor your Training Load to make sure you stay within your daily Load targets.`;
       R.stop();
     }

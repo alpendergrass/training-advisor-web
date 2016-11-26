@@ -63,18 +63,55 @@ var rules = [
     }
   },
   {
-    'name': 't4EnduranceRule',
+    'name': 't4GoalHillsAdviceRule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't4' &&
-        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+        this.plannedActivity.activityType === 'hard' &&
+        (this.nextGoal && this.nextGoal.eventTerrain > 2) &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.advice += ` You should do a long endurance ride today as you appear to be sufficiently rested.
- Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target load you will be fatigued after this ride.
- During your ride you should periodically increase your cadence beyond your normal confort range. Learing to spin a higher cadence will make
- you a more efficient cyclist.`;
+      this.plannedActivity.rationale += ' t4GoalHillsAdviceRule.';
+      this.plannedActivity.advice += ` Today you should seek out hills similar to your goal event.
+ Climb strongly but do not overcook it. You want to be able to put in a hard but sustainable effort on every climb.
+ Use your Training Load targets to determine ride duration.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't4IntensityAdviceRule',
+    'priority': -3,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't4' &&
+        this.plannedActivity.activityType === 'hard'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t4IntensityAdviceRule.';
+      this.plannedActivity.advice += ` Today you should work on fast intensity.
+ You focus should be on maintaing a Zone 5 effort for several minutes at a time.
+ A fast group ride can be an excellent way to do this workout. If you are feeling strong,
+ go to the front and take a hard pull several times during the course of this ride.
+ Just be careful that you keep enough in reserve to stay with the group after your pull.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't4Zone4TempoAdviceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't4' &&
+        this.plannedActivity.activityType === 'moderate'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t4Zone4TempoAdviceRule.';
+      this.plannedActivity.advice += ` Your workout today should focus on riding a hard pace for an extended duration.
+ Look for opportunities to ride 5 to 10 minutes in Zone 4 on flat or rolling terrain.
+ These efforts require close attention to maintain a hard but sustainable pace.`;
       R.stop();
     }
   }
