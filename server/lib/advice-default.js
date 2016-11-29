@@ -60,8 +60,6 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
       this.plannedActivity.rationale += ' hardIsDefaultRule.';
-      this.plannedActivity.advice += ` hard
- dude.`;
       R.next();
     }
   },

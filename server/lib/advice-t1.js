@@ -38,7 +38,7 @@ var rules = [
     'priority': 7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t1', 't2'], this.trainingDay.period) &&
+        _.includes(['t1'], this.trainingDay.period) &&
         this.metricsOneDayPrior && (this.metricsOneDayPrior.loadRating === 'rest')
       );
     },

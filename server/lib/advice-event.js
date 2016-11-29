@@ -44,6 +44,7 @@ var rules = [
       this.plannedActivity.activityType = 'event';
       this.plannedActivity.rationale += ' mediumPriorityEventRule.';
       this.plannedActivity.advice += ` You have a medium priority event scheduled for today.
+Your objective today is to simulate your goal event.
 If you feel good go for the podium but if you do not have the legs, sit in. You do not want to risk your season today.`;
       R.stop();
     }
