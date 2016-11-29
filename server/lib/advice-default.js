@@ -64,6 +64,19 @@ var rules = [
  dude.`;
       R.next();
     }
+  },
+  {
+    'name': 'enduranceIsDefaultAdviceRule',
+    'priority': -9,
+    'condition': function(R) {
+      R.when(this && this.plannedActivity.activityType);
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' enduranceIsDefaultAdviceRule.';
+      this.plannedActivity.advice += ` You should do an endurance (power zone 2) ride today.
+ Focus on keeping your pace steady and and your cadence high.`;
+      R.stop();
+    }
   }
 ];
 
