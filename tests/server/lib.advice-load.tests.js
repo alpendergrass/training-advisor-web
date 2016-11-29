@@ -19,14 +19,14 @@ var user,
   plannedActivity,
   metrics,
   source = 'advised',
-  lowLoadFactorEasy = 0.30,
-  highLoadFactorEasy = 0.60,
-  lowLoadFactorModerate = 1.0,
-  highLoadFactorModerate = 1.2,
-  lowLoadFactorHard = 1.9,
-  highLoadFactorHard = 2.1,
-  lowLoadFactorGoal = 2.5,
-  highLoadFactorGoal = 2.5;
+  lowLoadFactorEasy = 0.20,
+  highLoadFactorEasy = 0.40,
+  lowLoadFactorModerate = 0.9,
+  highLoadFactorModerate = 1.1,
+  lowLoadFactorHard = 1.4,
+  highLoadFactorHard = 1.9,
+  lowLoadFactorGoal = 2.1,
+  highLoadFactorGoal = 2.6;
 
 describe('advice-load Unit Tests:', function() {
 
@@ -81,7 +81,7 @@ describe('advice-load Unit Tests:', function() {
     //   });
     // });
 
-    it('should return computed target loads if this is an event day but no estimate is provided', function(done) {
+    it('should return computed target loads if this is an event day', function(done) {
       trainingDay.scheduledEventRanking = 1;
       plannedActivity.activityType = 'event';
 

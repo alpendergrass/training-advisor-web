@@ -40,13 +40,13 @@ describe('advice-choice Unit Tests:', function () {
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
         (plannedActivity.activityType).should.match(/choice/);
-        (plannedActivity.rationale).should.containEql('Is transition period, user can slack off');
+        (plannedActivity.rationale).should.containEql('t0ChoiceRule');
         done();
       });
     });
 
     it('should not return choice recommendation if not in transition period', function (done) {
-      trainingDay.period = 't3';
+      trainingDay.period = 't1';
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
