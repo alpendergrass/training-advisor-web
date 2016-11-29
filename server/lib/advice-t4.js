@@ -76,7 +76,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t4GoalHillsAdviceRule.';
       this.plannedActivity.advice += ` Today you should seek out hills similar to your goal event.
- Climb strongly but do not overcook it. You want to be able to put in a hard but sustainable effort on every climb.
+ Climb strongly but do not over do it. You want to be able to put in a hard but sustainable effort on every climb.
  Use your Training Load targets to determine ride duration.`;
       R.stop();
     }
