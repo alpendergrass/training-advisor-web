@@ -20,8 +20,7 @@ var rules = [
     'name': 't6ModerateAfterTwoHardRule',
     'priority': 7,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t6'], this.trainingDay.period) &&
+      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 't6' &&
         this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'hard' &&
         this.metricsTwoDaysPrior && this.metricsTwoDaysPrior.loadRating === 'hard'
       );
@@ -37,7 +36,7 @@ var rules = [
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't6' &&
-        _.includes(['hard'], this.plannedActivity.activityType)
+        _.includes(['hard'], this.plannedActivity.activityType) &&
         (this.nextGoal && this.nextGoal.eventTerrain > 2) &&
         (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.smallClimbingDay) &&
         (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.smallClimbingDay)

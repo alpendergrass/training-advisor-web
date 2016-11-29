@@ -13,7 +13,6 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
       this.plannedActivity.rationale += ' raceHardRule.';
-      this.plannedActivity.advice += ' You are peaking for your goal event. You should do a shorter but intense ride today.';
       R.next();
     }
   },
@@ -33,33 +32,45 @@ var rules = [
       R.next();
     }
   },
- //  {
- //    'name': 'sufficientlyFatiguedInRaceToNeedRestRule',
- //    'condition': function(R) {
- //      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 'race' &&
- //        this.metrics.form <= this.adviceConstants.restNeededForRacingThreshold
- //      );
- //    },
- //    'consequence': function(R) {
- //      this.plannedActivity.activityType = 'rest';
- //      this.plannedActivity.rationale += ' Sufficiently fatigued to recommend rest.';
- //      this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.';
- //      R.stop();
- //    }
- //  },
- //  {
- //    'name': 'easyAfterHardInRaceRule',
- //    'condition': function(R) {
- //      R.when(this && !this.plannedActivity.activityType && this.trainingDay.period === 'race' && this.wentHardYesterday);
- //    },
- //    'consequence': function(R) {
- //      this.plannedActivity.activityType = 'easy';
- //      this.plannedActivity.rationale += ' Yesterday was hard, in race or race, so recommending easy.';
- //      this.plannedActivity.advice += ` Yesterday was a hard day and you are peaking so go easy today. This should be a zone 1 - 2 ride.
- // As always, take the day off if you feel you need the rest. Sufficient recovery is critical at this point in your season.`;
- //      R.stop();
- //    }
- //  },
+  {
+    'name': 'raceSteepHillAdviceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 'race' &&
+        _.includes(['hard'], this.plannedActivity.activityType) &&
+        (this.nextGoal && this.nextGoal.eventTerrain > 2) &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.smallClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.smallClimbingDay)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' raceSteepHillAdviceRule.';
+      this.plannedActivity.advice += ` Today you should ride a climb similar in pitch to the steepest
+ climb in your goal event. Do not climb for more than a few minutes and limit the number of repeats to just a few.
+ The goal today is to hone the climbing skills you've been training all season.
+ Visualize the race climb. See yourself riding strongly and confidently!`;
+      R.stop();
+    }
+  },
+  {
+    'name': 'raceThresholdAdviceRule',
+    'priority': -3,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 'race' &&
+        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' raceThresholdAdviceRule.';
+      this.plannedActivity.advice += ` Today you should focus on riding at threshold - Zone 4 into lower Zone 5.
+ Do a good warm-up, then ride for a moderate period at this pace, using your Training Load targets
+ to keep the duration within bounds.
+ Intensity will be high but do not jeopardize your goal performance by doing too much work today.
+ Your goal it to put the finishing touch on your race fitness.
+ Visualize the crunch segments of your goal event. See yourself riding strongly, head up and confident!`;
+      R.stop();
+    }
+  }
 ];
 
 module.exports = {};
