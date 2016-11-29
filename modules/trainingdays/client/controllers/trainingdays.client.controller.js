@@ -79,9 +79,6 @@ angular.module('trainingDays')
           }, {
             activityType: 'hard',
             phrase: 'High Load Day'
-          // }, {
-          //   activityType: 'simulation',
-          //   phrase: 'Simulation Day'
           }, {
             activityType: 'test',
             phrase: 'Power Testing Day'
@@ -1492,7 +1489,7 @@ angular.module('trainingDays')
       };
 
       $scope.checkGiveFeedback = function(trainingDay) {
-        if (trainingDay.completedActivities.length > 0 && trainingDay.loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
+        if (trainingDay.completedActivities.length > 0 && getMetrics(trainingDay, 'actual').loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
           $scope.openGiveFeedback(trainingDay);
         }
       };
