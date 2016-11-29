@@ -38,7 +38,7 @@ var rules = [
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t5'], this.trainingDay.period) &&
-        this.metricsOneDayPrior && (this.metricsOneDayPrior.loadRating === 'rest')
+        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'rest'
       );
     },
     'consequence': function(R) {
@@ -63,18 +63,56 @@ var rules = [
     }
   },
   {
-    'name': 't5EnduranceRule',
+    'name': 't5RaceIntensityAdviceRule',
     'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't5' &&
+        this.plannedActivity.activityType === 'hard' &&
+        this.metricsOneDayPrior && _.includes(['rest', 'easy'], this.metricsOneDayPrior.loadRating)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t5RaceIntensityAdviceRule.';
+      this.plannedActivity.advice += ` Today you should work on race-pace intensity.
+ If riding in a group, look for opportunities to attack in situations similar to what you might expect in your goal event
+ If others are in an attacking mood, cover those attacks.
+ If riding alone use your imagination to visualize race scenarios and ride as is you are racing them.
+ The goal today is to simulate the intensity of your goal event.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't5GoalHillsAdviceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.trainingDay.period === 't5' &&
+        this.plannedActivity.activityType === 'moderate' &&
+        (this.nextGoal && this.nextGoal.eventTerrain > 2) &&
+        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
+        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += ' t5GoalHillsAdviceRule.';
+      this.plannedActivity.advice += ` Today is a climbing day. Ride hills similar to the ones in your goal event.
+ Focus on climbing strongly without going into the red.
+ Monitor total Training Load during your ride to ensure you stay within your target load range.`;
+      R.stop();
+    }
+  },
+  {
+    'name': 't5ThresholdAdviceRule',
+    'priority': -3,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't5' &&
         _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.advice += ` You should do a long endurance ride today as you appear to be sufficiently rested.
- Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target load you will be fatigued after this ride.
- During your ride you should periodically increase your cadence beyond your normal confort range. Learing to spin a higher cadence will make
- you a more efficient cyclist.`;
+      this.plannedActivity.rationale += ' t5ThresholdAdviceRule.';
+      this.plannedActivity.advice += ` Your goal today is to work on riding for an extended period at threshold power.
+ Threshold is Zone 4. After a good warmup, if the legs feel good, ride for at least 15 minutes at this pace,
+ longer if you feel capable.`;
       R.stop();
     }
   }

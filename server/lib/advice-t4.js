@@ -38,7 +38,7 @@ var rules = [
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t4'], this.trainingDay.period) &&
-        this.metricsOneDayPrior && (this.metricsOneDayPrior.loadRating === 'rest')
+        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'rest'
       );
     },
     'consequence': function(R) {
@@ -92,7 +92,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t4IntensityAdviceRule.';
       this.plannedActivity.advice += ` Today you should work on fast intensity.
- You focus should be on maintaing a Zone 5 effort for several minutes at a time.
+ Your focus should be on maintaing a Zone 5 effort for several minutes at a time.
  A fast group ride can be an excellent way to do this workout. If you are feeling strong,
  go to the front and take a hard pull several times during the course of this ride.
  Just be careful that you keep enough in reserve to stay with the group after your pull.`;
@@ -100,7 +100,7 @@ var rules = [
     }
   },
   {
-    'name': 't4Zone4TempoAdviceRule',
+    'name': 't4Zone4SteadyAdviceRule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't4' &&
@@ -108,7 +108,7 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t4Zone4TempoAdviceRule.';
+      this.plannedActivity.rationale += ' t4Zone4SteadyAdviceRule.';
       this.plannedActivity.advice += ` Your workout today should focus on riding a hard pace for an extended duration.
  Look for opportunities to ride 5 to 10 minutes in Zone 4 on flat or rolling terrain.
  These efforts require close attention to maintain a hard but sustainable pace.`;
