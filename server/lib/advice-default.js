@@ -15,7 +15,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';
       this.plannedActivity.rationale += ' preferredRestDayRule.';
-      this.plannedActivity.advice += ' Today is one of your planned rest days, so rest. Put your feet up.';
+      this.plannedActivity.advice += ' Today is one of your planned rest days, so rest. Put your feet up. Recovery is when your body becomes stronger.';
       R.stop();
     }
   },
@@ -30,7 +30,8 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';
       this.plannedActivity.rationale += ' defaultRestRule.';
-      this.plannedActivity.advice += ' You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin. The focus of this workout is recovery.';
+      this.plannedActivity.advice += ` You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.
+      The focus of this workout is recovery. Recovery is essential to supercompensation, the process by which you become stronger.`;
       R.stop();
     }
   },
@@ -72,7 +73,8 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.rationale += ' enduranceIsDefaultAdviceRule.';
       this.plannedActivity.advice += ` You should do an endurance (power zone 2) ride today.
- Focus on keeping your pace steady and and your cadence high.`;
+ Focus on keeping your pace steady and and your cadence high.
+ Your goal is to build a strong, efficient foundation for future higher intensity efforts.`;
       R.stop();
     }
   }

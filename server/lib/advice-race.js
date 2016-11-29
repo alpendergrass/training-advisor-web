@@ -65,8 +65,8 @@ var rules = [
       this.plannedActivity.advice += ` Today you should focus on riding at threshold - Zone 4 into lower Zone 5.
  Do a good warm-up, then ride for a moderate period at this pace, using your Training Load targets
  to keep the duration within bounds.
- Intensity will be high but do not jeopardize your goal performance by doing too much work today.
- Your goal it to put the finishing touch on your race fitness.
+ Intensity will be high but do not jeopardize your race performance by doing too much work today.
+ Today you want to put the finishing touch on your race fitness.
  Visualize the crunch segments of your goal event. See yourself riding strongly, head up and confident!`;
       R.stop();
     }

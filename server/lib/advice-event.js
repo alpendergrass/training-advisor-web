@@ -26,7 +26,7 @@ var rules = [
       this.result = true;
       this.plannedActivity.activityType = 'event';
       this.plannedActivity.rationale += ' goalEventRule.';
-      this.plannedActivity.advice += ' Today is a goal event. Give it your all. Good luck!';
+      this.plannedActivity.advice += ' Today is your goal event. Today is the day you have been training for. Give it your all! Good luck!';
       R.stop();
     }
   },
@@ -145,7 +145,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' twoDaysBeforeGoalEventRule.';
-      this.plannedActivity.advice += ' Easy day is recommended as your goal event is in two days. Just loosen the legs.';
+      this.plannedActivity.advice += ' Easy day is recommended as your goal event is in two days. Just loosen the legs, allow your body to recover and plan your performance.';
       R.stop();
     }
   },
@@ -160,8 +160,8 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
       this.plannedActivity.rationale += ' dayBeforeGoalEventRule.';
-      this.plannedActivity.advice += ` An easy-to-moderate day is recommended as your goal event is tomorrow.
- You may do a few 90% sprints to sharpen the legs but otherwise keep it relaxed.`;
+      this.plannedActivity.advice += ` An easy-to-moderate day is recommended as your goal event is tomorrow .
+ You may do a few 90% sprints to sharpen the legs but otherwise keep it relaxed. Visualize your best performance!`;
       R.stop();
     }
   },
@@ -177,7 +177,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' dayBeforePriority2EventRule.';
-      this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event tomorrow.';
+      this.plannedActivity.advice += ' An easy day is recommended as you have a medium priority event tomorrow. The goal today is to get ready to put in a good performance tomorrow';
       R.stop();
     }
   }
