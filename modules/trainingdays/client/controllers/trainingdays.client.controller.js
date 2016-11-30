@@ -271,7 +271,7 @@ angular.module('trainingDays')
           });
 
           if (td) {
-            $state.go('trainingDays.view', { trainingDayId: td._id });
+            $state.go('trainingDayView', { trainingDayId: td._id });
           } else {
             if (moment(date).isSameOrAfter($scope.hasStart.date)) {
               //trainingDay does not exist, we need to create it first.
@@ -280,7 +280,7 @@ angular.module('trainingDays')
               });
 
               trainingDay.$create(function(response) {
-                $location.path('trainingDays/' + response._id);
+                $location.path('trainingDay/' + response._id);
               }, function(errorResponse) {
                 if (errorResponse.data && errorResponse.data.message) {
                   $scope.error = errorResponse.data.message;
@@ -734,7 +734,7 @@ angular.module('trainingDays')
                 });
               }
             } else {
-              $state.go('trainingDays.view', { trainingDayId: td._id });
+              $state.go('trainingDayView', { trainingDayId: td._id });
             }
           }
         };
@@ -989,8 +989,12 @@ angular.module('trainingDays')
           });
 
           trainingDay.$create(function(response) {
-            toastr.success('You should update your profile now.', 'Start Created', { timeOut: 7000 });
-            $state.go('settings.profile');
+            if ($stateParams.forwardTo) {
+              $state.go($stateParams.forwardTo);
+            } else {
+              toastr.success('You should update your profile now.', 'Start Created', { timeOut: 7000 });
+              $state.go('settings.profile');
+            }
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -1181,7 +1185,7 @@ angular.module('trainingDays')
             trainingDate: getAdviceDate.toISOString(),
             alternateActivity: null
           }, function(trainingDay) {
-            $location.path('trainingDays/' + trainingDay._id);
+            $location.path('trainingDay/' + trainingDay._id);
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -1246,19 +1250,27 @@ angular.module('trainingDays')
         }
 
         $scope.showRanking = function() {
+          if (!$scope.trainingDay) {
+            return '';
+          }
+
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
             dayText = $scope.plannedActivity ? mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
         $scope.showTerrain = function() {
+          if (!$scope.trainingDay) {
+            return '';
+          }
+
           var selected = $filter('filter')($scope.eventTerrains, { value: $scope.trainingDay.eventTerrain });
           return ($scope.trainingDay.eventTerrain && selected.length) ? selected[0].text : 'Not Specified';
         };
 
         $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
           // If not a goal event, zero out estimates.
-          if (ranking !== 1) {
+          if ($scope.trainingDay && ranking !== 1) {
             $scope.trainingDay.estimatedLoad = 0;
             $scope.trainingDay.eventTerrain = 0;
           }
@@ -1270,7 +1282,7 @@ angular.module('trainingDays')
           TrainingDays.getDay({
             trainingDate: date.toISOString()
           }, function(trainingDay) {
-            $state.go('trainingDays.view', { trainingDayId: trainingDay._id });
+            $state.go('trainingDayView', { trainingDayId: trainingDay._id });
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
@@ -1424,7 +1436,12 @@ angular.module('trainingDays')
             resetViewObjects(trainingDay);
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
+              if (errorResponse.data.message === 'Starting date for current training period was not found.') {
+                // We want to come back here after we create start.
+                $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
+              } else {
+                $scope.error = errorResponse.data.message;
+              }
             } else {
               //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented advice retrieval.';
@@ -1432,18 +1449,24 @@ angular.module('trainingDays')
           });
         };
 
-        $scope.trainingDay = TrainingDays.get({
-          trainingDayId: $stateParams.trainingDayId
-        }, function(trainingDay) {
-          prepForTDView(trainingDay);
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-            $scope.error = 'Server error prevented training day retrieval.';
-          }
-        });
+        if (!$stateParams.trainingDayId) {
+          // The following will reload the page with today.
+          $scope.getDay($scope.today);
+        } else {
+          $scope.trainingDay = TrainingDays.get({
+            trainingDayId: $stateParams.trainingDayId
+          }, function(trainingDay) {
+            prepForTDView(trainingDay);
+          }, function(errorResponse) {
+            if (errorResponse.data && errorResponse.data.message) {
+              $scope.error = errorResponse.data.message;
+            } else {
+              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
+              $scope.error = 'Server error prevented training day retrieval.';
+            }
+          });
+        }
+
       };
 
       $scope.update = function(isValid, trainingDay, callback) {

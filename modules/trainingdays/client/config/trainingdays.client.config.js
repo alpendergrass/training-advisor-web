@@ -3,14 +3,14 @@
 angular.module('trainingDays').run(['Menus',
   function (Menus) {
     Menus.addMenuItem('topbar', {
-      title: 'My Season',
-      state: 'season',
+      title: 'My Training Day',
+      state: 'trainingDayView',
       roles: ['user']
     });
 
     Menus.addMenuItem('topbar', {
-      title: 'My Calendar',
-      state: 'calendar',
+      title: 'My Season',
+      state: 'season',
       roles: ['user']
     });
 
@@ -36,6 +36,12 @@ angular.module('trainingDays').run(['Menus',
     Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'True-Up Fitness & Fatigue',
       state: 'trainingDays.trueUp',
+      roles: ['user']
+    });
+
+    Menus.addSubMenuItem('topbar', 'trainingDays', {
+      title: 'My Calendar',
+      state: 'trainingDays.calendar',
       roles: ['user']
     });
 

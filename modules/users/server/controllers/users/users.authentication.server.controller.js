@@ -123,7 +123,7 @@ exports.oauthCallback = function(strategy) {
           return res.redirect('/admin/users');
         }
 
-        return res.redirect(redirectURL || sessionRedirectURL || '/season');
+        return res.redirect(redirectURL || sessionRedirectURL || '/trainingDay/');
       });
     })(req, res, next);
   };
