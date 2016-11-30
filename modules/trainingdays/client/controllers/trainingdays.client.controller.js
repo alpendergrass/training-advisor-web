@@ -953,7 +953,9 @@ angular.module('trainingDays')
       $scope.setUpStartingPoint = function() {
         var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
         var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
+
         $scope.startDate = $scope.today;
+
         $scope.startDateOptions = {
           formatYear: 'yy',
           startingDay: 1,

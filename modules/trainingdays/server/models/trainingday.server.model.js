@@ -306,13 +306,13 @@ var TrainingDaySchema = new Schema({
     load: {
       type: Number,
       min: 0,
-      max: 999,
+      max: 9999,
       default: 0
     },
     intensity: {
       type: Number,
       min: 0,
-      max: 9,
+      max: 99,
       default: 0
     },
     elevationGain: {

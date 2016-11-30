@@ -94,7 +94,7 @@ var UserSchema = new Schema({
     min: minThresholdPower,
     max: maxThresholdPower,
     required: 'Please provide threshold power',
-    default: 200
+    default: 0
   },
   thresholdPowerTestDate: {
     type: Date,

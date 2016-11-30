@@ -155,7 +155,7 @@
     </p>
     <p>
       <!-- only show download option if connected to Strava. -->
-      <a href="#" ng-click="downloadActivities('strava')" title="Download activities from Strava" ng-show="isConnectedSocialAccount('strava')">
+      <a href="#" ng-click="downloadActivities('strava')" title="Download activities from Strava" ng-show="authentication.user.thresholdPower && isConnectedSocialAccount('strava')">
         <!-- Strava Download -->
         <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/strava.png">
       </a>

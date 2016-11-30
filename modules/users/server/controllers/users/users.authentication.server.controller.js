@@ -177,7 +177,10 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
                 lastLogin: Date.now()
               });
 
-              // And save the user
+              if (providerUserProfile.providerData.ftp) {
+                user.thresholdPower = providerUserProfile.providerData.ftp;
+              }
+
               user.save(function(err) {
                 return done(err, user);
               });
