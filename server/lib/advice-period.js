@@ -43,6 +43,7 @@ function determinePeriod(user, trainingDay, callback) {
             return callback(null, startDay.dateNumeric);
           }
 
+          // Note that UI logic is tied to the following error message string.
           err = new TypeError('Starting date for current training period was not found.');
           return callback(err, null);
         });

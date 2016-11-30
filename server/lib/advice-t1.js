@@ -74,8 +74,8 @@ var rules = [
       this.plannedActivity.rationale += ' t1HardAdviceRule.';
       this.plannedActivity.advice += ` You should do a long endurance workout today.
  Endurance means most of your time should be spent in power zone 2.
- Cross-training is still an option at this point in the season, just focus on endurance.
  This is the time of the season to build your endurance engine.
+ Cross-training is still an option at this point in the season but keep the focus on endurance.
  If power data is not available for your selected activity you will need to estimate your training load.`;
       R.stop();
     }
