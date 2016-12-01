@@ -5,7 +5,7 @@ var passport = require('passport'),
   StravaStrategy = require('passport-strava-oauth2').Strategy,
   users = require('../../controllers/users.server.controller');
 
-module.exports = function (config) {
+module.exports = function(config) {
   // Use strava strategy
   passport.use(new StravaStrategy({
     clientID: config.strava.clientID,
@@ -13,7 +13,7 @@ module.exports = function (config) {
     callbackURL: config.strava.callbackURL,
     passReqToCallback: true
   },
-  function (req, accessToken, refreshToken, profile, done) {
+  function(req, accessToken, refreshToken, profile, done) {
     // Set the provider data and include tokens
     var providerData = profile._json;
     providerData.accessToken = accessToken;
@@ -26,7 +26,7 @@ module.exports = function (config) {
       displayName: profile.displayName,
       email: profile.emails[0].value,
       username: profile.username || generateUsername(profile),
-      profileImageURL: getImageURL(providerData), 
+      profileImageURL: getImageURL(providerData),
       provider: 'strava',
       providerIdentifierField: 'id',
       providerData: providerData
@@ -47,14 +47,14 @@ module.exports = function (config) {
       return username.toLowerCase() || undefined;
     }
 
-    function getImageURL (providerData) {
+    function getImageURL(providerData) {
       //(providerData.profile) ? providerData.profile : undefined, //avatar/athlete/large.png
 
       if (providerData.profile && providerData.profile.indexOf('http') > -1) {
         return providerData.profile;
       }
 
-      return '/modules/users/client/img/profile/default.png';  
+      return '/modules/users/client/img/profile/default.png';
     }
   }));
 };

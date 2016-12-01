@@ -29,7 +29,7 @@
       <div class="form-group" show-errors>
         <div class="col-md-4">
           <label for="fitness"><a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Current Fitness" data-content="Your current fitness value can be found in Strava on your Fitness & Freshness page. Or you can estimate this value. See 'Setting Start Day' in the FAQ for more.">Current Fitness</a> *</label>
-          <input name="fitness" type="number" min="1" max="999" step="1" ng-model="fitness" id="fitness" class="form-control" placeholder="56" required>
+          <input name="fitness" type="number" min="1" max="999" step="1" ng-model="fitness" id="fitness" class="form-control" placeholder="See strava.com/athlete/fitness" required>
           <div ng-messages="trainingDayForm.fitness.$error" role="alert">
             <p class="help-block error-text" ng-message="required">Fitness is required.</p>
             <p class="help-block error-text" ng-message="min">Current fitness must be greater than zero.</p>
@@ -41,7 +41,7 @@
       <div class="form-group" show-errors>
         <div class="col-md-4">
           <label for="fatigue"><a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Current Fatigue" data-content="Your current fatigue value can be found in Strava on your Fitness & Freshness page. Or you can estimate this value. See 'Setting Start Day' in the FAQ for more.">Current Fatigue</a> *</label>
-          <input name="fatigue" type="number" min="1" max="999" step="1" ng-model="fatigue" id="fatigue" class="form-control" placeholder="56" required>
+          <input name="fatigue" type="number" min="1" max="999" step="1" ng-model="fatigue" id="fatigue" class="form-control" placeholder="See strava.com/athlete/fitness" required>
           <div ng-messages="trainingDayForm.fatigue.$error" role="alert">
             <p class="help-block error-text" ng-message="required">Fatigue is required.</p>
             <p class="help-block error-text" ng-message="min">Current fatigue must be greater than zero.</p>

@@ -44,7 +44,7 @@ a:hover .header-profile-image {
 
 .navbar {
   border-bottom: 1px solid #e5e5e5;
-} 
+}
 
 .footer  {
   margin-top: 20px;
@@ -52,4 +52,8 @@ a:hover .header-profile-image {
 
 .footer .copyright {
   margin-left: 5px;
+}
+
+.user-notifications {
+  color: #C01B21;
 }

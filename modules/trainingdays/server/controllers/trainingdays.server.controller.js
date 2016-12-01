@@ -310,7 +310,11 @@ exports.update = function(req, res) {
         .then(function(trainingDay) {
           return res.json(trainingDay);
         })
-        .catch(function() {
+        .catch(function(err) {
+          if (err.message === 'Starting date for current training period was not found.') {
+            return res.json(trainingDay);
+          }
+
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });

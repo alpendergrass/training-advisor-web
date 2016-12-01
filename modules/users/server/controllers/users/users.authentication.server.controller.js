@@ -3,6 +3,7 @@
 
 var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
+  userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   _ = require('lodash'),
   mongoose = require('mongoose'),
   passport = require('passport'),
@@ -15,6 +16,30 @@ var noReturnUrls = [
   '/authentication/signin',
   '/authentication/signup'
 ];
+
+var validateUserSettings = function(user, callback) {
+  let notifications = [];
+
+  if (!user.thresholdPower) {
+    notifications.push({ notificationType: 'ftp', lookup: '' });
+  }
+
+  if (!user.timezone) {
+    notifications.push({ notificationType: 'timezone', lookup: '' });
+  }
+
+  if (notifications.length < 1) {
+    return callback(null, user);
+  }
+
+  userUtil.addNotifications(user, notifications)
+    .then(function(user) {
+      return callback(null, user);
+    })
+    .catch(function(err) {
+      return callback(err, null);
+    });
+};
 
 exports.signup = function(req, res) {
   // For security measurement we remove the roles from the req.body object
@@ -119,11 +144,19 @@ exports.oauthCallback = function(strategy) {
           return res.redirect('/waitlist');
         }
 
-        if (_.includes(user.roles, 'admin')) {
-          return res.redirect('/admin/users');
-        }
+        validateUserSettings(user, function(err, validatedUser) {
+          if (err) {
+            console.log(`validateUserSettings for user ${user.username} err: ${err}`);
+          } else {
+            user = validatedUser;
+          }
 
-        return res.redirect(redirectURL || sessionRedirectURL || '/trainingDay/');
+          if (_.includes(user.roles, 'admin')) {
+            return res.redirect('/admin/users');
+          }
+
+          return res.redirect(redirectURL || sessionRedirectURL || '/trainingDay/');
+        });
       });
     })(req, res, next);
   };

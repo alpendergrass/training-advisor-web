@@ -11,24 +11,28 @@ var mongoose = require('mongoose'),
   owasp = require('owasp-password-strength-test');
 
 
-/**
- * A Validation function for local strategy properties
- */
+// A Validation function for local strategy properties
 var validateLocalStrategyProperty = function (property) {
   return ((this.provider !== 'local' && !this.updated) || property.length);
 };
 
-/**
- * A Validation function for local strategy email
- */
+//A Validation function for local strategy email
 var validateLocalStrategyEmail = function (email) {
   return ((this.provider !== 'local' && !this.updated) || validator.isEmail(email));
 };
+
+var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
 var trainingPeaksAccountTypes = {
   values: 'SharedFree|CoachedFree|SelfCoachedPremium|SharedSelfCoachedPremium|CoachedPremium|SharedCoachedPremium|'.split('|'),
   message: 'Invalid Training Peaks Account Type.'
 };
+
+var notificationTypes = {
+  values: 'ftp|timezone|startday|seasongoal|goalterrain|plangen'.split('|'),
+  message: invalidDataErrorMessage
+};
+
 
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
@@ -161,6 +165,32 @@ var UserSchema = new Schema({
     default: ['user'],
     required: 'Please provide at least one role'
   },
+  notifications: [{
+    notificationType: {
+      type: String,
+      enum: notificationTypes
+    },
+    lookup: {
+      type: String,
+      default: ''
+    },
+    message: {
+      type: String,
+      default: ''
+    },
+    link: {
+      type: String,
+      default: ''
+    },
+    state: {
+      type: String,
+      default: ''
+    },
+    new: {
+      type: Boolean,
+      default: true
+    }
+  }],
   updated: {
     type: Date
   },
