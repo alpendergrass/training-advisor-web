@@ -186,7 +186,7 @@ var UserSchema = new Schema({
       type: String,
       default: ''
     },
-    new: {
+    alert: {
       type: Boolean,
       default: true
     }

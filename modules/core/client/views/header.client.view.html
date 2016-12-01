@@ -51,12 +51,12 @@
             </li>
           </ul>
           <ul class="nav navbar-nav navbar-right" ng-show="authentication.user.roles">
-            <li ui-sref-active="false"  ng-hide="authentication.user.notifications && authentication.user.notifications.length > 0">
-              <a>No Notifications</a>
-            </li>
+            <!-- <li ui-sref-active="false"  ng-hide="authentication.user.notifications && authentication.user.notifications.length > 0">
+              <a>No Alerts</a>
+            </li> -->
             <li class="dropdown" uib-dropdown ng-show="authentication.user.notifications && authentication.user.notifications.length > 0">
               <a class="dropdown-toggle" uib-dropdown-toggle role="button">
-                <span class="user-notifications">Notifications</span> <b class="caret"></b>
+                <span class="user-notifications">Alerts</span> <b class="caret"></b>
               </a>
               <ul class="dropdown-menu" uib-dropdown-menu role="menu">
                 <li ng-repeat="notification in authentication.user.notifications | orderBy: 'position'" ui-sref-active="active">

@@ -90,7 +90,7 @@ module.exports.getTrainingPeaksAutoDownloadUsers = function(callback) {
   });
 };
 
-module.exports.addNotifications = function(user, newNotifications) {
+module.exports.updateNotifications = function(user, notificationUpdates) {
   return new Promise(function(resolve, reject) {
 
     // User.findById(id, '-salt -password').exec(function(err, user) {
@@ -100,35 +100,69 @@ module.exports.addNotifications = function(user, newNotifications) {
 
     // if (user.notifications.length < 1) {
     //   // TODO: add message and link (?)
-    //   user.notifications.push(newNotification);
+    //   user.notifications.push(notificationUpdate);
     // } else {
 
-    console.log('addNotifications user: ', user);
-    let notificationAdded = false;
+    let notificationsModified = false;
 
-    _.forEach(newNotifications, function(newNotification) {
+    _.forEach(notificationUpdates, function(notificationUpdate) {
+      let notification = _.find(user.notifications, { 'notificationType': notificationUpdate.notificationType, 'lookup': notificationUpdate.lookup });
 
-      // See if notification already exists.
-      let notification = _.find(user.notifications, { 'notificationType': newNotification.notificationType, 'lookup': newNotification.lookup });
-
-      if (!notification) {
-        notificationAdded = true;
-        // TODO: add message and link (?)
-        user.notifications.push(adornNotification(newNotification));
+      if (notificationUpdate.add) {
+        // If notification does not exist we need to add it.
+        if (!notification) {
+          notificationsModified = true;
+          user.notifications.push(adornNotification(notificationUpdate));
+        }
+      } else {
+        // If notification exists we need to remove it.
+        if (notification) {
+          notificationsModified = true;
+          _.remove(user.notifications, function(notification) {
+            return notification.notificationType === notificationUpdate.notificationType && notification.lookup === notificationUpdate.lookup;
+          });
+        }
       }
     });
 
-    if (!notificationAdded) {
-      return resolve(user);
+    if (!notificationsModified) {
+      return resolve({ user: user, saved: false });
     }
+
+    user.markModified('notifications');
+    // I do not understand why I have to do this as notifications is not a schema-less type.
 
     user.save(function(err) {
       if (err) {
         return reject(err);
       }
-
-      return resolve(user);
+      return resolve({ user: user, saved: true });
     });
   });
   // });
 };
+
+module.exports.verifyUserSettings = function(user, callback) {
+  let notifications = [];
+
+  if (!user.thresholdPower) {
+    notifications.push({ notificationType: 'ftp', lookup: '', alert: true, add: true });
+  } else {
+    notifications.push({ notificationType: 'ftp', lookup: '' });
+  }
+
+  if (!user.timezone) {
+    notifications.push({ notificationType: 'timezone', lookup: '', alert: true, add: true });
+  } else {
+    notifications.push({ notificationType: 'timezone', lookup: '' });
+  }
+
+  module.exports.updateNotifications(user, notifications)
+    .then(function(response) {
+      return callback(null, response);
+    })
+    .catch(function(err) {
+      return callback(err, null);
+    });
+};
+

@@ -7,47 +7,68 @@ var _ = require('lodash'),
   mongoose = require('mongoose'),
   multer = require('multer'),
   config = require(path.resolve('./config/config')),
+  userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   User = mongoose.model('User');
 
-
-exports.update = function (req, res) {
+exports.update = function(req, res) {
   var user = req.user;
 
   // For security measurement we remove the roles from the req.body object
   delete req.body.roles;
 
-  if (user) {
-    // Merge existing user
-    user = _.extend(user, req.body);
-    user.updated = Date.now();
-    user.displayName = user.firstName + ' ' + user.lastName;
-    //Let's take the shotgun approach and suggest plan re-gen for any profile change
-    //even if only some changes could affect advice.
-    user.planGenNeeded = true;
-
-    user.save(function (err) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } else {
-        req.login(user, function (err) {
-          if (err) {
-            res.status(400).send(err);
-          } else {
-            res.json(user);
-          }
-        });
-      }
-    });
-  } else {
-    res.status(400).send({
+  if (!user) {
+    return res.status(400).send({
       message: 'User is not signed in'
     });
   }
+
+  // Merge existing user
+  user = _.extend(user, req.body);
+  user.updated = Date.now();
+  user.displayName = user.firstName + ' ' + user.lastName;
+
+  // TODO: only set plangen if thresholdPower, thresholdPowerTestDate or preferredRestDays has changed.
+  // req.user is before, req.body is after.
+  user.planGenNeeded = true;
+
+  userUtil.verifyUserSettings(user, function(err, response) {
+    // User might be saved during verification.
+    if (err) {
+      console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
+    } else {
+      user = response.user;
+    }
+
+    if (!err && response.saved) {
+      // No need to save the user again.
+      req.login(user, function(err) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.json(user);
+        }
+      });
+    } else {
+      user.save(function(err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } else {
+          req.login(user, function (err) {
+            if (err) {
+              res.status(400).send(err);
+            } else {
+              res.json(user);
+            }
+          });
+        }
+      });
+    }
+  });
 };
 
-exports.changeProfilePicture = function (req, res) {
+exports.changeProfilePicture = function(req, res) {
   var user = req.user;
   var message = null;
   var upload = multer(config.uploads.profileUpload).single('newProfilePicture');
@@ -89,9 +110,7 @@ exports.changeProfilePicture = function (req, res) {
   }
 };
 
-/**
- * Send User
- */
-exports.me = function (req, res) {
+//Send User
+exports.me = function(req, res) {
   res.json(req.user || null);
 };

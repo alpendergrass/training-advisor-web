@@ -17,30 +17,6 @@ var noReturnUrls = [
   '/authentication/signup'
 ];
 
-var validateUserSettings = function(user, callback) {
-  let notifications = [];
-
-  if (!user.thresholdPower) {
-    notifications.push({ notificationType: 'ftp', lookup: '' });
-  }
-
-  if (!user.timezone) {
-    notifications.push({ notificationType: 'timezone', lookup: '' });
-  }
-
-  if (notifications.length < 1) {
-    return callback(null, user);
-  }
-
-  userUtil.addNotifications(user, notifications)
-    .then(function(user) {
-      return callback(null, user);
-    })
-    .catch(function(err) {
-      return callback(err, null);
-    });
-};
-
 exports.signup = function(req, res) {
   // For security measurement we remove the roles from the req.body object
   delete req.body.roles;
@@ -144,11 +120,11 @@ exports.oauthCallback = function(strategy) {
           return res.redirect('/waitlist');
         }
 
-        validateUserSettings(user, function(err, validatedUser) {
+        userUtil.verifyUserSettings(user, function(err, response) {
           if (err) {
-            console.log(`validateUserSettings for user ${user.username} err: ${err}`);
+            console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
           } else {
-            user = validatedUser;
+            user = response.user;
           }
 
           if (_.includes(user.roles, 'admin')) {
