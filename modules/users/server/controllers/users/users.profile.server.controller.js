@@ -12,9 +12,11 @@ var _ = require('lodash'),
 
 exports.update = function(req, res) {
   var user = req.user;
+  var notifications;
+  var userUpdate = req.body;
 
-  // For security measurement we remove the roles from the req.body object
-  delete req.body.roles;
+  // As a security measure we remove roles from the incoming object in case they were tampered with.
+  delete userUpdate.roles;
 
   if (!user) {
     return res.status(400).send({
@@ -22,49 +24,40 @@ exports.update = function(req, res) {
     });
   }
 
-  // Merge existing user
-  user = _.extend(user, req.body);
-  user.updated = Date.now();
-  user.displayName = user.firstName + ' ' + user.lastName;
-
-  // TODO: only set plangen if thresholdPower, thresholdPowerTestDate or preferredRestDays has changed.
-  // req.user is before, req.body is after.
-  user.planGenNeeded = true;
-
-  userUtil.verifyUserSettings(user, function(err, response) {
-    // User might be saved during verification.
+  userUtil.verifyUserSettings(userUpdate, user, false, function(err, response) {
     if (err) {
       console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
     } else {
-      user = response.user;
+      userUpdate = response.user;
+      // Save notifications so we can restore after merge below
+      notifications = user.notifications;
     }
 
-    if (!err && response.saved) {
-      // No need to save the user again.
-      req.login(user, function(err) {
-        if (err) {
-          res.status(400).send(err);
-        } else {
-          res.json(user);
-        }
-      });
-    } else {
-      user.save(function(err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } else {
-          req.login(user, function (err) {
-            if (err) {
-              res.status(400).send(err);
-            } else {
-              res.json(user);
-            }
-          });
-        }
-      });
+    // Merge updates with existing user
+    user = _.extend(user, userUpdate);
+
+    user.updated = Date.now();
+    user.displayName = user.firstName + ' ' + user.lastName;
+
+    if (notifications) {
+      user.notifications = notifications;
     }
+
+    user.save(function(err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } else {
+        req.login(user, function (err) {
+          if (err) {
+            res.status(400).send(err);
+          } else {
+            res.json(user);
+          }
+        });
+      }
+    });
   });
 };
 

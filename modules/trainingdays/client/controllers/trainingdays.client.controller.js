@@ -749,7 +749,9 @@ angular.module('trainingDays')
           }, function(response) {
             usSpinnerService.stop('tdSpinner');
             $scope.isWorking = false;
-            toastr.success(response.text, response.title); //, { timeOut: 10000 });
+            toastr.success(response.statusMessage.text, response.statusMessage.title); //, { timeOut: 10000 });
+            // Reload user object as notifications may have been updated.
+            Authentication.user = response.user;
             loadChart();
           }, function(errorResponse) {
             $scope.isWorking = false;

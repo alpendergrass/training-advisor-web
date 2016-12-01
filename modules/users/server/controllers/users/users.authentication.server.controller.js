@@ -120,7 +120,7 @@ exports.oauthCallback = function(strategy) {
           return res.redirect('/waitlist');
         }
 
-        userUtil.verifyUserSettings(user, function(err, response) {
+        userUtil.verifyUserSettings(user, null, true, function(err, response) {
           if (err) {
             console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
           } else {

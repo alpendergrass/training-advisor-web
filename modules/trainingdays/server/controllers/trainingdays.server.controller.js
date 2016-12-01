@@ -451,13 +451,13 @@ exports.genPlan = function(req, res) {
   params.user = req.user;
   params.numericDate = util.toNumericDate(req.params.trainingDate);
 
-  adviceEngine.generatePlan(params, function(err, statusMessage) {
+  adviceEngine.generatePlan(params, function(err, response) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     } else {
-      res.json(statusMessage);
+      res.json(response);
     }
   });
 };

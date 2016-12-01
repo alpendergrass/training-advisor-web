@@ -2,6 +2,7 @@
 
 var path = require('path'),
   _ = require('lodash'),
+  moment = require('moment'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   User = mongoose.model('User'),
@@ -19,6 +20,10 @@ var adornNotification = function(notification) {
       notificationType: 'timezone',
       message: 'You need to set your local timezone.',
       state: 'settings.profile'
+    }, {
+      notificationType: 'plangen',
+      message: 'You need to update your season.',
+      state: 'season'
     }
   ];
 
@@ -90,19 +95,8 @@ module.exports.getTrainingPeaksAutoDownloadUsers = function(callback) {
   });
 };
 
-module.exports.updateNotifications = function(user, notificationUpdates) {
+module.exports.updateNotifications = function(user, notificationUpdates, saveUser) {
   return new Promise(function(resolve, reject) {
-
-    // User.findById(id, '-salt -password').exec(function(err, user) {
-    //   if (err) {
-    //     return reject(err);
-    //   }
-
-    // if (user.notifications.length < 1) {
-    //   // TODO: add message and link (?)
-    //   user.notifications.push(notificationUpdate);
-    // } else {
-
     let notificationsModified = false;
 
     _.forEach(notificationUpdates, function(notificationUpdate) {
@@ -132,6 +126,10 @@ module.exports.updateNotifications = function(user, notificationUpdates) {
     user.markModified('notifications');
     // I do not understand why I have to do this as notifications is not a schema-less type.
 
+    if (!saveUser) {
+      return resolve({ user: user, saved: false });
+    }
+
     user.save(function(err) {
       if (err) {
         return reject(err);
@@ -139,25 +137,30 @@ module.exports.updateNotifications = function(user, notificationUpdates) {
       return resolve({ user: user, saved: true });
     });
   });
-  // });
 };
 
-module.exports.verifyUserSettings = function(user, callback) {
+module.exports.verifyUserSettings = function(updateUser, userBefore, saveUser, callback) {
   let notifications = [];
 
-  if (!user.thresholdPower) {
+  if (!updateUser.thresholdPower) {
     notifications.push({ notificationType: 'ftp', lookup: '', alert: true, add: true });
   } else {
     notifications.push({ notificationType: 'ftp', lookup: '' });
   }
 
-  if (!user.timezone) {
+  if (!updateUser.timezone) {
     notifications.push({ notificationType: 'timezone', lookup: '', alert: true, add: true });
   } else {
     notifications.push({ notificationType: 'timezone', lookup: '' });
   }
 
-  module.exports.updateNotifications(user, notifications)
+  if (userBefore &&
+    (!moment(userBefore.thresholdPowerTestDate).isSame(updateUser.thresholdPowerTestDate, 'day') ||
+    !_.isEqual(userBefore.preferredRestDays, updateUser.preferredRestDays))) {
+    notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+  }
+
+  module.exports.updateNotifications(updateUser, notifications, saveUser)
     .then(function(response) {
       return callback(null, response);
     })
