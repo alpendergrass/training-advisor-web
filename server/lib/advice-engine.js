@@ -25,6 +25,7 @@ var path = require('path'),
   adviceRace = require('./advice-race'),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
+  userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   err;
 
 function generateAdvice(user, trainingDay, source, callback) {
@@ -309,9 +310,15 @@ module.exports.generatePlan = function(params, callback) {
                             return module.exports.refreshAdvice(user, todayTrainingDay);
                           })
                           .then(function() {
+                            //remove genPlan notification if it exists
+                            let notifications = [{ notificationType: 'plangen', lookup: '' }];
+                            return userUtil.updateNotifications(user, notifications, true);
+                          })
+                          .then(function(response) {
                             statusMessage.text = 'We have updated your season.';
                             statusMessage.type = 'success';
-                            return callback(null, statusMessage);
+                            let genPlanresponse = { user: response.user, statusMessage: statusMessage };
+                            return callback(null, genPlanresponse);
                           })
                           .catch(function(err) {
                             return callback(err, null);
