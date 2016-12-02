@@ -605,7 +605,6 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
     .where('cloneOfId').equals(null)
     .where('dateNumeric').equals(numericYesterday)
     .where('metrics').elemMatch({ metricsType: metricsType, loadRating: 'hard' });
-  // .where('metrics.$.loadRating').in(['simulation', 'hard']);
 
   query.findOne().exec(function(err, trainingDay) {
     if (err) {

@@ -205,7 +205,7 @@ exports.create = function(req, res) {
         });
       }
 
-      notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+      notifications.push({ notificationType: 'plangen', lookup: '', add: true });
 
       userUtil.updateNotifications(user, notifications, true)
         .then(function(response) {
@@ -228,7 +228,7 @@ exports.create = function(req, res) {
       let today = util.getTodayInUserTimezone(user);
 
       if (moment(trainingDay.date).isAfter(today)) {
-        notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+        notifications.push({ notificationType: 'plangen', lookup: '', add: true });
       }
 
       if (notifications.length > 0) {
@@ -303,7 +303,7 @@ exports.update = function(req, res) {
     let user = req.user;
 
     if (refreshAdvice) {
-      notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+      notifications.push({ notificationType: 'plangen', lookup: '', add: true });
     }
 
     if (trainingDay.scheduledEventRanking === 1) {
@@ -311,7 +311,7 @@ exports.update = function(req, res) {
       if (trainingDay.eventTerrain) {
         notifications.push({ notificationType: 'terrain', lookup: trainingDay.id });
       } else {
-        notifications.push({ notificationType: 'terrain', lookup: trainingDay.id, alert: false, add: true });
+        notifications.push({ notificationType: 'terrain', lookup: trainingDay.id, add: true });
       }
     }
 
@@ -355,7 +355,7 @@ exports.delete = function(req, res) {
       });
     }
 
-    let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
+    let notifications = [{ notificationType: 'plangen', lookup: '', add: true }];
 
     userUtil.updateNotifications(req.user, notifications, true)
       .then(function(response) {
@@ -406,7 +406,7 @@ exports.getSeason = function(req, res) {
       numericEffectiveStartDate = startDay.dateNumeric;
     } else {
       // Set notification.
-      notifications.push({ notificationType: 'start', lookup: '', alert: true, add: true });
+      notifications.push({ notificationType: 'start', lookup: '', add: true });
       numericEffectiveStartDate = util.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
     }
 
@@ -418,11 +418,11 @@ exports.getSeason = function(req, res) {
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
           _.forEach(goalDays, function(goalDay) {
             if (!goalDay.eventTerrain) {
-              notifications.push({ notificationType: 'terrain', lookup: goalDay.id, alert: false, add: true });
+              notifications.push({ notificationType: 'terrain', lookup: goalDay.id, add: true });
             }
           });
         } else {
-          notifications.push({ notificationType: 'goal', lookup: '', alert: true, add: true });
+          notifications.push({ notificationType: 'goal', lookup: '', add: true });
           numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
         }
 

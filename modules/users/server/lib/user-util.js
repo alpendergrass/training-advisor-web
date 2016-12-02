@@ -18,31 +18,37 @@ var adornNotification = function(notification) {
       notificationType: 'ftp',
       message: 'You need to set your Functional Threshold Power.',
       state: 'settings.profile',
+      alert: true,
       blocks: ''
     }, {
       notificationType: 'timezone',
       message: 'You need to set your local timezone.',
       state: 'settings.profile',
+      alert: true,
       blocks: ''
     }, {
       notificationType: 'plangen',
       message: 'You need to update your season.',
       state: 'season',
+      alert: false,
       blocks: ''
     }, {
       notificationType: 'start',
       message: 'You need to set a start day for your season.',
       state: 'trainingDays.createStart',
+      alert: true,
       blocks: 'plangen'
     }, {
       notificationType: 'goal',
       message: 'You need to create a goal for your season.',
       state: 'trainingDays.createEvent({"scheduledEventRanking": "1"})',
+      alert: true,
       blocks: 'plangen'
     }, {
       notificationType: 'terrain',
       message: 'You should set terrain for your event.',
       state: 'trainingDayView({"trainingDayId": "||lookup||" })',
+      alert: false,
       blocks: ''
     }
   ];
@@ -52,6 +58,7 @@ var adornNotification = function(notification) {
   if (adornment) {
     notification.message = adornment.message;
     notification.state = _.replace(adornment.state, '||lookup||', notification.lookup);
+    notification.alert = adornment.alert;
     notification.blocks = adornment.blocks;
   }
 
@@ -172,13 +179,13 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
   let notifications = [];
 
   if (!updatedUser.thresholdPower) {
-    notifications.push({ notificationType: 'ftp', lookup: '', alert: true, add: true });
+    notifications.push({ notificationType: 'ftp', lookup: '', add: true });
   } else {
     notifications.push({ notificationType: 'ftp', lookup: '' });
   }
 
   if (!updatedUser.timezone) {
-    notifications.push({ notificationType: 'timezone', lookup: '', alert: true, add: true });
+    notifications.push({ notificationType: 'timezone', lookup: '', add: true });
   } else {
     notifications.push({ notificationType: 'timezone', lookup: '' });
   }
@@ -186,7 +193,7 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
   if (userBefore &&
     (!moment(userBefore.thresholdPowerTestDate).isSame(updatedUser.thresholdPowerTestDate, 'day') ||
     !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
-    notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+    notifications.push({ notificationType: 'plangen', lookup: '', add: true });
   }
 
   module.exports.updateNotifications(updatedUser, notifications, saveUser)

@@ -54,6 +54,11 @@ a:hover .header-profile-image {
   margin-left: 5px;
 }
 
-.user-notifications {
+.user-alerts {
   color: #C01B21;
+  font-weight: bold !important;
+}
+
+.user-alert {
+  font-weight: bold !important;
 }
