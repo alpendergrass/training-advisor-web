@@ -31,7 +31,7 @@ function getTrainingDay(user, numericDate, callback) {
     .where('dateNumeric').equals(numericDate)
     .where('cloneOfId').equals(null);
 
-  query.findOne().populate('user').exec(function(err, trainingDay) {
+  query.findOne().populate('user', '-salt -password').exec(function(err, trainingDay) {
     if (err) {
       return callback(err, null);
     }

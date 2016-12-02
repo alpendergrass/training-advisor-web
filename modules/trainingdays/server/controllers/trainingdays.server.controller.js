@@ -18,7 +18,6 @@ var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 function getTrainingDay(id, callback) {
-  //TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
   TrainingDay.findById(id).populate('user', '-salt -password').exec(function(err, trainingDay) {
     if (err) {
       return callback(err, null);
@@ -185,7 +184,18 @@ function generateRecurrences(req, callback) {
 
 exports.create = function(req, res) {
   var user = req.user,
-    statusMessage = {};
+    statusMessage = {},
+    notifications = [];
+
+  if (req.body.startingPoint) {
+    // Remove notification if it exists.
+    notifications.push({ notificationType: 'start', lookup: '' });
+  }
+
+  if (req.body.scheduledEventRanking === '1') {
+    // Remove notification if it exists.
+    notifications.push({ notificationType: 'goal', lookup: '' });
+  }
 
   if (req.body.recurrenceSpec && req.body.recurrenceSpec.endsOn) {
     generateRecurrences(req, function(err, trainingDay) {
@@ -195,7 +205,7 @@ exports.create = function(req, res) {
         });
       }
 
-      let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
+      notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
 
       userUtil.updateNotifications(user, notifications, true)
         .then(function(response) {
@@ -218,8 +228,10 @@ exports.create = function(req, res) {
       let today = util.getTodayInUserTimezone(user);
 
       if (moment(trainingDay.date).isAfter(today)) {
-        let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
+        notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+      }
 
+      if (notifications.length > 0) {
         userUtil.updateNotifications(user, notifications, true)
           .then(function(response) {
             trainingDay.user = response.user;
@@ -366,7 +378,8 @@ exports.getSeason = function(req, res) {
     numericToday = util.toNumericDate(req.params.today),
     numericEffectiveStartDate,
     numericEffectiveGoalDate,
-    dates = {};
+    dates = {},
+    notifications = [];
 
   console.log('Active user: ', user.username);
 
@@ -380,6 +393,8 @@ exports.getSeason = function(req, res) {
     if (startDay) {
       numericEffectiveStartDate = startDay.dateNumeric;
     } else {
+      // Set notification.
+      notifications.push({ notificationType: 'start', lookup: '', alert: true, add: true });
       numericEffectiveStartDate = util.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
     }
 
@@ -390,6 +405,7 @@ exports.getSeason = function(req, res) {
           //Use last goal to end season.
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
         } else {
+          notifications.push({ notificationType: 'goal', lookup: '', alert: true, add: true });
           numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
         }
 
@@ -399,7 +415,20 @@ exports.getSeason = function(req, res) {
               message: errorHandler.getErrorMessage(err)
             });
           } else {
-            res.json(trainingDays);
+            if (notifications.length > 0) {
+              userUtil.updateNotifications(user, notifications, true)
+                .then(function(response) {
+                  // We will use user in first day to refresh notifications.
+                  trainingDays[0].user = response.user;
+                  return res.json(trainingDays);
+                })
+                .catch(function(err) {
+                  console.log('updateNotifications failed in TD.getSeason: ', err);
+                  return res.json(trainingDays);
+                });
+            } else {
+              return res.json(trainingDays);
+            }
           }
         });
       })

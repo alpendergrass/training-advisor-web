@@ -29,10 +29,14 @@ var trainingPeaksAccountTypes = {
 };
 
 var notificationTypes = {
-  values: 'ftp|timezone|startday|seasongoal|goalterrain|plangen'.split('|'),
+  values: 'ftp|timezone|start|goal|plangen'.split('|'),
   message: invalidDataErrorMessage
 };
 
+var blockableNotificationTypes = {
+  values: 'plangen|'.split('|'),
+  message: invalidDataErrorMessage
+};
 
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
@@ -108,9 +112,6 @@ var UserSchema = new Schema({
   preferredRestDays: [{
     type: String
   }],
-  // preferredSimulationDay: {
-  //   type: String
-  // },
   levelOfDetail: {
     type: Number,
     min: 1,
@@ -153,14 +154,6 @@ var UserSchema = new Schema({
       default: false
     }
   },
-  roles: {
-    type: [{
-      type: String,
-      enum: ['user', 'admin', 'waitlist']
-    }],
-    default: ['user'],
-    required: 'Please provide at least one role'
-  },
   notifications: [{
     notificationType: {
       type: String,
@@ -182,11 +175,30 @@ var UserSchema = new Schema({
       type: String,
       default: ''
     },
+    blocks: {
+      // Presence of this notification blocks the following notification type.
+      // Beware of possible circular references.
+      type: String,
+      enum: blockableNotificationTypes,
+      default: ''
+    },
+    blocked: {
+      type: Boolean,
+      default: false
+    },
     alert: {
       type: Boolean,
       default: true
     }
   }],
+  roles: {
+    type: [{
+      type: String,
+      enum: ['user', 'admin', 'waitlist']
+    }],
+    default: ['user'],
+    required: 'Please provide at least one role'
+  },
   updated: {
     type: Date
   },

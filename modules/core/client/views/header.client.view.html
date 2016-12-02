@@ -54,12 +54,12 @@
             <!-- <li ui-sref-active="false"  ng-hide="authentication.user.notifications && authentication.user.notifications.length > 0">
               <a>No Alerts</a>
             </li> -->
-            <li class="dropdown" uib-dropdown ng-show="authentication.user.notifications && authentication.user.notifications.length > 0">
+            <li class="dropdown" uib-dropdown ng-show="authentication.user.notifications && _.filter(authentication.user.notifications, ['blocked', false]).length > 0">
               <a class="dropdown-toggle" uib-dropdown-toggle role="button">
                 <span class="user-notifications">Alerts</span> <b class="caret"></b>
               </a>
               <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-                <li ng-repeat="notification in authentication.user.notifications | orderBy: 'position'" ui-sref-active="active">
+                <li ng-repeat="notification in _.filter(authentication.user.notifications, ['blocked', false]) | orderBy: 'position'" ui-sref-active="active">
                   <a ui-sref="{{notification.state}}" ng-bind="notification.message"></a>
                 </li>
               </ul>

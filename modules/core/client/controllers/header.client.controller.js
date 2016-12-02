@@ -10,6 +10,8 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Auth
     $scope.$state = $state;
     $scope.authentication = Authentication;
 
+    $scope.notifications = _.filter(Authentication.user.notifications, ['blocked', false]);
+
     // Get the topbar menu
     $scope.menu = Menus.getMenu('topbar');
 

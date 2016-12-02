@@ -101,6 +101,9 @@ angular.module('trainingDays')
         TrainingDays.getSeason({
           today: $scope.today.toISOString()
         }, function(season) {
+          // Reload user object as notifications may have been updated.
+          Authentication.user = season[0].user;
+
           _.forEach(season, function(td) {
             td.date = moment(td.dateNumeric.toString()).toDate();
 
@@ -123,8 +126,11 @@ angular.module('trainingDays')
             .value();
 
           if ($scope.hasEnd) {
-            // TODO: if we want to keep $scope.needsPlanGen we will need to look at user.notifications.
-            //$scope.needsPlanGen = (season && season[0] && season[0].user && season[0].user.planGenNeeded);
+            $scope.needsPlanGen = (Authentication.user.notifications &&
+              _.find(Authentication.user.notifications, function(n) {
+                return n.notificationType === 'plangen';
+              })
+            );
           }
 
           // Get yesterday if it exists.
@@ -388,7 +394,6 @@ angular.module('trainingDays')
           if (moment(td.date).isAfter($scope.today, 'day')) {
             return [];
           }
-
 
           if (td.completedActivities.length > 0) {
             load = _.sumBy(td.completedActivities, function(activity) {
@@ -994,7 +999,7 @@ angular.module('trainingDays')
             if ($stateParams.forwardTo) {
               $state.go($stateParams.forwardTo);
             } else {
-              toastr.success('You should update your profile now.', 'Start Created', { timeOut: 7000 });
+              toastr.success('You should review your profile settings.', 'Start Created', { timeOut: 7000 });
               $state.go('settings.profile');
             }
           }, function(errorResponse) {
@@ -1157,8 +1162,6 @@ angular.module('trainingDays')
           });
 
           trainingDay.$create(function(response) {
-            // Reload user to pick up changes in notifications.
-            Authentication.user = response.user;
             $state.go('season');
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -1299,7 +1302,6 @@ angular.module('trainingDays')
         // Remove existing TrainingDay
         $scope.remove = function() {
           $scope.trainingDay.$remove(function(response) {
-            Authentication.user = response.user;
             $state.go('season');
           });
         };

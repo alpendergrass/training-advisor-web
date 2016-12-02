@@ -11,19 +11,34 @@ var path = require('path'),
 
 
 var adornNotification = function(notification) {
+  // *** Beware of possible circular blocks. ***
+
   let notificationAdornments = [
     {
       notificationType: 'ftp',
       message: 'You need to set your Functional Threshold Power.',
-      state: 'settings.profile'
+      state: 'settings.profile',
+      blocks: ''
     }, {
       notificationType: 'timezone',
       message: 'You need to set your local timezone.',
-      state: 'settings.profile'
+      state: 'settings.profile',
+      blocks: ''
     }, {
       notificationType: 'plangen',
       message: 'You need to update your season.',
-      state: 'season'
+      state: 'season',
+      blocks: ''
+    }, {
+      notificationType: 'start',
+      message: 'You need to set a start day for your season.',
+      state: 'trainingDays.createStart',
+      blocks: 'plangen'
+    }, {
+      notificationType: 'goal',
+      message: 'You need to create a goal for your season.',
+      state: 'trainingDays.createEvent({"scheduledEventRanking": "1"})',
+      blocks: 'plangen'
     }
   ];
 
@@ -32,6 +47,7 @@ var adornNotification = function(notification) {
   if (adornment) {
     notification.message = adornment.message;
     notification.state = adornment.state;
+    notification.blocks = adornment.blocks;
   }
 
   return notification;
@@ -123,6 +139,14 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
       return resolve({ user: user, saved: false });
     }
 
+    // Block notifications if blocking notifications are present
+    // and v.v.
+    let blocks = _.flatMap(user.notifications, function(n) { return n.blocks; });
+
+    _.forEach(user.notifications, function(notification) {
+      notification.blocked = _.includes(blocks, notification.notificationType);
+    });
+
     user.markModified('notifications');
     // I do not understand why I have to do this as notifications is not a schema-less type.
 
@@ -139,28 +163,28 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
   });
 };
 
-module.exports.verifyUserSettings = function(updateUser, userBefore, saveUser, callback) {
+module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, callback) {
   let notifications = [];
 
-  if (!updateUser.thresholdPower) {
+  if (!updatedUser.thresholdPower) {
     notifications.push({ notificationType: 'ftp', lookup: '', alert: true, add: true });
   } else {
     notifications.push({ notificationType: 'ftp', lookup: '' });
   }
 
-  if (!updateUser.timezone) {
+  if (!updatedUser.timezone) {
     notifications.push({ notificationType: 'timezone', lookup: '', alert: true, add: true });
   } else {
     notifications.push({ notificationType: 'timezone', lookup: '' });
   }
 
   if (userBefore &&
-    (!moment(userBefore.thresholdPowerTestDate).isSame(updateUser.thresholdPowerTestDate, 'day') ||
-    !_.isEqual(userBefore.preferredRestDays, updateUser.preferredRestDays))) {
+    (!moment(userBefore.thresholdPowerTestDate).isSame(updatedUser.thresholdPowerTestDate, 'day') ||
+    !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
     notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
   }
 
-  module.exports.updateNotifications(updateUser, notifications, saveUser)
+  module.exports.updateNotifications(updatedUser, notifications, saveUser)
     .then(function(response) {
       return callback(null, response);
     })
