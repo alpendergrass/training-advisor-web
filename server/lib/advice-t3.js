@@ -68,8 +68,8 @@ var rules = [
       R.when(this && this.trainingDay.period === 't3' &&
         this.plannedActivity.activityType === 'hard' &&
         (this.nextGoal && this.nextGoal.eventTerrain > 3) &&
-        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.bigClimbingDay) &&
-        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.bigClimbingDay)
+        (!this.metricsOneDayPrior || !this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.bigClimbingDay) &&
+        (!this.metricsTwoDaysPrior || !this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.bigClimbingDay)
       );
     },
     'consequence': function(R) {
@@ -86,8 +86,8 @@ var rules = [
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't3' &&
         this.plannedActivity.activityType === 'hard' &&
-        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
-        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
+        (!this.metricsOneDayPrior || !this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
+        (!this.metricsTwoDaysPrior || !this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
       );
     },
     'consequence': function(R) {
@@ -103,10 +103,7 @@ var rules = [
     'priority': -5,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't3' &&
-        this.plannedActivity.activityType === 'hard' &&
-        (this.nextGoal && this.nextGoal.eventTerrain < 2) &&
-        (!this.metricsOneDayPrior.totalElevationGain || this.metricsOneDayPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay) &&
-        (!this.metricsTwoDaysPrior.totalElevationGain || this.metricsTwoDaysPrior.totalElevationGain < this.adviceConstants.moderateClimbingDay)
+        this.plannedActivity.activityType === 'hard'
       );
     },
     'consequence': function(R) {
