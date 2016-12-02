@@ -199,7 +199,7 @@ exports.create = function(req, res) {
 
       userUtil.updateNotifications(user, notifications, true)
         .then(function(response) {
-          trainingDay.user = response.uer;
+          trainingDay.user = response.user;
           return res.json(trainingDay);
         })
         .catch(function(err) {
@@ -222,7 +222,7 @@ exports.create = function(req, res) {
 
         userUtil.updateNotifications(user, notifications, true)
           .then(function(response) {
-            trainingDay.user = response.uer;
+            trainingDay.user = response.user;
             return res.json(trainingDay);
           })
           .catch(function(err) {

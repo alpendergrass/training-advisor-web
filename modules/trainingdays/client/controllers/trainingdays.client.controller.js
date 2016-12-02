@@ -594,15 +594,6 @@ angular.module('trainingDays')
           }, function(response) {
             initSimFlags();
             loadChart(function() {
-              // if (!$scope.authentication.user.timezone) {
-              //   toastr.warning('Please go to <strong>My Profile</strong> and set your timezone.', 'Timezone Not Set', {
-              //     allowHtml: true,
-              //     timeOut: 7000
-              //   });
-              // }
-              // if ($scope.needsPlanGen) {
-              //   toastr.info('You should update your season.', 'Season View May Be Out Of Date');
-              // }
             });
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -745,6 +736,7 @@ angular.module('trainingDays')
         $scope.genPlan = function() {
           $scope.isWorking = true;
           usSpinnerService.spin('tdSpinner');
+          toastr.info('Season update has been initiated.', 'Season Update'); //, { timeOut: 7000 });
           $scope.error = null;
 
           TrainingDays.genPlan({
@@ -1222,7 +1214,6 @@ angular.module('trainingDays')
           { value: 'easy', text: 'Do an easy ride' },
           { value: 'moderate', text: 'Do a moderate ride' },
           { value: 'hard', text: 'Do a hard ride' },
-          // { value: 'simulation', text: 'Do a goal event simulation' }, //TODO: do not offer this if no goal exists.
           { value: 'test', text: 'Do a threshold power test' }
         ];
 
