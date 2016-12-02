@@ -268,7 +268,8 @@ exports.getDay = function(req, res) {
 exports.update = function(req, res) {
   var trainingDay = req.trainingDay,
     refreshAdvice = false,
-    params = {};
+    params = {},
+    notifications = [];
 
   // If a change was made that would affect current advice, let's recompute.
   // Is not possible in the UI to change event ranking or estimated load of past events.
@@ -302,8 +303,19 @@ exports.update = function(req, res) {
     let user = req.user;
 
     if (refreshAdvice) {
-      let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
+      notifications.push({ notificationType: 'plangen', lookup: '', alert: true, add: true });
+    }
 
+    if (trainingDay.scheduledEventRanking === 1) {
+      // We prefer to know terrain for goal events.
+      if (trainingDay.eventTerrain) {
+        notifications.push({ notificationType: 'terrain', lookup: trainingDay.id });
+      } else {
+        notifications.push({ notificationType: 'terrain', lookup: trainingDay.id, alert: false, add: true });
+      }
+    }
+
+    if (notifications.length > 0) {
       userUtil.updateNotifications(user, notifications, true)
         .then(function(response) {
           user = response.user;
@@ -404,6 +416,11 @@ exports.getSeason = function(req, res) {
         if (goalDays.length > 0) {
           //Use last goal to end season.
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
+          _.forEach(goalDays, function(goalDay) {
+            if (!goalDay.eventTerrain) {
+              notifications.push({ notificationType: 'terrain', lookup: goalDay.id, alert: false, add: true });
+            }
+          });
         } else {
           notifications.push({ notificationType: 'goal', lookup: '', alert: true, add: true });
           numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));

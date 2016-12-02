@@ -29,7 +29,7 @@ var trainingPeaksAccountTypes = {
 };
 
 var notificationTypes = {
-  values: 'ftp|timezone|start|goal|plangen'.split('|'),
+  values: 'ftp|timezone|start|goal|plangen|terrain'.split('|'),
   message: invalidDataErrorMessage
 };
 

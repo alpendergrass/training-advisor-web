@@ -741,7 +741,7 @@ angular.module('trainingDays')
         $scope.genPlan = function() {
           $scope.isWorking = true;
           usSpinnerService.spin('tdSpinner');
-          toastr.info('Season update has been initiated.', 'Season Update'); //, { timeOut: 7000 });
+          toastr.info('Update has been initiated.', 'Season Update'); //, { timeOut: 7000 });
           $scope.error = null;
 
           TrainingDays.genPlan({

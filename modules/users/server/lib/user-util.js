@@ -39,6 +39,11 @@ var adornNotification = function(notification) {
       message: 'You need to create a goal for your season.',
       state: 'trainingDays.createEvent({"scheduledEventRanking": "1"})',
       blocks: 'plangen'
+    }, {
+      notificationType: 'terrain',
+      message: 'You should set terrain for your event.',
+      state: 'trainingDayView({"trainingDayId": "||lookup||" })',
+      blocks: ''
     }
   ];
 
@@ -46,7 +51,7 @@ var adornNotification = function(notification) {
 
   if (adornment) {
     notification.message = adornment.message;
-    notification.state = adornment.state;
+    notification.state = _.replace(adornment.state, '||lookup||', notification.lookup);
     notification.blocks = adornment.blocks;
   }
 
