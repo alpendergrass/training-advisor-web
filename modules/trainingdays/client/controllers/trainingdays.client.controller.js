@@ -123,7 +123,8 @@ angular.module('trainingDays')
             .value();
 
           if ($scope.hasEnd) {
-            $scope.needsPlanGen = (season && season[0] && season[0].user && season[0].user.planGenNeeded);
+            // TODO: if we want to keep $scope.needsPlanGen we will need to look at user.notifications.
+            //$scope.needsPlanGen = (season && season[0] && season[0].user && season[0].user.planGenNeeded);
           }
 
           // Get yesterday if it exists.
@@ -279,8 +280,10 @@ angular.module('trainingDays')
                 date: date
               });
 
-              trainingDay.$create(function(response) {
-                $location.path('trainingDay/' + response._id);
+              trainingDay.$create(function(trainingDay) {
+                // Reload user to pick up changes in notifications.
+                Authentication.user = trainingDay.user;
+                $location.path('trainingDay/' + trainingDay._id);
               }, function(errorResponse) {
                 if (errorResponse.data && errorResponse.data.message) {
                   $scope.error = errorResponse.data.message;
@@ -591,15 +594,15 @@ angular.module('trainingDays')
           }, function(response) {
             initSimFlags();
             loadChart(function() {
-              if (!$scope.authentication.user.timezone) {
-                toastr.warning('Please go to <strong>My Profile</strong> and set your timezone.', 'Timezone Not Set', {
-                  allowHtml: true,
-                  timeOut: 7000
-                });
-              }
-              if ($scope.needsPlanGen) {
-                toastr.info('You should update your season.', 'Season View May Be Out Of Date');
-              }
+              // if (!$scope.authentication.user.timezone) {
+              //   toastr.warning('Please go to <strong>My Profile</strong> and set your timezone.', 'Timezone Not Set', {
+              //     allowHtml: true,
+              //     timeOut: 7000
+              //   });
+              // }
+              // if ($scope.needsPlanGen) {
+              //   toastr.info('You should update your season.', 'Season View May Be Out Of Date');
+              // }
             });
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -993,6 +996,9 @@ angular.module('trainingDays')
           });
 
           trainingDay.$create(function(response) {
+            // Reload user to pick up changes in notifications.
+            Authentication.user = response.user;
+
             if ($stateParams.forwardTo) {
               $state.go($stateParams.forwardTo);
             } else {
@@ -1159,6 +1165,8 @@ angular.module('trainingDays')
           });
 
           trainingDay.$create(function(response) {
+            // Reload user to pick up changes in notifications.
+            Authentication.user = response.user;
             $state.go('season');
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
@@ -1298,20 +1306,11 @@ angular.module('trainingDays')
         };
 
         // Remove existing TrainingDay
-        $scope.remove = function(trainingDay) {
-          if (trainingDay) {
-            trainingDay.$remove();
-
-            for (var i in $scope.trainingDays) {
-              if ($scope.trainingDays[i] === trainingDay) {
-                $scope.trainingDays.splice(i, 1);
-              }
-            }
-          } else {
-            $scope.trainingDay.$remove(function() {
-              $state.go('season');
-            });
-          }
+        $scope.remove = function() {
+          $scope.trainingDay.$remove(function(response) {
+            Authentication.user = response.user;
+            $state.go('season');
+          });
         };
 
         $scope.updateEventRanking = function(priority) {
@@ -1493,9 +1492,13 @@ angular.module('trainingDays')
         }
 
         trainingDay.$update(function(trainingDay) {
+          // Reload user to pick up changes in notifications.
+          Authentication.user = trainingDay.user;
+
           //We need to correct the date coming from server-side as it might not have self corrected yet.
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.trainingDay = trainingDay;
+
           if (callback) {
             return callback(trainingDay);
           }

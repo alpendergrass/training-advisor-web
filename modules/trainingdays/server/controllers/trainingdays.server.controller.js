@@ -8,6 +8,7 @@ var path = require('path'),
   TrainingDay = mongoose.model('TrainingDay'),
   util = require('../lib/util'),
   dbUtil = require('../lib/db-util'),
+  userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   downloadStrava = require('../lib/download-strava'),
   downloadTrainingPeaks = require('../lib/download-trainingpeaks'),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
@@ -17,7 +18,8 @@ var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 function getTrainingDay(id, callback) {
-  TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
+  //TrainingDay.findById(id).populate('user', 'displayName thresholdPower').exec(function(err, trainingDay) {
+  TrainingDay.findById(id).populate('user', '-salt -password').exec(function(err, trainingDay) {
     if (err) {
       return callback(err, null);
     }
@@ -193,26 +195,17 @@ exports.create = function(req, res) {
         });
       }
 
-      user.planGenNeeded = true;
+      let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
 
-      user.save(function(err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        }
-
-        // statusMessage = {
-        //   type: 'info',
-        //   text: 'You should update your season.',
-        //   title: 'Events Added',
-        //   created: Date.now(),
-        //   username: user.username
-        // };
-
-        // dbUtil.sendMessageToUser(statusMessage, user);
-        res.json(trainingDay);
-      });
+      userUtil.updateNotifications(user, notifications, true)
+        .then(function(response) {
+          trainingDay.user = response.uer;
+          return res.json(trainingDay);
+        })
+        .catch(function(err) {
+          console.log('updateNotifications failed in TD.create: ', err);
+          return res.json(trainingDay);
+        });
     });
   } else {
     createTrainingDay(req, function(err, trainingDay) {
@@ -225,30 +218,19 @@ exports.create = function(req, res) {
       let today = util.getTodayInUserTimezone(user);
 
       if (moment(trainingDay.date).isAfter(today)) {
-        user.planGenNeeded = true;
+        let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
 
-        user.save(function(err) {
-          if (err) {
-            return res.status(400).send({
-              message: errorHandler.getErrorMessage(err)
-            });
-          }
-
-          // if (trainingDay.startingPoint || trainingDay.fitnessAndFatigueTrueUp || trainingDay.scheduledEventRanking) {
-          //   statusMessage = {
-          //     type: 'info',
-          //     text: 'You should update your season.',
-          //     title: 'Training Day Added or Updated',
-          //     created: Date.now(),
-          //     username: user.username
-          //   };
-
-          //   dbUtil.sendMessageToUser(statusMessage, user);
-          // }
-          res.json(trainingDay);
-        });
+        userUtil.updateNotifications(user, notifications, true)
+          .then(function(response) {
+            trainingDay.user = response.uer;
+            return res.json(trainingDay);
+          })
+          .catch(function(err) {
+            console.log('updateNotifications failed in TD.create: ', err);
+            return res.json(trainingDay);
+          });
       } else {
-        res.json(trainingDay);
+        return res.json(trainingDay);
       }
     });
   }
@@ -305,13 +287,23 @@ exports.update = function(req, res) {
       });
     }
 
+    let user = req.user;
+
     if (refreshAdvice) {
-      adviceEngine.refreshAdvice(req.user, trainingDay)
+      let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
+
+      userUtil.updateNotifications(user, notifications, true)
+        .then(function(response) {
+          user = response.user;
+          return adviceEngine.refreshAdvice(user, trainingDay);
+        })
         .then(function(trainingDay) {
+          trainingDay.user = user;
           return res.json(trainingDay);
         })
         .catch(function(err) {
           if (err.message === 'Starting date for current training period was not found.') {
+            // Ignore this. Not likely and we will nag them about it in other ways.
             return res.json(trainingDay);
           }
 
@@ -326,7 +318,7 @@ exports.update = function(req, res) {
 };
 
 exports.delete = function(req, res) {
-  // Rarely will a user be deleting a TD. I don't allow normal users to do this.
+  // Rarely will a user be deleting a TD.
 
   var trainingDay = req.trainingDay,
     user = req.user,
@@ -339,26 +331,17 @@ exports.delete = function(req, res) {
       });
     }
 
-    user.planGenNeeded = true;
+    let notifications = [{ notificationType: 'plangen', lookup: '', alert: true, add: true }];
 
-    user.save(function(err) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
-
-      // statusMessage = {
-      //   type: 'info',
-      //   text: 'You should update your season.',
-      //   title: 'Training Day Removed',
-      //   created: Date.now(),
-      //   username: user.username
-      // };
-
-      // dbUtil.sendMessageToUser(statusMessage, user);
-      res.json(trainingDay);
-    });
+    userUtil.updateNotifications(req.user, notifications, true)
+      .then(function(response) {
+        trainingDay.user = response.user;
+        return res.json(trainingDay);
+      })
+      .catch(function(err) {
+        console.log('updateNotifications failed in TD.delete: ', err);
+        return res.json(trainingDay);
+      });
   });
 };
 
