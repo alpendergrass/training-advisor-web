@@ -196,14 +196,7 @@ module.exports.generatePlan = function(params, callback) {
   var user = params.user,
     adviceParams = _.clone(params),
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
-    goalDay,
-    statusMessage = {
-      type: '',
-      text: '',
-      title: 'Season Update',
-      created: Date.now(),
-      username: user.username
-    };
+    goalDay;
 
   // Make the following a async.series, use promises or something to clean it up. Yuck.
 
@@ -300,7 +293,6 @@ module.exports.generatePlan = function(params, callback) {
                         dbUtil.removePlanGenerationCompletedActivities(user)
                           .then(function() {
                             user.thresholdPowerTestDate = savedThresholdPowerTestDate;
-                            user.planGenNeeded = false;
                             return user.save();
                           })
                           .then(function() {
@@ -315,8 +307,13 @@ module.exports.generatePlan = function(params, callback) {
                             return userUtil.updateNotifications(user, notifications, true);
                           })
                           .then(function(response) {
-                            statusMessage.text = 'We have updated your season.';
-                            statusMessage.type = 'success';
+                            let statusMessage = {
+                              type: 'success',
+                              text: 'We have updated your season.',
+                              title: 'Season Update',
+                              created: Date.now(),
+                              username: user.username
+                            };
                             let genPlanresponse = { user: response.user, statusMessage: statusMessage };
                             return callback(null, genPlanresponse);
                           })
@@ -468,7 +465,6 @@ module.exports.advise = function(params, callback) {
       var trainingDay = results[0];
       var plannedActivity = {};
       var source;
-      var statusMessage = {};
 
       if (params.source === 'requested') {
         //User has requested advice for a specific activity type.
@@ -503,18 +499,6 @@ module.exports.advise = function(params, callback) {
           if (err) {
             return callback(err, null);
           }
-
-          // if (params.alertUser && !trainingDay.isSimDay) {
-          //   statusMessage = {
-          //     type: 'info',
-          //     text: 'You should update your season.',
-          //     title: 'Training Metrics Updated',
-          //     created: Date.now(),
-          //     username: user.username
-          //   };
-
-          //   dbUtil.sendMessageToUser(statusMessage, user);
-          // }
 
           return callback(null, recommendation);
         });

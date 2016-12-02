@@ -14,7 +14,7 @@ var rules = [
       this.plannedActivity.activityType = 'test';
       this.plannedActivity.rationale += ' testingDueAndFormIsRecoveredRule.';
       this.plannedActivity.advice += ` Testing is due and form is sufficiently recovered for testing. Do a functional threshold power (FTP) test.
- A long, complete warm-up is important before testing. Then do a few hard efforts to stoke the engine.
+ A long, complete warm-up is important before testing. Then do a few short, hard efforts to prepare your legs for the challenge to come.
  After a few minutes recovery start your test. This is going to hurt but give it your all!
  Afterwards be sure to update your Tacit Training profile with your new threshold and the date you did the test.`;
       R.stop();

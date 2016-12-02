@@ -52,20 +52,7 @@ module.exports.updateMetrics = function(params, callback) {
         return callback(err, null);
       }
 
-      // if (params.planGenUnderway) {
-        // No need to set planGenNeeded since that is what we are doing now.
       return callback(null, trainingDay);
-      // }
-
-      // params.user.planGenNeeded = true;
-
-      // params.user.save(function(err) {
-      //   if (err) {
-      //     return callback(err, null);
-      //   }
-
-      //   return callback(null, trainingDay);
-      // });
     }
   );
 };
