@@ -18,8 +18,13 @@
       <div class="pull-left">
         <md-button ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" ng-show="hasStart && hasEnd" ng-disabled="simMode || isWorking" ng-click="genPlan()">Update Season</md-button>
       </div>
-      <div class="pull-right">
+      <!-- <div class="pull-right">
         <md-button ng-disabled="simMode" ui-sref="trainingDays.calendar">Calendar</md-button>
+      </div> -->
+      <div class="pull-right">
+        <md-button aria-label="Season Help" data-toggle="modal" data-target="#seasonHelp">
+          My Season Help
+        </md-button>
       </div>
     </div>
 
@@ -54,6 +59,36 @@
           <md-button aria-label="What-If Help" data-toggle="modal" data-target="#simHelp">
             What-If Help
           </md-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="seasonHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Understanding My Season</h4>
+        </div>
+        <div class="modal-body">
+          <p><strong>My Season</strong> is a graphical representation of your training plan from season start through your last goal event.
+          The graph shows both planned and historical values. The planned calculations show our recommendations. The historical measurements are a reflection of the actual work you did. By comparing the two you can see how your training is progressing.</p>
+          <!-- <p>This method of producing a training plan is very different from other training planning tools. These tools typically generate a plan at the beginning of the season and then expect the athlete to follow them as best they can. Significant deviations from the plan, due to illness, work or family obligations, or whatever, ofter completely negate the plan and require major </p> -->
+          <p>The values displayed are:</p>
+          <ul>
+            <li><strong>Load</strong> - a daily measurement of how much work - your <strong>training load</strong> - is planned and how much you did.</li>
+            <li><strong>Fitness</strong> - a numerical representation of your fitness level - actual and planned - based on training load over the previous six weeks.</li>
+            <li><strong>Fatigue</strong> - a representation of your level of fatigue based on training load over the previous week or so. We only display actual fatigue as projected fatigue is not especially useful.</li>
+            <li><strong>Form</strong> - actual and planned - is fitness minus fatigue and is an indication of your ability to perform on a given day.
+            In general you want form to be slightly positive and trending up for your most important events.</li>
+          </ul>
+          <p>Note that by clicking on a label in the chart legend you can hide and show values. This can be helpful when analyzing your progress.</p>
+          <p>The future values are based on the assumption that you follow our load recommendations perfectly. Because life rarely happens as planned, this is a somewhat artificial view of your training future. That is why we built Tacit Training to be dynamic. Every time you click <strong>Update Season</strong> all future values are recomputed based on your current levels, reflected in the way the fitness and form lines merge when the season is updated. If does not matter if your historical values are above or below what was planned. Future recommendations are always based on current fitness, fatigue and form.</p>
+          <p>Read about these measurements and more on <a href="https://support.strava.com/hc/en-us/sections/203773927-Strava-Glossary-Calculations" target="blank"><strong>Strava</strong></a>.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
