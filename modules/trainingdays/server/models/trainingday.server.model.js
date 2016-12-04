@@ -203,33 +203,6 @@ var TrainingDaySchema = new Schema({
       default: 0
     },
   }],
-  // Legacy below
-  sevenDayRampRate: {
-    type: Number,
-    default: 0
-  },
-  sevenDayTargetRampRate: {
-    type: Number,
-    default: 0
-  },
-  dailyTargetRampRate: {
-    type: Number,
-    default: 0
-  },
-  rampRateAdjustmentFactor: {
-    type: Number,
-    default: 1
-  },
-  targetAvgDailyLoad: {
-    type: Number,
-    default: 0
-  },
-  loadRating: {
-    type: String,
-    default: '',
-    enum: loadRatings
-  },
-  // Legacy above
   planLoad: {
     type: Number,
     default: 0
