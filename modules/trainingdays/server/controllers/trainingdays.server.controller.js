@@ -577,7 +577,7 @@ exports.validateWebhookSubscription = function(req, res) {
 
   if (req.query['hub.mode'] === 'subscribe' &&
     req.query['hub.verify_token'] === 'STRAVA') {
-    return res.json(req.query['hub.challenge']);
+    return res.json({ 'hub.challenge': req.query['hub.challenge'] });
   }
 
   // If challenge response is accepted, Strava will respond
@@ -598,12 +598,20 @@ exports.validateWebhookSubscription = function(req, res) {
 
 exports.postWebhookEvent = function(req, res) {
 
-
-
-  // if (req.query['hub.mode'] === 'subscribe' &&
-  //   req.query['hub.verify_token'] === 'STRAVA') {
-  //   res.json(req.query['hub.challenge']);
+  // EXAMPLE POST BODY
+  // {
+  //   "subscription_id": "1",
+  //   "owner_id": 13408,
+  //   "object_id": 12312312312,
+  //   "object_type": "activity",
+  //   "aspect_type": "create",
+  //   "event_time": 1297286541
   // }
+
+  // if (req.params.commit === 'yes') {
+
+  console.log('req.body: ', req.body || 'no body received');
+  return res.status(200).send();
 };
 
 

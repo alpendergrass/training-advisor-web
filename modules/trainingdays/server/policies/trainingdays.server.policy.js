@@ -77,7 +77,7 @@ exports.invokeRolesPolicies = function () {
     roles: ['guest'],
     allows: [{
       resources: '/api/trainingDays/strava/webhook',
-      permissions: ['get']
+      permissions: ['get', 'post']
     }]
   }
   ]);
