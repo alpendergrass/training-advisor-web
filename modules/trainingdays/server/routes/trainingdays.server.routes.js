@@ -37,6 +37,10 @@ module.exports = function (app) {
   app.route('/api/trainingDays/downloadActivities/:trainingDayId').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.downloadActivities);
 
+  app.route('/api/trainingDays/strava/webhook').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.validateWebhookSubscription)
+    .post(trainingDays.postWebhookEvent);
+
   // Finish by binding the trainingDay middleware
   app.param('trainingDayId', trainingDays.trainingDayByID);
 };
