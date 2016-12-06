@@ -1,0 +1,83 @@
+'use strict';
+
+var mongoose = require('mongoose'),
+  Schema = mongoose.Schema;
+
+var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
+
+var statusValues = {
+  values: 'new|downloaded|skipped'.split('|'),
+  message: invalidDataErrorMessage
+};
+
+var sourceValues = {
+  values: 'strava'.split('|'),
+  message: invalidDataErrorMessage
+};
+
+var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
+var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
+var minFitnessOrFatigueValue = [0, minMessage];
+var maxFitnessOrFatigueValue = [999, maxMessage];
+
+// Strava webhook:
+// {
+//   "subscription_id": "1",
+//   "owner_id": 13408,
+//   "object_id": 12312312312,
+//   "object_type": "activity",
+//   "aspect_type": "create",
+//   "event_time": 1297286541
+// }
+
+var EventSchema = new Schema({
+  created: {
+    type: Date,
+    default: Date.now
+  },
+  source: {
+    type: String,
+    default: 'strava',
+    enum: sourceValues
+  },
+  processed: {
+    type: Date
+  },
+  status: {
+    type: String,
+    default: 'new',
+    enum: statusValues
+  },
+  // isSimDay: {
+  //   type: Boolean,
+  //   default: false
+  // },
+  eventTime: {
+    type: Date,
+    required: 'eventTime is required'
+  },
+  // eventTime: {
+  //   type: Number,
+  //   min: minFitnessOrFatigueValue,
+  //   max: maxFitnessOrFatigueValue,
+  //   default: 0
+  // },
+  ownerId: {
+    type: String,
+    default: ''
+  },
+  objectId: {
+    type: String,
+    default: ''
+  },
+  objectType: {
+    type: String,
+    default: ''
+  },
+  aspectType: {
+    type: String,
+    default: ''
+  }
+});
+
+mongoose.model('Event', EventSchema);

@@ -250,6 +250,7 @@ exports.create = function(req, res) {
 
 exports.read = function(req, res) {
   // Return the current trainingDay retrieved in trainingDayByID().
+  console.log('My Training Day active user: ', req.user.username);
   res.json(req.trainingDay);
 };
 
@@ -393,7 +394,7 @@ exports.getSeason = function(req, res) {
     dates = {},
     notifications = [];
 
-  console.log('Active user: ', user.username);
+  console.log('My Season active user: ', user.username);
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
@@ -564,56 +565,6 @@ exports.downloadActivities = function(req, res) {
     });
   }
 };
-
-exports.validateWebhookSubscription = function(req, res) {
-
-  // Strava will challenge subscription.
-
-  // {
-  //   "hub.mode": "subscribe",
-  //   "hub.verify_token": "STRAVA",
-  //   "hub.challenge": "15f7d1a91c1f40f8a748fd134752feb3"
-  // }
-
-  if (req.query['hub.mode'] === 'subscribe' &&
-    req.query['hub.verify_token'] === 'STRAVA') {
-    return res.json({ 'hub.challenge': req.query['hub.challenge'] });
-  }
-
-  // If challenge response is accepted, Strava will respond
-  // (unclear if this response will be another GET or a POST):
-
-  // {
-  //   "id": 1,
-  //   "object_type": "activity",
-  //   "aspect_type": "create",
-  //   "callback_url": "http://a-valid.com/url",
-  //   "created_at": "2015-04-29T18:11:09.400558047-07:00",
-  //   "updated_at": "2015-04-29T18:11:09.400558047-07:00"
-  // }
-
-  console.log('req.query: ', req.query);
-  return res.status(200).send();
-};
-
-exports.postWebhookEvent = function(req, res) {
-
-  // EXAMPLE POST BODY
-  // {
-  //   "subscription_id": "1",
-  //   "owner_id": 13408,
-  //   "object_id": 12312312312,
-  //   "object_type": "activity",
-  //   "aspect_type": "create",
-  //   "event_time": 1297286541
-  // }
-
-  // if (req.params.commit === 'yes') {
-
-  console.log('req.body: ', req.body || 'no body received');
-  return res.status(200).send();
-};
-
 
 //TrainingDay middleware
 exports.trainingDayByID = function(req, res, next, id) {

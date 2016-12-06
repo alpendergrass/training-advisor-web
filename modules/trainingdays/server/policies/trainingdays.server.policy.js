@@ -73,12 +73,12 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/strava/webhook',
       permissions: ['get']
     }]
-  } , {
-    roles: ['guest'],
-    allows: [{
-      resources: '/api/trainingDays/strava/webhook',
-      permissions: ['get', 'post']
-    }]
+  // } , {
+  //   roles: ['guest'],
+  //   allows: [{
+  //     resources: '/api/trainingDays/strava/webhook',
+  //     permissions: ['get', 'post']
+  //   }]
   }
   ]);
 };
