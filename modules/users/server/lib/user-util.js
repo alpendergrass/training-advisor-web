@@ -27,6 +27,12 @@ var adornNotification = function(notification) {
       alert: true,
       blocks: ''
     }, {
+      notificationType: 'fetchstrava',
+      message: 'You need to set your Strava Sync preference.',
+      state: 'settings.profile',
+      alert: false,
+      blocks: ''
+    }, {
       notificationType: 'plangen',
       message: 'You need to update your season.',
       state: 'season',
@@ -159,12 +165,13 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
       notification.blocked = _.includes(blocks, notification.notificationType);
     });
 
-    user.markModified('notifications');
-    // I do not understand why I have to do this as notifications is not a schema-less type.
 
     if (!saveUser) {
       return resolve({ user: user, saved: false });
     }
+
+    user.markModified('notifications');
+    // I do not understand why I have to do this as notifications is not a schema-less type.
 
     user.save(function(err) {
       if (err) {
@@ -188,6 +195,12 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
     notifications.push({ notificationType: 'timezone', lookup: '', add: true });
   } else {
     notifications.push({ notificationType: 'timezone', lookup: '' });
+  }
+
+  if (updatedUser.autoFetchStravaActivities === null) {
+    notifications.push({ notificationType: 'fetchstrava', lookup: '', add: true });
+  } else {
+    notifications.push({ notificationType: 'fetchstrava', lookup: '' });
   }
 
   if (userBefore &&

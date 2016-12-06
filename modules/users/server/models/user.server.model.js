@@ -29,7 +29,7 @@ var trainingPeaksAccountTypes = {
 };
 
 var notificationTypes = {
-  values: 'ftp|timezone|start|goal|plangen|terrain'.split('|'),
+  values: 'ftp|timezone|fetchstrava|start|goal|plangen|terrain'.split('|'),
   message: invalidDataErrorMessage
 };
 
@@ -135,6 +135,10 @@ var UserSchema = new Schema({
   },
   providerData: {},
   additionalProvidersData: {},
+  autoFetchStravaActivities: {
+    type: Boolean,
+    default: null
+  },
   trainingPeaksCredentials: {
     username: {
       type: String,
@@ -176,7 +180,7 @@ var UserSchema = new Schema({
       default: ''
     },
     blocks: {
-      // Presence of this notification blocks the following notification type.
+      // Presence of this notification type blocks the following notification type.
       // Beware of possible circular references.
       type: String,
       enum: blockableNotificationTypes,

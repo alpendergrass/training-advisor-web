@@ -9,6 +9,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
 
     $scope.user = Authentication.user;
     $scope.user.thresholdPowerTestDate = new Date($scope.user.thresholdPowerTestDate);
+    $scope.user.autoFetchStravaActivities = $scope.user.autoFetchStravaActivities === null ? null : $scope.user.autoFetchStravaActivities.toString();
     $scope.data = {
       daysOfTheWeek: [
         { id: '1', name: 'Monday' },
@@ -18,14 +19,14 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
         { id: '5', name: 'Friday' },
         { id: '6', name: 'Saturday' },
         { id: '0', name: 'Sunday' }
-      ],
-      trainingPeaksAccountTypes: [
-        { id: 'SharedFree', name: 'Shared Free' },
-        { id: 'CoachedFree', name: 'Coached Free' },
-        { id: 'SelfCoachedPremium', name: 'Self Coached Premium' },
-        { id: 'SharedSelfCoachedPremium', name: 'Shared Self Coached Premium' },
-        { id: 'CoachedPremium', name: 'Coached Premium' },
-        { id: 'SharedCoachedPremium', name: 'Shared Coached Premium' },
+      // ],
+      // trainingPeaksAccountTypes: [
+      //   { id: 'SharedFree', name: 'Shared Free' },
+      //   { id: 'CoachedFree', name: 'Coached Free' },
+      //   { id: 'SelfCoachedPremium', name: 'Self Coached Premium' },
+      //   { id: 'SharedSelfCoachedPremium', name: 'Shared Self Coached Premium' },
+      //   { id: 'CoachedPremium', name: 'Coached Premium' },
+      //   { id: 'SharedCoachedPremium', name: 'Shared Coached Premium' },
       ]
     };
 

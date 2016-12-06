@@ -12,7 +12,6 @@ var _ = require('lodash'),
 
 exports.update = function(req, res) {
   var user = req.user;
-  var notifications;
   var userUpdate = req.body;
 
   // As a security measure we remove roles from the incoming object in case they were tampered with.
@@ -23,14 +22,11 @@ exports.update = function(req, res) {
       message: 'User is not signed in'
     });
   }
-
-  userUtil.verifyUserSettings(userUpdate, user, false, function(err, response) {
+  userUtil.verifyUserSettings(userUpdate, user, false, function(err, verified) {
     if (err) {
       console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
     } else {
-      userUpdate = response.user;
-      // Save notifications so we can restore after merge below
-      notifications = user.notifications;
+      userUpdate = verified.user;
     }
 
     // Merge updates with existing user
@@ -38,10 +34,6 @@ exports.update = function(req, res) {
 
     user.updated = Date.now();
     user.displayName = user.firstName + ' ' + user.lastName;
-
-    if (notifications) {
-      user.notifications = notifications;
-    }
 
     user.save(function(err) {
       if (err) {
