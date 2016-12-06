@@ -63,12 +63,12 @@ var EventSchema = new Schema({
   //   default: 0
   // },
   ownerId: {
-    type: String,
-    default: ''
+    type: Number,
+    default: 0
   },
   objectId: {
-    type: String,
-    default: ''
+    type: Number,
+    default: 0
   },
   objectType: {
     type: String,

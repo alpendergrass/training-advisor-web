@@ -15,7 +15,7 @@ module.exports.storeEvent = function(data) {
     if (data.object_type === 'activity' && data.aspect_type === 'create') {
       let event = new EventModel({
         source: 'strava',
-        ownerID: data.owner_id,
+        ownerId: data.owner_id,
         objectId: data.object_id,
         objectType: data.object_type,
         aspectType: data.aspect_type,
