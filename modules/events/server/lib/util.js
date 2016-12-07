@@ -75,7 +75,7 @@ module.exports.processEvents = function() {
                 console.log('strava webhook event processing failed: ', err);
               });
           } else {
-            event.status = 'skipped';
+            event.status = 'unrecognized';
 
             event.save()
               .then(function(event) {
