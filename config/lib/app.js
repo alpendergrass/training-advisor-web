@@ -1,7 +1,7 @@
 'use strict';
 
-
-var config = require('../config'),
+var path = require('path'),
+  config = require('../config'),
   mongoose = require('./mongoose'),
   express = require('./express'),
   chalk = require('chalk'),
@@ -41,6 +41,20 @@ module.exports.init = function init(callback) {
     if (process.env.TZ) {
       console.log(chalk.blue('Server timezone manually set to: ', process.env.TZ));
     }
+
+    // Schedule processEvents job:
+    // only run this on first instance.
+    var instanceIndex = process.env.CF_INSTANCE_INDEX || 0;
+
+    if (instanceIndex > 0) {
+      console.log(chalk.green('Skipping scheduling of processEvents job - not running on first instance.'));
+    } else {
+      var eventsUtil = require(path.resolve('./modules/events/server/lib/util')),
+        sched = later.parse.recur().every(5).minute();
+
+      later.setInterval(eventsUtil.processEvents, sched);
+    }
+
 
     // //Schedule workout download job: need to figure out how to run this on only one instance.
     // // var textSched = later.parse.text('every 1 min'); //time is GMT

@@ -9,6 +9,7 @@ var path = require('path'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   err;
 
+mongoose.Promise = global.Promise;
 
 var adornNotification = function(notification) {
   // *** Beware of possible circular blocks. ***

@@ -6,7 +6,7 @@ var mongoose = require('mongoose'),
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
 var statusValues = {
-  values: 'new|downloaded|skipped'.split('|'),
+  values: 'new|fetched|skipped'.split('|'),
   message: invalidDataErrorMessage
 };
 
@@ -41,7 +41,8 @@ var EventSchema = new Schema({
     enum: sourceValues
   },
   processed: {
-    type: Date
+    type: Date,
+    default: null
   },
   status: {
     type: String,

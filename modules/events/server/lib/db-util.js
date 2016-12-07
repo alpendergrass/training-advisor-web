@@ -4,24 +4,15 @@ var mongoose = require('mongoose'),
   EventModel = mongoose.model('Event'),
   err;
 
-module.exports = {};
+const GET_EVENTS_LIMIT = 5;
 
-module.exports.saveEvent = function(event) {
-  return new Promise(function(resolve, reject) {
-//overkill - do inline?
-    event.save()
-      .then(function(events) {
-        return resolve(events);
-      })
-      .catch(function(err) {
-        reject(err);
-      });
-  });
-};
+mongoose.Promise = global.Promise;
+
+module.exports = {};
 
 module.exports.getUnprocessedEvents = function() {
   return new Promise(function(resolve, reject) {
-    let findEvents = EventModel.find({ 'processed': null }).exec();
+    let findEvents = EventModel.find({ 'status': 'new' }).limit(GET_EVENTS_LIMIT).exec();
 
     findEvents
       .then(function(events) {
@@ -32,16 +23,3 @@ module.exports.getUnprocessedEvents = function() {
       });
   });
 };
-
-// module.exports.updateEvent = function(event) {
-//   return new Promise(function(resolve, reject) {
-//     let notificationsModified = false;
-
-//     event.save(function(err) {
-//       if (err) {
-//         return reject(err);
-//       }
-//       return resolve({ user: user, saved: true });
-//     });
-//   });
-// };
