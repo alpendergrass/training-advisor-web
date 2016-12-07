@@ -219,3 +219,17 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
     });
 };
 
+module.exports.getUserByStravaID = function(id) {
+  return new Promise(function(resolve, reject) {
+    // We are assuming that user.provider ==='strava'
+    let findUser = User.findOne({ 'providerData.id': id }).exec();
+
+    findUser
+      .then(function(user) {
+        return resolve(user);
+      })
+      .catch(function(err) {
+        reject(err);
+      });
+  });
+};

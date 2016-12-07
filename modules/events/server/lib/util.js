@@ -6,6 +6,8 @@ var path = require('path'),
   mongoose = require('mongoose'),
   EventModel = mongoose.model('Event'),
   dbUtil = require('./db-util'),
+  userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
+  stravaUtil = require(path.resolve('./modules/trainingdays/server/lib/strava-util')),
   err;
 
 mongoose.Promise = global.Promise;
@@ -49,29 +51,39 @@ module.exports.processEvents = function() {
           if (event.source === 'strava' && event.objectType === 'activity' && event.aspectType === 'create') {
             // Strava activity - see if the user wants us to save it.
             // get user by strava user id: providerData.id
-            // if autoFetchStravaActivities
-            //    get and process activity
-            // else
-            //    mark event skipped.
-            event.status = 'skipped';
-            event.processed = moment().format();
+            userUtil.getUserByStravaID(event.ownerId)
+              .then(function(user) {
+                if (user.autoFetchStravaActivities) {
+                  console.log('going after it: ', event.objectId);
+                  return stravaUtil.fetchActivity(user, event.objectId);
+                } else {
+                  event.status = 'skipped';
+                  return Promise.resolve();
+                }
+              })
+              .then(function() {
+                if (event.status !== 'skipped') {
+                  event.status = 'fetched';
+                }
 
-            event.save()
+                event.processed = moment().format();
+                return event.save();
+              })
               .then(function(event) {
-                console.log('updated strava webhook event: ', event);
+                console.log('processed strava webhook event: ', event);
               })
               .catch(function(err) {
-                console.log('strava webhook event save failed: ', err);
+                console.log('strava webhook event processing failed: ', err);
               });
           } else {
             event.status = 'skipped';
 
             event.save()
               .then(function(event) {
-                console.log('skipped unrecognized event: ', event);
+                console.log('skipping unrecognized event: ', event);
               })
               .catch(function(err) {
-                console.log('skipped unrecognized event save failed: ', err);
+                console.log('skipping unrecognized event save failed: ', err);
               });
           }
         });

@@ -9,7 +9,7 @@ var path = require('path'),
   util = require('../lib/util'),
   dbUtil = require('../lib/db-util'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
-  downloadStrava = require('../lib/download-strava'),
+  stravaUtil = require('../lib/strava-util'),
   downloadTrainingPeaks = require('../lib/download-trainingpeaks'),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
@@ -542,7 +542,7 @@ exports.downloadActivities = function(req, res) {
   var trainingDay = req.trainingDay;
 
   if (req.query.provider === 'strava') {
-    downloadStrava.downloadActivities(req.user, trainingDay, function(err, response) {
+    stravaUtil.downloadActivities(req.user, trainingDay, function(err, response) {
       if (err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)

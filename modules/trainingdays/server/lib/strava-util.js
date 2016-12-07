@@ -13,6 +13,29 @@ var path = require('path'),
 
 
 module.exports = {};
+module.exports.fetchActivity = function(user, activityId) {
+  return new Promise(function(resolve, reject) {
+    console.log('Strava: Initiating fetchActivity for TacitTraining user: ', user.username);
+    let accessToken = user.provider ==='strava'? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
+
+    strava.activities.get({ 'access_token': accessToken, 'id': activityId }, function(err, payload) {
+      if(err) {
+        console.log('strava.activities.get returned error: ', err);
+        return reject(err);
+      }
+
+      if(payload.errors) {
+        console.log('strava.activities.get access failed: ' + payload.message);
+        console.log(JSON.stringify(payload));
+        return reject(new Error('strava.activities.get access failed: ' + payload.message));
+      }
+
+      console.log('payload: ', payload);
+      return resolve();
+    });
+
+  });
+};
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
   var searchDate = moment(trainingDay.dateNumeric.toString()).unix(),

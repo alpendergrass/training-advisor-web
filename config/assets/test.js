@@ -8,7 +8,7 @@ module.exports = {
     // server: ['modules/trainingdays/tests/server/**/*.js'],
     // server: ['modules/trainingdays/tests/server/routes.tests.js'],
     // server: ['modules/trainingdays/tests/server/lib.db-util.tests.js'],
-    // server: ['modules/trainingdays/tests/server/lib.download-strava.tests.js'],
+    // server: ['modules/trainingdays/tests/server/lib.strava-util.tests.js'],
     // server: ['modules/trainingdays/tests/server/lib.download-trainingpeaks.tests.js'],
     // server: ['modules/advisor/tests/server/*.js'],
     // server: ['modules/advisor/tests/server/lib.advice-load.tests.js'],

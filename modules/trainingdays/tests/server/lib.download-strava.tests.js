@@ -10,7 +10,7 @@ var path = require('path'),
   testHelpers = require('./util/test-helpers'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants'));
 
-var downloadStrava,
+var stravaUtil,
   stravaStub,
   user,
   workoutDate,
@@ -22,7 +22,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
   before(function(done) {
     stravaStub = {};
     stravaStub.athlete = {};
-    downloadStrava = proxyquire('../../server/lib/download-strava', { 'strava-v3': stravaStub });
+    stravaUtil = proxyquire('../../server/lib/strava-util', { 'strava-v3': stravaStub });
 
     done();
   });
@@ -68,7 +68,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(new Error('Stubbed athlete.listActivities error'));
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.exist(err);
         (err.message).should.containEql('athlete.listActivities error');
         done();
@@ -80,7 +80,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, { message: 'payload error message', errors: ['payload Error'] });
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.exist(err);
         (err.message).should.containEql('payload error message');
         done();
@@ -92,7 +92,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, []);
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('found no Strava activities for the day');
         done();
@@ -118,7 +118,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
         done();
@@ -138,7 +138,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
         (returnedTrainingDay.completedActivities.length).should.equal(1);
@@ -165,7 +165,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('downloaded 2 new Strava activities');
         (returnedTrainingDay.completedActivities.length).should.equal(2);
@@ -186,12 +186,12 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      downloadStrava.downloadActivities(user, trainingDay, function(err, firstReturnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, firstReturnedTrainingDay) {
         if (err) {
           console.log('firstReturnedTrainingDay err: ', err);
         }
 
-        return downloadStrava.downloadActivities(user, firstReturnedTrainingDay, function(err, returnedTrainingDay) {
+        return stravaUtil.downloadActivities(user, firstReturnedTrainingDay, function(err, returnedTrainingDay) {
           should.not.exist(err);
           (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
           (returnedTrainingDay.completedActivities.length).should.equal(1);
@@ -216,7 +216,7 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return downloadStrava.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
         (returnedTrainingDay.completedActivities.length).should.equal(1);
