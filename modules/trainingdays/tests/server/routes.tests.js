@@ -10,14 +10,8 @@ var should = require('should'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   express = require(path.resolve('./config/lib/express'));
 
-/**
- * Globals
- */
 var app, agent, credentials, user, trainingDay;
 
-/**
- * TrainingDay routes tests
- */
 describe('TrainingDay server routes tests', function() {
   before(function(done) {
     // Get application
@@ -33,7 +27,6 @@ describe('TrainingDay server routes tests', function() {
       password: 'M3@n.jsI$Aw3$0m3'
     };
 
-    // Create a new user
     user = new User({
       firstName: 'Full',
       lastName: 'Name',
@@ -50,7 +43,6 @@ describe('TrainingDay server routes tests', function() {
         console.log('user.save error: ' + err);
         return done(err);
       }
-
 
       testHelpers.createStartingPoint(user, new Date(), 1, 9, 9, function(err, startDay) {
         if (err) {

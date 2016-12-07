@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
   EventModel = mongoose.model('Event'),
   err;
 
-const GET_EVENTS_LIMIT = 5;
+const GET_EVENTS_LIMIT = 20;
 
 mongoose.Promise = global.Promise;
 

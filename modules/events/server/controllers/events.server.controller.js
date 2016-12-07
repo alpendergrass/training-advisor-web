@@ -1,10 +1,6 @@
 'use strict';
 
-var path = require('path'),
-  _ = require('lodash'),
-  mongoose = require('mongoose'),
-  util = require('../lib/util'),
-  errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
+var util = require('../lib/util');
 
 exports.validateStravaWebhookSubscription = function(req, res) {
   // We will use curl on CL to request subscription.
