@@ -54,7 +54,6 @@ module.exports.processEvents = function() {
             userUtil.getUserByStravaID(event.ownerId)
               .then(function(user) {
                 if (user.autoFetchStravaActivities) {
-                  console.log('going after it: ', event.objectId);
                   return stravaUtil.fetchActivity(user, event.objectId);
                 } else {
                   event.status = 'skipped';
@@ -83,7 +82,7 @@ module.exports.processEvents = function() {
                 console.log('skipping unrecognized event: ', event);
               })
               .catch(function(err) {
-                console.log('skipping unrecognized event save failed: ', err);
+                console.log('skipping unrecognized event - save failed: ', err);
               });
           }
         });

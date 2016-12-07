@@ -95,8 +95,14 @@ module.exports.fetchActivity = function(user, activityId) {
             return reject(err);
           }
 
-          // refreshAdvice
-          return resolve();
+          adviceEngine.refreshAdvice(user, trainingDay)
+            .then(function(updatedTrainingDay) {
+              return resolve();
+            })
+            .catch(function(err) {
+              console.log('Strava fetchActivity refreshAdvice err: ', err);
+              return resolve();
+            });
         });
       });
     });
