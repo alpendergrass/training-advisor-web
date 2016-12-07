@@ -84,7 +84,7 @@ module.exports.fetchActivity = function(user, activityId) {
         }
 
         if (!processActivity(payload, trainingDay)) {
-          return resolve();
+          return resolve(trainingDay);
         }
 
         console.log('===> Strava fetchActivity: We found a keeper for user ', user.username);
@@ -97,11 +97,11 @@ module.exports.fetchActivity = function(user, activityId) {
 
           adviceEngine.refreshAdvice(user, trainingDay)
             .then(function(updatedTrainingDay) {
-              return resolve();
+              return resolve(updatedTrainingDay);
             })
             .catch(function(err) {
               console.log('Strava fetchActivity refreshAdvice err: ', err);
-              return resolve();
+              return resolve(trainingDay);
             });
         });
       });

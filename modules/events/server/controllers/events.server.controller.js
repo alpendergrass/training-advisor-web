@@ -21,9 +21,7 @@ exports.validateStravaWebhookSubscription = function(req, res) {
     return res.json({ 'hub.challenge': req.query['hub.challenge'] });
   }
 
-  // If challenge response is accepted, Strava will respond
-  // (unclear if this response will be another GET or a POST):
-
+  // If challenge response is accepted, Strava will respond with:
   // {
   //   "id": 1,
   //   "object_type": "activity",

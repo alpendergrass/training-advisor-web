@@ -62,6 +62,96 @@ describe('TrainingDay Download Strava Unit Tests:', function() {
     });
   });
 
+  describe('Method fetchActivity', function() {
+    it('should return an error when strava.activities.get fails', function(done) {
+      stravaStub.activities.get = function(parm, callback) {
+        return callback(new Error('Stubbed activities.get error'));
+      };
+
+      stravaUtil.fetchActivity(user, 99)
+        .then(function() {
+          // Should not be here.
+        })
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('activities.get error');
+          done();
+        });
+    });
+
+    it('should return an error when strava.athlete.listActivities returns payload.errors', function(done) {
+      stravaStub.activities.get = function(parm, callback) {
+        return callback(null, { message: 'payload error message', errors: ['payload Error'] });
+      };
+
+      stravaUtil.fetchActivity(user, 99)
+        .then(function() {
+          // Should not be here.
+        })
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('payload error message');
+          done();
+        });
+    });
+
+    it('should resolve when activity is returned', function(done) {
+      var activity = {
+        id: 752757127,
+        name: 'Lunch Ride',
+        start_date_local: moment.utc(workoutDate).format(),
+        weighted_average_watts: 189,
+        moving_time: 9342,
+        total_elevation_gain: 123
+      };
+
+      stravaStub.activities.get = function(parm, callback) {
+        return callback(null, activity);
+      };
+
+      stravaUtil.fetchActivity(user, 752757127)
+        .then(function(td) {
+          should.equal(td.completedActivities.length, 1);
+          should.equal(td.completedActivities[0].name, activity.name);
+          done();
+        })
+        .catch(function(err) {
+          should.not.exist(err);
+          done();
+        });
+    });
+
+    it('should resolve when activity is returned but it has been downloaded previously', function(done) {
+      var activity = {
+        id: 752757127,
+        name: 'Lunch Ride',
+        start_date_local: moment.utc(workoutDate).format(),
+        weighted_average_watts: 189,
+        moving_time: 9342,
+        total_elevation_gain: 123
+      };
+
+      stravaStub.activities.get = function(parm, callback) {
+        return callback(null, activity);
+      };
+
+      stravaUtil.fetchActivity(user, 752757127)
+        .then(function() {
+          return stravaUtil.fetchActivity(user, 752757127);
+        })
+        .then(function(td) {
+          should.equal(td.completedActivities.length, 1);
+          should.equal(td.completedActivities[0].name, activity.name);
+          done();
+        })
+        .catch(function(err) {
+          should.not.exist(err);
+          done();
+        });
+    });
+
+  });
+
   describe('Method downloadActivities', function() {
     it('should return an error when strava.athlete.listActivities fails', function(done) {
       stravaStub.athlete.listActivities = function(parm, callback) {
