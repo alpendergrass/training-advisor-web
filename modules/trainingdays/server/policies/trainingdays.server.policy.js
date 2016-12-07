@@ -1,14 +1,11 @@
 'use strict';
 
-
 var acl = require('acl');
 
 // Using the memory backend
 acl = new acl(new acl.memoryBackend());
 
-/**
- * Invoke TrainingDays Permissions
- */
+// Invoke TrainingDays Permissions
 exports.invokeRolesPolicies = function () {
   acl.allow([{
     roles: ['admin'],
@@ -69,18 +66,14 @@ exports.invokeRolesPolicies = function () {
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',
       permissions: ['get']
-    }, {
-      resources: '/api/trainingDays/strava/webhook',
-      permissions: ['get']
     }]
+  }]);
   // } , {
   //   roles: ['guest'],
   //   allows: [{
   //     resources: '/api/trainingDays/strava/webhook',
   //     permissions: ['get', 'post']
   //   }]
-  }
-  ]);
 };
 
 // Check If TrainingDays Policy Allows

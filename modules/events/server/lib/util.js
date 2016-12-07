@@ -88,7 +88,7 @@ module.exports.processEvents = function() {
           }
         });
 
-        console.log('processEvents   end: ', moment().toDate());
+        console.log('processEvents   end: ', moment().format());
         return resolve();
       })
       .catch(function(err) {

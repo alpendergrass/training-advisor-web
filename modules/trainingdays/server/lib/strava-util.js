@@ -1,6 +1,5 @@
 'use strict';
 
-
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment-timezone'),
@@ -11,8 +10,53 @@ var path = require('path'),
   strava = require('strava-v3'),
   err;
 
+// mongoose.Promise = global.Promise;
+
+var processActivity = function(stravaActivity, trainingDay) {
+  let newActivity = {};
+  let fudgedNP;
+  let intensity;
+
+  if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
+    // We have already processed this stravaActivity.
+    console.log('stravaActivity has already been processed.');
+    return false;
+  }
+
+  if (!stravaActivity.weighted_average_watts) {
+    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
+    console.log('stravaActivity.weighted_average_watts is not present: ', stravaActivity);
+    return false;
+  }
+
+  //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
+  fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
+  // IF = NP/FTP
+  intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
+  // TSS = [(s x W x IF) / (FTP x 3600)] x 100
+  // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
+  newActivity.intensity = intensity;
+  newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+  newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
+  console.log('Strava: stravaActivity.weighted_average_watts: ' + stravaActivity.weighted_average_watts);
+  console.log('Strava: fudgedNP: ' + fudgedNP);
+  console.log('Strava: stravaActivity.moving_time: ' + stravaActivity.moving_time);
+  console.log('Strava: trainingDay.user.thresholdPower: ' + trainingDay.user.thresholdPower);
+  console.log('Strava: intensity: ' + intensity);
+  console.log('Strava: load: ' + newActivity.load);
+  newActivity.source = 'strava';
+  newActivity.sourceID = stravaActivity.id;
+  newActivity.name = stravaActivity.name;
+  newActivity.notes = stravaActivity.name;
+  // newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
+  // newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';
+  trainingDay.completedActivities.push(newActivity);
+
+  return true;
+};
 
 module.exports = {};
+
 module.exports.fetchActivity = function(user, activityId) {
   return new Promise(function(resolve, reject) {
     console.log('Strava: Initiating fetchActivity for TacitTraining user: ', user.username);
@@ -30,20 +74,39 @@ module.exports.fetchActivity = function(user, activityId) {
         return reject(new Error('strava.activities.get access failed: ' + payload.message));
       }
 
-      console.log('payload: ', payload);
-      return resolve();
-    });
+      // console.log('payload: ', payload);
 
+      let numericDate = util.toNumericDate(payload.start_date_local);
+
+      dbUtil.getTrainingDayDocument(user, numericDate, function(err, trainingDay) {
+        if (err) {
+          return reject(err);
+        }
+
+        if (!processActivity(payload, trainingDay)) {
+          return resolve();
+        }
+
+        console.log('===> Strava fetchActivity: We found a keeper for user ', user.username);
+
+        trainingDay.save(function (err) {
+          if (err) {
+            console.log('Strava: fetchActivity td.save err: ', err);
+            return reject(err);
+          }
+
+          // refreshAdvice
+          return resolve();
+        });
+      });
+    });
   });
 };
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
   var searchDate = moment(trainingDay.dateNumeric.toString()).unix(),
-    newActivity = {},
-    fudgedNP,
     activityCount = 0,
     countPhrase = '',
-    intensity,
     accessToken,
     statusMessage = {
       type: '',
@@ -87,39 +150,12 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
 
     _.forEach(payload, function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
-
       var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
 
-      // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
-
-      if (stravaActivity.id && stravaActivity.weighted_average_watts &&
-        numericStartDateLocal === trainingDay.dateNumeric) {
-        if (!_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
-          activityCount++;
-          //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
-          fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
-          // IF = NP/FTP
-          intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
-          // TSS = [(s x W x IF) / (FTP x 3600)] x 100
-          // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
-          newActivity.intensity = intensity;
-          newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
-          newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
+      if (stravaActivity.id && numericStartDateLocal === trainingDay.dateNumeric) {
+        if (processActivity(stravaActivity, trainingDay)) {
           console.log('===> Strava: We found a keeper for user ', user.username);
-          console.log('Strava: stravaActivity.weighted_average_watts: ' + stravaActivity.weighted_average_watts);
-          console.log('Strava: fudgedNP: ' + fudgedNP);
-          console.log('Strava: stravaActivity.moving_time: ' + stravaActivity.moving_time);
-          console.log('Strava: trainingDay.user.thresholdPower: ' + trainingDay.user.thresholdPower);
-          console.log('Strava: intensity: ' + intensity);
-          console.log('Strava: load: ' + newActivity.load);
-          newActivity.source = 'strava';
-          newActivity.sourceID = stravaActivity.id;
-          newActivity.name = stravaActivity.name;
-          newActivity.notes = stravaActivity.name;
-          // newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
-          // newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';
-          trainingDay.completedActivities.push(newActivity);
-          newActivity = {};
+          activityCount++;
         }
       }
     });
