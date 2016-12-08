@@ -10,6 +10,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.user = Authentication.user;
     $scope.user.thresholdPowerTestDate = new Date($scope.user.thresholdPowerTestDate);
     $scope.user.autoFetchStravaActivities = $scope.user.autoFetchStravaActivities === null ? null : $scope.user.autoFetchStravaActivities.toString();
+    $scope.user.levelOfDetail = $scope.user.levelOfDetail.toString();
     $scope.data = {
       daysOfTheWeek: [
         { id: '1', name: 'Monday' },
