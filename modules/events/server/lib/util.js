@@ -53,7 +53,9 @@ module.exports.processEvents = function() {
             // get user by strava user id: providerData.id
             userUtil.getUserByStravaID(event.ownerId)
               .then(function(user) {
-                if (user.autoFetchStravaActivities) {
+                if (user && user.autoFetchStravaActivities) {
+                  // We were getting a few events for which we found no user.
+                  // Not sure how this happened.
                   return stravaUtil.fetchActivity(user, event.objectId);
                 } else {
                   event.status = 'skipped';

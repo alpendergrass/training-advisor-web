@@ -50,7 +50,7 @@ module.exports.init = function init(callback) {
       console.log(chalk.green('Skipping scheduling of processEvents job - not running on first instance.'));
     } else {
       var eventsUtil = require(path.resolve('./modules/events/server/lib/util')),
-        sched = later.parse.recur().every(3).minute();
+        sched = later.parse.recur().every(4).minute();
 
       later.setInterval(eventsUtil.processEvents, sched);
     }
