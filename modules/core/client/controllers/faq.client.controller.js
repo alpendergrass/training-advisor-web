@@ -1,10 +1,8 @@
 'use strict';
 
-angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentication',
-  function($scope, $sce, Authentication) {
-    // This provides Authentication context.
-    $scope.authentication = Authentication;
-    $scope.FAQ = [{
+angular.module('core').controller('FAQController',
+  function() {
+    this.FAQ = [{
       sectionTitle: 'What is Tacit Training?',
       questions: [{
         question: 'What is it?',
@@ -32,22 +30,22 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
       sectionTitle: 'The Basics',
       questions: [{
         question: 'How do I use Tacit Training on a daily basis?',
-        answer: '<p>For every ride you do you need to download your ride from Strava or manually enter your Training Load for the ride. Then you should ask Tacit Training for advice. Tacit Training will advise you if you should ride or not and if so, what kind of ride to do.</p><p>Tacit Training will also give you a suggested Training Load range for the day. While riding, you can monitor your Training Load (typically shown as TSS® - Training Stress Score®) in real-time on your head unit to stay within those parameters.</p><p>In addition to the advice you should frequently update your My Season page to see the big picture. This will help you understand how you are progressing and what is planned for future training days.</p>'
+        answer: '<p>Every day you should ask Tacit Training for advice. Tacit Training will advise you if you should ride or not and if so, what kind of ride to do. Tacit Training will also give you a suggested Training Load range for the day. While riding, you can monitor your Training Load (typically shown as TSS® - Training Stress Score®) in real-time on your head unit to stay within those parameters.</p><p>In addition to the advice you should frequently update your My Season page to see the big picture. This will help you understand how you are progressing and what is planned for future training days.</p>'
       }, {
         question: 'How do I get started? (Setting up my account)',
-        answer: 'You create an account by linking to your Strava account. Click the Strava button on the sign in page, enter your Strava credentials and you are logged in.</p><p>You then need to enter some personal information on the My Profile Page. The most important bits are your time zone and your Functional Threshold Power and test date.</p>'
+        answer: 'You create an account by linking to your Strava account. Click the Strava button on the sign in page, enter your Strava credentials and you are logged in.</p><p>You then need to enter some personal information on the My Profile Page. The most important bits are your time zone and your Functional Threshold Power and test date. We also recommend that you select "Fetch Strava activities automatically" to save you from having to download after every ride.</p>'
       }, {
         question: 'And then? (Setting start day)',
-        answer: '<p>You need to create a start day by clicking the Start Day link on My Season or My Calendar. Your start day can be yesterday or today. When creating your start day you need to input Fitness and Fatigue values for the day. If you are a Strava premium member, you can find these values in Strava on your Training | Fitness & Freshness page. You can also find these values in other training tools. If you do not have these values, we recommend you multiply the average number of hours you ride per week by 7 and use this number as your starting Fitness value. For Fatigue you can add 5 if you are feel rather tired, subtract 5 if you feel especially fresh, or use the same value if you feel neither.</p><p>If you rode on or since your start day, download the ride from Strava or manually enter data for that ride. You do this on the page for the day the ride occurred. If needed, see the Ride Data section below for more on how to enter data.</p><p>Do not be concerned if you started training for the current season several days, weeks or months ago. We will calculate your season plan and advice using a virtual start day based on your first goal event.</p>'
+        answer: '<p>You need to create a start day by clicking the Start Day link on My Season or the Calendar. Your start day can be yesterday or today. When creating your start day you need to input Fitness and Fatigue values for the day. If you are a Strava premium member, you can find these values in Strava on your Training | Fitness & Freshness page. You can also find these values in other training tools. If you do not have these values, we recommend you multiply the average number of hours you ride per week by 7 and use this number as your starting Fitness value. For Fatigue you can add 5 if you are feel rather tired, subtract 5 if you feel especially fresh, or use the same value if you feel neither.</p><p>If you rode on or since your start day, download the ride from Strava or manually enter data for that ride. You do this on the page for the day the ride occurred. If needed, see the Ride Data section below for more on how to enter data.</p><p>Do not be concerned if you started training for the current season several days, weeks or months ago. We will calculate your season plan and advice using a virtual start day based on your first goal event.</p>'
       }, {
         question: 'Next? (Creating a goal event)',
         answer: 'You should create at least one future goal event. Click on the Goal Event link. For your goal event you can provide a Training Load estimate for the event. A reasonable guess will do but if you have no idea, leave it blank - you can true it up later once you have a better feel for Training Load.'
       }, {
         question: 'So now what? (Getting advice)',
-        answer: '<p>If you rode on or after your start day, download the ride from Strava or manually enter data for that ride. You do this on the page for the day the ride occurred. If needed, see the Ride Data section below for more on how to enter data.</p><p>To get advice, click the Get Advice button on My Season or My Calendar. On this Get Advice page you will be able to select today or tomorrow. Make you selection and click the button. And there you go!</p>'
+        answer: '<p>If you rode on or after your start day, download the ride from Strava or manually enter data for that ride. You do this on the page for the day the ride occurred. If needed, see the Ride Data section below for more on how to enter data.</p><p>To get advice, click the Get Advice button. And there you go!</p>'
       }, {
         question: 'And after I ride? (Entering ride data)',
-        answer: 'Tacit Training needs your Training Load for every ride you do. On the Training Day page for the day you can download rides from Strava. You can also manually enter a ride by clicking the + button. See the Ride Data section below for more.'
+        answer: 'Tacit Training needs your Training Load for every ride you do. If you did not set up your profile to automatically fetch your ride data, on My Training Day you can download rides from Strava. You can also manually enter a ride by clicking the + button. See the Ride Data section below for more.'
       }, {
         question: 'I want the big picture! (Generating a season view)',
         answer: 'Go to My Season and click the Update Season button. This will update the season view using your latest ride data. And be sure to check out the What-If Simulator. This will let you see how your season will be affected by doing or skipping specific events or workouts. The buttons to run what-if simulations are at the bottom of the Season page.'
@@ -62,7 +60,7 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
         answer: 'No. Tacit Training does not know everything that is going on in your life. Or, most importantly, how you feel today. Do what you have to do, ride when you can but always pay attention to what your body is telling you. As long as you enter your ride data, Tacit Training will help keep you on track. We know you will not follow our advice every day but if we have the data we will adjust.'
       }, {
         question: 'Tacit Training says I should go easy today but I feel good, I want to hammer!  What should I do?',
-        answer: 'By all means, go hard. You know how you feel. All we know are numbers and what you tell us. Note that on the Training Day page, after you receive advice, you have the option of specifying that you want to do a different sort of ride than what we recommend. If you request a different ride, we will give you a Training Load range for that ride type.'
+        answer: 'By all means, go hard. You know how you feel. All we know are numbers and what you tell us. Note that on My Training Day, after you receive advice, you have the option of specifying that you want to do a different sort of ride than what we recommend. If you request a different ride, we will give you a Training Load range for that ride type.'
       }, {
         question: 'Tacit Training says I should go hard today but I’m too tired or I’m sick.  What should I do?',
         answer: 'Do what your body is telling you to do. If you need to rest, by all means REST. As with any advice you are given, only you can decide if it is right for you.'
@@ -79,7 +77,7 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
         question: 'I have multiple season goals. How do I set those up?',
         answer: 'Choose Schedule Events from the Training Days menu and specify that the event is a goal. After you create a goal be sure to go My Season and click Update Season to see how your new goal impacts your season. You can create as many goal events as you like and we will help you prepare for them.'
       }, {
-        question: 'I have intermediate events that I do not plan to t6 for but would like to include in my training. How do I set those up?',
+        question: 'I have intermediate events that I do not plan to peak for but would like to include in my training. How do I set those up?',
         answer: 'Go to Training Days | Schedule Events to create intermediate events. On this page, in addition to goal event, you can create medium priority and low priority events. Be sure to update your season after you add events.'
       }, {
         question: 'I have a club race every Tuesday night from April until September and a team ride every Thursday evening. Can I set these up as recurring events?',
@@ -92,10 +90,10 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
       sectionTitle: 'Ride Data',
       questions: [{
         question: 'How do I get my workout data into Tacit Training?',
-        answer: 'Tacit Training needs your Training Load for each ride. Ideally you will download your ride from Strava - see below for details. If for some reason you cannot download a ride, on the Training Day page you can manually enter the ride by clicking the + button. You can get Training Load (as TSS® - Training Stress Score®) from most head units or you can provide an estimate if actual data is not available. When estimating use rides of similar duration and intensity as a guide.'
+        answer: 'Tacit Training needs your Training Load for each ride. Ideally we will have your ride data from Strava - see below for details. If for some reason your ride is not on Strava, on My Training Day you can manually enter the ride by clicking the + button. You can get Training Load (as TSS® - Training Stress Score®) from most head units or you can provide an estimate if actual data is not available. When estimating use rides of similar duration and intensity as a guide.'
       }, {
-        question: 'How do I download my rides from Strava?',
-        answer: 'Because your Tacit Training account is linked to your Strava account, you are set up to download your rides from Strava from within Tacit Training. Click the Strava download button on the Training Day page.'
+        question: 'How do I get my rides from Strava?',
+        answer: 'Because your Tacit Training account is linked to your Strava account, you can either set your profile to automatically fetch your rides from Strava - on My Profile - or you can download your rides from Strava individually. Click the Strava download button on My Training Day.'
       }, {
         question: 'I have not input my rides into Tacit Training for a day/week/month or two but I want to start using it again. Do I have to input all the workouts I’ve done since the last time I used it?',
         answer: 'No. You need to do a Fitness and Fatigue True-Up - see the Training Days menu.'
@@ -108,4 +106,5 @@ angular.module('core').controller('FAQController', ['$scope', '$sce', 'Authentic
       }]
     }];
   }
-]);
+);
+// ]);

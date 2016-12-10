@@ -1,10 +1,10 @@
-<section ng-controller="FAQController">
+<section ng-controller="FAQController as faq">
   <div class="container">
     <div class="page-header">
       <h2>Frequently Asked Questions</h2>
     </div>
     <div class="container">
-      <div ng-repeat="section in FAQ">
+      <div ng-repeat="section in faq.FAQ">
         <h3>{{section.sectionTitle}}</h3>
         <uib-accordion>
           <div uib-accordion-group class="panel-default" heading="{{q.question}}" ng-repeat="q in section.questions">
