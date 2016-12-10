@@ -1,6 +1,5 @@
 'use strict';
 
-// TrainingDays controller
 angular.module('trainingDays')
   .controller('TrainingDaysController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
     function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
@@ -11,8 +10,7 @@ angular.module('trainingDays')
       });
 
       //The following makes lodash available in html.
-      //Is done in header controller, no need to repeat here.
-      // $scope._ = _;
+      $scope._ = _;
 
       // //Create socket for server-to-client messaging.
       // //Make sure the Socket is connected

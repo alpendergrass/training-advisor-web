@@ -7,11 +7,12 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       jQuery('[data-toggle="popover"]').popover();
     });
 
-    $scope.user = Authentication.user;
-    $scope.user.thresholdPowerTestDate = new Date($scope.user.thresholdPowerTestDate);
-    $scope.user.autoFetchStravaActivities = $scope.user.autoFetchStravaActivities === null ? null : $scope.user.autoFetchStravaActivities.toString();
-    $scope.user.levelOfDetail = $scope.user.levelOfDetail.toString();
-    $scope.data = {
+    this.user = Authentication.user;
+    this.user.thresholdPowerTestDate = new Date(this.user.thresholdPowerTestDate);
+    this.user.autoFetchStravaActivities = this.user.autoFetchStravaActivities === null ? null : this.user.autoFetchStravaActivities.toString();
+    this.user.levelOfDetail = this.user.levelOfDetail.toString();
+
+    this.data = {
       daysOfTheWeek: [
         { id: '1', name: 'Monday' },
         { id: '2', name: 'Tuesday' },
@@ -32,15 +33,15 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     };
 
     //Begin Datepicker stuff.
-    $scope.datePickerStatus = {
+    this.datePickerStatus = {
       opened: false
     };
 
-    $scope.openDatePicker = function($event) {
-      $scope.datePickerStatus.opened = true;
+    this.openDatePicker = function($event) {
+      this.datePickerStatus.opened = true;
     };
 
-    $scope.ftpDateOptions = {
+    this.ftpDateOptions = {
       formatYear: 'yy',
       startingDay: 1,
       showWeeks: false,
@@ -49,13 +50,13 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     //End Datepicker stuff.
 
     // Update a user profile
-    $scope.updateUserProfile = function (isValid) {
+    this.updateUserProfile = function (isValid) {
       if (!isValid) {
         $scope.$broadcast('show-errors-check-validity', 'userForm');
         return false;
       }
 
-      var user = new Users($scope.user);
+      var user = new Users(this.user);
 
       user.$update(function (response) {
         $scope.$broadcast('show-errors-reset', 'userForm');

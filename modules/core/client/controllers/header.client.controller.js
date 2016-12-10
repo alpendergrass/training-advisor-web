@@ -9,10 +9,6 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Auth
 
     this.$state = $state;
     this.authentication = Authentication;
-
-    // this.notifications = _.filter(Authentication.user.notifications, ['blocked', false]);
-
-    // Get the topbar menu
     this.menu = Menus.getMenu('topbar');
 
     // Collapsing the menu after navigation
