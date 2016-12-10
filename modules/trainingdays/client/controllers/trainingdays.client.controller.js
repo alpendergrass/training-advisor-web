@@ -11,7 +11,8 @@ angular.module('trainingDays')
       });
 
       //The following makes lodash available in html.
-      $scope._ = _;
+      //Is done in header controller, no need to repeat here.
+      // $scope._ = _;
 
       // //Create socket for server-to-client messaging.
       // //Make sure the Socket is connected

@@ -7,13 +7,13 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Auth
     //The following makes lodash available in html.
     $scope._ = _;
 
-    $scope.$state = $state;
-    $scope.authentication = Authentication;
+    this.$state = $state;
+    this.authentication = Authentication;
 
-    $scope.notifications = _.filter(Authentication.user.notifications, ['blocked', false]);
+    // this.notifications = _.filter(Authentication.user.notifications, ['blocked', false]);
 
     // Get the topbar menu
-    $scope.menu = Menus.getMenu('topbar');
+    this.menu = Menus.getMenu('topbar');
 
     // Collapsing the menu after navigation
     $scope.$on('$stateChangeSuccess', function () {
