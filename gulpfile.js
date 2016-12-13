@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash'),
+const _ = require('lodash'),
   defaultAssets = require('./config/assets/default'),
   testAssets = require('./config/assets/test'),
   gulp = require('gulp'),
@@ -16,7 +16,7 @@ var _ = require('lodash'),
   protractor = require('gulp-protractor').protractor,
   webdriver_update = require('gulp-protractor').webdriver_update,
   webdriver_standalone = require('gulp-protractor').webdriver_standalone,
-  nodeInspector = require('gulp-node-inspector');
+  babel = require('gulp-babel');
 
 
 // Set NODE_ENV to 'test'
@@ -278,20 +278,6 @@ gulp.task('test:server', function (done) {
   runSequence('env:test', 'lint', 'mocha', done);
 });
 
-//Run all server tests in debug mode
-//First run Node Inspector from the command line:
-//Alberts-iMac:web al$ node-inspector
-//Then open in browser: http://127.0.0.1:8080/?ws=127.0.0.1:8080&port=5858
-//App will break in node inspector on first line.
-gulp.task('test:server-debug', function () {
-  var spawn = require('child_process').spawn;
-  spawn('node', [
-    '--debug-brk',
-    path.join(__dirname, 'node_modules/gulp/bin/gulp.js'),
-    'test:server'
-  ], { stdio: 'inherit' });
-});
-
 gulp.task('test:client', function (done) {
   runSequence('env:test', 'lint', 'karma', done);
 });
@@ -303,18 +289,11 @@ gulp.task('test:e2e', function (done) {
 // Run the project in development mode
 gulp.task('default', function (done) {
   runSequence('env:dev', 'lint', ['nodemon'], done);
-  // runSequence('env:dev', 'lint', ['nodemon', 'watch'], done);
 });
 
 // Run the project in debug mode
 gulp.task('debug', function (done) {
-  // runSequence('env:dev', 'lint', ['nodemon', 'watch', 'node-inspector'], done);
   runSequence('env:dev', 'lint', ['nodemon:debug', 'watch'], done);
-});
-
-gulp.task('node-inspector', function () {
-  gulp.src([])
-    .pipe(nodeInspector());
 });
 
 // Run the project in production mode
