@@ -923,30 +923,7 @@ angular.module('trainingDays')
           });
         };
 
-        // $scope.nextBatch = function() {
-        //   if ($scope.trainingDaysChunked && $scope.trainingDaysChunked.length > $scope.nextChunk) {
-        //     $scope.trainingDays = _.concat($scope.trainingDays, $scope.trainingDaysChunked[$scope.nextChunk]);
-        //     $scope.nextChunk++;
-        //   }
-        // };
-
-        //The following is used on the TD list page for the Today button.
-        //This page is no longer available to non-admin users.
-        // $scope.scrollTo = function(id) {
-        //   var currentPath = $location.hash();
-        //   $location.hash(id);
-        //   $anchorScroll();
-        //   //reset to currentPath to keep from changing URL in browser.
-        //   $location.hash(currentPath);
-        // };
-
         getAllTrainingDays(function() {
-          //Doing infinite scrolling all client-side.
-          //May need to switch to server-side at some point. Or some combo of client and server side.
-          // $scope.trainingDaysChunked = _.chunk($scope.trainingDaysAll, 56);
-          // $scope.trainingDays = $scope.trainingDaysChunked[0];
-          // $scope.nextChunk = 1;
-          // 10/7/2016: infinite scrolling was breaking deployment.
           $scope.trainingDays = $scope.trainingDaysAll;
         });
       };

@@ -4,11 +4,10 @@
       All Training Days
     </h2>
   </div>
-  <!-- <div class="list-group" infinite-scroll="nextBatch()" infinite-scroll-disabled='nextChunk >= trainingDaysChunked.length'> -->
-    <div ng-repeat="trainingDay in trainingDays" id="{{trainingDay.htmlID || ''}}" class="{{trainingDay.htmlID || ''}}">
-      <a ui-sref="trainingDayView({trainingDayId: trainingDay._id})" class="list-group-item">
-        <h4 class="list-group-item-heading">{{trainingDay.dateNumeric}} -  {{trainingDay.date | date:'EEE, MMM d, y'}}<span ng-show="trainingDay.name"> - {{trainingDay.name}}</span></h4>
-        <small>
+  <div ng-repeat="trainingDay in trainingDays" id="{{trainingDay.htmlID || ''}}" class="{{trainingDay.htmlID || ''}}">
+    <a ui-sref="trainingDayView({trainingDayId: trainingDay._id})" class="list-group-item">
+      <h4 class="list-group-item-heading">{{trainingDay.dateNumeric}} -  {{trainingDay.date | date:'EEE, MMM d, y'}}<span ng-show="trainingDay.name"> - {{trainingDay.name}}</span></h4>
+      <small>
         <p class="list-group-item-text"></p>
         <p class="list-group-item-text text-danger" ng-show="trainingDay.startingPoint">Start Day</p>
         <p class="list-group-item-text text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp">Fitness and Fatigue True Up</p>
@@ -22,34 +21,32 @@
             </b><span ng-show="trainingDay.estimatedLoad > 0"> Estimated Event Load is {{trainingDay.estimatedLoad}}.</span></p>
         </div>
 
-        <small>
-          <ul class="list-inline">
-            <li>Period: {{trainingDay.period}}</li>
-            <li>Starting Point: {{trainingDay.startingPoint}}</li>
-            <li>True Up: {{trainingDay.fitnessAndFatigueTrueUp}}</li>
-            <li>Rationale: {{trainingDay.plannedActivities[0].rationale}}</li>
-            <li>Load Rating:: {{trainingDay.loadRating}}</li>
-            <li>Created <span ng-bind="trainingDay.created | date:'medium'"></span></li>
-          </ul>
-          <div>
-            <u>Metrics:</u><br>
-            <div ng-repeat="metrics in trainingDay.metrics" class="">
-              <span>{{metrics}}</span>
-            </div>
+        <ul class="list-inline">
+          <li>Period: {{trainingDay.period}}</li>
+          <li>Starting Point: {{trainingDay.startingPoint}}</li>
+          <li>True Up: {{trainingDay.fitnessAndFatigueTrueUp}}</li>
+          <li>Rationale: {{trainingDay.plannedActivities[0].rationale}}</li>
+          <li>Load Rating:: {{trainingDay.loadRating}}</li>
+          <li>Created <span ng-bind="trainingDay.created | date:'medium'"></span></li>
+        </ul>
+        <div>
+          <u>Metrics:</u><br>
+          <div ng-repeat="metrics in trainingDay.metrics" class="">
+            <span>{{metrics}}</span>
           </div>
-          <div ng-show="trainingDay.plannedActivities.length > 0">
-            <u>Planned Activities:</u><br>
-            <div ng-repeat="plannedActivity in trainingDay.plannedActivities" class="">
-              <span>{{plannedActivity}}</span>
-            </div>
+        </div>
+        <div ng-show="trainingDay.plannedActivities.length > 0">
+          <u>Planned Activities:</u><br>
+          <div ng-repeat="plannedActivity in trainingDay.plannedActivities" class="">
+            <span>{{plannedActivity}}</span>
           </div>
-          <div ng-show="trainingDay.completedActivities.length > 0"><u>Completed Activities</u>
-            <div ng-repeat="completedActivity in trainingDay.completedActivities" class="">
-              <span>{{completedActivity}}</span>
-            </div>
+        </div>
+        <div ng-show="trainingDay.completedActivities.length > 0"><u>Completed Activities</u>
+          <div ng-repeat="completedActivity in trainingDay.completedActivities" class="">
+            <span>{{completedActivity}}</span>
           </div>
-        </small>
-      </a>
-    </div>
-  <!-- </div> -->
+        </div>
+      </small>
+    </a>
+  </div>
 </section>
