@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('TrainingDaysController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
+  .controller('TrainingDaysController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
+    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
@@ -88,74 +88,6 @@ angular.module('trainingDays')
         ];
 
         return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
-      };
-
-      var getSeason = function(callback) {
-        $scope.hasStart = true;
-        $scope.hasEnd = true;
-        $scope.needsPlanGen = false;
-        $scope.isWorking = true;
-        usSpinnerService.spin('tdSpinner');
-
-        TrainingDays.getSeason({
-          today: $scope.today.toISOString()
-        }, function(season) {
-          // Reload user object as notifications may have been updated.
-          Authentication.user = season[0].user;
-
-          _.forEach(season, function(td) {
-            td.date = moment(td.dateNumeric.toString()).toDate();
-
-            if (moment(td.date).isSame(moment(), 'day')) {
-              td.htmlID = 'today';
-            }
-          });
-
-          $scope.hasStart = _.find(season, function(td) {
-            return td.startingPoint && moment(td.date).isBefore(moment());
-          });
-
-          //Find first future goal TD if any.
-          $scope.hasEnd = _.chain(season)
-            .filter(function(td) {
-              return td.scheduledEventRanking === 1 && moment(td.date).isAfter(moment());
-            })
-            .sortBy(['date'])
-            .head()
-            .value();
-
-          if ($scope.hasEnd) {
-            $scope.needsPlanGen = (Authentication.user.notifications &&
-              _.find(Authentication.user.notifications, function(n) {
-                return n.notificationType === 'plangen';
-              })
-            );
-          }
-
-          // Get yesterday if it exists.
-          var yesterday = _.find(season, function(td) {
-            return moment(td.date).isSame((moment().subtract(1, 'day')), 'day');
-          });
-
-          if (yesterday) {
-            $scope.checkGiveFeedback(yesterday);
-          }
-
-          $scope.season = season;
-          usSpinnerService.stop('tdSpinner');
-          $scope.isWorking = false;
-          return callback();
-        }, function(errorResponse) {
-          $scope.season = null;
-          $scope.isWorking = false;
-          usSpinnerService.stop('tdSpinner');
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-            $scope.error = 'Server error prevented season retrieval';
-          }
-        });
       };
 
       $scope.viewCalendar = function() {
@@ -250,9 +182,26 @@ angular.module('trainingDays')
           TrainingDays.finalizeSim({
             commit: 'no'
           }, function(response) {
-            getSeason(function() {
-              if ($scope.season) {
-                _.forEach($scope.season, function(td) {
+            usSpinnerService.spin('tdSpinner');
+            $scope.isWorking = true;
+
+            Season.getSeason(function(errorMessage, season) {
+              usSpinnerService.stop('tdSpinner');
+              $scope.isWorking = false;
+              $scope.error = errorMessage;
+
+              if (season) {
+                $scope.season = season.days;
+                // Reload user object as notifications may have been updated.
+                Authentication.user = season.user;
+                $scope.hasStart = season.hasStart;
+                $scope.hasEnd = season.hasEnd;
+                $scope.needsPlanGen = season.needsPlanGen;
+
+                if (season.yesterday) {
+                  $scope.checkGiveFeedback(season.yesterday);
+                }
+                _.forEach(season.days, function(td) {
                   MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
                 });
               }
@@ -462,9 +411,27 @@ angular.module('trainingDays')
           return moment(td.date).format('ddd MMM D');
         };
 
-        var loadChart = function(callback) {
-          getSeason(function() {
-            if ($scope.season) {
+        var loadChart = function() {
+          usSpinnerService.spin('tdSpinner');
+          $scope.isWorking = true;
+
+          Season.getSeason(function(errorMessage, season) {
+            usSpinnerService.stop('tdSpinner');
+            $scope.isWorking = false;
+            $scope.error = errorMessage;
+
+            if (season) {
+              $scope.season = season.days;
+              // Reload user object as notifications may have been updated.
+              Authentication.user = season.user;
+              $scope.hasStart = season.hasStart;
+              $scope.hasEnd = season.hasEnd;
+              $scope.needsPlanGen = season.needsPlanGen;
+
+              if (season.yesterday) {
+                $scope.checkGiveFeedback(season.yesterday);
+              }
+
               planLoadArray = _.flatMap($scope.season, getPlanLoad);
               planFormArray = _.flatMap($scope.season, getPlanForm);
               planFitnessArray = _.flatMap($scope.season, getPlanFitness);
@@ -578,10 +545,6 @@ angular.module('trainingDays')
                 }
               ];
             }
-
-            if (callback) {
-              return callback();
-            }
           });
         };
 
@@ -597,8 +560,7 @@ angular.module('trainingDays')
             commit: 'no'
           }, function(response) {
             initSimFlags();
-            loadChart(function() {
-            });
+            loadChart();
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
