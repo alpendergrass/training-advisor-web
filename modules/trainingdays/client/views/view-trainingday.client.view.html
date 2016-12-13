@@ -4,7 +4,7 @@
       <md-button ng-disabled="trainingDay.startingPoint" class='md-icon-button' ng-click='getDay(previousDay)' aria-label='Previous day'>
         <md-icon md-svg-src="/modules/trainingdays/client/img/svg/chevron-left.svg"></md-icon>
       </md-button>
-      {{trainingDay.date | date:'EEEE, MMM d, y'}} - <a href="#" editable-textarea="trainingDay.name" e-rows="1" e-cols="26" onbeforesave="update(true)"><small ng-hide="trainingDay.name" class="text-default">training day name</small><span ng-show="trainingDay.name">{{trainingDay.name}}</span></a>
+      {{trainingDay.date | date:'EEEE, MMM d, y'}} - <a href="#" editable-textarea="trainingDay.name" e-rows="1" e-cols="26" onbeforesave="update()"><small ng-hide="trainingDay.name" class="text-default">training day name</small><span ng-show="trainingDay.name">{{trainingDay.name}}</span></a>
       <small class="text-danger" ng-show="trainingDay.startingPoint">This is your season start</small>
       <small class="text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">This is a Fitness and Fatigue True Up Day</small>
       <md-button class='md-icon-button pull-right' ng-click='getDay(nextDay)' aria-label='Previous day'>
@@ -160,7 +160,7 @@
 
   <p>
     <label>Notes on the Day: </label>
-    <a href="#" editable-textarea="trainingDay.notes" e-rows="7" e-cols="40" onbeforesave="update(true)">
+    <a href="#" editable-textarea="trainingDay.notes" e-rows="7" e-cols="40" onbeforesave="update()">
       <pre>{{ trainingDay.notes || 'no notes' }}</pre>
     </a>
   </p>
@@ -206,6 +206,8 @@
   <div ng-show="authentication.user.levelOfDetail > 2">
     <hr />
     <small>
+      <div>user.fatigueTimeConstant: {{authentication.user.fatigueTimeConstant}}</div>
+      <div>trainingEffortFeedback: {{trainingDay.trainingEffortFeedback}}
       <div>dateNumeric: {{trainingDay.dateNumeric}}</div>
       <div>period: {{trainingDay.period }}</div>
       <div>startingPoint: {{trainingDay.startingPoint }}</div>
@@ -213,7 +215,6 @@
       <div>daysUntilNextGoalEvent: {{trainingDay.daysUntilNextGoalEvent}}</div>
       <div>daysUntilNextPriority2Event: {{trainingDay.daysUntilNextPriority2Event}}</div>
       <div>daysUntilNextPriority3Event: {{trainingDay.daysUntilNextPriority3Event}}</div>
-      <div>user.fatigueTimeConstant: {{authentication.user.fatigueTimeConstant}}</div>
       <div>
         <u>Metrics:</u><br>
         <div ng-repeat="metrics in trainingDay.metrics" class="">
