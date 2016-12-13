@@ -15,8 +15,7 @@ const _ = require('lodash'),
   endOfLine = require('os').EOL,
   protractor = require('gulp-protractor').protractor,
   webdriver_update = require('gulp-protractor').webdriver_update,
-  webdriver_standalone = require('gulp-protractor').webdriver_standalone,
-  babel = require('gulp-babel');
+  webdriver_standalone = require('gulp-protractor').webdriver_standalone;
 
 
 // Set NODE_ENV to 'test'
