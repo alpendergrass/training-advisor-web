@@ -1,30 +1,30 @@
-<section ng-controller="CalendarController" ng-init="viewCalendar()">
+<section ng-controller="CalendarController as calendar" ng-init="calendar.initCalendar()">
   <div class="page-header">
     <h2>
       My Calendar
     </h2>
   </div>
-  <div class="alert alert-warning text-center" ng-hide="hasStart && hasEnd">
-    <span ng-hide="hasStart">To get started you need to create a <a ui-sref="trainingDays.createStart">Start Day</a>.</span>
-    <span ng-hide="hasEnd"> You should create a <a ui-sref="trainingDays.createEvent({'scheduledEventRanking': '1'})">Goal Event</a>.</span>
+  <div class="alert alert-warning text-center" ng-hide="calendar.hasStart && calendar.hasEnd">
+    <span ng-hide="calendar.hasStart">To get started you need to create a <a ui-sref="trainingDays.createStart">Start Day</a>.</span>
+    <span ng-hide="calendar.hasEnd"> You should create a <a ui-sref="trainingDays.createEvent({'scheduledEventRanking': '1'})">Goal Event</a>.</span>
   </div>
   <div>
     <div class="pull-left">
-      <md-button ng-show="hasStart" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
+      <md-button ng-show="calendar.hasStart" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
     </div>
     <div class="pull-right">
-      <md-button ng-show="hasStart" ui-sref="season()">Season</md-button>
+      <md-button ng-show="calendar.hasStart" ui-sref="season()">Season</md-button>
     </div>
     <div class="pull-right">
-      <md-button ng-hide="smallWindow || direction === 'horizontal'" ng-click="setDirection('horizontal')">Calendar</md-button>
-      <md-button ng-hide="smallWindow || direction === 'vertical'" ng-click="setDirection('vertical')">List</md-button>
+      <md-button ng-hide="calendar.smallWindow || calendar.direction === 'horizontal'" ng-click="calendar.setDirection('horizontal')">Calendar</md-button>
+      <md-button ng-hide="calendar.smallWindow || calendar.direction === 'vertical'" ng-click="calendar.setDirection('vertical')">List</md-button>
     </div>
   </div>
-  <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
-    <strong ng-bind="error"></strong>
+  <div class="alert alert-danger text-center" ng-show="calendar.error" class="text-danger">
+    <strong ng-bind="calendar.error"></strong>
   </div>
   <div us-spinner="{radius:50, width:8, length: 16}" spinner-key="tdSpinner" style="position: relative"></div>
   <div class="td-calendar bottom-buffer">
-    <calendar-md id="tdcalendar" flex layout layout-fill calendar-direction="direction" on-prev-month="prevMonth" on-next-month="nextMonth" on-day-click="dayClick" title-format="'MMMM y'" ng-model="selectedDate" day-format="dayFormat" day-label-format="'EEE'" day-label-tooltip-format="'EEEE'" day-tooltip-format="'fullDate'" week-starts-on="1" tooltips="false" day-content="" disable-future-selection="false"></calendar-md>
+    <calendar-md id="tdcalendar" flex layout layout-fill calendar-direction="calendar.direction" on-prev-month="calendar.prevMonth" on-next-month="calendar.nextMonth" on-day-click="calendar.dayClick" title-format="'MMMM y'" ng-model="calendar.selectedDate" day-format="calendar.dayFormat" day-label-format="'EEE'" day-label-tooltip-format="'EEEE'" day-tooltip-format="'fullDate'" week-starts-on="1" tooltips="false" day-content="" disable-future-selection="false"></calendar-md>
   </div>
 </section>
