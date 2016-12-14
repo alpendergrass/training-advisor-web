@@ -7,7 +7,6 @@
     <option ng-repeat="rating in trainingEffortRatings" value="{{rating.value}}">{{rating.text}}</option>
   </select>
   <br/>
-  <!-- <tt>option = {{trainingEffortFeedback}}</tt> -->
 </div>
 <div class="modal-footer">
   <button class="btn btn-primary" type="button" ng-disabled="trainingEffortFeedback === ''" ng-click="giveFeedback()">Save</button>

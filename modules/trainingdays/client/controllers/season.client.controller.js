@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
+  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
+    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
@@ -683,64 +683,28 @@ angular.module('trainingDays')
             }
           });
 
-          modalInstance.result.then(function(trainingDay) {
-            $scope.update(trainingDay);
-            loadChart();
-            $scope.simConfigUnderway = true;
-          }, function() {
-            //User cancelled out of dialog.
-          }).finally(function() {
-            return;
-          });
+          modalInstance.result
+            .then(function(trainingDay) {
+              trainingDay.$update(function(trainingDay) {
+                loadChart();
+                $scope.simConfigUnderway = true;
+              }, function(errorResponse) {
+                if (errorResponse.data && errorResponse.data.message) {
+                  $scope.error = errorResponse.data.message;
+                } else {
+                  //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
+                  $scope.error = 'Server error prevented training day update.';
+                }
+              });
+            }, function() {
+              //User canceled out of dialog.
+            })
+            .finally(function() {
+              return;
+            });
         };
 
         initPage();
-      };
-
-      $scope.update = function(isValid, trainingDay, callback) {
-        //We are sometimes being called as if we were synchronous here.
-        //Note that we take a callback but do not return an error as we handle it here.
-        $scope.error = null;
-
-        if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
-
-          if (callback) {
-            return callback(null);
-          }
-
-          return false;
-        }
-
-        if (!trainingDay) {
-          trainingDay = $scope.trainingDay;
-        }
-
-        trainingDay.$update(function(trainingDay) {
-          // Reload user to pick up changes in notifications.
-          Authentication.user = trainingDay.user;
-
-          //We need to correct the date coming from server-side as it might not have self corrected yet.
-          trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-          $scope.trainingDay = trainingDay;
-
-          if (callback) {
-            return callback(trainingDay);
-          }
-        }, function(errorResponse) {
-          if (errorResponse.data && errorResponse.data.message) {
-            $scope.error = errorResponse.data.message;
-          } else {
-            //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-            $scope.error = 'Server error prevented training day update.';
-          }
-
-          if (callback) {
-            return callback(null);
-          }
-
-          return false;
-        });
       };
 
       $scope.checkGiveFeedback = function(trainingDay) {
@@ -750,71 +714,17 @@ angular.module('trainingDays')
       };
 
       $scope.openGiveFeedback = function(trainingDay) {
-        var modalInstance = $uibModal.open({
-          templateUrl: '/modules/trainingdays/client/views/partials/feedback-trainingdays.client.view.html',
-          size: 'sm',
-          controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
-            $scope.relativeDay = moment(trainingDay.date).calendar(null, {
-              sameDay: '[today]',
-              nextDay: '[tomorrow]',
-              nextWeek: 'dddd',
-              lastDay: '[yesterday]',
-              lastWeek: '[last] dddd',
-              sameElse: 'MMM D'
+        Feedback.show(trainingDay)
+          .then(function(trainingDay) {}, function() {})
+          .finally(function() {
+            trainingDay.$update(function(trainingDay) {}, function(errorResponse) {
+              if (errorResponse.data && errorResponse.data.message) {
+                $scope.error = errorResponse.data.message;
+              } else {
+                $scope.error = 'Server error prevented training day update.';
+              }
             });
-            //By setting $scope.trainingEffortFeedback to '' we disable the Save button
-            //until the user makes a selection.
-            $scope.trainingEffortFeedback = '';
-            $scope.trainingEffortRatings = [
-              { value: '2', text: 'Great!' },
-              { value: '1', text: 'Very Good.' },
-              { value: '0', text: 'Good.' },
-              { value: '-1', text: 'Tired.' },
-              { value: '-2', text: 'Very Tired!' }
-            ];
-            $scope.giveFeedback = function() {
-              trainingDay.trainingEffortFeedback = $scope.trainingEffortFeedback;
-              $uibModalInstance.close(trainingDay);
-            };
-            $scope.cancelFeedback = function() {
-              trainingDay.trainingEffortFeedback = 0;
-              $uibModalInstance.dismiss('cancel');
-            };
-          }],
-          resolve: {
-            trainingEffortRatings: function() {
-              return $scope.trainingEffortRatings;
-            }
-          }
-        });
-
-        modalInstance.result.then(function(trainingDay) {
-          // trainingDay.trainingEffortFeedback = trainingEffortFeedback;
-        }, function() {
-          //User cancelled out of dialog.
-          //By setting to zero we will not ask again.
-          // trainingDay.trainingEffortFeedback = 0;
-        }).finally(function() {
-          trainingDay.$update(function(trainingDay) {
-            // Reload user to pick up changes in notifications.
-            Authentication.user = trainingDay.user;
-
-            //We need to correct the date coming from server-side as it might not have self corrected yet.
-            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-            $scope.trainingDay = trainingDay;
-
-            return true;
-          }, function(errorResponse) {
-            if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
-            } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-              $scope.error = 'Server error prevented training day update.';
-            }
-
-            return false;
           });
-        });
       };
     }
   ]);
