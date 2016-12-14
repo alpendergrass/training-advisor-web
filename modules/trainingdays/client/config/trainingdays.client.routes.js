@@ -5,14 +5,14 @@ angular.module('trainingDays').config(['$stateProvider',
     $stateProvider
       .state('season', {
         url: '/season',
-        templateUrl: 'modules/trainingDays/client/views/season-trainingdays.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/season.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
       })
       .state('trainingDayView', {
         url: '/trainingDay/:trainingDayId',
-        templateUrl: 'modules/trainingDays/client/views/view-trainingday.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/view.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
@@ -24,14 +24,14 @@ angular.module('trainingDays').config(['$stateProvider',
       })
       .state('trainingDays.calendar', {
         url: '/calendar',
-        templateUrl: 'modules/trainingDays/client/views/calendar-trainingdays.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/calendar.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
       })
       .state('trainingDays.list', {
         url: '/list',
-        templateUrl: 'modules/trainingDays/client/views/list-trainingdays.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/list.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
@@ -41,14 +41,14 @@ angular.module('trainingDays').config(['$stateProvider',
         params: {
           forwardTo : null
         },
-        templateUrl: 'modules/trainingDays/client/views/create-start-trainingday.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/create-start.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
       })
       .state('trainingDays.trueUp', {
         url: '/trueUp',
-        templateUrl: 'modules/trainingDays/client/views/true-up-trainingday.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/true-up.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
@@ -58,7 +58,7 @@ angular.module('trainingDays').config(['$stateProvider',
         params: {
           scheduledEventRanking : null
         },
-        templateUrl: 'modules/trainingDays/client/views/create-event-trainingday.client.view.html',
+        templateUrl: 'modules/trainingDays/client/views/create-event.client.view.html',
         data: {
           roles: ['user', 'admin']
         }
