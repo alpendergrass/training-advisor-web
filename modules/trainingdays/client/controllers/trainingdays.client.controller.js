@@ -12,6 +12,7 @@ angular.module('trainingDays')
 
       //The following makes lodash available in html.
       $scope._ = _;
+      $scope.today = moment().startOf('day').toDate();
 
       // //Create socket for server-to-client messaging.
       // //Make sure the Socket is connected
@@ -26,8 +27,6 @@ angular.module('trainingDays')
       // Socket.on('trainingDayMessage', function(message) {
       //   toastr[message.type](message.text, message.title);
       // });
-
-      $scope.today = moment().startOf('day').toDate();
 
       $scope.listTrainingDays = function() {
         // This page is now Admin only.

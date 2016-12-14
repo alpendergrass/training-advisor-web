@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$anchorScroll', 'Authentication', 'TrainingDays', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService',
-    function($scope, $state, $stateParams, $compile, $filter, $anchorScroll, Authentication, TrainingDays, Feedback, _, moment, toastr, usSpinnerService) {
+  .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$anchorScroll', 'Authentication', 'TrainingDays', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
+    function($scope, $state, $stateParams, $compile, $filter, $anchorScroll, Authentication, TrainingDays, Feedback, Util, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -15,48 +15,6 @@ angular.module('trainingDays')
       $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
       $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate();
-
-      // Check if provider is already in use with current user
-      $scope.isConnectedSocialAccount = function(provider) {
-        return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
-      };
-
-      var getMetrics = function(trainingDay, metricsType) {
-        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
-      };
-
-      var getPlannedActivity = function(trainingDay, source) {
-        return _.find(trainingDay.plannedActivities, ['source', source]);
-      };
-
-      var mapActivityTypeToVerbiage = function(activityType) {
-        var activityTypeVerbiageLookups = [
-          {
-            activityType: 'choice',
-            phrase: 'Choice Day'
-          }, {
-            activityType: 'rest',
-            phrase: 'Rest Day'
-          }, {
-            activityType: 'easy',
-            phrase: 'Low Load Day'
-          }, {
-            activityType: 'moderate',
-            phrase: 'Moderate Load Day'
-          }, {
-            activityType: 'hard',
-            phrase: 'High Load Day'
-          }, {
-            activityType: 'test',
-            phrase: 'Power Testing Day'
-          }, {
-            activityType: 'event',
-            phrase: 'Event'
-          }
-        ];
-
-        return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
-      };
 
       $scope.viewTrainingDay = function() {
         $scope.activityTypes = [
@@ -95,11 +53,16 @@ angular.module('trainingDays')
         }
 
         function resetViewObjects(trainingDay) {
-          $scope.plannedActivity = getPlannedActivity(trainingDay, $scope.source);
-          $scope.requestedActivity = getPlannedActivity(trainingDay, 'requested');
-          $scope.plannedMetrics = getMetrics($scope.trainingDay, 'planned');
-          $scope.actualMetrics = getMetrics($scope.trainingDay, 'actual');
+          $scope.plannedActivity = Util.getPlannedActivity(trainingDay, $scope.source);
+          $scope.requestedActivity = Util.getPlannedActivity(trainingDay, 'requested');
+          $scope.plannedMetrics = Util.getMetrics($scope.trainingDay, 'planned');
+          $scope.actualMetrics = Util.getMetrics($scope.trainingDay, 'actual');
         }
+
+        // Check if provider is already in use with current user
+        $scope.isConnectedSocialAccount = function(provider) {
+          return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
+        };
 
         $scope.showRanking = function() {
           if (!$scope.trainingDay) {
@@ -107,7 +70,7 @@ angular.module('trainingDays')
           }
 
           var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.plannedActivity ? mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
+            dayText = $scope.plannedActivity ? Util.mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
           return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
         };
 
@@ -311,7 +274,7 @@ angular.module('trainingDays')
       };
 
       $scope.checkGiveFeedback = function(trainingDay) {
-        if (trainingDay.completedActivities.length > 0 && getMetrics(trainingDay, 'actual').loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
+        if (trainingDay.completedActivities.length > 0 && Util.getMetrics(trainingDay, 'actual').loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
           $scope.openGiveFeedback(trainingDay);
         }
       };

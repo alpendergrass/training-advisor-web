@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('CalendarController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', '_', 'moment', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $anchorScroll, Authentication, TrainingDays, Season, _, moment, usSpinnerService, MaterialCalendarData) {
+  .controller('CalendarController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment', 'usSpinnerService', 'MaterialCalendarData',
+    function($scope, $state, $stateParams, $location, $compile, $anchorScroll, Authentication, TrainingDays, Season, Util, _, moment, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -12,43 +12,6 @@ angular.module('trainingDays')
 
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
-
-      var getMetrics = function(trainingDay, metricsType) {
-        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
-      };
-
-      var getPlannedActivity = function(trainingDay, source) {
-        return _.find(trainingDay.plannedActivities, ['source', source]);
-      };
-
-      var mapActivityTypeToVerbiage = function(activityType) {
-        var activityTypeVerbiageLookups = [
-          {
-            activityType: 'choice',
-            phrase: 'Choice Day'
-          }, {
-            activityType: 'rest',
-            phrase: 'Rest Day'
-          }, {
-            activityType: 'easy',
-            phrase: 'Low Load Day'
-          }, {
-            activityType: 'moderate',
-            phrase: 'Moderate Load Day'
-          }, {
-            activityType: 'hard',
-            phrase: 'High Load Day'
-          }, {
-            activityType: 'test',
-            phrase: 'Power Testing Day'
-          }, {
-            activityType: 'event',
-            phrase: 'Event'
-          }
-        ];
-
-        return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
-      };
 
       $scope.viewCalendar = function() {
         var formatDayContent = function(trainingDay) {
@@ -99,9 +62,9 @@ angular.module('trainingDays')
           if (moment(trainingDay.date).isAfter($scope.today, 'day')) {
             content += content.length > lengthOfFixedContent ? '<br>' : '';
             content += '<i>';
-            planActivity = getPlannedActivity(trainingDay, 'plangeneration');
+            planActivity = Util.getPlannedActivity(trainingDay, 'plangeneration');
             if (planActivity) {
-              content += mapActivityTypeToVerbiage(planActivity.activityType) + ' - ';
+              content += Util.mapActivityTypeToVerbiage(planActivity.activityType) + ' - ';
             }
             content += 'load: ' + trainingDay.planLoad + '</i>';
           }
@@ -112,7 +75,7 @@ angular.module('trainingDays')
             _.forEach(trainingDay.completedActivities, function(activity) {
               load += activity.load;
             });
-            loadRating = getMetrics(trainingDay, 'actual').loadRating;
+            loadRating = Util.getMetrics(trainingDay, 'actual').loadRating;
             content += load ? ' Load: ' + load + ' - ' + loadRating + ' day' : '';
           }
 

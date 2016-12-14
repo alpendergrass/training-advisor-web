@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService',
-    function($scope, $state, $stateParams, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, _, moment, toastr, usSpinnerService) {
+  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
+    function($scope, $state, $stateParams, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, Util, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -13,43 +13,6 @@ angular.module('trainingDays')
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
-
-      var getMetrics = function(trainingDay, metricsType) {
-        return _.find(trainingDay.metrics, ['metricsType', metricsType]);
-      };
-
-      var getPlannedActivity = function(trainingDay, source) {
-        return _.find(trainingDay.plannedActivities, ['source', source]);
-      };
-
-      var mapActivityTypeToVerbiage = function(activityType) {
-        var activityTypeVerbiageLookups = [
-          {
-            activityType: 'choice',
-            phrase: 'Choice Day'
-          }, {
-            activityType: 'rest',
-            phrase: 'Rest Day'
-          }, {
-            activityType: 'easy',
-            phrase: 'Low Load Day'
-          }, {
-            activityType: 'moderate',
-            phrase: 'Moderate Load Day'
-          }, {
-            activityType: 'hard',
-            phrase: 'High Load Day'
-          }, {
-            activityType: 'test',
-            phrase: 'Power Testing Day'
-          }, {
-            activityType: 'event',
-            phrase: 'Event'
-          }
-        ];
-
-        return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
-      };
 
       $scope.viewSeason = function() {
         var actualLoadArray,
@@ -96,7 +59,7 @@ angular.module('trainingDays')
             return '#EBD1D1';
           }
 
-          var planActivity = getPlannedActivity(td, 'plangeneration');
+          var planActivity = Util.getPlannedActivity(td, 'plangeneration');
 
           if (planActivity && planActivity.activityType === 'test') {
             return '#B2DBDA';
@@ -144,7 +107,7 @@ angular.module('trainingDays')
         };
 
         var getPlanFitness = function(td) {
-          return getMetrics(td, 'planned').fitness;
+          return Util.getMetrics(td, 'planned').fitness;
         };
 
 
@@ -153,7 +116,7 @@ angular.module('trainingDays')
             return null;
           }
 
-          return getMetrics(td, 'actual').fitness;
+          return Util.getMetrics(td, 'actual').fitness;
         };
 
         var getActualFatigue = function(td) {
@@ -161,11 +124,11 @@ angular.module('trainingDays')
             return null;
           }
 
-          return getMetrics(td, 'actual').fatigue;
+          return Util.getMetrics(td, 'actual').fatigue;
         };
 
         var getPlanForm = function(td) {
-          return getMetrics(td, 'planned').form;
+          return Util.getMetrics(td, 'planned').form;
         };
 
         var getActualForm = function(td) {
@@ -173,29 +136,29 @@ angular.module('trainingDays')
             return null;
           }
 
-          return getMetrics(td, 'actual').form;
+          return Util.getMetrics(td, 'actual').form;
         };
 
         var getTargetRampRate = function(td) {
           if (moment(td.date).isAfter($scope.today, 'day')) {
-            return getMetrics(td, 'planned').sevenDayTargetRampRate;
+            return Util.getMetrics(td, 'planned').sevenDayTargetRampRate;
           }
-          return getMetrics(td, 'actual').sevenDayTargetRampRate;
+          return Util.getMetrics(td, 'actual').sevenDayTargetRampRate;
         };
 
         var getRampRate = function(td) {
           if (moment(td.date).isAfter($scope.today, 'day')) {
-            return getMetrics(td, 'planned').sevenDayRampRate;
+            return Util.getMetrics(td, 'planned').sevenDayRampRate;
           }
-          return getMetrics(td, 'actual').sevenDayRampRate;
+          return Util.getMetrics(td, 'actual').sevenDayRampRate;
         };
 
         var getActualAverageRampRate = function(td) {
-          return getMetrics(td, 'actual').sevenDayAverageRampRate;
+          return Util.getMetrics(td, 'actual').sevenDayAverageRampRate;
         };
 
         var getPlanAverageRampRate = function(td) {
-          return getMetrics(td, 'planned').sevenDayAverageRampRate;
+          return Util.getMetrics(td, 'planned').sevenDayAverageRampRate;
         };
 
         var extractDate = function(td) {
@@ -450,16 +413,16 @@ angular.module('trainingDays')
                 // advised activity type for today or tomorrow,
                 // planned activity type for future days.
                 if (moment(td.date).isBefore($scope.today, 'day')) {
-                  text = getMetrics(td, 'actual').loadRating + ' day';
+                  text = Util.getMetrics(td, 'actual').loadRating + ' day';
                 } else if (!td.scheduledEventRanking && moment(td.date).isBetween($scope.today, $scope.tomorrow, 'day', '[]')) {
-                  planActivity = getPlannedActivity(td, 'advised');
+                  planActivity = Util.getPlannedActivity(td, 'advised');
                   if (planActivity) {
-                    text = mapActivityTypeToVerbiage(planActivity.activityType);
+                    text = Util.mapActivityTypeToVerbiage(planActivity.activityType);
                   }
                 } else if (!td.scheduledEventRanking) {
-                  planActivity = getPlannedActivity(td, 'plangeneration');
+                  planActivity = Util.getPlannedActivity(td, 'plangeneration');
                   if (planActivity) {
-                    text = mapActivityTypeToVerbiage(planActivity.activityType);
+                    text = Util.mapActivityTypeToVerbiage(planActivity.activityType);
                     if ($scope.authentication.user.levelOfDetail > 2) {
                       text += ' period: ' + td.period;
                       text += ' rationale: ' + planActivity.rationale;
@@ -669,7 +632,7 @@ angular.module('trainingDays')
       };
 
       $scope.checkGiveFeedback = function(trainingDay) {
-        if (trainingDay.completedActivities.length > 0 && getMetrics(trainingDay, 'actual').loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
+        if (trainingDay.completedActivities.length > 0 && Util.getMetrics(trainingDay, 'actual').loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
           $scope.openGiveFeedback(trainingDay);
         }
       };
