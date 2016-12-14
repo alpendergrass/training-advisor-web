@@ -4,6 +4,7 @@ angular.module('trainingDays')
   .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService',
     function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Feedback, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
+
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
         jQuery('[data-toggle="popover"]').popover();
@@ -327,7 +328,7 @@ angular.module('trainingDays')
           //By setting to zero we will not ask again.
           // trainingDay.trainingEffortFeedback = 0;
         }).finally(function() {
-          return $scope.update(trainingDay);
+          return $scope.update(trainingDay, function() {});
         });
       };
 

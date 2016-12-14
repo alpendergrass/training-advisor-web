@@ -4,6 +4,7 @@ angular.module('trainingDays')
   .controller('SeasonController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
     function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
+
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
         jQuery('[data-toggle="popover"]').popover();
