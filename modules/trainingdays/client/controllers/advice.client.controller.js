@@ -3,31 +3,31 @@
 angular.module('trainingDays')
   .controller('AdviceController', ['$scope', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment',
     function($scope, $location, $compile, $anchorScroll, Authentication, TrainingDays, _, moment) {
-      $scope.authentication = Authentication;
+      this.authentication = Authentication;
 
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
         jQuery('[data-toggle="popover"]').popover();
       });
 
-      $scope._ = _;
-      $scope.today = moment().startOf('day').toDate();
-      $scope.adviceDate = $scope.today;
+      // this._ = _;
+      var today = moment().startOf('day').toDate();
+      this.adviceDate = today;
 
-      $scope.datePickerStatus = {
+      this.datePickerStatus = {
         opened: false
       };
 
-      $scope.openDatePicker = function($event) {
-        $scope.datePickerStatus.opened = true;
+      this.openDatePicker = function($event) {
+        this.datePickerStatus.opened = true;
       };
 
-      $scope.requestAdvice = function() {
-        var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-        var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
+      this.requestAdvice = function() {
+        var minAdviceDate = this.authentication.user.levelOfDetail > 2 ? null : today;
+        var maxAdviceDate = this.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
 
-        $scope.getAdvice = function(isValid) {
-          $scope.error = null;
+        this.getAdvice = function(isValid) {
+          this.error = null;
 
           if (!isValid) {
             $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
@@ -43,15 +43,15 @@ angular.module('trainingDays')
             $location.path('trainingDay/' + trainingDay._id);
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
+              this.error = errorResponse.data.message;
             } else {
               //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-              $scope.error = 'Server error prevented advice retrieval.';
+              this.error = 'Server error prevented advice retrieval.';
             }
           });
         };
 
-        $scope.adviceDateOptions = {
+        this.adviceDateOptions = {
           formatYear: 'yy',
           startingDay: 1,
           showWeeks: false,

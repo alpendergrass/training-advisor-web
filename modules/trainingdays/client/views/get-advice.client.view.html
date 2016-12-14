@@ -1,17 +1,17 @@
-<section ng-controller="AdviceController" ng-init="requestAdvice()">
+<section ng-controller="AdviceController as advice" ng-init="advice.requestAdvice()">
   <div class="page-header">
     <h2>Get Advice</h2>
   </div>
-  <form name="trainingDayForm" class="form-horizontal" ng-submit="getAdvice(trainingDayForm.$valid)" novalidate>
+  <form name="trainingDayForm" class="form-horizontal" ng-submit="advice.getAdvice(trainingDayForm.$valid)" novalidate>
     <fieldset>
 
       <div class="form-group" show-errors>
         <div class="col-md-4">
           <label for="adviceDate">Training Date</label>
           <p class="input-group">
-          <input type="text" id="adviceDate" name="adviceDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="adviceDate" is-open="datePickerStatus.opened" datepicker-options="adviceDateOptions" required close-text="Close" >
+          <input type="text" id="adviceDate" name="adviceDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="advice.adviceDate" is-open="advice.datePickerStatus.opened" datepicker-options="advice.adviceDateOptions" required close-text="Close" >
           <span class="input-group-btn">
-            <button type="button" class="btn btn-default" ng-click="openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+            <button type="button" class="btn btn-default" ng-click="advice.openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
           </span>
           </p>
           <div ng-messages="trainingDayForm.adviceDate.$error" role="alert">
@@ -26,7 +26,7 @@
         </div>
       </div>
       <div ng-show="error" class="text-danger">
-        <strong ng-bind="error"></strong>
+        <strong ng-bind="advice.error"></strong>
       </div>
 
     </fieldset>
