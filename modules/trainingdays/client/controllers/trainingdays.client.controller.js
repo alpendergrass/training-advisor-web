@@ -29,19 +29,12 @@ angular.module('trainingDays')
       $scope.today = moment().startOf('day').toDate();
       $scope.adviceDate = $scope.today;
 
-      //Begin Datepicker stuff.
       $scope.datePickerStatus = {
         opened: false
       };
 
       $scope.openDatePicker = function($event) {
         $scope.datePickerStatus.opened = true;
-      };
-      //End Datepicker stuff.
-
-      // Check if provider is already in use with current user
-      $scope.isConnectedSocialAccount = function(provider) {
-        return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
       };
 
       var toNumericDate = function(date) {
@@ -167,44 +160,6 @@ angular.module('trainingDays')
               $scope.error = 'Server error prevented starting point creation.';
             }
           });
-        };
-      };
-
-      $scope.requestAdvice = function() {
-        var minAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
-        var maxAdviceDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
-
-        $scope.getAdvice = function(isValid) {
-          $scope.error = null;
-
-          if (!isValid) {
-            $scope.$broadcast('show-errors-check-validity', 'trainingDayForm');
-            return false;
-          }
-
-          var getAdviceDate = moment(this.adviceDate).startOf('day').toDate();
-
-          TrainingDays.getAdvice({
-            trainingDate: getAdviceDate.toISOString(),
-            alternateActivity: null
-          }, function(trainingDay) {
-            $location.path('trainingDay/' + trainingDay._id);
-          }, function(errorResponse) {
-            if (errorResponse.data && errorResponse.data.message) {
-              $scope.error = errorResponse.data.message;
-            } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-              $scope.error = 'Server error prevented advice retrieval.';
-            }
-          });
-        };
-
-        $scope.adviceDateOptions = {
-          formatYear: 'yy',
-          startingDay: 1,
-          showWeeks: false,
-          minDate: minAdviceDate,
-          maxDate: maxAdviceDate
         };
       };
     }
