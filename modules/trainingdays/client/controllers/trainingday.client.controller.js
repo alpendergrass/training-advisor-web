@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService',
-    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Feedback, _, moment, toastr, usSpinnerService) {
+  .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$anchorScroll', 'Authentication', 'TrainingDays', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService',
+    function($scope, $state, $stateParams, $compile, $filter, $anchorScroll, Authentication, TrainingDays, Feedback, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -10,10 +10,7 @@ angular.module('trainingDays')
         jQuery('[data-toggle="popover"]').popover();
       });
 
-      //The following makes lodash available in html.
       $scope._ = _;
-
-      //Set dates.
       $scope.today = moment().startOf('day').toDate();
       $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();

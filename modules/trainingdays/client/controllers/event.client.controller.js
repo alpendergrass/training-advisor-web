@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('EventController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
+  .controller('EventController', ['$scope', '$state', '$stateParams', '$compile', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment',
+    function($scope, $state, $stateParams, $compile, $uibModal, $anchorScroll, Authentication, TrainingDays, _, moment) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -10,7 +10,6 @@ angular.module('trainingDays')
         jQuery('[data-toggle="popover"]').popover();
       });
 
-      //The following makes lodash available in html.
       $scope._ = _;
 
       $scope.datePickerStatus = {

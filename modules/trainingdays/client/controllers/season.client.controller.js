@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, _, moment, toastr, usSpinnerService, MaterialCalendarData) {
+  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', '_', 'moment', 'toastr', 'usSpinnerService',
+    function($scope, $state, $stateParams, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -10,24 +10,7 @@ angular.module('trainingDays')
         jQuery('[data-toggle="popover"]').popover();
       });
 
-      //The following makes lodash available in html.
       $scope._ = _;
-
-      // //Create socket for server-to-client messaging.
-      // //Make sure the Socket is connected
-      // if (!Socket.socket) {
-      //   Socket.connect();
-      // }
-
-      // //The following will remove any listeners. We create a new one below.
-      // Socket.init();
-
-      // // Add an event listener to the 'trainingDayMessage' event
-      // Socket.on('trainingDayMessage', function(message) {
-      //   toastr[message.type](message.text, message.title);
-      // });
-
-      //Set dates.
       $scope.today = moment().startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
 
