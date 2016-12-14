@@ -28,30 +28,7 @@ angular.module('trainingDays')
 
       //Set dates.
       $scope.today = moment().startOf('day').toDate();
-      $scope.adviceDate = $scope.today;
-      $scope.yesterday = moment().subtract(1, 'day').startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
-      $scope.dayAfterTomorrow = moment().add(2, 'days').startOf('day').toDate();
-
-      //Begin Datepicker stuff.
-      $scope.datePickerStatus = {
-        opened: false
-      };
-
-      $scope.openDatePicker = function($event) {
-        $scope.datePickerStatus.opened = true;
-      };
-      //End Datepicker stuff.
-
-      // Check if provider is already in use with current user
-      $scope.isConnectedSocialAccount = function(provider) {
-        return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
-      };
-
-      var toNumericDate = function(date) {
-        var dateString = moment(date).format('YYYYMMDD');
-        return parseInt(dateString, 10);
-      };
 
       var getMetrics = function(trainingDay, metricsType) {
         return _.find(trainingDay.metrics, ['metricsType', metricsType]);
