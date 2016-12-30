@@ -6,10 +6,9 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Auth
 
     //The following makes lodash available in html.
     $scope._ = _;
-
-    this.$state = $state;
-    this.authentication = Authentication;
-    this.menu = Menus.getMenu('topbar');
+    $scope.$state = $state;
+    $scope.authentication = Authentication;
+    $scope.menu = Menus.getMenu('topbar');
 
     // Collapsing the menu after navigation
     $scope.$on('$stateChangeSuccess', function () {
