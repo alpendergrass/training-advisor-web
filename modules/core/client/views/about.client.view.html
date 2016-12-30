@@ -1,0 +1,15 @@
+<section ng-controller="AboutController as about">
+  <div class="container">
+    <div class="page-header">
+      <h2>About Tacit Training</h2>
+    </div>
+    <div class="container">
+      <div ng-repeat="section in about.sections">
+        <h3>{{section.title}}</h3>
+        <div class="about-content">
+          <span ng-bind-html="section.content"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -55,8 +55,8 @@ angular.module('trainingDays')
       $scope.openRecurrence = function(eventDate) {
         var modalInstance = $uibModal.open({
           templateUrl: 'recurrance.html',
-          //size: 'sm',
           controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
+            // What is $scope here?
             $scope.recurrenceSpec = {
               daysOfWeek: {}
             };

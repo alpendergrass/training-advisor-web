@@ -62,3 +62,7 @@ a:hover .header-profile-image {
 .user-alert {
   font-weight: bold !important;
 }
+
+.about-content {
+  font-size: 16px;
+}
