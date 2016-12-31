@@ -42,7 +42,7 @@ module.exports.init = function init(callback) {
       console.log(chalk.blue('Server timezone manually set to: ', process.env.TZ));
     }
 
-    // Schedule processEvents job:
+    // Schedule events jobs:
     // only run this on first instance.
     var instanceIndex = process.env.CF_INSTANCE_INDEX || 0;
 
@@ -53,6 +53,9 @@ module.exports.init = function init(callback) {
         sched = later.parse.recur().every(4).minute();
 
       later.setInterval(eventsUtil.processEvents, sched);
+
+      sched = later.parse.recur().every(24).hour();
+      later.setInterval(eventsUtil.purgeEvents, sched);
     }
 
 

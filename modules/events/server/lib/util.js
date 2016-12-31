@@ -105,3 +105,22 @@ module.exports.processEvents = function() {
   });
 };
 
+module.exports.purgeEvents = function() {
+  let purgeDate = moment().subtract(1, 'week').toDate();
+
+  return new Promise(function(resolve, reject) {
+    console.log('purgeEvents starting: ', moment().format());
+    EventModel.remove({
+      created: { $lt: purgeDate },
+      status: { $ne: 'new' }
+    }, function(err) {
+      if (err) {
+        console.log('purgeEvents failed: ', err);
+        reject(err);
+      }
+
+      resolve();
+    });
+  });
+};
+
