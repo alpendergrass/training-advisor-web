@@ -6,7 +6,7 @@ var mongoose = require('mongoose'),
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
 var statusValues = {
-  values: 'new|fetched|skipped|unrecognized'.split('|'),
+  values: 'new|fetched|skipped|error|unrecognized'.split('|'),
   message: invalidDataErrorMessage
 };
 
@@ -49,20 +49,14 @@ var EventSchema = new Schema({
     default: 'new',
     enum: statusValues
   },
-  // isSimDay: {
-  //   type: Boolean,
-  //   default: false
-  // },
+  errorDetail: {
+    type: String,
+    default: ''
+  },
   eventTime: {
     type: Date,
     required: 'eventTime is required'
   },
-  // eventTime: {
-  //   type: Number,
-  //   min: minFitnessOrFatigueValue,
-  //   max: maxFitnessOrFatigueValue,
-  //   default: 0
-  // },
   ownerId: {
     type: Number,
     default: 0

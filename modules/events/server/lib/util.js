@@ -28,7 +28,6 @@ module.exports.storeEvent = function(data) {
 
       event.save()
         .then(function(event) {
-          console.log('saved strava webhook event: ', event);
           resolve(event);
         })
         .catch(function(err) {
@@ -71,10 +70,18 @@ module.exports.processEvents = function() {
                 return event.save();
               })
               .then(function(event) {
-                console.log('processed strava webhook event: ', event);
+                // console.log('processed strava webhook event: ', event);
               })
               .catch(function(err) {
                 console.log('strava webhook event processing failed: ', err);
+                event.status = 'error';
+                event.errorDetail = err;
+
+                event.save()
+                  .then(function(event) {})
+                  .catch(function(err) {
+                    console.log('strava webhook event processing error - event save failed: ', err);
+                  });
               });
           } else {
             event.status = 'unrecognized';

@@ -18,7 +18,7 @@ var stravaUtil,
   trainingDate,
   trainingDay;
 
-describe('TrainingDay Download Strava Unit Tests:', function() {
+describe('strava-util Unit Tests:', function() {
   before(function(done) {
     stravaStub = {};
     stravaStub.athlete = {};

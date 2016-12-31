@@ -64,17 +64,12 @@ module.exports.fetchActivity = function(user, activityId) {
 
     strava.activities.get({ 'access_token': accessToken, 'id': activityId }, function(err, payload) {
       if(err) {
-        console.log('strava.activities.get returned error: ', err);
         return reject(err);
       }
 
       if(payload.errors) {
-        console.log('strava.activities.get access failed: ' + payload.message);
-        console.log(JSON.stringify(payload));
-        return reject(new Error('strava.activities.get access failed: ' + payload.message));
+        return reject(new Error('strava.activities.get access failed: ' + JSON.stringify(payload)));
       }
-
-      // console.log('payload: ', payload);
 
       let numericDate = util.toNumericDate(payload.start_date_local);
 

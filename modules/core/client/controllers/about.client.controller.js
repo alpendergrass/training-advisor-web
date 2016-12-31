@@ -18,6 +18,6 @@ angular.module('core').controller('AboutController', ['$scope', 'Authentication'
     }, {
       title: 'Next Steps',
       content: '<p>When we first conceived of Tacit Training, we were thinking of riders like us. We love to ride, we want to ride faster and go further, we want our time on the bike to be effective training, but we are often too busy to spend a lot of time planning and monitoring our training. If this sounds like you, Tacit Training can be a game-changer. We invite you to give it a try. To get started you need to: <ul><li>Sign up.</li><li>Set your start day.</li><li>Create a goal.</li><li>Click a button to generate your season.</li></ul></p><p><b>Allez!</b></p>'
-    }]
+    }];
   }
 ]);
