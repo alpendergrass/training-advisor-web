@@ -7,9 +7,10 @@ var path = require('path'),
   chalk = require('chalk'),
   seed = require('./seed'),
   later = require('later'),
-  nodemailer = require('nodemailer');
+  nodemailer = require('nodemailer'),
+  sendinBlue = require('nodemailer-sendinblue-transport');
 
-var smtpTransport = nodemailer.createTransport(config.mailer.options),
+var smtpTransport = nodemailer.createTransport(sendinBlue(config.mailer.options)),
   mailSubjectPrefix = 'TacitTraining - ' + process.env.NODE_ENV,
   mailOptions = {
     to: config.mailer.from,
@@ -54,7 +55,7 @@ module.exports.init = function init(callback) {
 
       later.setInterval(eventsUtil.processEvents, sched);
 
-      sched = later.parse.recur().every(24).hour();
+      sched = later.parse.recur().every(2).hour();
       later.setInterval(eventsUtil.purgeEvents, sched);
     }
 

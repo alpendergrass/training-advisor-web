@@ -72,11 +72,7 @@ module.exports = {
   mailer: {
     from: getCred('training-advisor-mail', 'from') || 'MAILER_FROM',
     options: {
-      service: getCred('training-advisor-mail', 'service') || 'MAILER_SERVICE_PROVIDER',
-      auth: {
-        user: getCred('training-advisor-mail', 'username') || 'MAILER_EMAIL_ID',
-        pass: getCred('training-advisor-mail', 'password') || 'MAILER_PASSWORD'
-      }
+      apiKey: getCred('training-advisor-mail', 'password') || 'MAILER_PASSWORD',
     }
   },
   seedDB: {

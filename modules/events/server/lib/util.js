@@ -43,7 +43,7 @@ module.exports.storeEvent = function(data) {
 
 module.exports.processEvents = function() {
   return new Promise(function(resolve, reject) {
-    console.log('processEvents start: ', moment().format());
+    // console.log('processEvents start: ', moment().format());
     dbUtil.getUnprocessedEvents()
       .then(function(events) {
         _.forEach(events, function(event) {
@@ -96,7 +96,7 @@ module.exports.processEvents = function() {
           }
         });
 
-        console.log('processEvents   end: ', moment().format());
+        // console.log('processEvents   end: ', moment().format());
         return resolve();
       })
       .catch(function(err) {
