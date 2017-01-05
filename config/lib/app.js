@@ -55,7 +55,7 @@ module.exports.init = function init(callback) {
 
       later.setInterval(eventsUtil.processEvents, sched);
 
-      sched = later.parse.recur().every(2).hour();
+      sched = later.parse.recur().every(12).hour();
       later.setInterval(eventsUtil.purgeEvents, sched);
     }
 
