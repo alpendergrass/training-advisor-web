@@ -140,13 +140,15 @@ module.exports.start = function start(callback) {
       console.log(chalk.green('App version:\t\t\t' + config.meanjs.version));
       console.log('--');
 
-      mailOptions.subject = mailSubjectPrefix + ': Started';
-      mailOptions.text = 'App instance has been started.';
-      smtpTransport.sendMail(mailOptions, function(err) {
-        if (err) {
-          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        }
-      });
+      if (process.env.NODE_ENV !== 'development') {
+        mailOptions.subject = mailSubjectPrefix + ': Started';
+        mailOptions.text = 'App instance has been started.';
+        smtpTransport.sendMail(mailOptions, function(err) {
+          if (err) {
+            console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
+          }
+        });
+      }
     });
 
     if (callback) callback(app, db, config);
