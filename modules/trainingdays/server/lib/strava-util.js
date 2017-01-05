@@ -19,7 +19,6 @@ var processActivity = function(stravaActivity, trainingDay) {
 
   if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
     // We have already processed this stravaActivity.
-    console.log('stravaActivity has already been processed.');
     return false;
   }
 
@@ -38,18 +37,10 @@ var processActivity = function(stravaActivity, trainingDay) {
   newActivity.intensity = intensity;
   newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
   newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
-  console.log('Strava: stravaActivity.weighted_average_watts: ' + stravaActivity.weighted_average_watts);
-  console.log('Strava: fudgedNP: ' + fudgedNP);
-  console.log('Strava: stravaActivity.moving_time: ' + stravaActivity.moving_time);
-  console.log('Strava: trainingDay.user.thresholdPower: ' + trainingDay.user.thresholdPower);
-  console.log('Strava: intensity: ' + intensity);
-  console.log('Strava: load: ' + newActivity.load);
   newActivity.source = 'strava';
   newActivity.sourceID = stravaActivity.id;
   newActivity.name = stravaActivity.name;
   newActivity.notes = stravaActivity.name;
-  // newActivity.notes = 'Strava reports weighted average watts of ' + stravaActivity.weighted_average_watts;
-  // newActivity.notes += '. We are using adjusted NP of ' + fudgedNP + '.';
   trainingDay.completedActivities.push(newActivity);
 
   return true;
@@ -58,24 +49,29 @@ var processActivity = function(stravaActivity, trainingDay) {
 module.exports = {};
 
 module.exports.fetchActivity = function(user, activityId) {
+  // Note that if activityId is for an activity associated with an athlete other than user,
+  // Strava will still return the activity, though only a summary.
+  // We will process it as if it belongs to user.
+  // This should not happen but if we were paranoid...
+  // TODO: add check to ensure returned activity belongs to user.
   return new Promise(function(resolve, reject) {
     console.log('Strava: Initiating fetchActivity for TacitTraining user: ', user.username);
     let accessToken = user.provider ==='strava'? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
 
     strava.activities.get({ 'access_token': accessToken, 'id': activityId }, function(err, payload) {
       if(err) {
-        return reject(err);
+        return reject(new Error(`strava.activities.get access failed. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`));
       }
 
       if(payload.errors) {
-        return reject(new Error('strava.activities.get access failed: ' + JSON.stringify(payload)));
+        return reject(new Error(`strava.activities.get access returned errors. username: ${user.username}, activityId: ${activityId}, message: ${payload.message}, errors: ${JSON.stringify(payload.errors)}`));
       }
 
       let numericDate = util.toNumericDate(payload.start_date_local);
 
       dbUtil.getTrainingDayDocument(user, numericDate, function(err, trainingDay) {
         if (err) {
-          return reject(err);
+          return reject(new Error(`Strava fetchActivity - getTrainingDayDocument returned error. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`));
         }
 
         if (!processActivity(payload, trainingDay)) {
@@ -86,8 +82,7 @@ module.exports.fetchActivity = function(user, activityId) {
 
         trainingDay.save(function (err) {
           if (err) {
-            console.log('Strava: fetchActivity td.save err: ', err);
-            return reject(err);
+            return reject(new Error(`Strava fetchActivity - trainingDay.save returned error. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`));
           }
 
           adviceEngine.refreshAdvice(user, trainingDay)
@@ -127,12 +122,12 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       // statusMessage.text = 'Strava access failed: ' + (err.msg || '');
       // statusMessage.type = 'error';
       // dbUtil.sendMessageToUser(statusMessage, user);
+      console.log(`strava.athlete.listActivities failed for user: ${user.username}, error: ${JSON.stringify(err)}`);
       return callback(err, null);
     }
 
     if(payload.errors) {
-      console.log('Strava access failed: ' + payload.message);
-      console.log(JSON.stringify(payload));
+      console.log(`strava.athlete.listActivities returned errors for user: ${user.username}, payload: ${JSON.stringify(payload)}`);
       // statusMessage.text = 'Strava access failed: ' + payload.message;
       // statusMessage.type = 'error';
       // dbUtil.sendMessageToUser(statusMessage, user);
