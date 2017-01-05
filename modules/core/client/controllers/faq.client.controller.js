@@ -95,6 +95,9 @@ angular.module('core').controller('FAQController',
         question: 'How do I get my rides from Strava?',
         answer: 'Because your Tacit Training account is linked to your Strava account, you can either set your profile to automatically fetch your rides from Strava - on My Profile - or you can download your rides from Strava individually. Click the Strava download button on My Training Day.'
       }, {
+        question: 'My private activities in Strava are not showing up. How do I fix this?',
+        answer: 'You need to log out and then log back into Tacit Training. When you log in Strava should ask you to authorize access of private events as part of the authorization process.'
+      }, {
         question: 'I have not input my rides into Tacit Training for a day/week/month or two but I want to start using it again. Do I have to input all the workouts I’ve done since the last time I used it?',
         answer: 'No. You need to do a Fitness and Fatigue True-Up - see the Training Days menu.'
       }, {
