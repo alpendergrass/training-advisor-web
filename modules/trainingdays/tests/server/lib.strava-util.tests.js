@@ -74,7 +74,7 @@ describe('strava-util Unit Tests:', function() {
         })
         .catch(function(err) {
           should.exist(err);
-          (err.message).should.containEql('activities.get error');
+          (err.message).should.containEql('strava.activities.get access failed');
           done();
         });
     });
