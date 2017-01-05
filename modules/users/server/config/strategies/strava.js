@@ -11,6 +11,7 @@ module.exports = function(config) {
     clientID: config.strava.clientID,
     clientSecret: config.strava.clientSecret,
     callbackURL: config.strava.callbackURL,
+    scope: 'view_private',
     passReqToCallback: true
   },
   function(req, accessToken, refreshToken, profile, done) {
