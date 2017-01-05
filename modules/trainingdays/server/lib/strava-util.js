@@ -24,7 +24,7 @@ var processActivity = function(stravaActivity, trainingDay) {
 
   if (!stravaActivity.weighted_average_watts) {
     // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
-    console.log('stravaActivity.weighted_average_watts is not present: ', stravaActivity);
+    console.log('stravaActivity.weighted_average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
     return false;
   }
 
