@@ -474,7 +474,6 @@ angular.module('trainingDays')
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;
             } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
               $scope.error = 'Server error prevented season update.';
             }
           });
@@ -512,7 +511,7 @@ angular.module('trainingDays')
             commit: 'no'
           }, function(response) {
             initSimFlags();
-            $scope.genPlan();
+            loadChart();
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;

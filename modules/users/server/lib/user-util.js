@@ -22,7 +22,6 @@ var removeOrphanedNotifications = function(notifications) {
 
         countTDs
           .then(function(count) {
-            console.log('count: ', count);
             if (count < 1) {
               // No TrainingDay exists for the notification.
               // Remove the notification.
