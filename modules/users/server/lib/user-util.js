@@ -11,6 +11,47 @@ var path = require('path'),
 
 mongoose.Promise = global.Promise;
 
+var removeOrphanedNotifications = function(notifications) {
+  // Here we will remove any notifications that are associated with training days that no longer exist.
+  return new Promise(function(resolve, reject) {
+
+    return Promise.all(notifications.map(function(notification) {
+      if (notification.lookup) {
+        // We are assuming that the lookup is an TD ID.
+        let countTDs = TrainingDay.count({ _id: notification.lookup }).exec();
+
+        countTDs
+          .then(function(count) {
+            console.log('count: ', count);
+            if (count < 1) {
+              // No TrainingDay exists for the notification.
+              // Remove the notification.
+              return null;
+            } else {
+              // TrainingDay exists for the notification.
+              return notification;
+            }
+          })
+          .catch(function(err) {
+            // If error we will remove notification
+            return;
+          });
+      } else {
+        // No lookup associated with the notification so leave it alone.
+        return notification;
+      }
+    }))
+      .then(function(scannedNotifications) {
+        // Remove any null values from our array of results from Promise.all
+        _.remove(scannedNotifications, function(notification) {
+          return !notification;
+        });
+
+        return resolve(scannedNotifications);
+      });
+  });
+};
+
 var adornNotification = function(notification) {
   // *** Beware of possible circular blocks. ***
 
@@ -134,55 +175,63 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
   return new Promise(function(resolve, reject) {
     let notificationsModified = false;
 
-    _.forEach(notificationUpdates, function(notificationUpdate) {
-      let notification = _.find(user.notifications, function(n) {
-        return ((notificationUpdate.notificationType === '[[all]]' || n.notificationType === notificationUpdate.notificationType) && n.lookup === notificationUpdate.lookup);
-      });
+    removeOrphanedNotifications(user.notifications)
+      .then(function(notifications) {
+        user.notifications = notifications;
 
-      if (notificationUpdate.add) {
-        // If notification does not exist we need to add it.
-        if (!notification && notificationUpdate.notificationType !== '[[all]]') {
-          // '[[all]]' is only valid when removing notifications.
-          notificationsModified = true;
-          user.notifications.push(adornNotification(notificationUpdate));
-        }
-      } else {
-        // If notification exists we need to remove it.
-        if (notification) {
-          notificationsModified = true;
-          _.remove(user.notifications, function(notification) {
-            return (notificationUpdate.notificationType === '[[all]]' || notification.notificationType === notificationUpdate.notificationType) && notification.lookup === notificationUpdate.lookup;
+        _.forEach(notificationUpdates, function(notificationUpdate) {
+          let notification = _.find(user.notifications, function(n) {
+            return ((notificationUpdate.notificationType === '[[all]]' || n.notificationType === notificationUpdate.notificationType) && n.lookup === notificationUpdate.lookup);
           });
+
+          if (notificationUpdate.add) {
+            // If notification does not exist we need to add it.
+            if (!notification && notificationUpdate.notificationType !== '[[all]]') {
+              // '[[all]]' is only valid when removing notifications.
+              notificationsModified = true;
+              user.notifications.push(adornNotification(notificationUpdate));
+            }
+          } else {
+            // If notification exists we need to remove it.
+            if (notification) {
+              notificationsModified = true;
+              _.remove(user.notifications, function(notification) {
+                return (notificationUpdate.notificationType === '[[all]]' || notification.notificationType === notificationUpdate.notificationType) && notification.lookup === notificationUpdate.lookup;
+              });
+            }
+          }
+        });
+
+        if (!notificationsModified) {
+          return resolve({ user: user, saved: false });
         }
-      }
-    });
 
-    if (!notificationsModified) {
-      return resolve({ user: user, saved: false });
-    }
+        // Block notifications if blocking notifications are present
+        // and v.v.
+        let blocks = _.flatMap(user.notifications, function(n) { return n.blocks; });
 
-    // Block notifications if blocking notifications are present
-    // and v.v.
-    let blocks = _.flatMap(user.notifications, function(n) { return n.blocks; });
-
-    _.forEach(user.notifications, function(notification) {
-      notification.blocked = _.includes(blocks, notification.notificationType);
-    });
+        _.forEach(user.notifications, function(notification) {
+          notification.blocked = _.includes(blocks, notification.notificationType);
+        });
 
 
-    if (!saveUser) {
-      return resolve({ user: user, saved: false });
-    }
+        if (!saveUser) {
+          return resolve({ user: user, saved: false });
+        }
 
-    user.markModified('notifications');
-    // I do not understand why I have to do this as notifications is not a schema-less type.
+        user.markModified('notifications');
+        // I do not understand why I have to do this as notifications is not a schema-less type.
 
-    user.save(function(err) {
-      if (err) {
+        user.save(function(err) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve({ user: user, saved: true });
+        });
+      })
+      .catch(function(err){
         return reject(err);
-      }
-      return resolve({ user: user, saved: true });
-    });
+      });
   });
 };
 
