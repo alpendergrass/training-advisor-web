@@ -357,6 +357,7 @@ exports.delete = function(req, res) {
     }
 
     let notifications = [{ notificationType: 'plangen', lookup: '', add: true }];
+    notifications.push({ notificationType: '[[all]]', lookup: trainingDay.id });
 
     userUtil.updateNotifications(req.user, notifications, true)
       .then(function(response) {
@@ -420,6 +421,9 @@ exports.getSeason = function(req, res) {
           _.forEach(goalDays, function(goalDay) {
             if (!goalDay.eventTerrain) {
               notifications.push({ notificationType: 'terrain', lookup: goalDay.id, add: true });
+            } else {
+              // Remove any potentially erroneous terrain notifications. Can occur if user recreates a goal.
+              notifications.push({ notificationType: 'terrain', lookup: goalDay.id });
             }
           });
         } else {

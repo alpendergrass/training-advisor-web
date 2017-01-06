@@ -135,11 +135,14 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
     let notificationsModified = false;
 
     _.forEach(notificationUpdates, function(notificationUpdate) {
-      let notification = _.find(user.notifications, { 'notificationType': notificationUpdate.notificationType, 'lookup': notificationUpdate.lookup });
+      let notification = _.find(user.notifications, function(n) {
+        return ((notificationUpdate.notificationType === '[[all]]' || n.notificationType === notificationUpdate.notificationType) && n.lookup === notificationUpdate.lookup);
+      });
 
       if (notificationUpdate.add) {
         // If notification does not exist we need to add it.
-        if (!notification) {
+        if (!notification && notificationUpdate.notificationType !== '[[all]]') {
+          // '[[all]]' is only valid when removing notifications.
           notificationsModified = true;
           user.notifications.push(adornNotification(notificationUpdate));
         }
@@ -148,7 +151,7 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
         if (notification) {
           notificationsModified = true;
           _.remove(user.notifications, function(notification) {
-            return notification.notificationType === notificationUpdate.notificationType && notification.lookup === notificationUpdate.lookup;
+            return (notificationUpdate.notificationType === '[[all]]' || notification.notificationType === notificationUpdate.notificationType) && notification.lookup === notificationUpdate.lookup;
           });
         }
       }
