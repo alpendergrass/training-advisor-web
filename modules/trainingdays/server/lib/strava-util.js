@@ -90,7 +90,7 @@ module.exports.fetchActivity = function(user, activityId) {
               return resolve(updatedTrainingDay);
             })
             .catch(function(err) {
-              console.log('Strava fetchActivity refreshAdvice err: ', err);
+              console.log(`Strava fetchActivity refreshAdvice  failed. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`);
               return resolve(trainingDay);
             });
         });

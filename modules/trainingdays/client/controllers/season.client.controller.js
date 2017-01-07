@@ -13,6 +13,8 @@ angular.module('trainingDays')
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
+      $scope.hasStart = true;
+      $scope.hasEnd = true;
 
       $scope.viewSeason = function() {
         var actualLoadArray,

@@ -4,6 +4,8 @@ angular.module('trainingDays')
   .controller('CalendarController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment', 'usSpinnerService', 'MaterialCalendarData',
     function($scope, $state, $stateParams, $location, $compile, $anchorScroll, Authentication, TrainingDays, Season, Util, _, moment, usSpinnerService, MaterialCalendarData) {
       this.authentication = Authentication;
+      this.hasStart = true;
+      this.hasEnd = true;
 
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
