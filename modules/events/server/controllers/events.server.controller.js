@@ -33,6 +33,8 @@ exports.validateStravaWebhookSubscription = function(req, res) {
 
 exports.postStravaWebhookEvent = function(req, res) {
 
+  // callback_url=http://www.tacittraining.com/api/events/strava/webhook
+
   // EXAMPLE POST BODY
   // {
   //   "subscription_id": "1",
@@ -54,4 +56,35 @@ exports.postStravaWebhookEvent = function(req, res) {
       console.log('postStravaWebhookEvent error.');
       return res.status(200).send();
     });
+};
+
+exports.postSendInBlueWebhookEvent = function(req, res) {
+
+  // callback_url=http://www.tacittraining.com/api/events/sendinblue/campaign_webhook
+
+  // EXAMPLE POST BODY
+  // {
+  //   "event":"delivered",
+  //   "email":"example@example.net",
+  //   "id":1,
+  //   "date":"2013-06-16 10:08:14",
+  //   "message-id":"<201306160953.85395191262@msgid.domain>",
+  //   "tag":"defined-tag",
+  //   "X-Mailin-custom":"defined-custom-value",
+  //   "reason":"Reason",
+  //   "link":"http://example.net"
+  //   }
+
+  console.log('postSendInBlueWebhookEvent req.body: ', JSON.stringify(req.body));
+  return res.status(200).send();
+
+  // util.storeEvent(req.body)
+  //   .then(function(event) {
+  //     return res.status(200).send();
+  //   })
+  //   .catch(function(err) {
+  //     // No reason to tell Strata about the error.
+  //     console.log('postStravaWebhookEvent error.');
+  //     return res.status(200).send();
+  //   });
 };
