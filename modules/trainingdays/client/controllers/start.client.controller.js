@@ -68,8 +68,14 @@ angular.module('trainingDays')
             if ($stateParams.forwardTo) {
               $state.go($stateParams.forwardTo);
             } else {
-              toastr.success('You should review your profile settings.', 'Start Created', { timeOut: 7000 });
-              $state.go('settings.profile');
+              if (isTrueUp) {
+                toastr.success('Your new fitness and fatigue values have been recorded.', 'True-Up Saved');
+                $state.go('season');
+
+              } else {
+                toastr.success('You should review your profile settings.', 'Start Created', { timeOut: 7000 });
+                $state.go('settings.profile');
+              }
             }
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {

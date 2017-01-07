@@ -227,7 +227,7 @@ exports.create = function(req, res) {
 
       let today = util.getTodayInUserTimezone(user);
 
-      if (moment(trainingDay.date).isAfter(today)) {
+      if (moment(trainingDay.date).isAfter(today) || req.body.fitnessAndFatigueTrueUp) {
         notifications.push({ notificationType: 'plangen', lookup: '', add: true });
       }
 
