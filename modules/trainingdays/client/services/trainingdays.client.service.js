@@ -8,7 +8,7 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
     }, {
       create: {
         method: 'POST'
-      }, 
+      },
       update: {
         method: 'PUT'
       },
@@ -36,7 +36,8 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
       },
       genPlan: {
         method: 'GET',
-        url: 'api/trainingDays/genPlan/:trainingDate'
+        url: 'api/trainingDays/genPlan/:trainingDate',
+        params: { isSim: false }
       },
       downloadActivities: {
         method: 'GET',

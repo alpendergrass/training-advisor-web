@@ -453,14 +453,27 @@ angular.module('trainingDays')
           }
         };
 
-        $scope.genPlan = function() {
+        $scope.genPlan = function(isSim) {
+          var toastMsg,
+            toastTitle;
           $scope.isWorking = true;
           usSpinnerService.spin('tdSpinner');
-          toastr.info('Update has been initiated.', 'Season Update'); //, { timeOut: 7000 });
+
+          if (isSim) {
+            toastTitle = 'Season Simulation';
+            toastMsg = 'Simulation is running...';
+          } else {
+            toastTitle = 'Season Update';
+            toastMsg = 'Update has been initiated.';
+            isSim = false;
+          }
+          toastr.info(toastMsg, toastTitle); //, { timeOut: 7000 });
+
           $scope.error = null;
 
           TrainingDays.genPlan({
-            trainingDate: $scope.today.toISOString()
+            trainingDate: $scope.today.toISOString(),
+            isSim: isSim
           }, function(response) {
             usSpinnerService.stop('tdSpinner');
             $scope.isWorking = false;
@@ -488,7 +501,7 @@ angular.module('trainingDays')
           //genPlan using sim days.
           $scope.simConfigUnderway = false;
           $scope.simHasRun = true;
-          $scope.genPlan();
+          $scope.genPlan(true);
         };
 
         $scope.commitSim = function() {

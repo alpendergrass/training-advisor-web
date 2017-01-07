@@ -484,6 +484,7 @@ exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
   params.numericDate = util.toNumericDate(req.params.trainingDate);
+  params.isSim = JSON.parse(req.query.isSim); // Converts string to boolean.
 
   adviceEngine.generatePlan(params, function(err, response) {
     if (err) {
@@ -527,7 +528,16 @@ exports.finalizeSim = function(req, res) {
         });
       }
 
-      res.json('Simulation committed');
+      // Remove any plan gen notification that might exist.
+      let notifications = [{ notificationType: 'plangen', lookup: '' }];
+      userUtil.updateNotifications(req.user, notifications, true)
+        .then(function(response) {
+          return res.json('Simulation committed');
+        })
+        .catch(function(err) {
+          console.log('finalizeSim - updateNotifications err: ', err);
+          return res.json('Simulation committed');
+        });
     });
   } else {
     dbUtil.revertSimulation(req.user, function(err) {
@@ -537,7 +547,7 @@ exports.finalizeSim = function(req, res) {
         });
       }
 
-      res.json('Simulation reverted');
+      return res.json('Simulation reverted');
     });
   }
 };
