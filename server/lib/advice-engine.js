@@ -301,6 +301,11 @@ module.exports.generatePlan = function(params, callback) {
                             return module.exports.refreshAdvice(user, todayTrainingDay);
                           })
                           .then(function() {
+                            if (params.isSim) {
+                              // Don't mess with notifications if we are running a sim.
+                              return Promise.resolve({ user: user, saved: false });
+                            }
+
                             //remove genPlan notification if it exists
                             let notifications = [{ notificationType: 'plangen', lookup: '' }];
                             return userUtil.updateNotifications(user, notifications, true);
@@ -313,6 +318,12 @@ module.exports.generatePlan = function(params, callback) {
                               created: Date.now(),
                               username: user.username
                             };
+
+                            if (params.isSim) {
+                              statusMessage.text = 'Simulation has completed.';
+                              statusMessage.title = 'Season Simulation';
+                            }
+
                             let genPlanresponse = { user: response.user, statusMessage: statusMessage };
                             return callback(null, genPlanresponse);
                           })
