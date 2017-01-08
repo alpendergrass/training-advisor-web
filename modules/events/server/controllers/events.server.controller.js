@@ -35,7 +35,7 @@ exports.postStravaWebhookEvent = function(req, res) {
 
   // callback_url=http://www.tacittraining.com/api/events/strava/webhook
 
-  // EXAMPLE POST BODY
+  // Strava webhook:
   // {
   //   "subscription_id": "1",
   //   "owner_id": 13408,
@@ -47,13 +47,13 @@ exports.postStravaWebhookEvent = function(req, res) {
 
   console.log('postStravaWebhookEvent for user: ', req.body.owner_id || 'no owner_id received');
 
-  util.storeEvent(req.body)
+  util.storeStravaEvent(req.body)
     .then(function(event) {
       return res.status(200).send();
     })
     .catch(function(err) {
       // No reason to tell Strata about the error.
-      console.log('postStravaWebhookEvent error.');
+      console.log('postStravaWebhookEvent error. req.body: ', JSON.stringify(req.body));
       return res.status(200).send();
     });
 };
@@ -62,29 +62,32 @@ exports.postSendInBlueWebhookEvent = function(req, res) {
 
   // callback_url=http://www.tacittraining.com/api/events/sendinblue/campaign_webhook
 
-  // EXAMPLE POST BODY
+  // Unsubscribe postSendInBlueWebhookEvent req.body (payload differs by event):
   // {
-  //   "event":"delivered",
-  //   "email":"example@example.net",
-  //   "id":1,
-  //   "date":"2013-06-16 10:08:14",
-  //   "message-id":"<201306160953.85395191262@msgid.domain>",
-  //   "tag":"defined-tag",
-  //   "X-Mailin-custom":"defined-custom-value",
-  //   "reason":"Reason",
-  //   "link":"http://example.net"
-  //   }
+  //    "id":20650,
+  //    "camp_id":1,
+  //    "email":"gus@tacittraining.com",
+  //    "campaign name":"Test Campaign",
+  //    "date_sent":"",
+  //    "date_event":"2017-01-07 14:52:37", --> eventTime
+  //    "event":"unsubscribe", --> aspectType
+  //    "tag":"",
+  //    "ts_sent":null,
+  //    "ts_event":1483797157,
+  //    "list_id":[
+  //       4
+  //    ]
+  // }
 
-  console.log('postSendInBlueWebhookEvent req.body: ', JSON.stringify(req.body));
-  return res.status(200).send();
+  console.log('postSendInBlueWebhookEvent for email: ', req.body.email || 'no email received');
 
-  // util.storeEvent(req.body)
-  //   .then(function(event) {
-  //     return res.status(200).send();
-  //   })
-  //   .catch(function(err) {
-  //     // No reason to tell Strata about the error.
-  //     console.log('postStravaWebhookEvent error.');
-  //     return res.status(200).send();
-  //   });
+  util.storeSendInBlueEvent(req.body)
+    .then(function(event) {
+      return res.status(200).send();
+    })
+    .catch(function(err) {
+      // No reason to tell them about the error.
+      console.log('postSendInBlueWebhookEvent error. req.body: ', JSON.stringify(req.body));
+      return res.status(200).send();
+    });
 };

@@ -5,6 +5,7 @@ var path = require('path'),
   moment = require('moment-timezone'),
   mongoose = require('mongoose'),
   EventModel = mongoose.model('Event'),
+  User = mongoose.model('User'),
   dbUtil = require('./db-util'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   stravaUtil = require(path.resolve('./modules/trainingdays/server/lib/strava-util')),
@@ -14,7 +15,7 @@ mongoose.Promise = global.Promise;
 
 module.exports = {};
 
-module.exports.storeEvent = function(data) {
+module.exports.storeStravaEvent = function(data) {
   return new Promise(function(resolve, reject) {
     if (data.object_type === 'activity' && data.aspect_type === 'create') {
       let event = new EventModel({
@@ -23,7 +24,8 @@ module.exports.storeEvent = function(data) {
         objectId: data.object_id,
         objectType: data.object_type,
         aspectType: data.aspect_type,
-        eventTime: moment.unix(data.event_time)
+        eventTime: moment.unix(data.event_time),
+        eventData: JSON.stringify(data)
       });
 
       event.save()
@@ -31,12 +33,39 @@ module.exports.storeEvent = function(data) {
           resolve(event);
         })
         .catch(function(err) {
-          console.log('strava webhook event save failed: ', err);
+          console.log(`strava webhook event save failed. Error: ${err}. Data: ${JSON.stringify(data)}`);
           reject(err);
         });
     } else {
       console.log('unrecognized webhook data: ', data);
-      reject(new Error(`storeEvent: unrecognized webhook data ${data}.`));
+      reject(new Error(`storeStravaEvent: unrecognized webhook data ${JSON.stringify(data)}.`));
+    }
+  });
+};
+
+module.exports.storeSendInBlueEvent = function(data) {
+  return new Promise(function(resolve, reject) {
+    if (data.event === 'unsubscribe') {
+      let event = new EventModel({
+        source: 'sendinblue',
+        objectType: 'email_address',
+        objectValue: data.email,
+        aspectType: data.event,
+        eventTime: moment(data.date_event),
+        eventData: JSON.stringify(data)
+      });
+
+      event.save()
+        .then(function(event) {
+          resolve(event);
+        })
+        .catch(function(err) {
+          console.log(`sendInBlue webhook event save failed. Error: ${err}. Data: ${JSON.stringify(data)}`);
+          reject(err);
+        });
+    } else {
+      console.log('unrecognized webhook data: ', JSON.stringify(data));
+      reject(new Error(`storeSendInBlueEvent: unrecognized webhook data ${JSON.stringify(data)}.`));
     }
   });
 };
@@ -73,14 +102,35 @@ module.exports.processEvents = function() {
                 // console.log('processed strava webhook event: ', event);
               })
               .catch(function(err) {
-                console.log('strava webhook event processing failed: ', err);
+                console.log(`strava event processing failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
                 event.status = 'error';
                 event.errorDetail = err;
 
                 event.save()
                   .then(function(event) {})
                   .catch(function(err) {
-                    console.log('strava webhook event processing error - event save failed: ', err);
+                    console.log(`strava event processing error - event save failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
+                  });
+              });
+          } else if (event.source === 'sendinblue' && event.objectType === 'email_address' && event.aspectType === 'unsubscribe') {
+            User.update({ email: event.objectValue }, { $set: { emailNewsletter: false } }).exec()
+              .then(function() {
+                event.status = 'applied';
+                event.processed = moment().format();
+                return event.save();
+              })
+              .then(function(event) {
+                console.log(`processed sendInBlue webhook event for: ${event.objectValue}`);
+              })
+              .catch(function(err) {
+                console.log(`sendinblue event processing failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
+                event.status = 'error';
+                event.errorDetail = err;
+
+                event.save()
+                  .then(function(event) {})
+                  .catch(function(err) {
+                    console.log(`sendinblue event processing error - event save failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
                   });
               });
           } else {
@@ -88,15 +138,14 @@ module.exports.processEvents = function() {
 
             event.save()
               .then(function(event) {
-                console.log('skipping unrecognized event: ', event);
+                console.log(`skipping unrecognized event. Event: ${JSON.stringify(event)}`);
               })
               .catch(function(err) {
-                console.log('skipping unrecognized event - save failed: ', err);
+                console.log(`skipping unrecognized event - save failed. Event: ${JSON.stringify(event)}`);
               });
           }
         });
 
-        // console.log('processEvents   end: ', moment().format());
         return resolve();
       })
       .catch(function(err) {

@@ -6,12 +6,12 @@ var mongoose = require('mongoose'),
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
 var statusValues = {
-  values: 'new|fetched|skipped|error|unrecognized'.split('|'),
+  values: 'new|fetched|applied|skipped|error|unrecognized'.split('|'),
   message: invalidDataErrorMessage
 };
 
 var sourceValues = {
-  values: 'strava'.split('|'),
+  values: 'strava|sendinblue'.split('|'),
   message: invalidDataErrorMessage
 };
 
@@ -19,16 +19,6 @@ var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN})
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
 var minFitnessOrFatigueValue = [0, minMessage];
 var maxFitnessOrFatigueValue = [999, maxMessage];
-
-// Strava webhook:
-// {
-//   "subscription_id": "1",
-//   "owner_id": 13408,
-//   "object_id": 12312312312,
-//   "object_type": "activity",
-//   "aspect_type": "create",
-//   "event_time": 1297286541
-// }
 
 var EventSchema = new Schema({
   created: {
@@ -69,7 +59,15 @@ var EventSchema = new Schema({
     type: String,
     default: ''
   },
+  objectValue: {
+    type: String,
+    default: ''
+  },
   aspectType: {
+    type: String,
+    default: ''
+  },
+  eventData: {
     type: String,
     default: ''
   }

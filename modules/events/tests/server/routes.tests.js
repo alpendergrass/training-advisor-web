@@ -48,6 +48,30 @@ describe('Events server routes tests', function() {
       });
   });
 
+  it('should be able to postSendInBlueWebhookEvent.', function(done) {
+    let sendInBlueEvent = {
+      'event': 'unsubscribe',
+      'email': 'me@here.com',
+      'date_event': '2017-01-07 14:52:37'
+    };
+
+    agent.post('/api/events/sendinblue/campaign_webhook')
+      .send(sendInBlueEvent)
+      .expect(200)
+      .end(function(saveErr, saveRes) {
+        return done(saveErr);
+      });
+  });
+
+  it('should be able to postSendInBlueWebhookEvent with no data.', function(done) {
+    agent.post('/api/events/sendinblue/campaign_webhook')
+      .send()
+      .expect(200)
+      .end(function(saveErr, saveRes) {
+        return done(saveErr);
+      });
+  });
+
   afterEach(function(done) {
     EventModel.remove().exec()
       .then(function(response) {
