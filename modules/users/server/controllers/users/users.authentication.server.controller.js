@@ -127,9 +127,9 @@ exports.oauthCallback = function(strategy) {
             user = response.user;
           }
 
-          if (_.includes(user.roles, 'admin')) {
-            return res.redirect('/admin/users');
-          }
+          // if (_.includes(user.roles, 'admin')) {
+          //   return res.redirect('/admin/users');
+          // }
 
           return res.redirect(redirectURL || sessionRedirectURL || '/trainingDay/');
         });

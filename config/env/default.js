@@ -11,8 +11,8 @@ module.exports = {
   templateEngine: 'swig',
   // Session Cookie settings
   sessionCookie: {
-    // session expiration is set by default to 24 hours
-    maxAge: 24 * (60 * 60 * 1000),
+    // session expiration is set by default to 72 hours
+    maxAge: 72 * (60 * 60 * 1000),
     // httpOnly flag makes sure the cookie is only accessed
     // through the HTTP protocol and not JS/browser
     httpOnly: true,

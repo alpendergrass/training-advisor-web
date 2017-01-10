@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('core').factory('authInterceptor', ['$q', '$injector',
-  function ($q, $injector) {
+angular.module('core').factory('authInterceptor', ['$q', '$injector', '$window',
+  function ($q, $injector, $window) {
     return {
       responseError: function(rejection) {
         if (!rejection.config.ignoreAuthModule) {
@@ -11,8 +11,10 @@ angular.module('core').factory('authInterceptor', ['$q', '$injector',
               $injector.get('$state').transitionTo('authentication.signin');
               break;
             case 403:
-              //Authorization failure.
-              $injector.get('$state').transitionTo('forbidden');
+              // Authorization failure.
+              // We get a 403 when our sessionid cookie has expired.
+              //$injector.get('$state').transitionTo('forbidden');
+              $window.location.href = '/api/auth/signout';
               break;
           }
         }
