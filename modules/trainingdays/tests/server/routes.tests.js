@@ -104,8 +104,8 @@ describe('TrainingDay server routes tests', function() {
   });
 
   it('should not be able to save a trainingDay if no date is provided', function(done) {
-    // Invalidate title field
-    trainingDay.date = null;
+    // Invalidate date field
+    trainingDay.dateNumeric = null;
 
     agent.post('/api/auth/signin')
       .send(credentials)
