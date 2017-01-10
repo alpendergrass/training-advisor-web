@@ -130,7 +130,7 @@ function generateRecurrences(req, callback) {
   var spec = req.body.recurrenceSpec,
     startDate = moment(req.body.date),
     nextDate,
-    timezone = req.user.timezone || 'America/Denver',
+    timezone = req.user.timezone || 'America/New_York',
     endDate = moment.tz(req.body.recurrenceSpec.endsOn, timezone).add(1, 'day'),
     trainingDay;
 

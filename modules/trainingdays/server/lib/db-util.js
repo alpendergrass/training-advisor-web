@@ -55,7 +55,7 @@ module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
 
     if (!trainingDay) {
       var newTrainingDay = new TrainingDay(),
-        timezone = user.timezone || 'America/Denver',
+        timezone = user.timezone || 'America/New_York',
         plannedMetrics = {
           metricsType: 'planned'
         },
