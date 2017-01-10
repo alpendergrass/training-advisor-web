@@ -10,7 +10,7 @@ module.exports = function (app) {
     .get(trainingDays.list)
     .post(trainingDays.create);
 
-  app.route('/api/trainingDays/getSeason/:today').all(trainingDaysPolicy.isAllowed)
+  app.route('/api/trainingDays/getSeason/:todayNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getSeason);
 
   // Single trainingDay routes
@@ -25,13 +25,13 @@ module.exports = function (app) {
   app.route('/api/trainingDays/finalizeSim/:commit').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.finalizeSim);
 
-  app.route('/api/trainingDays/getDay/:trainingDate').all(trainingDaysPolicy.isAllowed)
+  app.route('/api/trainingDays/getDay/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getDay);
 
-  app.route('/api/trainingDays/getAdvice/:trainingDate').all(trainingDaysPolicy.isAllowed)
+  app.route('/api/trainingDays/getAdvice/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getAdvice);
 
-  app.route('/api/trainingDays/genPlan/:trainingDate').all(trainingDaysPolicy.isAllowed)
+  app.route('/api/trainingDays/genPlan/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.genPlan);
 
   app.route('/api/trainingDays/downloadActivities/:trainingDayId').all(trainingDaysPolicy.isAllowed)

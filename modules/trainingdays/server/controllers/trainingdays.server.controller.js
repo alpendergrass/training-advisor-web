@@ -30,7 +30,7 @@ function getTrainingDay(id, callback) {
 function createTrainingDay(req, callback) {
   //This function is used to create start days, true-up days and events.
   //It is possible that a document already exists for this day so we must treat this as an update.
-  let numericDate = util.toNumericDate(req.body.date);
+  let numericDate = parseInt(req.body.dateNumeric, 10);
 
   dbUtil.getTrainingDayDocument(req.user, numericDate, function(err, trainingDay) {
     if (err) {
@@ -41,7 +41,10 @@ function createTrainingDay(req, callback) {
 
     if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
       //Preserve existing name, if any.
-      trainingDay.name = trainingDay.name? trainingDay.name + ', ' + req.body.name : req.body.name;
+      if (typeof req.body.name !== 'undefined') {
+        trainingDay.name = trainingDay.name ? trainingDay.name + ', ' + req.body.name : req.body.name;
+      }
+
       trainingDay.startingPoint = req.body.startingPoint;
       trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
       actualMetrics.fitness = req.body.actualFitness;
@@ -145,7 +148,7 @@ function generateRecurrences(req, callback) {
           nextDate = moment(startDate).day(parseInt(key, 10));
 
           if (nextDate.isSameOrAfter(startDate) && nextDate.isBefore(endDate)) {
-            req.body.date = nextDate.toDate();
+            req.body.dateNumeric = util.toNumericDate(nextDate.toDate());
             createTrainingDay(req, function(err, createdTrainingDay) {
               if (err) {
                 return callback(err);
@@ -255,7 +258,7 @@ exports.read = function(req, res) {
 };
 
 exports.getDay = function(req, res) {
-  dbUtil.getTrainingDayDocument(req.user, util.toNumericDate(req.params.trainingDate), function(err, trainingDay) {
+  dbUtil.getTrainingDayDocument(req.user, parseInt(req.params.trainingDateNumeric, 10), function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -389,7 +392,7 @@ exports.list = function(req, res) {
 
 exports.getSeason = function(req, res) {
   var user = req.user,
-    numericToday = util.toNumericDate(req.params.today),
+    numericToday = parseInt(req.params.todayNumeric, 10),
     numericEffectiveStartDate,
     numericEffectiveGoalDate,
     dates = {},
@@ -465,7 +468,7 @@ exports.getSeason = function(req, res) {
 exports.getAdvice = function(req, res) {
   var params = {};
   params.user = req.user;
-  params.numericDate = util.toNumericDate(req.params.trainingDate);
+  params.numericDate = parseInt(req.params.trainingDateNumeric, 10);
   params.alternateActivity = req.query.alternateActivity;
   params.source = params.alternateActivity ? 'requested' : 'advised';
 
@@ -483,7 +486,7 @@ exports.getAdvice = function(req, res) {
 exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;
-  params.numericDate = util.toNumericDate(req.params.trainingDate);
+  params.numericDate = parseInt(req.params.trainingDateNumeric, 10);
   params.isSim = JSON.parse(req.query.isSim); // Converts string to boolean.
 
   adviceEngine.generatePlan(params, function(err, response) {

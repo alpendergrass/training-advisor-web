@@ -17,7 +17,7 @@ function getTrainingDay(user, numericDate, callback) {
   }
 
   if (!numericDate) {
-    err = new TypeError('getTrainingDay numericDate is required to getTrainingDay');
+    err = new TypeError('numericDate is required to getTrainingDay');
     return callback(err, null);
   }
 

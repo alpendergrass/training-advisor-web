@@ -22,21 +22,21 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
       },
       getDay: {
         method: 'GET',
-        url: 'api/trainingDays/getDay/:trainingDate'
+        url: 'api/trainingDays/getDay/:trainingDateNumeric'
       },
       getAdvice: {
         method: 'GET',
-        url: 'api/trainingDays/getAdvice/:trainingDate',
+        url: 'api/trainingDays/getAdvice/:trainingDateNumeric',
         params: { alternateActivity: '' }
       },
       getSeason: {
         method: 'GET',
-        url: 'api/trainingDays/getSeason/:today',
+        url: 'api/trainingDays/getSeason/:todayNumeric',
         isArray: true
       },
       genPlan: {
         method: 'GET',
-        url: 'api/trainingDays/genPlan/:trainingDate',
+        url: 'api/trainingDays/genPlan/:trainingDateNumeric',
         params: { isSim: false }
       },
       downloadActivities: {

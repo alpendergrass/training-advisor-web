@@ -16,7 +16,7 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/:trainingDayId',
       permissions: '*'
     }, {
-      resources: '/api/trainingDays/getSeason/:today',
+      resources: '/api/trainingDays/getSeason/:todayNumeric',
       permissions: '*'
     }, {
       resources: '/api/trainingDays/getSimDay/:trainingDayId',
@@ -25,13 +25,13 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/finalizeSim/:commit',
       permissions: '*'
     }, {
-      resources: '/api/trainingDays/getDay/:trainingDate',
+      resources: '/api/trainingDays/getDay/:trainingDateNumeric',
       permissions: '*'
     }, {
-      resources: '/api/trainingDays/getAdvice/:trainingDate',
+      resources: '/api/trainingDays/getAdvice/:trainingDateNumeric',
       permissions: '*'
     }, {
-      resources: '/api/trainingDays/genPlan/:trainingDate',
+      resources: '/api/trainingDays/genPlan/:trainingDateNumeric',
       permissions: '*'
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',
@@ -46,7 +46,7 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/:trainingDayId',
       permissions: ['get']
     }, {
-      resources: '/api/trainingDays/getSeason/:today',
+      resources: '/api/trainingDays/getSeason/:todayNumeric',
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getSimDay/:trainingDayId',
@@ -55,13 +55,13 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/finalizeSim/:commit',
       permissions: ['get']
     }, {
-      resources: '/api/trainingDays/getDay/:trainingDate',
+      resources: '/api/trainingDays/getDay/:trainingDateNumeric',
       permissions: ['get']
     }, {
-      resources: '/api/trainingDays/getAdvice/:trainingDate',
+      resources: '/api/trainingDays/getAdvice/:trainingDateNumeric',
       permissions: ['get']
     }, {
-      resources: '/api/trainingDays/genPlan/:trainingDate',
+      resources: '/api/trainingDays/genPlan/:trainingDateNumeric',
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',

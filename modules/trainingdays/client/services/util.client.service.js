@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('trainingDays').service('Util', ['_',
-  function (_) {
+angular.module('trainingDays').service('Util', ['_', 'moment',
+  function (_, moment) {
     var getMetrics = function(trainingDay, metricsType) {
       return _.find(trainingDay.metrics, ['metricsType', metricsType]);
     };
@@ -39,10 +39,16 @@ angular.module('trainingDays').service('Util', ['_',
       return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
     };
 
+    var toNumericDate = function(date) {
+      var dateString = moment(date).format('YYYYMMDD');
+      return parseInt(dateString, 10);
+    };
+
     return {
       getMetrics: getMetrics,
       getPlannedActivity: getPlannedActivity,
-      mapActivityTypeToVerbiage: mapActivityTypeToVerbiage
+      mapActivityTypeToVerbiage: mapActivityTypeToVerbiage,
+      toNumericDate: toNumericDate
     };
   }
 ]);

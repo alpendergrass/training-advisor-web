@@ -474,7 +474,7 @@ angular.module('trainingDays')
           $scope.error = null;
 
           TrainingDays.genPlan({
-            trainingDate: $scope.today.toISOString(),
+            trainingDateNumeric: Util.toNumericDate($scope.today),
             isSim: isSim
           }, function(response) {
             usSpinnerService.stop('tdSpinner');

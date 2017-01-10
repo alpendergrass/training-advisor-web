@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('EventController', ['$scope', '$state', '$stateParams', '$compile', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment',
-    function($scope, $state, $stateParams, $compile, $uibModal, $anchorScroll, Authentication, TrainingDays, _, moment) {
+  .controller('EventController', ['$scope', '$state', '$stateParams', '$compile', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Util', '_', 'moment',
+    function($scope, $state, $stateParams, $compile, $uibModal, $anchorScroll, Authentication, TrainingDays, Util, _, moment) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -157,7 +157,8 @@ angular.module('trainingDays')
         }
 
         var trainingDay = new TrainingDays({
-          date: this.date,
+          date: this.date, // We use date for recurring events.
+          dateNumeric: Util.toNumericDate(this.date),
           name: this.name,
           estimatedLoad: this.estimatedLoad,
           eventTerrain: this.eventTerrain,

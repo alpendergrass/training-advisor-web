@@ -64,7 +64,7 @@ angular.module('trainingDays').config(['$stateProvider',
         }
       })
       .state('trainingDays.getAdvice', {
-        url: '/getAdvice/:trainingDate',
+        url: '/getAdvice/:trainingDateNumeric',
         templateUrl: 'modules/trainingDays/client/views/get-advice.client.view.html',
         data: {
           roles: ['user', 'admin']

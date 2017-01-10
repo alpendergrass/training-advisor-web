@@ -1,13 +1,13 @@
 'use strict';
 
-angular.module('trainingDays').service('Season', ['TrainingDays', '_', 'moment',
-  function (TrainingDays, _, moment) {
+angular.module('trainingDays').service('Season', ['TrainingDays', 'Util', '_', 'moment',
+  function (TrainingDays, Util, _, moment) {
     var getSeason = function(callback) {
       var season = {};
       season.needsPlanGen = false;
 
       TrainingDays.getSeason({
-        today: moment().startOf('day').toDate().toISOString()
+        todayNumeric: Util.toNumericDate(moment())
       }, function(seasonDays) {
         // Return user object as notifications may have been updated.
         season.days = seasonDays;

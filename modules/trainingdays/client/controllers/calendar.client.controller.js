@@ -3,9 +3,9 @@
 angular.module('trainingDays')
   .controller('CalendarController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment', 'usSpinnerService', 'MaterialCalendarData',
     function($scope, $state, $stateParams, $location, $compile, $anchorScroll, Authentication, TrainingDays, Season, Util, _, moment, usSpinnerService, MaterialCalendarData) {
-      this.authentication = Authentication;
-      this.hasStart = true;
-      this.hasEnd = true;
+      $scope.authentication = Authentication;
+      $scope.hasStart = true;
+      $scope.hasEnd = true;
 
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
@@ -88,18 +88,16 @@ angular.module('trainingDays')
         return content;
       };
 
-      this.initCalendar = function() {
+      $scope.initCalendar = function() {
         //Use vertical format if we are in a small window like on a phone.
         if (jQuery(window).width() < 800) {
-          this.setDirection('vertical');
-          this.smallWindow = true;
+          $scope.setDirection('vertical');
+          $scope.smallWindow = true;
         } else {
-          this.smallWindow = false;
+          $scope.smallWindow = false;
         }
         // Need to clear out calendar data. Moving goal date can strand some data otherwise.
         MaterialCalendarData.data = {};
-
-        var that = this;
 
         //We need to clean up any potential left over sim days.
         TrainingDays.finalizeSim({
@@ -109,14 +107,14 @@ angular.module('trainingDays')
 
           Season.getSeason(function(errorMessage, season) {
             usSpinnerService.stop('tdSpinner');
-            that.error = errorMessage;
+            $scope.error = errorMessage;
 
             if (season) {
-              that.season = season.days;
+              $scope.season = season.days;
               // Reload user object as notifications may have been updated.
               Authentication.user = season.user;
-              that.hasStart = season.hasStart;
-              that.hasEnd = season.hasEnd;
+              $scope.hasStart = season.hasStart;
+              $scope.hasEnd = season.hasEnd;
 
               _.forEach(season.days, function(td) {
                 MaterialCalendarData.setDayContent(td.date, formatDayContent(td));
@@ -125,33 +123,31 @@ angular.module('trainingDays')
           });
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
-            that.error = errorResponse.data.message;
+            $scope.error = errorResponse.data.message;
           } else {
-            that.error = 'Server error prevented simulation clean-up.';
+            $scope.error = 'Server error prevented simulation clean-up.';
           }
         });
       };
 
-      this.setDirection = function(direction) {
-        this.direction = direction;
-        this.dayFormat = direction === 'vertical' ? 'EEE, MMM d' : 'd';
+      $scope.setDirection = function(direction) {
+        $scope.direction = direction;
+        $scope.dayFormat = direction === 'vertical' ? 'EEE, MMM d' : 'd';
       };
 
-      this.dayClick = function(date) {
-        var td = _.find(this.season, function(d) {
+      $scope.dayClick = function(date) {
+        var td = _.find($scope.season, function(d) {
           return (moment(d.date).isSame(moment(date), 'day'));
         });
 
         if (td) {
           $state.go('trainingDayView', { trainingDayId: td._id });
         } else {
-          if (moment(date).isSameOrAfter(this.hasStart.date)) {
+          if (moment(date).isSameOrAfter($scope.hasStart.date)) {
             //trainingDay does not exist, we need to create it first.
             var trainingDay = new TrainingDays({
               date: date
             });
-
-            var that = this;
 
             trainingDay.$create(function(trainingDay) {
               // Reload user to pick up changes in notifications.
@@ -159,9 +155,9 @@ angular.module('trainingDays')
               $location.path('trainingDay/' + trainingDay._id);
             }, function(errorResponse) {
               if (errorResponse.data && errorResponse.data.message) {
-                that.error = errorResponse.data.message;
+                $scope.error = errorResponse.data.message;
               } else {
-                that.error = 'Server error prevented trainingDay creation.';
+                $scope.error = 'Server error prevented trainingDay creation.';
               }
             });
           }

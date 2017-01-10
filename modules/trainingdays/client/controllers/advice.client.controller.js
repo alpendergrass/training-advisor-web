@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('AdviceController', ['$scope', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', '_', 'moment',
-    function($scope, $location, $compile, $anchorScroll, Authentication, TrainingDays, _, moment) {
+  .controller('AdviceController', ['$scope', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', 'Util', '_', 'moment',
+    function($scope, $location, $compile, $anchorScroll, Authentication, TrainingDays, Util, _, moment) {
       this.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -22,7 +22,6 @@ angular.module('trainingDays')
         this.datePickerStatus.opened = true;
       };
 
-      // this.requestAdvice = function() {
       var minAdviceDate = this.authentication.user.levelOfDetail > 2 ? null : today;
       var maxAdviceDate = this.authentication.user.levelOfDetail > 2 ? null : moment().add(1, 'day').startOf('day').toDate();
 
@@ -42,11 +41,11 @@ angular.module('trainingDays')
           return false;
         }
 
-        var getAdviceDate = moment(this.adviceDate).startOf('day').toDate();
+        var getAdviceDate = Util.toNumericDate(this.adviceDate);
         var that = this;
 
         TrainingDays.getAdvice({
-          trainingDate: getAdviceDate.toISOString(),
+          trainingDateNumeric: getAdviceDate,
           alternateActivity: null
         }, function(trainingDay) {
           $location.path('trainingDay/' + trainingDay._id);
@@ -58,6 +57,5 @@ angular.module('trainingDays')
           }
         });
       };
-      // };
     }
   ]);

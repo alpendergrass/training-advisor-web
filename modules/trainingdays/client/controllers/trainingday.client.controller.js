@@ -93,9 +93,10 @@ angular.module('trainingDays')
 
         $scope.getDay = function(date) {
           $scope.error = null;
+          var dateNumeric = Util.toNumericDate(date);
 
           TrainingDays.getDay({
-            trainingDate: date.toISOString()
+            trainingDateNumeric: dateNumeric
           }, function(trainingDay) {
             $state.go('trainingDayView', { trainingDayId: trainingDay._id });
           }, function(errorResponse) {
@@ -232,7 +233,7 @@ angular.module('trainingDays')
 
         $scope.advise = function() {
           TrainingDays.getAdvice({
-            trainingDate: $scope.trainingDay.date.toISOString(),
+            trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
             alternateActivity: $scope.alternateActivity || null
           }, function(trainingDay) {
             trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
@@ -309,7 +310,7 @@ angular.module('trainingDays')
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.trainingDay = trainingDay;
 
-          return callback(trainingDay);
+          return callback ? callback(trainingDay) : null;
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;
@@ -318,7 +319,7 @@ angular.module('trainingDays')
             $scope.error = 'Server error prevented training day update.';
           }
 
-          return callback(null);
+          return callback ? callback(null) : null;
         });
       };
     }
