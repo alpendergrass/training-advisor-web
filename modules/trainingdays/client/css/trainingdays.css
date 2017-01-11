@@ -3,10 +3,6 @@
   width: 40px;
 }
 
-.top-buffer {
-  margin-top: 10px;
-}
-
 .editable-radiolist label {
   display: block;
   font-weight: normal;
