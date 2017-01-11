@@ -33,6 +33,10 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
       url: '/terms',
       templateUrl: 'modules/core/client/views/terms.client.view.html'
     })
+    .state('privacy', {
+      url: '/privacy',
+      templateUrl: 'modules/core/client/views/privacy.client.view.html'
+    })
     .state('waitlist', {
       url: '/waitlist',
       templateUrl: 'modules/core/client/views/waitlist.client.view.html'
