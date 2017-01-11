@@ -64,7 +64,6 @@ function createTrainingDay(req, callback) {
       trainingDay.name = req.body.name;
       trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
       trainingDay.estimatedLoad = req.body.estimatedLoad;
-      trainingDay.expectedIntensity = req.body.expectedIntensity;
       trainingDay.eventTerrain = req.body.eventTerrain;
 
       if (req.body.recurrenceSpec) {
@@ -280,7 +279,6 @@ exports.update = function(req, res) {
   if (trainingDay.completedActivities !== req.body.completedActivities ||
     trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
     trainingDay.estimatedLoad !== req.body.estimatedLoad ||
-    trainingDay.expectedIntensity !== req.body.expectedIntensity ||
     trainingDay.eventTerrain !== req.body.eventTerrain
   ) {
     refreshAdvice = true;
@@ -291,7 +289,6 @@ exports.update = function(req, res) {
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
   trainingDay.estimatedLoad = req.body.estimatedLoad;
-  trainingDay.expectedIntensity = req.body.expectedIntensity;
   trainingDay.eventTerrain = req.body.eventTerrain;
   trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
   trainingDay.notes = req.body.notes;
@@ -306,9 +303,9 @@ exports.update = function(req, res) {
 
     let user = req.user;
 
-    if (refreshAdvice) {
-      notifications.push({ notificationType: 'plangen', lookup: '', add: true });
-    }
+    // if (refreshAdvice) {
+    //   notifications.push({ notificationType: 'plangen', lookup: '', add: true });
+    // }
 
     if (trainingDay.scheduledEventRanking === 1) {
       // We prefer to know terrain for goal events.
