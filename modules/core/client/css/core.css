@@ -69,3 +69,12 @@ a:hover .header-profile-image {
 .top-buffer {
   margin-top: 10px;
 }
+
+.strava-me img {
+border-radius: 15px;
+margin: 0;
+}
+
+.strava-me:hover  {
+opacity: 0.6;
+}
