@@ -416,6 +416,11 @@ exports.getSeason = function(req, res) {
     dbUtil.getFuturePriorityDays(user, numericToday, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd)
       .then(function(goalDays) {
         if (goalDays.length > 0) {
+          // Remove any goal-needed notifications. We should not have to do this but
+          // for the first goal created by a user, the notification removal is not persisted.
+          // It is removed from the user object and saved but when getSeason is subsequently called,
+          // the req.user object passed in has the notification still.
+          notifications.push({ notificationType: 'goal', lookup: '' });
           //Use last goal to end season.
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
           _.forEach(goalDays, function(goalDay) {
