@@ -11,6 +11,8 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     this.user.thresholdPowerTestDate = new Date(this.user.thresholdPowerTestDate);
     this.user.autoFetchStravaActivities = this.user.autoFetchStravaActivities === null ? null : this.user.autoFetchStravaActivities.toString();
     this.user.levelOfDetail = this.user.levelOfDetail.toString();
+    // We highlight fields that need to be updated.
+    this.needsFTP = !this.user.thresholdPower;
 
     this.data = {
       daysOfTheWeek: [

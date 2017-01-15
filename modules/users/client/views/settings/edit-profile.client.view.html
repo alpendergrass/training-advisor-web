@@ -48,22 +48,22 @@
       </div>
 
       <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">
-        <div class="panel panel-default">
+        <div class="panel panel-default" ng-class="{ 'panel-danger' : profile.needsFTP }">
           <div class="panel-heading">
             <label>Functional Threshold Power</label>
           </div>
           <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
+            <div class="form-group input-group-sm" ng-class="{ 'text-danger' : profile.needsFTP }" show-errors>
               <label class="small" for="thresholdPower">Watts *</label>
-              <input name="thresholdPower" type="number" min="0" max="999" step="1" ng-model="profile.user.thresholdPower" id="thresholdPower" class="form-control" placeholder="Threshold Power" required>
+              <input name="thresholdPower" type="number" min="1" max="999" step="1" ng-model="profile.user.thresholdPower" id="thresholdPower" class="form-control" placeholder="Threshold Power" required>
               <div ng-messages="userForm.thresholdPower.$error" role="alert">
                 <p class="help-block error-text" ng-message="required">Threshold Power is required.</p>
               </div>
               <div ng-messages="userForm.thresholdPower.$error" role="alert">
-                <p class="help-block error-text" ng-message="min">Threshold Power must be between 0 and 999.</p>
+                <p class="help-block error-text" ng-message="min">Threshold Power must be between 1 and 999.</p>
               </div>
               <div ng-messages="userForm.thresholdPower.$error" role="alert">
-                <p class="help-block error-text" ng-message="max">Threshold Power must be between 0 and 999.</p>
+                <p class="help-block error-text" ng-message="max">Threshold Power must be between 1 and 999.</p>
               </div>
             </div>
             <div class="form-group input-group-sm" show-errors>

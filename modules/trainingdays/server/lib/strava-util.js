@@ -29,7 +29,6 @@ var processActivity = function(stravaActivity, trainingDay) {
   }
 
   if (!trainingDay.user.thresholdPower) {
-    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
     console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
     return false;
   }
