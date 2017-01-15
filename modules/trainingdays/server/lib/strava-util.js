@@ -28,6 +28,12 @@ var processActivity = function(stravaActivity, trainingDay) {
     return false;
   }
 
+  if (!trainingDay.user.thresholdPower) {
+    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
+    console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
+    return false;
+  }
+
   //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
   fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
   // IF = NP/FTP
