@@ -5,7 +5,7 @@
     </div>
     <div class="container">
       <div ng-repeat="section in about.sections">
-        <h3>{{section.title}}</h3>
+        <h3 ng-bind-html="section.title"></h3>
         <div class="about-content">
           <span ng-bind-html="section.content"></span>
         </div>

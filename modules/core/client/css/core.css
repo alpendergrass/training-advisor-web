@@ -70,8 +70,29 @@ a:hover .header-profile-image {
   margin-top: 10px;
 }
 
+.top-buffer-2x {
+  margin-top: 20px;
+}
+
+.top-buffer-4x {
+  margin-top: 40px;
+}
+
+.color-tacit-red {
+  color: #C21E24;
+}
+
+.background-color-tacit-red {
+  background-color: #C21E24;
+  color: white;
+}
+
+.color-strava-orange {
+  color: #FC4C02;
+}
+
 .strava-me img {
-border-radius: 15px;
+border-radius: 5px;
 margin: 0;
 }
 
