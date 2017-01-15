@@ -316,7 +316,7 @@ exports.update = function(req, res) {
       }
     }
 
-    if (notifications.length > 0) {
+    if (refreshAdvice) {
       userUtil.updateNotifications(user, notifications, true)
         .then(function(response) {
           user = response.user;

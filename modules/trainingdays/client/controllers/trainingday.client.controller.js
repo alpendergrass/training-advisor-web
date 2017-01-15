@@ -50,6 +50,8 @@ angular.module('trainingDays')
           $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
           $scope.source = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'advised' : 'plangeneration';
           resetViewObjects(trainingDay);
+          $scope.checkGiveFeedback($scope.trainingDay);
+
         }
 
         function resetViewObjects(trainingDay) {
