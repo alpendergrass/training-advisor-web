@@ -131,6 +131,11 @@ exports.oauthCallback = function(strategy) {
           //   return res.redirect('/admin/users');
           // }
 
+          // If user needs to set FTP we should redirect to profile page.
+          if (!user.thresholdPower) {
+            return res.redirect('/settings/profile');
+          }
+
           return res.redirect(redirectURL || sessionRedirectURL || '/trainingDay/');
         });
       });
