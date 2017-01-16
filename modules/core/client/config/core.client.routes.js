@@ -25,6 +25,10 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
       url: '/faq',
       templateUrl: 'modules/core/client/views/faq.client.view.html'
     })
+    .state('contribute', {
+      url: '/contribute',
+      templateUrl: 'modules/core/client/views/contribute.client.view.html'
+    })
     .state('contact', {
       url: '/contact',
       templateUrl: 'modules/core/client/views/contact.client.view.html'
