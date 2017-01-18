@@ -16,6 +16,12 @@ var processActivity = function(stravaActivity, trainingDay) {
   let newActivity = {};
   let fudgedNP;
   let intensity;
+  let averageWatts = 0;
+
+  if (!trainingDay.user.thresholdPower) {
+    console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
+    return false;
+  }
 
   if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
     // We have already processed this stravaActivity.
@@ -23,19 +29,16 @@ var processActivity = function(stravaActivity, trainingDay) {
     return false;
   }
 
-  if (!stravaActivity.weighted_average_watts) {
+  if (!stravaActivity.weighted_average_watts && !stravaActivity.average_watts) {
     // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
-    console.log('stravaActivity.weighted_average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
+    console.log('stravaActivity.weighted_average_watts or average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
     return false;
   }
 
-  if (!trainingDay.user.thresholdPower) {
-    console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
-    return false;
-  }
+  averageWatts = stravaActivity.weighted_average_watts ? stravaActivity.weighted_average_watts : stravaActivity.average_watts;
 
   //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
-  fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
+  fudgedNP = Math.round(averageWatts * adviceConstants.stravaNPFudgeFactor);
   // IF = NP/FTP
   intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
   // TSS = [(s x W x IF) / (FTP x 3600)] x 100
@@ -142,6 +145,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     }
 
     console.log('Strava: activities returned: ' + payload.length);
+    // console.log(`strava.athlete.listActivities for user: ${user.username}, payload: ${JSON.stringify(payload)}`);
 
     if (payload.length < 1) {
       statusMessage.text = 'We found no Strava activities for the day.';
