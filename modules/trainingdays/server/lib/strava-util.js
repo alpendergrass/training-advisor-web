@@ -19,6 +19,7 @@ var processActivity = function(stravaActivity, trainingDay) {
 
   if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
     // We have already processed this stravaActivity.
+    console.log('We have already processed this stravaActivity. stravaActivity.id: ', stravaActivity.id.toString());
     return false;
   }
 
@@ -105,7 +106,8 @@ module.exports.fetchActivity = function(user, activityId) {
 };
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
-  var searchDate = moment(trainingDay.dateNumeric.toString()).unix(),
+  // We need to subtract one day for our search start to make sure we get current day in Australia - it's a time zone thing, of course.
+  var searchDate = moment(trainingDay.dateNumeric.toString()).subtract(1, 'day').unix(),
     activityCount = 0,
     countPhrase = '',
     accessToken,
@@ -152,7 +154,6 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     _.forEach(payload, function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
       var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
-
       if (stravaActivity.id && numericStartDateLocal === trainingDay.dateNumeric) {
         if (processActivity(stravaActivity, trainingDay)) {
           console.log('===> Strava: We found a keeper for user ', user.username);
