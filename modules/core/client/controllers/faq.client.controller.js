@@ -6,7 +6,7 @@ angular.module('core').controller('FAQController',
       sectionTitle: 'What is Tacit Training?',
       questions: [{
         question: 'What is it?',
-        answer: 'Tacit Training is an app for cyclists that uses power data to provide a season-long plan and dispense training advice that will help you achieve your cycling objectives.'
+        answer: 'Tacit Training is an app for cyclists that provides a season-long plan and dispenses training advice that will help you achieve your cycling objectives. The primary input is your ride data from Strava.'
       }, {
         question: 'What does Tacit Training give me?',
         answer: 'Tacit Training provides a season plan based on your current fitness, your goals and the training you do. It gives you daily advice on what your training day should look like and how much work you should do.'
@@ -21,7 +21,7 @@ angular.module('core').controller('FAQController',
         answer: 'In general it keeps our training on track. When the app suggests an easy day we are more likely to get on our bike than blow it off. When testing is due we are more likely to do it. But most of all we like knowing when we should ride and how much work we should do without having to spend a lot of time staring at numbers and graphs and trying to figure out what the data is telling us.'
       }, {
         question: 'What equipment do I need in order to use Tacit Training?',
-        answer: '<p>You need a power meter on the bike you ride the most. Much of the functionality in the app relies on power data. You can estimate when needed, like if you do not have a power meter on your mountain or gravel bike, using other rides of similar intensity and duration as a guide.</p><p>And, ideally, you have a head unit that displays Training Load (typically as TSS® - Training Stress Score®) in real time. Most head units do these days. You can make effective use of Tacit Training without this but we like being able to see our training Load in real time.</p>'
+        answer: '<p>Tacit Training is most accurate when you have a power meter on the bike you ride the most. Much of the functionality in the app relies on power data. For rides where power data is not available Strava provides estimated power and we will use that. You can also estimate when needed using other rides of similar intensity and duration as a guide.</p><p>And, ideally, you have a head unit that displays Training Load (typically as TSS® - Training Stress Score®) in real time. Most head units do these days. You can make effective use of Tacit Training without this but we like being able to see our Training Load in real time.</p>'
       }, {
         question: 'How is Tacit Training different from other training tools?',
         answer: 'Most currently available tools focus on analysis of your workout data with charts, graphs and numbers. It is then up to you to figure out how to use those numbers to plan future training. Tacit Training automates much of this analysis and generates a season plan and dispenses advice based on that analysis. And unlike static training plans, the season plan created by Tacit Training can be regenerated at any time, taking into account the training you have done, any events you have added to your calendar and any off-days you have scheduled.'
@@ -93,7 +93,7 @@ angular.module('core').controller('FAQController',
         answer: 'Tacit Training needs your Training Load for each ride. Ideally we will have your ride data from Strava - see below for details. If for some reason your ride is not on Strava, on My Training Day you can manually enter the ride by clicking the + button. You can get Training Load (as TSS® - Training Stress Score®) from most head units or you can provide an estimate if actual data is not available. When estimating use rides of similar duration and intensity as a guide.'
       }, {
         question: 'How do I get my rides from Strava?',
-        answer: 'Because your Tacit Training account is linked to your Strava account, you can either set your profile to automatically fetch your rides from Strava - on My Profile - or you can download your rides from Strava individually. Click the Strava download button on My Training Day.'
+        answer: 'Because your Tacit Training account is linked to your Strava account, you can either set your profile to automatically fetch your rides from Strava - on My Profile - or you can download your rides from Strava individually by clicking the Strava download button on My Training Day.'
       }, {
         question: 'My private activities in Strava are not showing up. How do I fix this?',
         answer: 'You need to log out and then log back into Tacit Training. When you log in Strava should ask you to authorize access of private events as part of the authorization process.'
@@ -105,7 +105,7 @@ angular.module('core').controller('FAQController',
         answer: 'One of our goals is to give you a Training Load recommendation that you can monitor in real time on your head unit. Due to the way Strava processes raw activity data, one of the values from your Strava ride data tends to run lower than the corresponding value your head unit uses to compute Training Load. We adjust this value when computing Training Load (which affects Fitness, Fatigue and Form) using an average of the difference we’ve measured over time. It will not be exact but we believe it is close enough.'
       }, {
         question: 'I do not have a power meter on my mountain/cross/whatever bike. Can I still use Tacit Training?',
-        answer: 'You can but will have to estimate your Training Load. You can compare your duration and perceived intensity with similar rides for which you have data and use that. Alternatively, Strava will estimate Training Load using heart rate data. As long as you are reasonably close our advice will be valid.'
+        answer: 'Yes you can. Strava provides estimated power for rides without power meter data using weight and elevations (<a href="https://support.strava.com/hc/en-us/articles/216919427-How-to-Get-Calculated-Power-for-Your-Rides" target="_blank">see here for how they do it</a>) and we use these estimates when actual power data is not available. If Strava does not provide either actual or estimated power, your ride will not be imported into Tacit Training. In this case you can manually enter a ride and provide an estimated Training Load. Use similar rides for which you have data as a guide for estimating.'
       }]
     }];
   }
