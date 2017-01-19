@@ -87,6 +87,7 @@ exports.postSendInBlueWebhookEvent = function(req, res) {
     })
     .catch(function(err) {
       // No reason to tell them about the error.
+      // Probably for an event we do not care about.
       console.log('postSendInBlueWebhookEvent error. req.body: ', JSON.stringify(req.body));
       return res.status(200).send();
     });

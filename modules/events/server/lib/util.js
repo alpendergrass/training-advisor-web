@@ -64,7 +64,6 @@ module.exports.storeSendInBlueEvent = function(data) {
           reject(err);
         });
     } else {
-      console.log('unrecognized webhook data: ', JSON.stringify(data));
       reject(new Error(`storeSendInBlueEvent: unrecognized webhook data ${JSON.stringify(data)}.`));
     }
   });

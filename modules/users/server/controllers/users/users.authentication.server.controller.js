@@ -136,7 +136,8 @@ exports.oauthCallback = function(strategy) {
             return res.redirect('/settings/profile');
           }
 
-          return res.redirect(redirectURL || sessionRedirectURL || '/trainingDay/');
+          // We do not want to redirect to the home page after auth.
+          return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/') || '/trainingDay/');
         });
       });
     })(req, res, next);
