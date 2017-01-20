@@ -9,6 +9,9 @@ applications:
   memory: 256M
   services:
   - training-advisor-mongodb
+  - training-advisor-strava
+  - training-advisor-autoscaler
+  - training-advisor-mail
   env:
     NODE_ENV: cloud-foundry
     RUN_MIGRATIONS: true
