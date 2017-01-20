@@ -5,7 +5,10 @@ declared-services:
     plan: 100
 applications:
 - name: training-advisor
-  host: training-advisor
+  routes:
+  - route: training-advisor.cfapps.io
+  - route: www.tacittraining.com
+  instances: 2
   memory: 256M
   services:
   - training-advisor-mongodb
