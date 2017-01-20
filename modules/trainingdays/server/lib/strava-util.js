@@ -16,25 +16,29 @@ var processActivity = function(stravaActivity, trainingDay) {
   let newActivity = {};
   let fudgedNP;
   let intensity;
-
-  if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
-    // We have already processed this stravaActivity.
-    return false;
-  }
-
-  if (!stravaActivity.weighted_average_watts) {
-    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
-    console.log('stravaActivity.weighted_average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
-    return false;
-  }
+  let averageWatts = 0;
 
   if (!trainingDay.user.thresholdPower) {
     console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
     return false;
   }
 
+  if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
+    // We have already processed this stravaActivity.
+    console.log('We have already processed this stravaActivity. stravaActivity.id: ', stravaActivity.id.toString());
+    return false;
+  }
+
+  if (!stravaActivity.weighted_average_watts && !stravaActivity.average_watts) {
+    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
+    console.log('stravaActivity.weighted_average_watts or average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
+    return false;
+  }
+
+  averageWatts = stravaActivity.weighted_average_watts ? stravaActivity.weighted_average_watts : stravaActivity.average_watts;
+
   //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
-  fudgedNP = Math.round(stravaActivity.weighted_average_watts * adviceConstants.stravaNPFudgeFactor);
+  fudgedNP = Math.round(averageWatts * adviceConstants.stravaNPFudgeFactor);
   // IF = NP/FTP
   intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
   // TSS = [(s x W x IF) / (FTP x 3600)] x 100
@@ -105,7 +109,8 @@ module.exports.fetchActivity = function(user, activityId) {
 };
 
 module.exports.downloadActivities = function(user, trainingDay, callback) {
-  var searchDate = moment(trainingDay.dateNumeric.toString()).unix(),
+  // We need to subtract one day for our search start to make sure we get current day in Australia - it's a time zone thing, of course.
+  var searchDate = moment(trainingDay.dateNumeric.toString()).subtract(1, 'day').unix(),
     activityCount = 0,
     countPhrase = '',
     accessToken,
@@ -140,6 +145,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     }
 
     console.log('Strava: activities returned: ' + payload.length);
+    // console.log(`strava.athlete.listActivities for user: ${user.username}, payload: ${JSON.stringify(payload)}`);
 
     if (payload.length < 1) {
       statusMessage.text = 'We found no Strava activities for the day.';
@@ -152,7 +158,6 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     _.forEach(payload, function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
       var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
-
       if (stravaActivity.id && numericStartDateLocal === trainingDay.dateNumeric) {
         if (processActivity(stravaActivity, trainingDay)) {
           console.log('===> Strava: We found a keeper for user ', user.username);

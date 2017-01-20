@@ -1,7 +1,7 @@
 {
   "name": "training-advisor",
   "description": "Get cycling training advice on a daily basis.",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "private": false,
   "author": "Al Pendergrass",
   "license": "MIT",
