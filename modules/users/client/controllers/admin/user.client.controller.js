@@ -38,7 +38,6 @@ angular.module('users.admin').controller('UserController', ['$scope', '$state', 
     };
 
     $scope.impersonate = function(user_id) {
-
       Admin.impersonate({
         userId: user_id
       }, function(user) {

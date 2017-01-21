@@ -15,8 +15,8 @@
     <th ng-click="sortBy('lastName')">Last Name</th>
     <th ng-click="sortBy('email')">Email</th>
     <th ng-click="sortBy('username')">Username</th>
-    <th ng-click="sortBy('lastLogin')">Last Login</th>
     <th ng-click="sortBy('loginCount')">Login Count</th>
+    <th ng-click="sortBy('lastLogin')">Last Login</th>
     <th ng-click="sortBy('updated')">Last Update</th>
     <th ng-click="sortBy('created')">Created</th>
     <th ng-click="sortBy('roles')">Roles</th>
@@ -27,8 +27,8 @@
       <td><a ui-sref="admin.user({userId: user._id})">{{user.lastName}}</a></td>
       <td><a ui-sref="admin.user({userId: user._id})">{{user.email}}</a></td>
       <td><a ui-sref="admin.user({userId: user._id})">{{user.username}}</a></td>
-      <td>{{user.lastLogin ? moment(user.lastLogin).format("DD MMMM YYYY, HH:mm:ss ZZ") : ''}}</td>
       <td>{{user.loginCount}}</td>
+      <td>{{user.lastLogin ? moment(user.lastLogin).format("DD MMMM YYYY, HH:mm:ss ZZ") : ''}}</td>
       <td>{{user.updated ? moment(user.updated).format("DD MMMM YYYY, HH:mm:ss ZZ") : ''}}</td>
       <td>{{moment(user.created).format("DD MMMM YYYY, HH:mm:ss ZZ")}}</td>
       <td>{{user.roles}}</td>

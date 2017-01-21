@@ -18,6 +18,7 @@ exports.update = function (req, res) {
   user.firstName = req.body.firstName;
   user.lastName = req.body.lastName;
   user.displayName = user.firstName + ' ' + user.lastName;
+  user.emailNewsletter = req.body.emailNewsletter;
   user.roles = req.body.roles;
 
   user.save(function (err) {
