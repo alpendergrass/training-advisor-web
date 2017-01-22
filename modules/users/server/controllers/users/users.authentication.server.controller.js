@@ -137,7 +137,7 @@ exports.oauthCallback = function(strategy) {
           }
 
           // We do not want to redirect to the home page after auth.
-          return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/') || '/trainingDay/');
+          return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/')? sessionRedirectURL : '/trainingDay/');
         });
       });
     })(req, res, next);
