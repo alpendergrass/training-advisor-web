@@ -16,12 +16,91 @@ var stravaUtil,
   workoutDate,
   workoutDateOffset,
   trainingDate,
-  trainingDay;
+  trainingDay,
+  wattagePayload = [{
+    'type': 'time',
+    'data': [
+      1,
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900,
+      1000,
+      1100
+    ],
+    'series_type': 'distance',
+    'original_size': 7330,
+    'resolution': 'low'
+  }, {
+    'type': 'watts',
+    'data': [
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189
+    ],
+    'series_type': 'distance',
+    'original_size': 7330,
+    'resolution': 'low'
+  }],
+  estimatedWattagePayload = [{
+    'type': 'time',
+    'data': [
+      1,
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900,
+      1000,
+      1100
+    ],
+    'series_type': 'distance',
+    'original_size': 7330,
+    'resolution': 'low'
+  }, {
+    'type': 'watts_calc',
+    'data': [
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189,
+      189
+    ],
+    'series_type': 'distance',
+    'original_size': 7330,
+    'resolution': 'low'
+  }];
 
 describe('strava-util Unit Tests:', function() {
   before(function(done) {
     stravaStub = {};
     stravaStub.athlete = {};
+    stravaStub.streams = {};
     stravaUtil = proxyquire('../../server/lib/strava-util', { 'strava-v3': stravaStub });
 
     done();
@@ -56,6 +135,10 @@ describe('strava-util Unit Tests:', function() {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
+
+        stravaStub.streams.activity = function(parm, callback) {
+          return callback(null, wattagePayload);
+        };
 
         done();
       });
@@ -95,6 +178,35 @@ describe('strava-util Unit Tests:', function() {
         });
     });
 
+    it('should return an error when strava.streams.activity fails', function(done) {
+      var activity = {
+        id: 752757127,
+        name: 'Lunch Ride',
+        start_date_local: moment.utc(workoutDate).format(),
+        weighted_average_watts: 189,
+        moving_time: 9342,
+        total_elevation_gain: 123
+      };
+
+      stravaStub.activities.get = function(parm, callback) {
+        return callback(null, activity);
+      };
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(new Error('Stubbed streams.activity error'), null);
+      };
+
+      stravaUtil.fetchActivity(user, 99)
+        .then(function() {
+          // Should not be here.
+        })
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('stravaUtil.getAverageWatts returned error');
+          done();
+        });
+    });
+
     it('should resolve when activity is returned', function(done) {
       var activity = {
         id: 752757127,
@@ -107,6 +219,36 @@ describe('strava-util Unit Tests:', function() {
 
       stravaStub.activities.get = function(parm, callback) {
         return callback(null, activity);
+      };
+
+      stravaUtil.fetchActivity(user, 752757127)
+        .then(function(td) {
+          should.equal(td.completedActivities.length, 1);
+          should.equal(td.completedActivities[0].name, activity.name);
+          done();
+        })
+        .catch(function(err) {
+          should.not.exist(err);
+          done();
+        });
+    });
+
+    it('should resolve when activity with estimated watts is returned', function(done) {
+      var activity = {
+        id: 752757127,
+        name: 'Lunch Ride',
+        start_date_local: moment.utc(workoutDate).format(),
+        average_watts: 189,
+        moving_time: 9342,
+        total_elevation_gain: 123
+      };
+
+      stravaStub.activities.get = function(parm, callback) {
+        return callback(null, activity);
+      };
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, estimatedWattagePayload);
       };
 
       stravaUtil.fetchActivity(user, 752757127)
@@ -161,6 +303,30 @@ describe('strava-util Unit Tests:', function() {
       return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.exist(err);
         (err.message).should.containEql('athlete.listActivities error');
+        done();
+      });
+    });
+
+    it('should return an error when strava.streams.activity fails', function(done) {
+      var activities = [{
+        id: 752757127,
+        name: 'Lunch Ride',
+        start_date_local: moment.utc(workoutDate).format(),
+        weighted_average_watts: 189,
+        moving_time: 9342
+      }];
+
+      stravaStub.athlete.listActivities = function(parm, callback) {
+        return callback(null, activities);
+      };
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(new Error('Stubbed streams.activity error'), null);
+      };
+
+      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+        should.exist(err);
+        (err.message).should.containEql('stravaUtil.getAverageWatts returned error');
         done();
       });
     });
@@ -298,9 +464,9 @@ describe('strava-util Unit Tests:', function() {
           weighted_average_watts: 189,
           moving_time: 9342
         }],
-        fudgedNP = Math.round(189 * adviceConstants.stravaNPFudgeFactor),
-        intensity = Math.round((fudgedNP / user.thresholdPower) * 100) / 100,
-        expectedLoad = Math.round(((9342 * fudgedNP * intensity) / (user.thresholdPower * 3600)) * 100);
+        weightedAverageWatts = 189,
+        intensity = Math.round((weightedAverageWatts / user.thresholdPower) * 100) / 100,
+        expectedLoad = Math.round(((9342 * weightedAverageWatts * intensity) / (user.thresholdPower * 3600)) * 100);
 
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(null, activities);

@@ -101,9 +101,6 @@ angular.module('core').controller('FAQController',
         question: 'I have not input my rides into Tacit Training for a day/week/month or two but I want to start using it again. Do I have to input all the workouts I’ve done since the last time I used it?',
         answer: 'No. You need to do a Fitness and Fatigue True-Up - see the Training Days menu.'
       }, {
-        question: 'Why are my Fitness, Fatigue and Form numbers in Tacit Training higher than in Strava?',
-        answer: 'One of our goals is to give you a Training Load recommendation that you can monitor in real time on your head unit. Due to the way Strava processes raw activity data, one of the values from your Strava ride data tends to run lower than the corresponding value your head unit uses to compute Training Load. We adjust this value when computing Training Load (which affects Fitness, Fatigue and Form) using an average of the difference we’ve measured over time. It will not be exact but we believe it is close enough.'
-      }, {
         question: 'I do not have a power meter on my mountain/cross/whatever bike. Can I still use Tacit Training?',
         answer: 'Yes you can. Strava provides estimated power for rides without power meter data using weight and elevations (<a href="https://support.strava.com/hc/en-us/articles/216919427-How-to-Get-Calculated-Power-for-Your-Rides" target="_blank">see here for how they do it</a>) and we use these estimates when actual power data is not available. If Strava does not provide either actual or estimated power, your ride will not be imported into Tacit Training. In this case you can manually enter a ride and provide an estimated Training Load. Use similar rides for which you have data as a guide for estimating.'
       }]

@@ -17,26 +17,35 @@ var getAccessToken = function(user) {
 
 var getWeightedAverageWatts = function(user, stravaActivity) {
   return new Promise(function(resolve, reject) {
+    // We compute weightedAverageWatts rather than use Strava's as I find it gets us closer to the others.
+    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter
+    // so we will use their estimated power to compute weightedAverageWatts.
+
+    let activityTypes;
+
     if (stravaActivity.weighted_average_watts) {
-      return resolve(stravaActivity.weighted_average_watts);
+      activityTypes = 'time,watts';
+    } else {
+      activityTypes = 'time,watts_calc';
     }
-
-    if (!stravaActivity.average_watts) {
-      // No need to get stream as apparently Strava did not estimate wattage.
-      return resolve(0);
-    }
-
     // average_watts is based on estimated wattage if weighted_average_watts is not present.
     // Need to get stream and compute weighted_average_watts.
-    strava.streams.activity({ 'access_token': getAccessToken(user), 'id': stravaActivity.id, 'types': 'time,watts_calc' }, function(err, payload) {
-      if(err) {
-        return reject(new Error(`strava.streams.activity failed. username: ${user.username}, activityId: ${stravaActivity.id}, err: ${JSON.stringify(err)}`));
+    strava.streams.activity({ 'access_token': getAccessToken(user), 'id': stravaActivity.id, 'types': activityTypes }, function(err, payload) {
+      if (err) {
+        return reject(new Error(`strava.streams.activity failed. username: ${user.username}, activityId: ${stravaActivity.id}, err: ${err}`));
       }
 
-      let calculatedWatts = _.find(payload, ['type', 'watts_calc']).data;
+      let wattageArray;
+
+      if (stravaActivity.weighted_average_watts) {
+        wattageArray = _.find(payload, ['type', 'watts']).data;
+      } else {
+        wattageArray = _.find(payload, ['type', 'watts_calc']).data;
+      }
+
       let times = _.find(payload, ['type', 'time']).data;
 
-      if (_.isEmpty(calculatedWatts) || _.isEmpty(calculatedWatts)) {
+      if (_.isEmpty(wattageArray) || _.isEmpty(wattageArray)) {
         return resolve(0);
       }
 
@@ -52,11 +61,12 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
       let sampleCount = 0;
       let rollingAverages = [];
 
-      for (var i = 1; i < calculatedWatts.length; i++) {
+      for (var i = 1; i < wattageArray.length; i++) {
         // From Stravistix: if not a trainer ride, only use samples where velocity is greater than 3.5 Kph - not sure why.
+        // Seems to me that if anything perhaps I should drop zero power recs but the general consensus is to include zeros.
         duration = (times[i] - times[i - 1]);
         accumulatedTime += duration;
-        accumulatedPower += calculatedWatts[i];
+        accumulatedPower += wattageArray[i];
         sampleCount++;
 
         if (accumulatedTime >= 30) {
@@ -73,7 +83,7 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
 
       let weightedAverageWatts = Math.pow(rollingAveragesAverage, 1/4);
 
-      resolve(weightedAverageWatts);
+      resolve(Math.round(weightedAverageWatts));
     });
   });
 };
@@ -81,8 +91,6 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
 var processActivity = function(stravaActivity, trainingDay) {
   return new Promise(function(resolve, reject) {
     let newActivity = {};
-    let fudgedNP;
-    let intensity;
 
     if (!trainingDay.user.thresholdPower) {
       console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
@@ -96,7 +104,6 @@ var processActivity = function(stravaActivity, trainingDay) {
     }
 
     if (!stravaActivity.weighted_average_watts && !stravaActivity.average_watts) {
-      // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter or a manually created activity.
       console.log('stravaActivity.weighted_average_watts or average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
       return resolve(false);
     }
@@ -109,14 +116,14 @@ var processActivity = function(stravaActivity, trainingDay) {
           return resolve(false);
         }
 
-        //Strava NP is consistently lower than Garmin device and website and TrainingPeaks. We try to compensate here.
-        fudgedNP = Math.round(weightedAverageWatts * adviceConstants.stravaNPFudgeFactor);
         // IF = NP/FTP
-        intensity = Math.round((fudgedNP / trainingDay.user.thresholdPower) * 100) / 100;
+        let intensity = Math.round((weightedAverageWatts / trainingDay.user.thresholdPower) * 100) / 100;
+        newActivity.intensity = intensity;
+
         // TSS = [(s x W x IF) / (FTP x 3600)] x 100
         // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
-        newActivity.intensity = intensity;
-        newActivity.load = Math.round(((stravaActivity.moving_time * fudgedNP * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+        newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+
         newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
         newActivity.source = 'strava';
         newActivity.sourceID = stravaActivity.id;
@@ -127,7 +134,7 @@ var processActivity = function(stravaActivity, trainingDay) {
         return resolve(true);
       })
       .catch(function(err) {
-        return reject(new Error(`stravaUtil.getAverageWatts returned error for user: ${trainingDay.user.username}, err: ${JSON.stringify(err)}, payload: ${JSON.stringify(stravaActivity)}`));
+        return reject(new Error(`stravaUtil.getAverageWatts returned error for user: ${trainingDay.user.username}, err: ${err}, payload: ${JSON.stringify(stravaActivity)}`));
       });
   });
 };
@@ -144,11 +151,11 @@ module.exports.fetchActivity = function(user, activityId) {
     console.log('Strava: Initiating fetchActivity for TacitTraining user: ', user.username);
 
     strava.activities.get({ 'access_token': getAccessToken(user), 'id': activityId }, function(err, payload) {
-      if(err) {
-        return reject(new Error(`strava.activities.get access failed. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`));
+      if (err) {
+        return reject(new Error(`strava.activities.get access failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
       }
 
-      if(payload.errors) {
+      if (payload.errors) {
         return reject(new Error(`strava.activities.get access returned errors. username: ${user.username}, activityId: ${activityId}, message: ${payload.message}, errors: ${JSON.stringify(payload.errors)}`));
       }
 
@@ -156,7 +163,7 @@ module.exports.fetchActivity = function(user, activityId) {
 
       dbUtil.getTrainingDayDocument(user, numericDate, function(err, trainingDay) {
         if (err) {
-          return reject(new Error(`Strava fetchActivity - getTrainingDayDocument returned error. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`));
+          return reject(new Error(`Strava fetchActivity - getTrainingDayDocument returned error. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
         }
 
         processActivity(payload, trainingDay)
@@ -169,7 +176,7 @@ module.exports.fetchActivity = function(user, activityId) {
 
             trainingDay.save(function (err) {
               if (err) {
-                return reject(new Error(`Strava fetchActivity - trainingDay.save returned error. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`));
+                return reject(new Error(`Strava fetchActivity - trainingDay.save returned error. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
               }
 
               adviceEngine.refreshAdvice(user, trainingDay)
@@ -177,14 +184,13 @@ module.exports.fetchActivity = function(user, activityId) {
                   return resolve(updatedTrainingDay);
                 })
                 .catch(function(err) {
-                  console.log(`Strava fetchActivity refreshAdvice  failed. username: ${user.username}, activityId: ${activityId}, err: ${JSON.stringify(err)}`);
+                  console.log(`Strava fetchActivity refreshAdvice  failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`);
                   return resolve(trainingDay);
                 });
             });
           })
           .catch(function(err){
-            console.log('err: ', err);
-            return false;
+            return reject(err);
           });
       });
     });
@@ -213,7 +219,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
       // statusMessage.text = 'Strava access failed: ' + (err.msg || '');
       // statusMessage.type = 'error';
       // dbUtil.sendMessageToUser(statusMessage, user);
-      console.log(`strava.athlete.listActivities failed for user: ${user.username}, error: ${JSON.stringify(err)}`);
+      console.log(`strava.athlete.listActivities failed for user: ${user.username}, error: ${err}`);
       return callback(err, null);
     }
 
@@ -249,8 +255,7 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
             }
           })
           .catch(function(err){
-            console.log('err: ', err);
-            return false;
+            throw(err);
           });
       } else {
         return Promise.resolve(true);
@@ -299,6 +304,9 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
               return callback(null, trainingDay);
             });
         });
+      })
+      .catch(function(err) {
+        return callback(err, null);
       });
   });
 };
