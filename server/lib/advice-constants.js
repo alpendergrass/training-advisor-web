@@ -81,10 +81,6 @@ module.exports.restNeededForRacingThreshold = -12;
 // //If form is less than or equal to this, we recommend an easy day if...see code.
 // module.exports.easyDaytNeededThreshold = -32;
 
-//We apply this factor to make the NP (weighted_average_watts) reported by Strava
-//to more closely match Garmin/TP.
-module.exports.stravaNPFudgeFactor = 1.055;
-
 // This is the target ramp rate we use in t6 and race periods.
 module.exports.peakRaceTargetRampRate = -3.5;
 
