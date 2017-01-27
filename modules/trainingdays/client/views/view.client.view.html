@@ -92,16 +92,20 @@
           <tr style="font-weight: bold">
             <td style="width:10%">Source</td>
             <td style="width:10%">Training Load</td>
+            <td style="width:10%">Intensity</td>
             <td style="width:50%">Activity Notes</td>
-            <td style="width:20%"></td>
+            <td style="width:10%"></td>
           </tr>
           <tr ng-repeat="completedActivity in trainingDay.completedActivities">
             <td>
-              <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link">View on Strava</a></span>
-              <span ng-if="completedActivity.source !== 'strava'">{{ completedActivity.source }}</span>
+              <span class="text-capitalize">{{ completedActivity.source }}</span></a></span><span ng-if="completedActivity.source !== 'manual' && completedActivity.edited"> (edited)</span>
+              <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link"><br>View on Strava
             </td>
             <td>
               <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span>
+            </td>
+            <td>
+              <span editable-number="completedActivity.intensity" e-name="intensity" e-min="0.00" e-max="9" e-step="0.01" e-form="completedActivityForm" e-required>{{ completedActivity.intensity }}</span>
             </td>
             <td>
               <span editable-textarea="completedActivity.notes" e-rows="2" e-cols="70" e-name="notes" e-form="completedActivityForm">

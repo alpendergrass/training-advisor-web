@@ -1,6 +1,7 @@
 .undecorated-link:hover {
   text-decoration: none;
 }
+
 [ng\:cloak],
 [ng-cloak],
 [x-ng-cloak],
@@ -8,6 +9,7 @@
 .x-ng-cloak {
   display: none !important;
 }
+
 .header-profile-image {
   opacity: 0.8;
   height: 28px;
@@ -15,20 +17,25 @@
   border-radius: 50%;
   margin-right: 5px;
 }
+
 .open .header-profile-image,
 a:hover .header-profile-image {
   opacity: 1;
 }
+
 .user-header-dropdown-toggle {
   padding-top: 11px !important;
   padding-bottom: 11px !important;
 }
+
 .error-text {
   display: none;
 }
+
 .has-error .help-block.error-text {
   display: block;
 }
+
 .has-error .help-inline.error-text {
   display: inline;
 }
@@ -37,6 +44,7 @@ a:hover .header-profile-image {
   padding-top: 0;
   padding-left: 0;
 }
+
 .navbar-nav a {
   color: black;
 }
@@ -45,7 +53,7 @@ a:hover .header-profile-image {
   border-bottom: 1px solid #e5e5e5;
 }
 
-.footer  {
+.footer {
   margin-top: 20px;
 }
 
@@ -91,11 +99,15 @@ a:hover .header-profile-image {
   color: #FC4C02;
 }
 
-.strava-me img {
-border-radius: 5px;
-margin: 0;
+.strava-link {
+  color: #FC4C02;
 }
 
-.strava-me:hover  {
-opacity: 0.6;
+.strava-me img {
+  border-radius: 5px;
+  margin: 0;
+}
+
+.strava-me:hover {
+  opacity: 0.6;
 }

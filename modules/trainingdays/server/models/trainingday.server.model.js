@@ -260,6 +260,10 @@ var TrainingDaySchema = new Schema({
       default: 'manual',
       enum: completedActivitySources
     },
+    edited: {
+      type: Boolean,
+      default: false
+    },
     sourceID: {
       type: String,
       default: '',

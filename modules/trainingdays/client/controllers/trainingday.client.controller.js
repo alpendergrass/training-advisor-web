@@ -177,9 +177,19 @@ angular.module('trainingDays')
         };
 
         $scope.saveCompletedActivity = function(data, created) {
-          angular.extend(data, { created: created });
           var index = _.indexOf($scope.trainingDay.completedActivities, _.find($scope.trainingDay.completedActivities, { created: created }));
-          $scope.trainingDay.completedActivities.splice(index, 1, data);
+
+          if (index > -1) {
+            // Is an existing activity.
+            var activity = $scope.trainingDay.completedActivities[index];
+            activity.edited = true;
+            activity.load = data.load;
+            activity.intensity = data.intensity;
+            activity.notes = data.notes;
+          } else {
+            // We are creating an activity, replace the place-holder one created when we clicked the create button.
+            $scope.trainingDay.completedActivities.splice(index, 1, data);
+          }
 
           $scope.update($scope.trainingDay, function(trainingDay) {
             if (trainingDay) {
@@ -192,7 +202,7 @@ angular.module('trainingDays')
         $scope.addCompletedActivity = function(data) {
           $scope.inserted = {
             load: 0,
-            //intensity: 0,
+            intensity: 0,
             notes: ''
           };
           $scope.trainingDay.completedActivities.push($scope.inserted);
