@@ -280,6 +280,10 @@ var TrainingDaySchema = new Schema({
       max: 9999,
       default: 0
     },
+    loadIsFromEstimatedPower: {
+      type: Boolean,
+      default: false
+    },
     loadIsSufferScore: {
       type: Boolean,
       default: false

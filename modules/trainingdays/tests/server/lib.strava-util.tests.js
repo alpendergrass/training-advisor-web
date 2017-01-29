@@ -248,6 +248,7 @@ describe('strava-util Unit Tests:', function() {
         .then(function(td) {
           should.equal(td.completedActivities.length, 1);
           should.equal(td.completedActivities[0].name, activity.name);
+          should.equal(td.completedActivities[0].loadIsFromEstimatedPower, false);
         },
         function(err) {
           throw err;
@@ -267,6 +268,7 @@ describe('strava-util Unit Tests:', function() {
         .then(function(td) {
           should.equal(td.completedActivities.length, 1);
           should.equal(td.completedActivities[0].name, activity.name);
+          should.equal(td.completedActivities[0].loadIsFromEstimatedPower, true);
         },
         function(err) {
           throw err;
@@ -322,6 +324,7 @@ describe('strava-util Unit Tests:', function() {
             should.equal(td.completedActivities[0].name, activity.name);
             should.equal(td.completedActivities[0].load, activity.suffer_score);
             should.equal(td.completedActivities[0].loadIsSufferScore, true);
+            should.equal(td.completedActivities[0].loadIsFromEstimatedPower, false);
             done();
           },
           function(err) {

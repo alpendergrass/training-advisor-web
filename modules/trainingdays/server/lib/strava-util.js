@@ -129,6 +129,10 @@ var processActivity = function(stravaActivity, trainingDay) {
           // TSS = [(s x W x IF) / (FTP x 3600)] x 100
           // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
           newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * newActivity.intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+
+          if (!stravaActivity.device_watts) {
+            newActivity.loadIsFromEstimatedPower = true;
+          }
         }
 
         newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
