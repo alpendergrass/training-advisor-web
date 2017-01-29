@@ -17,6 +17,9 @@ var stravaUtil,
   workoutDateOffset,
   trainingDate,
   trainingDay,
+  startingPoint,
+  activityID = 752757127,
+  activity,
   wattagePayload = [{
     'type': 'time',
     'data': [
@@ -94,6 +97,26 @@ var stravaUtil,
     'series_type': 'distance',
     'original_size': 7330,
     'resolution': 'low'
+  }],
+  noWattagePayload = [{
+    'type': 'time',
+    'data': [
+      1,
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900,
+      1000,
+      1100
+    ],
+    'series_type': 'distance',
+    'original_size': 7330,
+    'resolution': 'low'
   }];
 
 describe('strava-util Unit Tests:', function() {
@@ -107,6 +130,17 @@ describe('strava-util Unit Tests:', function() {
   });
 
   beforeEach(function(done) {
+    activity = {
+      id: activityID,
+      name: 'Lunch Ride',
+      start_date_local: moment.utc(workoutDate).format(),
+      weighted_average_watts: 189,
+      device_watts: true,
+      suffer_score: 99,
+      moving_time: 9342,
+      total_elevation_gain: 123
+    };
+
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
@@ -131,10 +165,16 @@ describe('strava-util Unit Tests:', function() {
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
 
       //Need a starting day to avoid error from update metrics.
-      testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err) {
+      testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err, newStartingPoint) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
+
+        startingPoint = newStartingPoint;
+
+        stravaStub.activities.get = function(parm, callback) {
+          return callback(null, activity);
+        };
 
         stravaStub.streams.activity = function(parm, callback) {
           return callback(null, wattagePayload);
@@ -145,150 +185,203 @@ describe('strava-util Unit Tests:', function() {
     });
   });
 
+  // *** Testing promises ***
+  // fetchActivity() returns a promise.
+  //
+  // If we are not calling other methods first, we can simply return our fetchActivity() promise
+  // and mocha will handle promise as expected.
+  // But note that we still need our done() callback if we are calling other async (e.g. helper)
+  // functions to set up our test prior to running our function under test.
+  //
+  // In our then() we provide both success and error handlers to handle output from our test.
+  // If we are using done, we also provide a catch() handler to handle errors thrown by our
+  // assertions in our then() function.
+
   describe('Method fetchActivity', function() {
-    it('should return an error when strava.activities.get fails', function(done) {
+    it('should return an error when strava.activities.get fails', function() {
       stravaStub.activities.get = function(parm, callback) {
         return callback(new Error('Stubbed activities.get error'));
       };
 
-      stravaUtil.fetchActivity(user, 99)
-        .then(function() {
-          // Should not be here.
-        })
-        .catch(function(err) {
+      return stravaUtil.fetchActivity(user, 99)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           should.exist(err);
           (err.message).should.containEql('strava.activities.get access failed');
-          done();
         });
     });
 
-    it('should return an error when strava.athlete.listActivities returns payload.errors', function(done) {
+    it('should return an error when strava.athlete.listActivities returns payload.errors', function() {
       stravaStub.activities.get = function(parm, callback) {
         return callback(null, { message: 'payload error message', errors: ['payload Error'] });
       };
 
-      stravaUtil.fetchActivity(user, 99)
-        .then(function() {
-          // Should not be here.
-        })
-        .catch(function(err) {
+      return stravaUtil.fetchActivity(user, 99)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           should.exist(err);
           (err.message).should.containEql('payload error message');
-          done();
         });
     });
 
-    it('should return an error when strava.streams.activity fails', function(done) {
-      var activity = {
-        id: 752757127,
-        name: 'Lunch Ride',
-        start_date_local: moment.utc(workoutDate).format(),
-        weighted_average_watts: 189,
-        moving_time: 9342,
-        total_elevation_gain: 123
-      };
-
-      stravaStub.activities.get = function(parm, callback) {
-        return callback(null, activity);
-      };
-
+    it('should return an error when strava.streams.activity fails', function() {
       stravaStub.streams.activity = function(parm, callback) {
         return callback(new Error('Stubbed streams.activity error'), null);
       };
 
-      stravaUtil.fetchActivity(user, 99)
-        .then(function() {
-          // Should not be here.
-        })
-        .catch(function(err) {
+      return stravaUtil.fetchActivity(user, 99)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           should.exist(err);
           (err.message).should.containEql('stravaUtil.getAverageWatts returned error');
-          done();
         });
     });
 
-    it('should resolve when activity is returned', function(done) {
-      var activity = {
-        id: 752757127,
-        name: 'Lunch Ride',
-        start_date_local: moment.utc(workoutDate).format(),
-        weighted_average_watts: 189,
-        moving_time: 9342,
-        total_elevation_gain: 123
-      };
-
-      stravaStub.activities.get = function(parm, callback) {
-        return callback(null, activity);
-      };
-
-      stravaUtil.fetchActivity(user, 752757127)
+    it('should resolve when activity is returned', function() {
+      return stravaUtil.fetchActivity(user, activityID)
         .then(function(td) {
           should.equal(td.completedActivities.length, 1);
           should.equal(td.completedActivities[0].name, activity.name);
-          done();
-        })
-        .catch(function(err) {
-          should.not.exist(err);
-          done();
+        },
+        function(err) {
+          throw err;
         });
     });
 
-    it('should resolve when activity with estimated watts is returned', function(done) {
-      var activity = {
-        id: 752757127,
-        name: 'Lunch Ride',
-        start_date_local: moment.utc(workoutDate).format(),
-        average_watts: 189,
-        moving_time: 9342,
-        total_elevation_gain: 123
-      };
-
-      stravaStub.activities.get = function(parm, callback) {
-        return callback(null, activity);
-      };
+    it('should resolve when activity with estimated watts is returned', function() {
+      activity.weighted_average_watts = null;
+      activity.average_watts = 189;
+      activity.device_watts = false;
 
       stravaStub.streams.activity = function(parm, callback) {
         return callback(null, estimatedWattagePayload);
       };
 
-      stravaUtil.fetchActivity(user, 752757127)
+      return stravaUtil.fetchActivity(user, activityID)
         .then(function(td) {
           should.equal(td.completedActivities.length, 1);
           should.equal(td.completedActivities[0].name, activity.name);
-          done();
-        })
-        .catch(function(err) {
-          should.not.exist(err);
-          done();
+        },
+        function(err) {
+          throw err;
         });
     });
 
-    it('should resolve when activity is returned but it has been downloaded previously', function(done) {
-      var activity = {
-        id: 752757127,
-        name: 'Lunch Ride',
-        start_date_local: moment.utc(workoutDate).format(),
-        weighted_average_watts: 189,
-        moving_time: 9342,
-        total_elevation_gain: 123
+    it('should return error when thresholdPower has not been set ', function(done) {
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, wattagePayload);
       };
 
-      stravaStub.activities.get = function(parm, callback) {
-        return callback(null, activity);
+      startingPoint.user.thresholdPower = 0;
+
+      testHelpers.updateTrainingDay(startingPoint, function(err) {
+        if (err) {
+          console.log('updateTrainingDay: ' + err);
+        }
+
+        return stravaUtil.fetchActivity(user, activityID) //.should.be.rejected();
+          .then(function(result) {
+            done(new Error('Promise was unexpectedly fulfilled in thresholdPower test. Result: ' + result));
+          },
+          function(err) {
+            should.exist(err);
+            console.log('err: ', err);
+            (err.message).should.containEql('user.thresholdPower is not set');
+            done();
+          }).catch(function (err) {
+            done(err);
+          });
+      });
+    });
+
+    it('should resolve when activity has estimated watts and suffer score and user.favorSufferScoreOverEstimatedPower ', function(done) {
+      activity.weighted_average_watts = null;
+      activity.average_watts = 189;
+      activity.device_watts = false;
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, estimatedWattagePayload);
       };
 
-      stravaUtil.fetchActivity(user, 752757127)
+      startingPoint.user.favorSufferScoreOverEstimatedPower = true;
+
+      testHelpers.updateTrainingDay(startingPoint, function(err) {
+        if (err) {
+          console.log('updateTrainingDay: ' + err);
+        }
+
+        return stravaUtil.fetchActivity(user, activityID)
+          .then(function(td) {
+            should.equal(td.completedActivities.length, 1);
+            should.equal(td.completedActivities[0].name, activity.name);
+            should.equal(td.completedActivities[0].load, activity.suffer_score);
+            should.equal(td.completedActivities[0].loadIsSufferScore, true);
+            done();
+          },
+          function(err) {
+            done(err);
+          }).catch(function (err) {
+            done(err);
+          });
+      });
+    });
+
+    it('should resolve with no completedActivities when activity has no estimated watts and no suffer score ', function() {
+      activity.weighted_average_watts = null;
+      activity.suffer_score = null;
+      activity.device_watts = false;
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, noWattagePayload);
+      };
+
+      return stravaUtil.fetchActivity(user, activityID)
+        .then(function(td) {
+          should.exist(td.completedActivities);
+          should.equal(td.completedActivities.length, 0);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+    it('should resolve when activity has suffer score but no watts ', function() {
+      activity.weighted_average_watts = null;
+      activity.device_watts = false;
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, noWattagePayload);
+      };
+
+      return stravaUtil.fetchActivity(user, activityID)
+        .then(function(td) {
+          should.equal(td.completedActivities.length, 1);
+          should.equal(td.completedActivities[0].name, activity.name);
+          should.equal(td.completedActivities[0].loadIsSufferScore, true);
+          should.equal(td.completedActivities[0].load, activity.suffer_score);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+    it('should resolve when activity is returned but it has been downloaded previously', function() {
+      stravaUtil.fetchActivity(user, activityID)
         .then(function() {
-          return stravaUtil.fetchActivity(user, 752757127);
+          return stravaUtil.fetchActivity(user, activityID);
         })
         .then(function(td) {
           should.equal(td.completedActivities.length, 1);
           should.equal(td.completedActivities[0].name, activity.name);
-          done();
-        })
-        .catch(function(err) {
-          should.not.exist(err);
-          done();
+        },
+        function(err) {
+          throw err;
         });
     });
 
@@ -300,7 +393,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(new Error('Stubbed athlete.listActivities error'));
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.exist(err);
         (err.message).should.containEql('athlete.listActivities error');
         done();
@@ -309,10 +402,11 @@ describe('strava-util Unit Tests:', function() {
 
     it('should return an error when strava.streams.activity fails', function(done) {
       var activities = [{
-        id: 752757127,
+        id: activityID,
         name: 'Lunch Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }];
 
@@ -324,7 +418,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(new Error('Stubbed streams.activity error'), null);
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.exist(err);
         (err.message).should.containEql('stravaUtil.getAverageWatts returned error');
         done();
@@ -336,7 +430,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, { message: 'payload error message', errors: ['payload Error'] });
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.exist(err);
         (err.message).should.containEql('payload error message');
         done();
@@ -348,7 +442,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, []);
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('found no Strava activities for the day');
         done();
@@ -357,16 +451,18 @@ describe('strava-util Unit Tests:', function() {
 
     it('should return appropriate statusMessage when strava.athlete.listActivities activities exist but none for requested day', function(done) {
       var activities = [{
-        id: 752757127,
+        id: activityID,
         name: 'Lunch Ride',
         start_date_local: moment.utc(workoutDate).subtract(1, 'day').format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }, {
         id: 752757129,
         name: 'Lunch Ride',
         start_date_local: moment.utc(workoutDate).add(1, 'day').format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }];
 
@@ -374,7 +470,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
         done();
@@ -383,10 +479,11 @@ describe('strava-util Unit Tests:', function() {
 
     it('should return one completedActivity when strava.athlete.listActivities returns one activity for requested day', function(done) {
       var activities = [{
-        id: 752757127,
+        id: activityID,
         name: 'Lunch Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }];
 
@@ -394,7 +491,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
         (returnedTrainingDay.completedActivities.length).should.equal(1);
@@ -404,16 +501,18 @@ describe('strava-util Unit Tests:', function() {
 
     it('should return two completedActivities when strava.athlete.listActivities returns two activities for requested day', function(done) {
       var activities = [{
-        id: 752757127,
+        id: activityID,
         name: 'Lunch Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }, {
         id: 752757128,
         name: 'Dinner Ride',
         start_date_local: moment.utc(workoutDate).add(1, 'second').format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }];
 
@@ -421,7 +520,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('downloaded 2 new Strava activities');
         (returnedTrainingDay.completedActivities.length).should.equal(2);
@@ -431,10 +530,11 @@ describe('strava-util Unit Tests:', function() {
 
     it('should return appropriate statusMessage when strava.athlete.listActivities returns one activity for requested day but it has been downloaded previously', function(done) {
       var activities = [{
-        id: 752757127,
+        id: activityID,
         name: 'Lunch Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
+        device_watts: true,
         moving_time: 9342
       }];
 
@@ -447,7 +547,7 @@ describe('strava-util Unit Tests:', function() {
           console.log('firstReturnedTrainingDay err: ', err);
         }
 
-        return stravaUtil.downloadActivities(user, firstReturnedTrainingDay, function(err, returnedTrainingDay) {
+        stravaUtil.downloadActivities(user, firstReturnedTrainingDay, function(err, returnedTrainingDay) {
           should.not.exist(err);
           (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
           (returnedTrainingDay.completedActivities.length).should.equal(1);
@@ -458,10 +558,11 @@ describe('strava-util Unit Tests:', function() {
 
     it('should return correct load for completedActivity when strava.athlete.listActivities returns activity for requested day', function(done) {
       var activities = [{
-          id: 752757127,
+          id: activityID,
           name: 'Lunch Ride',
           start_date_local: moment.utc(workoutDate).format(),
           weighted_average_watts: 189,
+          device_watts: true,
           moving_time: 9342
         }],
         weightedAverageWatts = 189,
@@ -472,7 +573,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
+      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
         should.not.exist(err);
         (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
         (returnedTrainingDay.completedActivities.length).should.equal(1);

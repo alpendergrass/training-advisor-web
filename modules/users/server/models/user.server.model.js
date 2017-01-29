@@ -143,6 +143,10 @@ var UserSchema = new Schema({
     type: Boolean,
     default: null
   },
+  favorSufferScoreOverEstimatedPower: {
+    type: Boolean,
+    default: false
+  },
   trainingPeaksCredentials: {
     username: {
       type: String,

@@ -23,7 +23,7 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
 
     let activityTypes;
 
-    if (stravaActivity.weighted_average_watts) {
+    if (stravaActivity.device_watts) {
       activityTypes = 'time,watts';
     } else {
       activityTypes = 'time,watts_calc';
@@ -35,19 +35,25 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
         return reject(new Error(`strava.streams.activity failed. username: ${user.username}, activityId: ${stravaActivity.id}, err: ${err}`));
       }
 
-      let wattageArray;
+      let wattageElement;
 
-      if (stravaActivity.weighted_average_watts) {
-        wattageArray = _.find(payload, ['type', 'watts']).data;
+      if (stravaActivity.device_watts) {
+        wattageElement = _.find(payload, ['type', 'watts']);
       } else {
-        wattageArray = _.find(payload, ['type', 'watts_calc']).data;
+        wattageElement = _.find(payload, ['type', 'watts_calc']);
       }
 
-      let times = _.find(payload, ['type', 'time']).data;
+      if (_.isUndefined(wattageElement)) {
+        return resolve(0);
+      }
+
+      let wattageArray = wattageElement.data;
 
       if (_.isEmpty(wattageArray) || _.isEmpty(wattageArray)) {
         return resolve(0);
       }
+
+      let times = _.find(payload, ['type', 'time']).data;
 
       // Normalized power formula from Training and Racing With a Power Meter, 2nd edition, pg. 120:
       // 1. Starting at the beginning of the data and calculating a 30-second rolling average for power;
@@ -94,7 +100,7 @@ var processActivity = function(stravaActivity, trainingDay) {
 
     if (!trainingDay.user.thresholdPower) {
       console.log(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`);
-      return resolve(false);
+      reject(new Error(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
     }
 
     if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
@@ -103,26 +109,27 @@ var processActivity = function(stravaActivity, trainingDay) {
       return resolve(false);
     }
 
-    if (!stravaActivity.weighted_average_watts && !stravaActivity.average_watts) {
-      console.log('stravaActivity.weighted_average_watts or average_watts is not present. stravaActivity.id: ', stravaActivity.id.toString());
-      return resolve(false);
-    }
-
     getWeightedAverageWatts(trainingDay.user, stravaActivity)
       .then(function(weightedAverageWatts) {
-
-        if (!weightedAverageWatts) {
-          console.log(`stravaUtil.getAverageWatts returned no watttage for user: ${trainingDay.user.username}, payload: ${JSON.stringify(stravaActivity)}`);
+        if (!weightedAverageWatts && !stravaActivity.suffer_score) {
+          console.log(`stravaUtil.getAverageWatts returned no watttage for user: ${trainingDay.user.username} and suffer_score is not provided, payload: ${JSON.stringify(stravaActivity)}`);
           return resolve(false);
         }
 
-        // IF = NP/FTP
-        let intensity = Math.round((weightedAverageWatts / trainingDay.user.thresholdPower) * 100) / 100;
-        newActivity.intensity = intensity;
+        if ((!weightedAverageWatts || (!stravaActivity.device_watts && trainingDay.user.favorSufferScoreOverEstimatedPower)) && stravaActivity.suffer_score) {
+          // If we did not compute weightedAverageWatts, or
+          // if we used estimated wattage to compute weightedAverageWatts and the user would rather we use suffer score,
+          // we will use suffer score as training load.
+          newActivity.load = stravaActivity.suffer_score;
+          newActivity.loadIsSufferScore = true;
+        } else {
+          // IF = NP/FTP
+          newActivity.intensity = Math.round((weightedAverageWatts / trainingDay.user.thresholdPower) * 100) / 100;
 
-        // TSS = [(s x W x IF) / (FTP x 3600)] x 100
-        // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
-        newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+          // TSS = [(s x W x IF) / (FTP x 3600)] x 100
+          // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
+          newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * newActivity.intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+        }
 
         newActivity.elevationGain = stravaActivity.total_elevation_gain; // in meters
         newActivity.source = 'strava';
@@ -147,6 +154,7 @@ module.exports.fetchActivity = function(user, activityId) {
   // We will process it as if it belongs to user.
   // This should not happen but if we were paranoid...
   // TODO: add check to ensure returned activity belongs to user.
+
   return new Promise(function(resolve, reject) {
     console.log('Strava: Initiating fetchActivity for TacitTraining user: ', user.username);
 
@@ -168,6 +176,7 @@ module.exports.fetchActivity = function(user, activityId) {
 
         processActivity(payload, trainingDay)
           .then(function(success) {
+            console.log('fetchActivity success: ', success);
             if (!success) {
               return resolve(trainingDay);
             }
@@ -190,6 +199,7 @@ module.exports.fetchActivity = function(user, activityId) {
             });
           })
           .catch(function(err){
+            console.log('fetchActivity err: ', err);
             return reject(err);
           });
       });
@@ -244,8 +254,8 @@ module.exports.downloadActivities = function(user, trainingDay, callback) {
     return Promise.all(payload.map(function(stravaActivity) {
       // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
       var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
+
       if (stravaActivity.id && numericStartDateLocal === trainingDay.dateNumeric) {
-        // if (processActivity(stravaActivity, trainingDay)) {
         return processActivity(stravaActivity, trainingDay)
           .then(function(success) {
             if (success) {

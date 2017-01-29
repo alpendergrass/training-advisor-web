@@ -30,19 +30,30 @@
                 <p class="help-block error-text" ng-message="email">Email address is invalid.</p>
               </div>
             </div>
-            <div class="form-group input-group-sm" show-errors>
+            <!-- <div class="form-group input-group-sm" show-errors>
               <label class="small" for="username">Username *</label>
               <input type="text" id="username" name="username" class="form-control" ng-model="profile.user.username" placeholder="Username" lowercase required>
               <div ng-messages="userForm.username.$error" role="alert">
                 <p class="help-block error-text" ng-message="required">Username is required.</p>
               </div>
-            </div>
+            </div> -->
             <div class="form-group input-group-sm">
               <label class="small" for="timezone">Your Timezone *</label>
               <div>
                 <timezone-selector ng-model="profile.user.timezone" sort-by="offset" show-local="true" set-local="true" width="230px" class="small"></timezone-selector>
               </div>
            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <label for="emailNewsletter">Tacit Training Newsletter</label>
+          </div>
+          <div class="panel-body">
+            <div class="form-group input-group-sm" show-errors>
+              <input type="checkbox" name="emailNewsletter" ng-model="profile.user.emailNewsletter" id="emailNewsletter"> Send me the Tacit Training email newsletter
+            </div>
           </div>
         </div>
       </div>
@@ -103,24 +114,14 @@
             </div> -->
           </div>
         </div>
+
       </div>
 
       <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">
 
         <div class="panel panel-default">
           <div class="panel-heading">
-            <label for="emailNewsletter">Tacit Training Newsletter</label>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <input type="checkbox" name="emailNewsletter" ng-model="profile.user.emailNewsletter" id="emailNewsletter"> Send me the Tacit Training email newsletter
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Strava Auto-Sync" data-content="If you select 'Fetch Strava activities automatically', when Strava notifies us of new activities we will retrieve your activity data from Strava. Otherwise you will need to manually sync your Strava activities on the My Training Day page."><label for="autoFetchStravaActivities">Strava Auto-Sync</label></a>
+            <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="top" title="Strava Auto-Sync" data-content="If you select 'Fetch Strava activities automatically', when Strava notifies us of new activities we will retrieve your activity data from Strava. Otherwise you will need to manually sync your Strava activities on the My Training Day page."><label for="autoFetchStravaActivities">Strava Auto-Sync</label></a>
           </div>
           <div class="panel-body">
             <div class="form-group input-group-sm" show-errors>
@@ -134,6 +135,17 @@
                   <input type="radio" name="autoFetchStravaActivities" ng-model="profile.user.autoFetchStravaActivities" id="autoFetchStravaActivitiesFalse" value="false" checked> Do not automatically fetch
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <a tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="top" title="Use Strava Estimated Power or Suffer Score" data-content="If power meter data is not available for a ride, by default we use Strava's estimated power to compute Training Load. However, some users report that estimated power is not reliable in their region. If you prefer, we can use Strava's Suffer Score for your Training Load rather than computing Training Load using estimated power. Note that Strava provides Suffer Score for Strava Premium members only and is only provided if heart rate is recorded for your ride."><label for="favorSufferScoreOverEstimatedPower">Strava Estimated Power or Suffer Score</label></a><br><span class="small text-warning"><em>Experimental</em></span>
+          </div>
+          <div class="panel-body">
+            <div class="form-group input-group-sm" show-errors>
+              <input type="checkbox" name="favorSufferScoreOverEstimatedPower" ng-model="profile.user.favorSufferScoreOverEstimatedPower" id="favorSufferScoreOverEstimatedPower">  Use Suffer Score For Training Load When No Power Meter
             </div>
           </div>
         </div>

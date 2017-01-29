@@ -280,6 +280,10 @@ var TrainingDaySchema = new Schema({
       max: 9999,
       default: 0
     },
+    loadIsSufferScore: {
+      type: Boolean,
+      default: false
+    },
     intensity: {
       type: Number,
       min: 0,
