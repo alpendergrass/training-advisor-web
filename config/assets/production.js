@@ -42,7 +42,7 @@ module.exports = {
         'public/lib/owasp-password-strength-test/owasp-password-strength-test.js'
       ]
     },
-    css: 'public/dist/application.min.css',
-    js: 'public/dist/application.min.js'
+    css: 'public/dist/application-bdb044620d.min.css',
+    js: 'public/dist/application-ad4672a8c4.min.js'
   }
 };

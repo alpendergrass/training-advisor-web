@@ -3,6 +3,7 @@
 const _ = require('lodash'),
   defaultAssets = require('./config/assets/default'),
   testAssets = require('./config/assets/test'),
+  // prodAssets = require('./config/assets/production'),
   gulp = require('gulp'),
   gulpLoadPlugins = require('gulp-load-plugins'),
   runSequence = require('run-sequence'),
@@ -15,7 +16,11 @@ const _ = require('lodash'),
   endOfLine = require('os').EOL,
   protractor = require('gulp-protractor').protractor,
   webdriver_update = require('gulp-protractor').webdriver_update,
-  webdriver_standalone = require('gulp-protractor').webdriver_standalone;
+  webdriver_standalone = require('gulp-protractor').webdriver_standalone,
+  del = require('del'),
+  replace = require('gulp-replace'),
+  rev = require('gulp-rev'),
+  revReplace = require("gulp-rev-replace");  // rev = require('gulp-rev-all');
 
 
 // Set NODE_ENV to 'test'
@@ -126,7 +131,7 @@ gulp.task('uglify', function () {
       mangle: true
     }))
     .pipe(plugins.concat('application.min.js'))
-    .pipe(gulp.dest('public/dist'));
+    .pipe(gulp.dest('tmp'));
 });
 
 // CSS minifying task
@@ -134,7 +139,40 @@ gulp.task('cssmin', function () {
   return gulp.src(defaultAssets.client.css)
     .pipe(plugins.cssmin())
     .pipe(plugins.concat('application.min.css'))
+    .pipe(gulp.dest('tmp'));
+});
+
+gulp.task('clean', function () {
+  return del('public/dist');
+});
+
+// Set files names back to non-hash prior to renaming in revreplace task.
+gulp.task('prep', ['clean'], function () {
+  return gulp.src(['./config/assets/production.js', './config/assets/cloud-foundry.js'])
+    .pipe(replace(/public\/dist\/application-(\w+)./g, 'public/dist/application.'))
+    .pipe(gulp.dest('./config/assets'));
+});
+
+// Static asset revisioning by appending content hash to filenames.
+gulp.task('revision', ['uglify', 'cssmin'], function () {
+  return gulp.src('tmp/**')
+    .pipe(rev())
+    .pipe(gulp.dest('public/dist'))
+    .pipe(rev.manifest())
     .pipe(gulp.dest('public/dist'));
+});
+
+// Rewrite occurrences of filenames which have been renamed by gulp-rev
+gulp.task('revreplace', ['revision'], function () {
+  var manifest = gulp.src('./public/dist/rev-manifest.json');
+
+  return gulp.src(['./config/assets/production.js', './config/assets/cloud-foundry.js'])
+    .pipe(revReplace({manifest: manifest}))
+    .pipe(gulp.dest('./config/assets'));
+});
+
+gulp.task('finish', function () {
+  return del('tmp/**');
 });
 
 // Sass task
@@ -265,7 +303,7 @@ gulp.task('lint', function (done) {
 
 // Lint project files and minify them into two production files.
 gulp.task('build', function (done) {
-  runSequence('env:dev', 'lint', ['uglify', 'cssmin'], done);
+  runSequence('env:dev', 'lint', 'prep', ['revreplace'], 'finish', done);
 });
 
 // Run the project tests
