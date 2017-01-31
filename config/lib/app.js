@@ -140,7 +140,7 @@ module.exports.start = function start(callback) {
       console.log(chalk.green('App version:\t\t\t' + config.meanjs.version));
       console.log('--');
 
-      if (process.env.NODE_ENV !== 'development') {
+      if (process.env.NODE_ENV === 'cloud-foundry') {
         mailOptions.subject = mailSubjectPrefix + ': Started';
         mailOptions.text = 'App instance has been started.';
         smtpTransport.sendMail(mailOptions, function(err) {
