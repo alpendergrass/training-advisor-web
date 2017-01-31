@@ -1,18 +1,18 @@
 'use strict';
 
-const  _ = require('lodash'),
+const _ = require('lodash'),
   ua = require('universal-analytics');
 
 module.exports = {};
 
-module.exports.logAnalytics = function(req, pageData, eventData) {
+module.exports.logAnalytics = function(req, pageData, eventData, user) {
 
-  if (!req.user) {
+  if (!req.user && !user) {
     return;
   }
 
   try {
-    var visitor = ua(req.app.locals.googleAnalyticsTrackingID, req.user.id, { strictCidFormat: false });
+    var visitor = ua(req.app.locals.googleAnalyticsTrackingID, req.user? req.user.id : user.id, { strictCidFormat: false });
 
     if (pageData && pageData.path) {
       if (!pageData.title) {
@@ -21,7 +21,7 @@ module.exports.logAnalytics = function(req, pageData, eventData) {
         // req.headers.referer: "http://localhost:3000/trainingDays/calendar"
         pageData.title = _.startCase(req.headers.referer.replace(/^(\w+)(\:{1})(\/{2})(\w+)(\:?)(\w*)(\/?)(\w*)(\/{1})/, ''));
       }
-      console.log('pageData: ', pageData);
+
       visitor.pageview({ dp: pageData.path, dt: pageData.title, dh: req.app.locals.googleAnalyticsHost }).send();
     }
 
@@ -31,9 +31,10 @@ module.exports.logAnalytics = function(req, pageData, eventData) {
         ea: eventData.action,
         el: eventData.label || null,
         ev: eventData.value || null,
+        // I do not see where event path shows up in GA.
         dp: eventData.path || null
       };
-      console.log('eventData: ', eventData);
+
       visitor.event(eventParms).send();
     }
     return;

@@ -3,6 +3,7 @@
 
 var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   _ = require('lodash'),
   mongoose = require('mongoose'),
@@ -79,6 +80,11 @@ exports.signin = function(req, res, next) {
 };
 
 exports.signout = function(req, res) {
+  let path = 'Signout';
+  let pageData = null;
+  let eventData = { category: 'User', action: 'Sign Out', path: path };
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   req.logout();
   res.redirect('/');
 };
@@ -174,7 +180,11 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
         if (err) {
           return done(err);
         } else {
+          let path = 'saveOAuthUserProfile';
+          let pageData = null;
+
           if (!user) {
+
             var possibleUsername = providerUserProfile.username || ((providerUserProfile.email) ? providerUserProfile.email.split('@')[0] : '');
 
             User.findUniqueUsername(possibleUsername, null, function(availableUsername) {
@@ -196,12 +206,19 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
                 user.thresholdPower = providerUserProfile.providerData.ftp;
               }
 
+              let eventData = { category: 'User', action: 'New User Login', path: path };
+              coreUtil.logAnalytics(req, pageData, eventData, user);
+
               user.save(function(err) {
                 return done(err, user);
               });
             });
           } else {
             //user exists, let's save providerData so we have the latest.
+
+            let eventData = { category: 'User', action: 'Existing User Login', path: path };
+            coreUtil.logAnalytics(req, pageData, eventData, user);
+
             //It is possible that the user revoked access to our app in Strava and then reauthorized,
             //which generates a new accessToken which must be used when calling their API.
             user.providerData = providerUserProfile.providerData;

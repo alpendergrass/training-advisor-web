@@ -7,6 +7,7 @@ var _ = require('lodash'),
   mongoose = require('mongoose'),
   multer = require('multer'),
   config = require(path.resolve('./config/config')),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   User = mongoose.model('User');
 
@@ -22,6 +23,13 @@ exports.update = function(req, res) {
       message: 'User is not signed in'
     });
   }
+
+  let path = '/api/users/update';
+  let pageData = { path: path, title: 'My Profile' };
+  let eventData = { category: 'User', action: 'Update Profile', path: path };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   userUtil.verifyUserSettings(userUpdate, user, false, function(err, verified) {
     if (err) {
       console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);

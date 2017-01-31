@@ -316,19 +316,19 @@ exports.update = function(req, res) {
   let eventData = { category: 'Training Day', action: 'Update', value: req.body.dateNumeric, path: '/api/trainingDays/:trainingDayId/update' };
 
   if (trainingDay.isSimDay) {
-    eventData.label = 'Update Sim Day';
+    eventData.label = 'Sim Day';
   } else if (trainingDay.name !== req.body.name) {
-    eventData.label = 'Update Training Day Name';
+    eventData.label = 'Training Day Name';
   } else if (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking) {
-    eventData.label = 'Update Scheduled Event Ranking';
+    eventData.label = 'Scheduled Event Ranking';
   } else if (trainingDay.estimatedLoad !== req.body.estimatedLoad) {
-    eventData.label = 'Update Estimated Load';
+    eventData.label = 'Estimated Load';
   } else if (trainingDay.eventTerrain !== req.body.eventTerrain) {
-    eventData.label = 'Update Event Terrain';
+    eventData.label = 'Event Terrain';
   } else if (trainingDay.notes !== req.body.notes) {
-    eventData.label = 'Update Training Day Notes';
+    eventData.label = 'Training Day Notes';
   } else if (!_.isEqual(trainingDay.completedActivities, req.body.completedActivities)) {
-    eventData.label = 'Update Completed Activities';
+    eventData.label = 'Completed Activities';
   }
 
   coreUtil.logAnalytics(req, pageData, eventData);
