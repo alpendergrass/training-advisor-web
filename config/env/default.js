@@ -5,7 +5,8 @@ module.exports = {
     title: 'Tacit Training',
     description: 'Load-based workout advice for cyclists.',
     keywords: 'cycling, training',
-    googleAnalyticsTrackingID: process.env.GOOGLE_ANALYTICS_TRACKING_ID || 'GOOGLE_ANALYTICS_TRACKING_ID'
+    googleAnalyticsTrackingID: process.env.GOOGLE_ANALYTICS_TRACKING_ID || 'GOOGLE_ANALYTICS_TRACKING_ID',
+    googleAnalyticsHost: process.env.GOOGLE_ANALYTICS_HOST || 'GOOGLE_ANALYTICS_HOST'
   },
   port: process.env.PORT || 3000,
   templateEngine: 'swig',

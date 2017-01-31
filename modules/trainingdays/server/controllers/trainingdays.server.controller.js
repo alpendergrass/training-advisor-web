@@ -7,6 +7,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   util = require('../lib/util'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   dbUtil = require('../lib/db-util'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   stravaUtil = require('../lib/strava-util'),
@@ -189,6 +190,42 @@ exports.create = function(req, res) {
     statusMessage = {},
     notifications = [];
 
+  let path = '/api/trainingDays/create';
+  let pageData = { path: path };
+  let eventData = { category: 'Training Day', action: 'Create', value: req.body.dateNumeric, path: path };
+
+  if (req.body.startingPoint) {
+    pageData.title = 'Create Start';
+    eventData.label = 'Start';
+  } else if (req.body.fitnessAndFatigueTrueUp) {
+    pageData.title = 'True-Up Fitness and Fatigue';
+    eventData.label = 'True-Up';
+  } else if (req.body.scheduledEventRanking) {
+    pageData.title = 'Schedule Event';
+    switch (req.body.scheduledEventRanking) {
+      case '1':
+        eventData.label = 'Goal Event';
+        break;
+      case '2':
+        eventData.label = 'Medium Priority Event';
+        break;
+      case '3':
+        eventData.label = 'Low Priority Event';
+        break;
+      case '9':
+        eventData.label = 'Off Day';
+        break;
+      default:
+        eventData.label = 'Unrecognized Event';
+        break;
+    }
+  } else {
+    pageData.title = 'Unknown Create';
+    eventData.label = 'Unknown';
+  }
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   if (req.body.startingPoint) {
     // Remove notification if it exists.
     notifications.push({ notificationType: 'start', lookup: '' });
@@ -252,6 +289,7 @@ exports.create = function(req, res) {
 
 exports.read = function(req, res) {
   // Return the current trainingDay retrieved in trainingDayByID().
+  coreUtil.logAnalytics(req, { path: '/api/trainingDays/:trainingDayId/read', title: 'My Training Day' });
   console.log('My Training Day active user: ', req.user.username);
   res.json(req.trainingDay);
 };
@@ -274,9 +312,30 @@ exports.update = function(req, res) {
     params = {},
     notifications = [];
 
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: 'Update', value: req.body.dateNumeric, path: '/api/trainingDays/:trainingDayId/update' };
+
+  if (trainingDay.isSimDay) {
+    eventData.label = 'Update Sim Day';
+  } else if (trainingDay.name !== req.body.name) {
+    eventData.label = 'Update Training Day Name';
+  } else if (trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking) {
+    eventData.label = 'Update Scheduled Event Ranking';
+  } else if (trainingDay.estimatedLoad !== req.body.estimatedLoad) {
+    eventData.label = 'Update Estimated Load';
+  } else if (trainingDay.eventTerrain !== req.body.eventTerrain) {
+    eventData.label = 'Update Event Terrain';
+  } else if (trainingDay.notes !== req.body.notes) {
+    eventData.label = 'Update Training Day Notes';
+  } else if (!_.isEqual(trainingDay.completedActivities, req.body.completedActivities)) {
+    eventData.label = 'Update Completed Activities';
+  }
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   // If a change was made that would affect current advice, let's recompute.
   // Is not possible in the UI to change event ranking or estimated load of past events.
-  if (trainingDay.completedActivities !== req.body.completedActivities ||
+  if (!_.isEqual(trainingDay.completedActivities, req.body.completedActivities)||
     trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
     trainingDay.estimatedLoad !== req.body.estimatedLoad ||
     trainingDay.eventTerrain !== req.body.eventTerrain
@@ -285,14 +344,16 @@ exports.update = function(req, res) {
   }
 
   trainingDay.name = req.body.name;
+  // No longer updating f&f via this method/TD view page.
   trainingDay.fitness = req.body.fitness;
   trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
   trainingDay.estimatedLoad = req.body.estimatedLoad;
   trainingDay.eventTerrain = req.body.eventTerrain;
-  trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
   trainingDay.notes = req.body.notes;
   trainingDay.completedActivities = req.body.completedActivities;
+  // trainingEffortFeedback will only come with updated completedActivities.
+  trainingDay.trainingEffortFeedback = req.body.trainingEffortFeedback;
 
   trainingDay.save(function(err) {
     if (err) {
@@ -349,6 +410,10 @@ exports.delete = function(req, res) {
     user = req.user,
     statusMessage = {};
 
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: 'Delete', path: '/api/trainingDays/:trainingDayId/delete' };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
   trainingDay.remove(function(err) {
     if (err) {
       return res.status(400).send({
@@ -376,6 +441,12 @@ exports.list = function(req, res) {
   //Note that this will include sim clone days so there could be dups for some days.
   var user = req.user;
 
+  let path = '/api/trainingDays/list';
+  let pageData = { path: path, title: 'List Training Days' };
+  let eventData = { category: 'Training Day', action: 'List', path: path };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   TrainingDay.find({ user: user.id }).sort('-date').populate('user', 'displayName').exec(function(err, trainingDays) {
     if (err) {
       return res.status(400).send({
@@ -396,6 +467,18 @@ exports.getSeason = function(req, res) {
     notifications = [];
 
   console.log('My Season active user: ', user.username);
+
+  let path = '/api/trainingDays/getSeason/:todayNumeric';
+  let pageData = { path: path };
+  // We may decide to not log season page hits because we would get a lot of false positives
+  // from season updates and running simulations.
+  // Also from redirects from other pages, like getAdvice and profile updates.
+  // I guess this is the price we pay from doing it all server-side.
+  // Any way to know if previous referrer was season? Always store last referrer in session?
+  //let pageData = req.headers.referer.includes('calendar') ? { path: path } : null;
+  let eventData = { category: 'Training Day', action: 'Get Season', value: numericToday, path: path };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
@@ -474,6 +557,13 @@ exports.getAdvice = function(req, res) {
   params.alternateActivity = req.query.alternateActivity;
   params.source = params.alternateActivity ? 'requested' : 'advised';
 
+  let path = '/api/trainingDays/getAdvice/:trainingDateNumeric';
+  // Do not log page hit if request comes from My Training Day page.
+  let pageData = req.headers.referer.includes('getAdvice') ? { path: path, title: 'Get Advice' } : null;
+  let eventData = { category: 'Training Day', action: params.alternateActivity ? 'Request Alternative Activity' : 'Get Advice', value: params.numericDate, path: path };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
       return res.status(400).send({
@@ -490,6 +580,11 @@ exports.genPlan = function(req, res) {
   params.user = req.user;
   params.numericDate = parseInt(req.params.trainingDateNumeric, 10);
   params.isSim = JSON.parse(req.query.isSim); // Converts string to boolean.
+
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: params.isSim ? 'Run Sim' : 'Update Plan', value: params.numericDate, path: '/api/trainingDays/genPlan/:trainingDateNumeric' };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
 
   adviceEngine.generatePlan(params, function(err, response) {
     if (err) {
@@ -508,6 +603,11 @@ exports.getSimDay = function(req, res) {
 
   var trainingDay = req.trainingDay;
 
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: 'Get Sim Day', value: trainingDay.dateNumeric, path: '/api/trainingDays/getSimDay/:trainingDayId' };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   if (trainingDay.isSimDay) {
     // This day has already been simmed.
     res.json(trainingDay);
@@ -525,6 +625,12 @@ exports.getSimDay = function(req, res) {
 };
 
 exports.finalizeSim = function(req, res) {
+
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: req.params.commit === 'yes' ? 'Commit Simulation' : 'Revert Simulation', path: '/api/trainingDays/finalizeSim/:commit' };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
   if (req.params.commit === 'yes') {
     dbUtil.commitSimulation(req.user, function(err) {
       if (err) {
@@ -559,6 +665,11 @@ exports.finalizeSim = function(req, res) {
 
 exports.downloadActivities = function(req, res) {
   var trainingDay = req.trainingDay;
+
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: 'Download Activities', value: trainingDay.dateNumeric, path: '/api/trainingDays/downloadActivities/:trainingDayId' };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
 
   if (req.query.provider === 'strava') {
     stravaUtil.downloadActivities(req.user, trainingDay, function(err, response) {

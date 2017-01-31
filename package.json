@@ -72,6 +72,7 @@
     "soap": "^0.17.0",
     "strava-v3": "^1.9.0",
     "swig": "^1.4.2",
+    "universal-analytics": "^0.4.8",
     "validator": "^6.0.0"
   },
   "devDependencies": {

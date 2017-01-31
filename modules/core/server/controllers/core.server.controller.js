@@ -1,9 +1,15 @@
 'use strict';
 
+var path = require('path'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util'));
+
 /**
  * Render the main application page
  */
 exports.renderIndex = function (req, res) {
+
+  coreUtil.logAnalytics(req, { path: '/', title: 'Index' });
+
   res.render('modules/core/server/views/index', {
     user: req.user || null
   });
