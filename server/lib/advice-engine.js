@@ -195,20 +195,20 @@ module.exports.generatePlan = function(params, callback) {
   var user = params.user,
     adviceParams = _.clone(params),
     savedThresholdPowerTestDate = user.thresholdPowerTestDate,
-    goalDay;
+    numericEffectiveGoalDate;
 
   // Make the following a async.series, use promises or something to clean it up. Yuck.
 
   // Get future goal days.
   dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd)
     .then(function(goalDays) {
-      if (goalDays.length < 1) {
-        err = new TypeError('A goal is required in order to generate a season view.');
-        return callback(err, null);
+      if (goalDays.length > 0) {
+        //Use last goal to generate plan.
+        numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
+      } else {
+        // We will still generate a plan without a goal but it won't be very interesting.
+        numericEffectiveGoalDate = util.toNumericDate(moment().add(3, 'months'));
       }
-
-      //Use last goal to generate plan.
-      goalDay = goalDays[goalDays.length - 1];
 
       let metricsParams = {
         user: params.user,
@@ -234,7 +234,7 @@ module.exports.generatePlan = function(params, callback) {
                 //get all training days from tomorrow thru last goal.
                 let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
-                dbUtil.getTrainingDays(user, tomorrowNumeric, goalDay.dateNumeric, function(err, trainingDays) {
+                dbUtil.getTrainingDays(user, tomorrowNumeric, numericEffectiveGoalDate, function(err, trainingDays) {
                   if (err) {
                     return callback(err, null);
                   }
