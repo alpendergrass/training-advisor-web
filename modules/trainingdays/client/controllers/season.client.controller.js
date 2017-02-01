@@ -13,7 +13,6 @@ angular.module('trainingDays')
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
       $scope.tomorrow = moment().add(1, 'days').startOf('day').toDate();
-      $scope.hasStart = true;
       $scope.hasEnd = true;
 
       $scope.viewSeason = function() {
@@ -172,15 +171,14 @@ angular.module('trainingDays')
           $scope.isWorking = true;
 
           Season.getSeason(function(errorMessage, season) {
-            usSpinnerService.stop('tdSpinner');
-            $scope.isWorking = false;
-            $scope.error = errorMessage;
-
             if (season) {
+              if (!season.hasStart) {
+                $state.go('trainingDays.createStart');
+              }
+
               $scope.season = season.days;
               // Reload user object as notifications may have been updated.
               Authentication.user = season.user;
-              $scope.hasStart = season.hasStart;
               $scope.hasEnd = season.hasEnd;
               $scope.needsPlanGen = season.needsPlanGen;
 
@@ -301,6 +299,10 @@ angular.module('trainingDays')
                 }
               ];
             }
+
+            usSpinnerService.stop('tdSpinner');
+            $scope.isWorking = false;
+            $scope.error = errorMessage;
           });
         };
 

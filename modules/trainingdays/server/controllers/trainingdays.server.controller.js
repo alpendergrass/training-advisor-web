@@ -266,13 +266,14 @@ exports.create = function(req, res) {
 
       let today = util.getTodayInUserTimezone(user);
 
-      if (moment(trainingDay.date).isAfter(today) || req.body.fitnessAndFatigueTrueUp) {
+      if (moment(trainingDay.date).isAfter(today) || req.body.fitnessAndFatigueTrueUp || req.body.startingPoint) {
         notifications.push({ notificationType: 'plangen', lookup: '', add: true });
       }
 
       if (notifications.length > 0) {
         userUtil.updateNotifications(user, notifications, true)
           .then(function(response) {
+            console.log('response.saved: ', response.saved);
             trainingDay.user = response.user;
             return res.json(trainingDay);
           })
@@ -489,8 +490,12 @@ exports.getSeason = function(req, res) {
 
     if (startDay) {
       numericEffectiveStartDate = startDay.dateNumeric;
+      // This notification should not exist but somehow our notifications are out of sync
+      // after the first creation of a start day. Does not happen on subsequent start creations.
+      notifications.push({ notificationType: 'start', lookup: '' });
     } else {
       // Set notification.
+      console.log('adding start notify: ');
       notifications.push({ notificationType: 'start', lookup: '', add: true });
       numericEffectiveStartDate = util.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
     }
@@ -516,7 +521,7 @@ exports.getSeason = function(req, res) {
           });
         } else {
           notifications.push({ notificationType: 'goal', lookup: '', add: true });
-          numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(1, 'month'));
+          numericEffectiveGoalDate = util.toNumericDate(moment(numericToday.toString()).add(3, 'months'));
         }
 
         dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {

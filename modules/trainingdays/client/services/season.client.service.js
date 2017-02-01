@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('trainingDays').service('Season', ['TrainingDays', 'Util', '_', 'moment',
-  function (TrainingDays, Util, _, moment) {
+  function(TrainingDays, Util, _, moment) {
     var getSeason = function(callback) {
       var season = {};
       season.needsPlanGen = false;
@@ -34,13 +34,11 @@ angular.module('trainingDays').service('Season', ['TrainingDays', 'Util', '_', '
           .head()
           .value();
 
-        if (season.hasEnd) {
-          season.needsPlanGen = (season.user.notifications &&
-            _.find(season.user.notifications, function(n) {
-              return n.notificationType === 'plangen';
-            })
-          );
-        }
+        season.needsPlanGen = (season.user.notifications &&
+          _.find(season.user.notifications, function(n) {
+            return n.notificationType === 'plangen';
+          })
+        );
 
         // Get yesterday if it exists.
         season.yesterday = _.find(seasonDays, function(td) {

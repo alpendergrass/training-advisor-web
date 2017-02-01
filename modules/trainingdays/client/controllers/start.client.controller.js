@@ -12,15 +12,17 @@ angular.module('trainingDays')
 
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
+      $scope.fitness = 10;
+      $scope.fatigue = 10;
 
       $scope.datePickerStatus = {
         opened: false
       };
 
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(1, 'day').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(6, 'months').startOf('day').toDate();
       var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
 
-      $scope.startDate = $scope.today;
+      $scope.startDate = moment().subtract(1, 'day').startOf('day').toDate();
 
       $scope.startDateOptions = {
         formatYear: 'yy',
@@ -60,21 +62,17 @@ angular.module('trainingDays')
           notes: this.notes
         });
 
-        trainingDay.$create(function(response) {
-          // Reload user to pick up changes in notifications.
-          Authentication.user = response.user;
-
+        trainingDay.$create(function(createdTrainingDay) {
           if ($stateParams.forwardTo) {
             $state.go($stateParams.forwardTo);
           } else {
             if (isTrueUp) {
               toastr.success('Your new fitness and fatigue values have been recorded.', 'True-Up Saved');
-              $state.go('season');
 
             } else {
-              toastr.success('You should review your profile settings.', 'Start Created', { timeOut: 7000 });
-              $state.go('settings.profile');
+              toastr.success('Your season start day has been created.', 'Start Saved');
             }
+            $state.go('season');
           }
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {

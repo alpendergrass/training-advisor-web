@@ -90,7 +90,7 @@ var adornNotification = function(notification) {
       message: 'You need to create a goal for your season.',
       state: 'trainingDays.createEvent({"scheduledEventRanking": "1"})',
       alert: true,
-      blocks: 'plangen'
+      blocks: ''
     }, {
       notificationType: 'terrain',
       message: 'You should set terrain for your event.',
