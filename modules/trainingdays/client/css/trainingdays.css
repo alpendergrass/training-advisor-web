@@ -63,3 +63,12 @@ calendar-md md-content.agenda > div > div > div {
 .fff-table {
   width: 30%;
 }
+
+.season-panel-title {
+  line-height: 50px;
+}
+
+.legend-tip {
+  font-weight: bold;
+  font-size: 28px;
+}

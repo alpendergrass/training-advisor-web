@@ -4,7 +4,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
   function ($scope, $http, $state, Users, Authentication, moment, toastr) {
     var jQuery = window.jQuery;
     angular.element(document).ready(function() {
-      jQuery('[data-toggle="popover"]').popover();
+      jQuery('[data-toggle="popover"]').popover({trigger: 'hover'});
     });
 
     this.user = Authentication.user;
@@ -23,14 +23,6 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
         { id: '5', name: 'Friday' },
         { id: '6', name: 'Saturday' },
         { id: '0', name: 'Sunday' }
-      // ],
-      // trainingPeaksAccountTypes: [
-      //   { id: 'SharedFree', name: 'Shared Free' },
-      //   { id: 'CoachedFree', name: 'Coached Free' },
-      //   { id: 'SelfCoachedPremium', name: 'Self Coached Premium' },
-      //   { id: 'SharedSelfCoachedPremium', name: 'Shared Self Coached Premium' },
-      //   { id: 'CoachedPremium', name: 'Coached Premium' },
-      //   { id: 'SharedCoachedPremium', name: 'Shared Coached Premium' },
       ]
     };
 

@@ -10,33 +10,34 @@
   </div>
 
   <div>
-    <div>
-      <div class="pull-left">
-        <md-button ng-disabled="simMode" ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
-      </div>
-      <div class="pull-left">
-        <md-button ng-class="{'md-warn' : needsPlanGen, 'md-hue-2' : needsPlanGen}" ng-disabled="simMode || isWorking" ng-click="genPlan()">Update Season</md-button>
-      </div>
-      <div class="pull-right">
-        <md-button aria-label="Season Help" data-toggle="modal" data-target="#seasonHelp">
-          My Season Help
-        </md-button>
-      </div>
-    </div>
-
-
     <div class="alert alert-danger text-center" ng-show="error" class="text-danger">
       <strong ng-bind="error"></strong>
     </div>
 
-    <div class="panel panel-default" ng-class="{'panel-warning' : simMode}">
+    <div class="panel" ng-class="{'panel-warning' : simMode}">
+      <div class="panel-heading" ng-hide="simMode">
+        <div class="pull-left">
+          <md-button ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
+        </div>
+        <div class="pull-left">
+          <md-button ng-class="{'color-tacit-red' : needsPlanGen}" ng-disabled="isWorking" ng-click="genPlan()">Update Season</md-button>
+        </div>
+        <div class="pull-right">
+          <md-button aria-label="Season Help" data-toggle="modal" data-target="#seasonHelp">
+            My Season Help
+          </md-button>
+        </div>
+        <h1 class="panel-title text-center season-panel-title">
+          <a tabindex="0" role="button" data-toggle="popover" data-placement="bottom" data-content="Click on chart legend to show and hide."><span class="color-tacit-red legend-tip">*</span></a>
+        </h1>
+      </div>
       <div class="panel-heading" ng-show="simMode">
-        <h1 class="panel-title text-center">SIMULATION MODE</h1>
+        <h1 class="panel-title text-center season-panel-title">SIMULATION MODE</h1>
       </div>
       <div class="panel-body">
         <canvas id="base" class="chart chart-bar" chart-options="chartOptions" chart-colors="chartColors" chart-data="chartData" chart-labels="chartLabels" chart-dataset-override="chartDatasetOverride" chart-click="onChartClick">
         </canvas>
-        <md-button ng-disabled="simMode || isWorking" class="md-warn md-hue-2" ng-click="startSim()" aria-label="Start">
+        <md-button ng-disabled="simMode || isWorking" class="color-tacit-red" ng-click="startSim()" aria-label="Start">
           What If?
         </md-button>
         <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run">
@@ -68,7 +69,7 @@
           <h4 class="modal-title" id="myModalLabel">Understanding My Season</h4>
         </div>
         <div class="modal-body">
-          <p><b>Click on a label in the chart legend</b> to hide and show values. This can be helpful when analyzing your season.</p>
+          <p><b>Click on the chart legend</b> to show and hide values. This can be helpful when viewing your season.</p>
           <p><strong>My Season</strong> is a graphical representation of your training plan from season start through your last goal event.
           The graph shows both planned and historical values. The planned calculations show our recommendations. The historical measurements are a reflection of the actual work you did. By comparing the two you can see how your training is progressing.</p>
           <!-- <p>This method of producing a training plan is very different from other training planning tools. These tools typically generate a plan at the beginning of the season and then expect the athlete to follow them as best they can. Significant deviations from the plan, due to illness, work or family obligations, or whatever, ofter completely negate the plan and require major </p> -->

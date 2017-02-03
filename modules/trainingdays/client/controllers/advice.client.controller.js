@@ -7,7 +7,7 @@ angular.module('trainingDays')
 
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
-        jQuery('[data-toggle="popover"]').popover();
+        jQuery('[data-toggle="popover"]').popover({trigger: 'hover'});
       });
 
       // this._ = _;
