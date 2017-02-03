@@ -476,10 +476,14 @@ exports.getSeason = function(req, res) {
   // Also from redirects from other pages, like getAdvice and profile updates.
   // I guess this is the price we pay from doing it all server-side.
   // Any way to know if previous referrer was season? Always store last referrer in session?
+  // I do not like coupling server-side processing to a UI like this though.
   //let pageData = req.headers.referer.includes('calendar') ? { path: path } : null;
-  let eventData = { category: 'Training Day', action: 'Get Season', value: numericToday, path: path };
 
-  coreUtil.logAnalytics(req, pageData, eventData);
+  // Let's not log getSeason event as it is not an explicit user action.
+  // let eventData = { category: 'Training Day', action: 'Get Season', value: numericToday, path: path };
+
+  // coreUtil.logAnalytics(req, pageData, eventData);
+  coreUtil.logAnalytics(req, pageData);
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
@@ -631,10 +635,14 @@ exports.getSimDay = function(req, res) {
 
 exports.finalizeSim = function(req, res) {
 
-  let pageData = null;
-  let eventData = { category: 'Training Day', action: req.params.commit === 'yes' ? 'Commit Simulation' : 'Revert Simulation', path: '/api/trainingDays/finalizeSim/:commit' };
+  if (req.params.commit === 'yes') {
+    //Revert Simulation is usually a passive clean-up call when displaying season.
+    let pageData = null;
+    // let eventData = { category: 'Training Day', action: req.params.commit === 'yes' ? 'Commit Simulation' : 'Revert Simulation', path: '/api/trainingDays/finalizeSim/:commit' };
+    let eventData = { category: 'Training Day', action: 'Commit Simulation', path: '/api/trainingDays/finalizeSim/:commit' };
 
-  coreUtil.logAnalytics(req, pageData, eventData);
+    coreUtil.logAnalytics(req, pageData, eventData);
+  }
 
   if (req.params.commit === 'yes') {
     dbUtil.commitSimulation(req.user, function(err) {
