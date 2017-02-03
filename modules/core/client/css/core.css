@@ -2,6 +2,16 @@
   text-decoration: none;
 }
 
+.decorated-link {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.disabled {
+  cursor: default;
+  opacity: .5;
+}
+
 [ng\:cloak],
 [ng-cloak],
 [x-ng-cloak],
