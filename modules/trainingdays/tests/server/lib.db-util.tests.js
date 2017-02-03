@@ -41,35 +41,38 @@ describe('db-util Unit Tests:', function() {
 
   describe('Method getTrainingDayDocument', function() {
     it('should return error if no user', function(done) {
-      return dbUtil.getTrainingDayDocument(null, null, function(err, trainingDay) {
-        should.exist(err);
-        (err.message).should.containEql('valid user is required');
-        done();
-      });
+      dbUtil.getTrainingDayDocument(null, null)
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('valid user is required');
+          done();
+        });
     });
 
     it('should return error if null trainingDate', function(done) {
-      return dbUtil.getTrainingDayDocument(user, null, function(err, trainingDay) {
-        should.exist(err);
-        (err.message).should.containEql('numericDate is required to getTrainingDay');
-        done();
-      });
+      dbUtil.getTrainingDayDocument(user, null)
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('numericDate is required to getTrainingDay');
+          done();
+        });
     });
 
     it('should return error if invalid trainingDate', function(done) {
-      return dbUtil.getTrainingDayDocument(user, 'asdf', function(err, trainingDay) {
-        should.exist(err);
-        (err.message).should.containEql('not a valid date');
-        done();
-      });
+      dbUtil.getTrainingDayDocument(user, 'asdf')
+        .catch(function(err) {
+          should.exist(err);
+          (err.message).should.containEql('not a valid date');
+          done();
+        });
     });
 
     it('should return new trainingDay doc if none exists for trainingDate', function(done) {
-      return dbUtil.getTrainingDayDocument(user, numericDate, function(err, trainingDay) {
-        should.not.exist(err);
-        should.exist(trainingDay);
-        done();
-      });
+      dbUtil.getTrainingDayDocument(user, numericDate)
+        .then(function(trainingDay) {
+          should.exist(trainingDay);
+          done();
+        });
     });
 
     it('should return existing trainingDay doc if one exists for trainingDate', function(done) {
@@ -78,12 +81,12 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        return dbUtil.getTrainingDayDocument(user, numericDate, function(err, trainingDay) {
-          should.not.exist(err);
-          should.exist(trainingDay);
-          (trainingDay.name).should.match(/Existing trainingDay/);
-          done();
-        });
+        dbUtil.getTrainingDayDocument(user, numericDate)
+          .then(function(trainingDay) {
+            should.exist(trainingDay);
+            (trainingDay.name).should.match(/Existing trainingDay/);
+            done();
+          });
       });
     });
 
@@ -98,13 +101,13 @@ describe('db-util Unit Tests:', function() {
             console.log('makeSimDay: ' + err);
           }
 
-          return dbUtil.getTrainingDayDocument(user, numericDate, function(err, trainingDay) {
-            should.not.exist(err);
-            should.exist(trainingDay);
-            (trainingDay._id).should.match(simDay._id);
-            (trainingDay.isSimDay).should.match(true);
-            done();
-          });
+          dbUtil.getTrainingDayDocument(user, numericDate)
+            .then(function(trainingDay) {
+              should.exist(trainingDay);
+              (trainingDay._id).should.match(simDay._id);
+              (trainingDay.isSimDay).should.match(true);
+              done();
+            });
         });
       });
     });

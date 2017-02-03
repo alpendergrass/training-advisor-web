@@ -280,68 +280,69 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
     return callback(null, user, trainingDay);
   }
 
-  async.eachSeries(workouts, function(workout, callback) {
-    args = {
-      username: user.trainingPeaksCredentials.username,
-      password: user.trainingPeaksCredentials.password,
-      personId: personId,
-      workoutId: workout.WorkoutId
-    };
+  async.eachSeries(workouts,
+    function(workout, callback) {
+      args = {
+        username: user.trainingPeaksCredentials.username,
+        password: user.trainingPeaksCredentials.password,
+        personId: personId,
+        workoutId: workout.WorkoutId
+      };
 
-    if (offlineMode) {
-      //We are possibly processing workouts for multiple days and we need to get trainingDay for each workout.
-      //TP returns local dates but calls them UTC. We fix that here.
-      trainingDate = moment.utc(workout.WorkoutDay).format(); //2016-07-23T09:36:05Z
-      trainingDate = trainingDate.substring(0, trainingDate.length - 1); // 2016-07-23T09:36:05
-      offset = moment.tz(workout.WorkoutDay, timezone).format('Z'); //-06:00
-      trainingDate = trainingDate + offset; //2016-07-23T09:36:05-06:00
+      if (offlineMode) {
+        //We are possibly processing workouts for multiple days and we need to get trainingDay for each workout.
+        //TP returns local dates but calls them UTC. We fix that here.
+        trainingDate = moment.utc(workout.WorkoutDay).format(); //2016-07-23T09:36:05Z
+        trainingDate = trainingDate.substring(0, trainingDate.length - 1); // 2016-07-23T09:36:05
+        offset = moment.tz(workout.WorkoutDay, timezone).format('Z'); //-06:00
+        trainingDate = trainingDate + offset; //2016-07-23T09:36:05-06:00
 
-      dbUtil.getTrainingDayDocument(user, util.toNumericDate(trainingDate), function(err, retrievedTrainingDay) {
-        if (err) {
-          statusMessage.text = 'TrainingPeaks download failed - getTrainingDayDocument returned error: ' + (err.msg || '');
-          statusMessage.type = 'error';
-          return callback(err);
-        }
+        dbUtil.getTrainingDayDocument(user, util.toNumericDate(trainingDate))
+          .then(function(retrievedTrainingDay) {
+            trainingDay = retrievedTrainingDay;
 
-        trainingDay = retrievedTrainingDay;
-
-        processWorkout(client, args, trainingDay, function(err) {
-          if (err) {
-            return callback(err);
-          }
-
-          trainingDay.save(function(err) {
-            if (err) {
-              statusMessage.text = 'We processed workoutId ' + workout.WorkoutId + ' but encountered an error when we tried to save the data.';
-              statusMessage.type = 'error';
-              return callback(err);
-            }
-
-            let params = {
-              user: user,
-              numericDate: trainingDay.dateNumeric,
-              metricsType: 'actual'
-            };
-
-            adviceMetrics.updateMetrics(params, function(err) {
+            processWorkout(client, args, trainingDay, function(err) {
               if (err) {
-                statusMessage.text = 'We processed workoutId ' + workout.WorkoutId + ' but encountered an error when we tried to updateMetrics for ' + trainingDay.dateNumeric + '.';
-                statusMessage.type = 'error';
                 return callback(err);
               }
 
-              return callback();
+              trainingDay.save(function(err) {
+                if (err) {
+                  statusMessage.text = 'We processed workoutId ' + workout.WorkoutId + ' but encountered an error when we tried to save the data.';
+                  statusMessage.type = 'error';
+                  return callback(err);
+                }
+
+                let params = {
+                  user: user,
+                  numericDate: trainingDay.dateNumeric,
+                  metricsType: 'actual'
+                };
+
+                adviceMetrics.updateMetrics(params, function(err) {
+                  if (err) {
+                    statusMessage.text = 'We processed workoutId ' + workout.WorkoutId + ' but encountered an error when we tried to updateMetrics for ' + trainingDay.dateNumeric + '.';
+                    statusMessage.type = 'error';
+                    return callback(err);
+                  }
+
+                  return callback();
+                });
+              });
             });
+          })
+          .catch(function(err) {
+            statusMessage.text = 'TrainingPeaks download failed - getTrainingDayDocument returned error: ' + (err.msg || '');
+            statusMessage.type = 'error';
+            return callback(err);
           });
+      } else {
+        processWorkout(client, args, trainingDay, function(err) {
+          //err will be null if processWorkout is successful.
+          return callback(err);
         });
-      });
-    } else {
-      processWorkout(client, args, trainingDay, function(err) {
-        //err will be null if processWorkout is successful.
-        return callback(err);
-      });
-    }
-  },
+      }
+    },
     function(err) {
       if (err) {
         return callback(err, user, null);

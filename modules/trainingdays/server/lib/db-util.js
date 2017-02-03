@@ -42,43 +42,42 @@ function getTrainingDay(user, numericDate, callback) {
 
 module.exports = {};
 
-module.exports.getTrainingDayDocument = function(user, numericDate, callback) {
+module.exports.getTrainingDayDocument = function(user, numericDate) {
   //If requested training day does not exist it will be created and returned.
   //This should be the only place in the app where a new training day is created from scratch.
-  callback = (typeof callback === 'function') ? callback : function(err, data) {};
+  return new Promise(function(resolve, reject) {
+    getTrainingDay(user, numericDate, function(err, trainingDay) {
+      if (err) {
+        return reject(err);
+      }
 
+      if (!trainingDay) {
+        var newTrainingDay = new TrainingDay(),
+          timezone = user.timezone || 'America/New_York',
+          plannedMetrics = {
+            metricsType: 'planned'
+          },
+          actualMetrics = {
+            metricsType: 'actual',
+          };
 
-  getTrainingDay(user, numericDate, function(err, trainingDay) {
-    if (err) {
-      return callback(err, null);
-    }
+        newTrainingDay.dateNumeric = numericDate;
+        newTrainingDay.date = moment.tz(numericDate.toString(), timezone).toDate();
+        newTrainingDay.user = user;
+        newTrainingDay.metrics.push(plannedMetrics);
+        newTrainingDay.metrics.push(actualMetrics);
 
-    if (!trainingDay) {
-      var newTrainingDay = new TrainingDay(),
-        timezone = user.timezone || 'America/New_York',
-        plannedMetrics = {
-          metricsType: 'planned'
-        },
-        actualMetrics = {
-          metricsType: 'actual',
-        };
+        newTrainingDay.save(function(err, createdTrainingDay) {
+          if (err) {
+            return reject(err);
+          }
 
-      newTrainingDay.dateNumeric = numericDate;
-      newTrainingDay.date = moment.tz(numericDate.toString(), timezone).toDate();
-      newTrainingDay.user = user;
-      newTrainingDay.metrics.push(plannedMetrics);
-      newTrainingDay.metrics.push(actualMetrics);
-
-      newTrainingDay.save(function(err, createdTrainingDay) {
-        if (err) {
-          return callback(err, null);
-        }
-
-        return callback(null, createdTrainingDay);
-      });
-    } else {
-      return callback(null, trainingDay);
-    }
+          return resolve(createdTrainingDay);
+        });
+      } else {
+        return resolve(trainingDay);
+      }
+    });
   });
 };
 
@@ -129,15 +128,16 @@ module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate
       return currentNumeric <= numericEndDate;
     },
     function(callback) {
-      module.exports.getTrainingDayDocument(user, currentNumeric, function(err, trainingDay) {
-        if (err) {
+      module.exports.getTrainingDayDocument(user, currentNumeric)
+        .then(function(trainingDay) {
+          trainingDays.push(trainingDay);
+          currentNumeric = util.toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
+          callback(null, trainingDay);
+        })
+        .catch(function(err) {
           console.log('err: ', err);
           return callback(err, null);
-        }
-        trainingDays.push(trainingDay);
-        currentNumeric = util.toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
-        callback(null, trainingDay);
-      });
+        });
     },
     function(err, lastDay) {
       if (err) {
@@ -642,22 +642,24 @@ module.exports.computeAverageRampRate = function(user, numericSearchDate, metric
     }
 
     let numericStartDate = util.toNumericDate(moment(numericSearchDate.toString()).subtract(7, 'days'));
-    TrainingDay.aggregate([
-      { $match: {
+
+    TrainingDay.aggregate([{
+      $match: {
         $and: [
           { user: user._id },
           { dateNumeric: { $gte: numericStartDate, $lt: numericSearchDate } }
         ]
-      } },
-      { $project: { _id: '$dateNumeric', metrics: 1 } },
-      { $unwind: '$metrics' },
-      { $match: { 'metrics.metricsType' : metricsType } },
-      { $group: {
-        _id : null,
+      }
+    },
+    { $project: { _id: '$dateNumeric', metrics: 1 } },
+    { $unwind: '$metrics' },
+    { $match: { 'metrics.metricsType': metricsType } }, {
+      $group: {
+        _id: null,
         averageRampRate: { $avg: '$metrics.sevenDayRampRate' },
         dayCount: { $sum: 1 }
-      } }
-    ], function(err, results) {
+      }
+    }], function(err, results) {
       if (err) {
         return reject(err);
       }

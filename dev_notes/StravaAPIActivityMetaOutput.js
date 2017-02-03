@@ -1,3 +1,9 @@
+// To get a summary of all activities:
+
+// curl -G https://www.strava.com/api/v3/athlete/activities \
+// -H "Accept: application/json+meta" \
+// -H "Authorization: Bearer 4969ffd221cb6b49bc24a935582f8faaf22b3819"
+
 // [Activity ID, server time, activity type, local time, elapsed time in secs, ?, ?, run something, run something]
 //  for each
 //    itemArray = item.split(",");

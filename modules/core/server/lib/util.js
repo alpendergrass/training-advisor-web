@@ -21,7 +21,6 @@ module.exports.logAnalytics = function(req, pageData, eventData, user) {
         // req.headers.referer: "http://localhost:3000/trainingDays/calendar"
         // req.headers.referer: "http://www.tacittraining.com/season"
         pageData.title = _.startCase(req.headers.referer.replace(/^\w+\:{1}\/{2}[\w.:]+\/?\w*\/{1}/, ''));
-        console.log('pageData.title: ', pageData.title);
       }
 
       visitor.pageview({ dp: pageData.path, dt: pageData.title, dh: req.app.locals.googleAnalyticsHost }).send();

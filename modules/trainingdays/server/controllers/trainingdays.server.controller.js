@@ -33,92 +33,92 @@ function createTrainingDay(req, callback) {
   //It is possible that a document already exists for this day so we must treat this as an update.
   let numericDate = parseInt(req.body.dateNumeric, 10);
 
-  dbUtil.getTrainingDayDocument(req.user, numericDate, function(err, trainingDay) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    let actualMetrics = util.getMetrics(trainingDay, 'actual');
-
-    if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
-      //Preserve existing name, if any.
-      if (typeof req.body.name !== 'undefined') {
-        trainingDay.name = trainingDay.name ? trainingDay.name + ', ' + req.body.name : req.body.name;
-      }
-
-      trainingDay.startingPoint = req.body.startingPoint;
-      trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
-      actualMetrics.fitness = req.body.actualFitness;
-      actualMetrics.fatigue = req.body.actualFatigue;
-      // Normally form is calculated using the preceding day's fitness and fatigue but for a start day
-      // we do not have prior day and for a true-up day we treat as a new start.
-      actualMetrics.form = Math.round((req.body.actualFitness - req.body.actualFatigue) * 100) / 100;
-
-      if (req.body.startingPoint) {
-        // Planning metrics should not be affected by a true-up. I think.
-        let plannedMetrics = util.getMetrics(trainingDay, 'planned');
-        plannedMetrics.fitness = req.body.actualFitness;
-        plannedMetrics.fatigue = req.body.actualFatigue;
-        plannedMetrics.form = actualMetrics.form;
-      }
-    } else if (req.body.scheduledEventRanking) {
-      trainingDay.name = req.body.name;
-      trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
-      trainingDay.estimatedLoad = req.body.estimatedLoad;
-      trainingDay.eventTerrain = req.body.eventTerrain;
-
-      if (req.body.recurrenceSpec) {
-        trainingDay.recurrenceSpec = req.body.recurrenceSpec;
-        trainingDay.eventRecurrenceID = req.body.eventRecurrenceID;
-      }
-    }
-
-    trainingDay.notes = req.body.notes || '';
-    trainingDay.period = '';
-    trainingDay.plannedActivities = [];
-
-    actualMetrics.sevenDayRampRate = 0;
-    actualMetrics.sevenDayTargetRampRate = 0;
-    actualMetrics.dailyTargetRampRate = 0;
-    actualMetrics.rampRateAdjustmentFactor = 1;
-    actualMetrics.targetAvgDailyLoad = 0;
-    actualMetrics.loadRating = '';
-
-    trainingDay.save(function(err) {
-      if (err) {
-        return callback(err, null);
-      }
+  dbUtil.getTrainingDayDocument(req.user, numericDate)
+    .then(function(trainingDay) {
+      let actualMetrics = util.getMetrics(trainingDay, 'actual');
 
       if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
-        adviceEngine.refreshAdvice(req.user, trainingDay)
-          .then(function(trainingDay) {
-            if (req.body.startingPoint) {
-              // Refresh plan metrics from start.
-              // TODO: likely need to regen plan.
-              let params = {};
-              params.user = req.user;
-              params.numericDate = trainingDay.dateNumeric;
-              params.metricsType = 'planned';
+        //Preserve existing name, if any.
+        if (typeof req.body.name !== 'undefined') {
+          trainingDay.name = trainingDay.name ? trainingDay.name + ', ' + req.body.name : req.body.name;
+        }
 
-              adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-                if (err) {
-                  return callback(err, null);
-                }
+        trainingDay.startingPoint = req.body.startingPoint;
+        trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
+        actualMetrics.fitness = req.body.actualFitness;
+        actualMetrics.fatigue = req.body.actualFatigue;
+        // Normally form is calculated using the preceding day's fitness and fatigue but for a start day
+        // we do not have prior day and for a true-up day we treat as a new start.
+        actualMetrics.form = Math.round((req.body.actualFitness - req.body.actualFatigue) * 100) / 100;
 
-                return callback(null, trainingDay);
-              });
-            } else {
-              return callback(null, trainingDay);
-            }
-          })
-          .catch(function(err) {
-            return callback(err, null);
-          });
-      } else {
-        return callback(null, trainingDay);
+        if (req.body.startingPoint) {
+          // Planning metrics should not be affected by a true-up. I think.
+          let plannedMetrics = util.getMetrics(trainingDay, 'planned');
+          plannedMetrics.fitness = req.body.actualFitness;
+          plannedMetrics.fatigue = req.body.actualFatigue;
+          plannedMetrics.form = actualMetrics.form;
+        }
+      } else if (req.body.scheduledEventRanking) {
+        trainingDay.name = req.body.name;
+        trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
+        trainingDay.estimatedLoad = req.body.estimatedLoad;
+        trainingDay.eventTerrain = req.body.eventTerrain;
+
+        if (req.body.recurrenceSpec) {
+          trainingDay.recurrenceSpec = req.body.recurrenceSpec;
+          trainingDay.eventRecurrenceID = req.body.eventRecurrenceID;
+        }
       }
+
+      trainingDay.notes = req.body.notes || '';
+      trainingDay.period = '';
+      trainingDay.plannedActivities = [];
+
+      actualMetrics.sevenDayRampRate = 0;
+      actualMetrics.sevenDayTargetRampRate = 0;
+      actualMetrics.dailyTargetRampRate = 0;
+      actualMetrics.rampRateAdjustmentFactor = 1;
+      actualMetrics.targetAvgDailyLoad = 0;
+      actualMetrics.loadRating = '';
+
+      trainingDay.save(function(err) {
+        if (err) {
+          return callback(err, null);
+        }
+
+        if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+          adviceEngine.refreshAdvice(req.user, trainingDay)
+            .then(function(trainingDay) {
+              if (req.body.startingPoint) {
+                // Refresh plan metrics from start.
+                // TODO: likely need to regen plan.
+                let params = {};
+                params.user = req.user;
+                params.numericDate = trainingDay.dateNumeric;
+                params.metricsType = 'planned';
+
+                adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+                  if (err) {
+                    return callback(err, null);
+                  }
+
+                  return callback(null, trainingDay);
+                });
+              } else {
+                return callback(null, trainingDay);
+              }
+            })
+            .catch(function(err) {
+              return callback(err, null);
+            });
+        } else {
+          return callback(null, trainingDay);
+        }
+      });
+    })
+    .catch(function(err) {
+      return callback(err, null);
     });
-  });
 }
 
 function generateRecurrences(req, callback) {
@@ -296,15 +296,15 @@ exports.read = function(req, res) {
 };
 
 exports.getDay = function(req, res) {
-  dbUtil.getTrainingDayDocument(req.user, parseInt(req.params.trainingDateNumeric, 10), function(err, trainingDay) {
-    if (err) {
+  dbUtil.getTrainingDayDocument(req.user, parseInt(req.params.trainingDateNumeric, 10))
+    .then(function(trainingDay) {
+      res.json(trainingDay);
+    })
+    .catch(function(err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
-    }
-
-    res.json(trainingDay);
-  });
+    });
 };
 
 exports.update = function(req, res) {
@@ -336,7 +336,7 @@ exports.update = function(req, res) {
 
   // If a change was made that would affect current advice, let's recompute.
   // Is not possible in the UI to change event ranking or estimated load of past events.
-  if (!_.isEqual(trainingDay.completedActivities, req.body.completedActivities)||
+  if (!_.isEqual(trainingDay.completedActivities, req.body.completedActivities) ||
     trainingDay.scheduledEventRanking !== req.body.scheduledEventRanking ||
     trainingDay.estimatedLoad !== req.body.estimatedLoad ||
     trainingDay.eventTerrain !== req.body.eventTerrain
