@@ -12,6 +12,7 @@ angular.module('trainingDays')
 
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
+      $scope.name = 'Season Start';
       $scope.fitness = 10;
       $scope.fatigue = 10;
 
