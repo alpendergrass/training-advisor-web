@@ -73,37 +73,37 @@ function clearRunway(params, callback) {
 }
 
 function updateFatigue(params, callback) {
-  dbUtil.getTrainingDayDocument(params.user, params.numericDate, function(err, trainingDay) {
-    if (err) {
+  dbUtil.getTrainingDayDocument(params.user, params.numericDate)
+    .then(function(trainingDay) {
+      params.trainingDay = trainingDay;
+
+      //not needed if we are generating plan.
+      if (params.planGenUnderway) {
+        return callback(null, params);
+      }
+
+      //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
+      userUtil.updateFatigueTimeConstant(params.user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
+        if (err) {
+          return callback(err, null);
+        }
+
+        params.user.fatigueTimeConstant = fatigueTimeConstant;
+
+        if (params.trainingDay.trainingEffortFeedback !== null) {
+          //We only ask for feedback if trainingEffortFeedback is null.
+          //So if we got here, this means that we have received and applied feedback,
+          //so we reset it to zero to avoid having the time constant
+          //readjusted if/when updateMetrics is called again.
+          params.trainingDay.trainingEffortFeedback = 0;
+        }
+
+        return callback(null, params);
+      });
+    })
+    .catch(function(err) {
       return callback(err, null);
-    }
-
-    params.trainingDay = trainingDay;
-
-    //not needed if we are generating plan.
-    if (params.planGenUnderway) {
-      return callback(null, params);
-    }
-
-    //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
-    userUtil.updateFatigueTimeConstant(params.user.id, trainingDay.trainingEffortFeedback, function(err, fatigueTimeConstant) {
-      if (err) {
-        return callback(err, null);
-      }
-
-      params.user.fatigueTimeConstant = fatigueTimeConstant;
-
-      if (params.trainingDay.trainingEffortFeedback !== null) {
-        //We only ask for feedback if trainingEffortFeedback is null.
-        //So if we got here, this means that we have received and applied feedback,
-        //so we reset it to zero to avoid having the time constant
-        //readjusted if/when updateMetrics is called again.
-        params.trainingDay.trainingEffortFeedback = 0;
-      }
-
-      return callback(null, params);
     });
-  });
 }
 
 function updateMetricsForDay(params, callback) {
@@ -128,7 +128,7 @@ function updateMetricsForDay(params, callback) {
       });
     },
     priorDayMetrics: function(callback) {
-    //TODO: return prior day metrics here instead of TD?
+      //TODO: return prior day metrics here instead of TD?
       var priorDayMetrics;
 
       if (params.trainingDay.startingPoint || params.trainingDay.fitnessAndFatigueTrueUp) {
@@ -146,33 +146,33 @@ function updateMetricsForDay(params, callback) {
 
       var numericPriorDate = util.toNumericDate(moment(params.trainingDay.dateNumeric.toString()).subtract(1, 'day'));
 
-      dbUtil.getTrainingDayDocument(params.user, numericPriorDate, function(err, priorTrainingDay) {
-        if (err) {
+      dbUtil.getTrainingDayDocument(params.user, numericPriorDate)
+        .then(function(priorTrainingDay) {
+          priorDayMetrics = _.find(priorTrainingDay.metrics, ['metricsType', params.metricsType]);
+
+          if (!priorDayMetrics) {
+            return callback(new Error(`priorDayMetrics not found for ${params.user.username}. metricsType: ${params.metricsType}. priorTrainingDay: ${priorTrainingDay}`), null);
+          }
+
+          if (priorDayMetrics.fitness === 0 && priorDayMetrics.fatigue === 0) {
+            let priorDayParams = _.clone(params);
+            priorDayParams.trainingDay = priorTrainingDay;
+            priorDayParams.metrics = null;
+
+            updateMetricsForDay(priorDayParams, function(err, updatedpriorTrainingDay) {
+              if (err) {
+                return callback(err, null);
+              }
+
+              return callback(null, _.find(updatedpriorTrainingDay.metrics, ['metricsType', params.metricsType]));
+            });
+          } else {
+            return callback(null, priorDayMetrics);
+          }
+        })
+        .catch(function(err) {
           return callback(err, null);
-        }
-
-        priorDayMetrics = _.find(priorTrainingDay.metrics, ['metricsType', params.metricsType]);
-
-        if (!priorDayMetrics) {
-          return callback(new Error(`priorDayMetrics not found for ${params.user.username}. metricsType: ${params.metricsType}. priorTrainingDay: ${priorTrainingDay}`), null);
-        }
-
-        if (priorDayMetrics.fitness === 0 && priorDayMetrics.fatigue === 0) {
-          let priorDayParams = _.clone(params);
-          priorDayParams.trainingDay = priorTrainingDay;
-          priorDayParams.metrics = null;
-
-          updateMetricsForDay(priorDayParams, function(err, updatedpriorTrainingDay) {
-            if (err) {
-              return callback(err, null);
-            }
-
-            return callback(null, _.find(updatedpriorTrainingDay.metrics, ['metricsType', params.metricsType]));
-          });
-        } else {
-          return callback(null, priorDayMetrics);
-        }
-      });
+        });
     }
   },
     function(err, results) {
@@ -241,7 +241,7 @@ function updateMetricsForDay(params, callback) {
       params.trainingDay.daysUntilNextPriority2Event = results.periodData.daysUntilNextPriority2Event;
       params.trainingDay.daysUntilNextPriority3Event = results.periodData.daysUntilNextPriority3Event;
 
-      computeSevenDayRampRate(params.user, params.trainingDay, params.metricsType, function (err, rampRate) {
+      computeSevenDayRampRate(params.user, params.trainingDay, params.metricsType, function(err, rampRate) {
         //ignore error...for now at least.
         params.metrics.sevenDayRampRate = rampRate;
         dbUtil.computeAverageRampRate(params.user, params.trainingDay.dateNumeric, params.metricsType)
