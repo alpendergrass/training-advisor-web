@@ -325,7 +325,7 @@ gulp.task('test:e2e', function (done) {
 
 // Run the project in development mode
 gulp.task('default', function (done) {
-  runSequence('env:dev', 'lint', ['nodemon'], done);
+  runSequence('env:dev', 'lint', ['nodemon', 'watch'], done);
 });
 
 // Run the project in debug mode

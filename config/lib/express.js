@@ -36,6 +36,7 @@ module.exports.initLocalVariables = function (app) {
   app.locals.livereload = config.livereload;
   app.locals.logo = config.logo;
   app.locals.favicon = config.favicon;
+  app.locals.version = config.trainingAdvisor.version;
 
   // Passing the request url to environment locals
   app.use(function (req, res, next) {
@@ -212,9 +213,7 @@ module.exports.configureSocketIO = function (app, db) {
   return server;
 };
 
-/**
- * Initialize the Express application
- */
+// Initialize the Express application
 module.exports.init = function (db) {
   // Initialize express app
   var app = express();

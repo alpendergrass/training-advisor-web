@@ -183,7 +183,7 @@ var initGlobalConfig = function () {
 
   // read package.json for MEAN.JS project information
   var pkg = require(path.resolve('./package.json'));
-  config.meanjs = pkg;
+  config.trainingAdvisor = pkg;
 
   // We only extend the config object with the local.js custom/local environment if we are on
   // production or development environment. If test environment is used we don't merge it with local.js

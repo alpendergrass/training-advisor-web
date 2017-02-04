@@ -3,9 +3,7 @@
 // var path = require('path'),
 //   coreUtil = require(path.resolve('./modules/core/server/lib/util'));
 
-/**
- * Render the main application page
- */
+// Render the main application page
 exports.renderIndex = function (req, res) {
 
   //coreUtil.logAnalytics(req, { path: '/', title: 'Index' });
@@ -15,21 +13,16 @@ exports.renderIndex = function (req, res) {
   });
 };
 
-/**
- * Render the server error page
- */
+// Render the server error page
 exports.renderServerError = function (req, res) {
   res.status(500).render('modules/core/server/views/500', {
     error: 'Oops! Something went wrong...'
   });
 };
 
-/**
- * Render the server not found responses
- * Performs content-negotiation on the Accept HTTP header
- */
+// Render the server not found responses
+// Performs content-negotiation on the Accept HTTP header
 exports.renderNotFound = function (req, res) {
-
   res.status(404).format({
     'text/html': function () {
       res.render('modules/core/server/views/404', {
@@ -45,4 +38,8 @@ exports.renderNotFound = function (req, res) {
       res.send('Path not found');
     }
   });
+};
+
+exports.getAppVersion = function (req, res) {
+  return res.json({ 'appVersion': req.app.locals.version });
 };

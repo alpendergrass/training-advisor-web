@@ -7,6 +7,10 @@
   text-decoration: underline;
 }
 
+.refresh-link {
+  font-weight: bold;
+}
+
 .disabled {
   cursor: default;
   opacity: .5;

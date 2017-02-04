@@ -4,6 +4,10 @@ module.exports = function (app) {
   // Root routing
   var core = require('../controllers/core.server.controller');
 
+  // Good routes must be defined before error routes or they will be 404'ed.
+  app.route('/api/core/getAppVersion')
+    .get(core.getAppVersion);
+
   // Define error pages
   app.route('/server-error').get(core.renderServerError);
 

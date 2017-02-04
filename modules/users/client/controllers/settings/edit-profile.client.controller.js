@@ -4,7 +4,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
   function ($scope, $http, $state, Users, Authentication, moment, toastr) {
     var jQuery = window.jQuery;
     angular.element(document).ready(function() {
-      jQuery('[data-toggle="popover"]').popover({trigger: 'hover'});
+      jQuery('[data-toggle="popover"]').popover({ trigger: 'hover' });
     });
 
     this.user = Authentication.user;

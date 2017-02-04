@@ -9,7 +9,7 @@ angular.module('trainingDays')
 
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
-        jQuery('[data-toggle="popover"]').popover({trigger: 'hover'});
+        jQuery('[data-toggle="popover"]').popover({ trigger: 'hover' });
       });
 
       var today = moment().startOf('day').toDate();
