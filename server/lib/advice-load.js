@@ -9,7 +9,6 @@ var path = require('path'),
   adviceConstants = require('./advice-constants'),
   err;
 
-
 module.exports = {};
 
 module.exports.setLoadRecommendations = function(user, trainingDay, source, callback) {

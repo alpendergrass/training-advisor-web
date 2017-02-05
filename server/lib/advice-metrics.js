@@ -13,7 +13,6 @@ var path = require('path'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   err;
 
-
 module.exports = {};
 
 module.exports.updateMetrics = function(params, callback) {

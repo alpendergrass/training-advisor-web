@@ -356,11 +356,11 @@ module.exports.refreshAdvice = function(user, trainingDay) {
   // if trainingDay is not beyond tomorrow we should update metrics for trainingDay (which will clear future)
   // and then advise for today (maybe) and tomorrow.
 
-  let tdDate = moment(trainingDay.dateNumeric.toString()); //Thu Nov 03 2016 00:00:00 GMT+0000 (UTC)
-  let today = util.getTodayInUserTimezone(user);
-  let tomorrow = moment(today).add(1, 'day').startOf('day').toDate(); //Fri Nov 04 2016 00:00:00 GMT+0000
-
   return new Promise(function(resolve, reject) {
+    let tdDate = moment(trainingDay.dateNumeric.toString()); //Thu Nov 03 2016 00:00:00 GMT+0000 (UTC)
+    let today = util.getTodayInUserTimezone(user);
+    let tomorrow = moment(today).add(1, 'day').startOf('day').toDate(); //Fri Nov 04 2016 00:00:00 GMT+0000
+
     if (tdDate.isAfter(tomorrow)) {
       return resolve(trainingDay);
     }

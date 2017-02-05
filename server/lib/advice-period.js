@@ -10,7 +10,6 @@ var path = require('path'),
   adviceConstants = require('./advice-constants'),
   err;
 
-
 module.exports = {};
 
 module.exports.getPeriod = function(user, trainingDay, callback) {

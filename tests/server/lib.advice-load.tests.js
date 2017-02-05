@@ -1,6 +1,5 @@
 'use strict';
 
-
 var path = require('path'),
   _ = require('lodash'),
   should = require('should'),
