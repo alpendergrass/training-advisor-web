@@ -2,8 +2,11 @@
 
 var path = require('path'),
   should = require('should'),
-  mongoose = require('mongoose'),
-  User = mongoose.model('User'),
+  mongoose = require('mongoose');
+
+mongoose.Promise = global.Promise;
+
+var User = mongoose.model('User'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util'));
 

@@ -685,28 +685,28 @@ exports.downloadActivities = function(req, res) {
   coreUtil.logAnalytics(req, pageData, eventData);
 
   if (req.query.provider === 'strava') {
-    stravaUtil.downloadActivities(req.user, trainingDay, function(err, response) {
-      if (err) {
+    stravaUtil.downloadActivities(req.user, trainingDay)
+      .then(function(response) {
+        return res.json(response);
+      })
+      .catch(function(err) {
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      }
-
-      return res.json(response);
-    });
+      });
   }
 
-  if (req.query.provider === 'trainingpeaks') {
-    downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      }
+  // if (req.query.provider === 'trainingpeaks') {
+  //   downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
+  //     if (err) {
+  //       return res.status(400).send({
+  //         message: errorHandler.getErrorMessage(err)
+  //       });
+  //     }
 
-      return res.json(trainingDay);
-    });
-  }
+  //     return res.json(trainingDay);
+  //   });
+  // }
 };
 
 //TrainingDay middleware

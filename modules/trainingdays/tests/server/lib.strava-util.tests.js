@@ -145,7 +145,6 @@ describe('strava-util Unit Tests:', function() {
       if (err) {
         return done(err);
       }
-
       user = newUser;
       user.providerData.accessToken = 'accessToken';
 
@@ -179,7 +178,6 @@ describe('strava-util Unit Tests:', function() {
         stravaStub.streams.activity = function(parm, callback) {
           return callback(null, wattagePayload);
         };
-
         done();
       });
     });
@@ -239,7 +237,7 @@ describe('strava-util Unit Tests:', function() {
         },
         function(err) {
           should.exist(err);
-          (err.message).should.containEql('stravaUtil.getAverageWatts returned error');
+          (err.message).should.containEql('strava.streams.activity failed');
         });
     });
 
@@ -293,7 +291,6 @@ describe('strava-util Unit Tests:', function() {
           },
           function(err) {
             should.exist(err);
-            console.log('err: ', err);
             (err.message).should.containEql('user.thresholdPower is not set');
             done();
           }).catch(function (err) {
@@ -335,7 +332,7 @@ describe('strava-util Unit Tests:', function() {
       });
     });
 
-    it('should resolve with no completedActivities when activity has no estimated watts and no suffer score ', function() {
+    it('should resolve with no trainingDay when activity has no estimated watts and no suffer score ', function() {
       activity.weighted_average_watts = null;
       activity.suffer_score = null;
       activity.device_watts = false;
@@ -346,8 +343,7 @@ describe('strava-util Unit Tests:', function() {
 
       return stravaUtil.fetchActivity(user, activityID)
         .then(function(td) {
-          should.exist(td.completedActivities);
-          should.equal(td.completedActivities.length, 0);
+          should.not.exist(td);
         },
         function(err) {
           throw err;
@@ -374,36 +370,46 @@ describe('strava-util Unit Tests:', function() {
         });
     });
 
-    it('should resolve when activity is returned but it has been downloaded previously', function() {
+    it('should resolve when activity is returned but it has been downloaded previously', function(done) {
       stravaUtil.fetchActivity(user, activityID)
         .then(function() {
-          return stravaUtil.fetchActivity(user, activityID);
-        })
-        .then(function(td) {
-          should.equal(td.completedActivities.length, 1);
-          should.equal(td.completedActivities[0].name, activity.name);
+          return stravaUtil.fetchActivity(user, activityID)
+            .then(function(td) {
+              should.not.exist(td);
+              // should.equal(td.completedActivities.length, 1);
+              // should.equal(td.completedActivities[0].name, activity.name);
+              done();
+            },
+            function(err) {
+              // should.not.exist(err);
+              done(err);
+            });
         },
         function(err) {
-          throw err;
+          // should.not.exist(err);
+          done(err);
         });
     });
 
   });
 
   describe('Method downloadActivities', function() {
-    it('should return an error when strava.athlete.listActivities fails', function(done) {
+    it('should return an error when strava.athlete.listActivities fails', function() {
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(new Error('Stubbed athlete.listActivities error'));
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.exist(err);
-        (err.message).should.containEql('athlete.listActivities error');
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
+          should.exist(err);
+          (err.message).should.containEql('athlete.listActivities error');
+        });
     });
 
-    it('should return an error when strava.streams.activity fails', function(done) {
+    it('should return an error when strava.streams.activity fails', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
@@ -421,38 +427,46 @@ describe('strava-util Unit Tests:', function() {
         return callback(new Error('Stubbed streams.activity error'), null);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.exist(err);
-        (err.message).should.containEql('stravaUtil.getAverageWatts returned error');
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
+          should.exist(err);
+          (err.message).should.containEql('strava.streams.activity failed');
+        });
     });
 
-    it('should return an error when strava.athlete.listActivities returns payload.errors', function(done) {
+    it('should return an error when strava.athlete.listActivities returns payload.errors', function() {
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(null, { message: 'payload error message', errors: ['payload Error'] });
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.exist(err);
-        (err.message).should.containEql('payload error message');
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
+          should.exist(err);
+          (err.message).should.containEql('payload error message');
+        });
     });
 
-    it('should return appropriate statusMessage when strava.athlete.listActivities returns no activities', function(done) {
+    it('should return appropriate statusMessage when strava.athlete.listActivities returns no activities', function() {
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(null, []);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.not.exist(err);
-        (returnedTrainingDay.lastStatus.text).should.containEql('found no Strava activities for the day');
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.lastStatus.text).should.containEql('found no Strava activities for the day');
+        },
+        function(err) {
+          throw err;
+        });
     });
 
-    it('should return appropriate statusMessage when strava.athlete.listActivities activities exist but none for requested day', function(done) {
+    it('should return appropriate statusMessage when strava.athlete.listActivities activities exist but none for requested day', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
@@ -473,14 +487,16 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.not.exist(err);
-        (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
+        },
+        function(err) {
+          throw err;
+        });
     });
 
-    it('should return one completedActivity when strava.athlete.listActivities returns one activity for requested day', function(done) {
+    it('should return one completedActivity when strava.athlete.listActivities returns one activity for requested day', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
@@ -494,15 +510,17 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.not.exist(err);
-        (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
-        (returnedTrainingDay.completedActivities.length).should.equal(1);
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
+          (returnedTrainingDay.completedActivities.length).should.equal(1);
+        },
+        function(err) {
+          throw err;
+        });
     });
 
-    it('should return two completedActivities when strava.athlete.listActivities returns two activities for requested day', function(done) {
+    it('should return two completedActivities when strava.athlete.listActivities returns two activities for requested day', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
@@ -523,12 +541,14 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.not.exist(err);
-        (returnedTrainingDay.lastStatus.text).should.containEql('downloaded 2 new Strava activities');
-        (returnedTrainingDay.completedActivities.length).should.equal(2);
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.lastStatus.text).should.containEql('downloaded 2 new Strava activities');
+          (returnedTrainingDay.completedActivities.length).should.equal(2);
+        },
+        function(err) {
+          throw err;
+        });
     });
 
     it('should return appropriate statusMessage when strava.athlete.listActivities returns one activity for requested day but it has been downloaded previously', function(done) {
@@ -545,21 +565,26 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, firstReturnedTrainingDay) {
-        if (err) {
-          console.log('firstReturnedTrainingDay err: ', err);
-        }
-
-        stravaUtil.downloadActivities(user, firstReturnedTrainingDay, function(err, returnedTrainingDay) {
-          should.not.exist(err);
-          (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
-          (returnedTrainingDay.completedActivities.length).should.equal(1);
-          done();
+      stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(firstReturnedTrainingDay) {
+          return stravaUtil.downloadActivities(user, firstReturnedTrainingDay)
+            .then(function(returnedTrainingDay) {
+              (returnedTrainingDay.lastStatus.text).should.containEql('found no new Strava activities for the day');
+              (returnedTrainingDay.completedActivities.length).should.equal(1);
+              done();
+            },
+            function(err) {
+              // should.not.exist(err);
+              done(err);
+            });
+        },
+        function(err) {
+          // should.not.exist(err);
+          done(err);
         });
-      });
     });
 
-    it('should return correct load for completedActivity when strava.athlete.listActivities returns activity for requested day', function(done) {
+    it('should return correct load for completedActivity when strava.athlete.listActivities returns activity for requested day', function() {
       var activities = [{
           id: activityID,
           name: 'Lunch Ride',
@@ -576,13 +601,15 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      stravaUtil.downloadActivities(user, trainingDay, function(err, returnedTrainingDay) {
-        should.not.exist(err);
-        (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
-        (returnedTrainingDay.completedActivities.length).should.equal(1);
-        (returnedTrainingDay.completedActivities[0].load).should.equal(expectedLoad);
-        done();
-      });
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
+          (returnedTrainingDay.completedActivities.length).should.equal(1);
+          (returnedTrainingDay.completedActivities[0].load).should.equal(expectedLoad);
+        },
+        function(err) {
+          throw err;
+        });
     });
 
   });

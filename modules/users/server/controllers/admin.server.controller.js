@@ -2,9 +2,13 @@
 
 
 var path = require('path'),
-  mongoose = require('mongoose'),
-  User = mongoose.model('User'),
+  mongoose = require('mongoose');
+
+mongoose.Promise = global.Promise;
+
+var User = mongoose.model('User'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
+
 
 // Show the current user
 exports.read = function (req, res) {

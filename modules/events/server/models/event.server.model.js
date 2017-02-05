@@ -3,6 +3,8 @@
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
+mongoose.Promise = global.Promise;
+
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
 var statusValues = {

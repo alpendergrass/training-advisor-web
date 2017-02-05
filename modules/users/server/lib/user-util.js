@@ -3,13 +3,15 @@
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
-  mongoose = require('mongoose'),
-  TrainingDay = mongoose.model('TrainingDay'),
+  mongoose = require('mongoose');
+
+mongoose.Promise = global.Promise;
+
+var TrainingDay = mongoose.model('TrainingDay'),
   User = mongoose.model('User'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   err;
 
-mongoose.Promise = global.Promise;
 
 var removeOrphanedNotifications = function(notifications) {
   // Here we will remove any notifications that are associated with training days that no longer exist.

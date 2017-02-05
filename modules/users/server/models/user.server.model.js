@@ -10,6 +10,7 @@ var mongoose = require('mongoose'),
   generatePassword = require('generate-password'),
   owasp = require('owasp-password-strength-test');
 
+mongoose.Promise = global.Promise;
 
 // A Validation function for local strategy properties
 var validateLocalStrategyProperty = function (property) {

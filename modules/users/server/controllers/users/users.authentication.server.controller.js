@@ -7,8 +7,11 @@ var path = require('path'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   _ = require('lodash'),
   mongoose = require('mongoose'),
-  passport = require('passport'),
-  Site = mongoose.model('Site'),
+  passport = require('passport');
+
+mongoose.Promise = global.Promise;
+
+var Site = mongoose.model('Site'),
   User = mongoose.model('User');
 
 

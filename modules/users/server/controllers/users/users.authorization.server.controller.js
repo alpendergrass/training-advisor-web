@@ -2,8 +2,11 @@
 
 
 var _ = require('lodash'),
-  mongoose = require('mongoose'),
-  User = mongoose.model('User');
+  mongoose = require('mongoose');
+
+mongoose.Promise = global.Promise;
+
+var User = mongoose.model('User');
 
 
 /**

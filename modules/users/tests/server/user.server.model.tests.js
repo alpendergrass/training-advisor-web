@@ -1,8 +1,11 @@
 'use strict';
 
 var should = require('should'),
-  mongoose = require('mongoose'),
-  User = mongoose.model('User');
+  mongoose = require('mongoose');
+
+mongoose.Promise = global.Promise;
+
+var User = mongoose.model('User');
 
 var user1, user2, user3;
 
