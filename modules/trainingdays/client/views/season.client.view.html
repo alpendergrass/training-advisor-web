@@ -40,7 +40,7 @@
         <md-button ng-disabled="simMode || isWorking" class="color-tacit-red" ng-click="startSim()" aria-label="Start">
           What If?
         </md-button>
-        <md-button ng-disabled="!simConfigUnderway" ng-click="runSim()" aria-label="Run">
+        <md-button ng-disabled="!simConfigUnderway" ng-class="{'color-tacit-red' : simConfigUnderway}" ng-click="runSim()" aria-label="Run">
           Run
         </md-button>
         <md-button ng-disabled="!simHasRun" ng-click="commitSim()" aria-label="Commit">
@@ -61,12 +61,12 @@
     </div>
   </div>
 
-  <div class="modal fade" id="seasonHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal fade" id="seasonHelp" tabindex="-1" role="dialog" aria-labelledby="aboutMySeason">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" id="myModalLabel">Understanding My Season</h4>
+          <h4 class="modal-title" id="aboutMySeason">Understanding My Season</h4>
         </div>
         <div class="modal-body">
           <p><b>Click on the chart legend</b> to show and hide values. This can be helpful when viewing your season.</p>
@@ -91,12 +91,12 @@
     </div>
   </div>
 
-  <div class="modal fade" id="simHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal fade" id="simHelp" tabindex="-1" role="dialog" aria-labelledby="runningWhatIfSimulations">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" id="myModalLabel">Running "What-If" Simulations</h4>
+          <h4 class="modal-title" id="runningWhatIfSimulations">Running "What-If" Simulations</h4>
         </div>
         <div class="modal-body">
           <p><strong>The What-If Simulator allows you to see how your season would be affected by
