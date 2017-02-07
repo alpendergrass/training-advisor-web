@@ -22,6 +22,12 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
+      title: 'Sync Strava Activities',
+      state: 'trainingDays.syncActivities',
+      roles: ['user']
+    });
+
+    Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'Schedule Events',
       state: 'trainingDays.createEvent',
       roles: ['user']

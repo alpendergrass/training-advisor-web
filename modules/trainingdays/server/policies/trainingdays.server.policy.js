@@ -36,6 +36,9 @@ exports.invokeRolesPolicies = function () {
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',
       permissions: '*'
+    }, {
+      resources: '/api/trainingDays/downloadAllActivities/:todayNumeric',
+      permissions: '*'
     }]
   }, {
     roles: ['user'],
@@ -65,6 +68,9 @@ exports.invokeRolesPolicies = function () {
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/downloadActivities/:trainingDate',
+      permissions: ['get']
+    }, {
+      resources: '/api/trainingDays/downloadAllActivities/:todayNumeric',
       permissions: ['get']
     }]
   }]);

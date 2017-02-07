@@ -8,65 +8,67 @@ angular.module(ApplicationConfiguration.applicationModuleName).constant('_', win
 angular.module(ApplicationConfiguration.applicationModuleName).constant('moment', window.moment);
 
 // Setting HTML5 Location Mode
-angular.module(ApplicationConfiguration.applicationModuleName).config(['$locationProvider', '$httpProvider', 'toastrConfig',
-  function ($locationProvider, $httpProvider, toastrConfig) {
-    $locationProvider.html5Mode(true).hashPrefix('!');
+angular.module(ApplicationConfiguration.applicationModuleName)
+  .config(['$locationProvider', '$httpProvider', 'toastrConfig',
+    function($locationProvider, $httpProvider, toastrConfig) {
+      $locationProvider.html5Mode(true).hashPrefix('!');
 
-    $httpProvider.interceptors.push('authInterceptor');
+      $httpProvider.interceptors.push('authInterceptor');
 
-    angular.extend(toastrConfig, {
-      timeOut: 3000,
-    });
-  }
-]);
-
-angular.module(ApplicationConfiguration.applicationModuleName).run(function ($rootScope, $state, Authentication, editableOptions) {
-  editableOptions.theme = 'bs3';
-
-  // Check authentication before changing state
-  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
-    if (toState.data && toState.data.roles && toState.data.roles.length > 0) {
-      var allowed = false;
-      toState.data.roles.forEach(function (role) {
-        if (Authentication.user.roles !== undefined && Authentication.user.roles.indexOf(role) !== -1) {
-          allowed = true;
-          return true;
-        }
+      angular.extend(toastrConfig, {
+        timeOut: 3000,
       });
+    }
+  ]);
 
-      if (!allowed) {
-        event.preventDefault();
-        if (Authentication.user !== undefined && typeof Authentication.user === 'object') {
-          $state.go('forbidden');
-        } else {
-          $state.go('authentication.signin').then(function () {
-            storePreviousState(toState, toParams);
-          });
+angular.module(ApplicationConfiguration.applicationModuleName)
+  .run(function($rootScope, $state, Authentication, editableOptions) {
+    editableOptions.theme = 'bs3';
+
+    // Check authentication before changing state
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+      if (toState.data && toState.data.roles && toState.data.roles.length > 0) {
+        var allowed = false;
+        toState.data.roles.forEach(function(role) {
+          if (Authentication.user.roles !== undefined && Authentication.user.roles.indexOf(role) !== -1) {
+            allowed = true;
+            return true;
+          }
+        });
+
+        if (!allowed) {
+          event.preventDefault();
+          if (Authentication.user !== undefined && typeof Authentication.user === 'object') {
+            $state.go('forbidden');
+          } else {
+            $state.go('authentication.signin').then(function() {
+              storePreviousState(toState, toParams);
+            });
+          }
         }
+      }
+    });
+
+    // Record previous state
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+      storePreviousState(fromState, fromParams);
+    });
+
+    // Store previous state
+    function storePreviousState(state, params) {
+      // only store this state if it shouldn't be ignored
+      if (!state.data || !state.data.ignoreState) {
+        $state.previous = {
+          state: state,
+          params: params,
+          href: $state.href(state, params)
+        };
       }
     }
   });
 
-  // Record previous state
-  $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
-    storePreviousState(fromState, fromParams);
-  });
-
-  // Store previous state
-  function storePreviousState(state, params) {
-    // only store this state if it shouldn't be ignored
-    if (!state.data || !state.data.ignoreState) {
-      $state.previous = {
-        state: state,
-        params: params,
-        href: $state.href(state, params)
-      };
-    }
-  }
-});
-
 //Then define the init function for starting up the application
-angular.element(document).ready(function () {
+angular.element(document).ready(function() {
   //Fixing facebook bug with redirect
   if (window.location.hash && window.location.hash === '#_=_') {
     if (window.history && history.pushState) {

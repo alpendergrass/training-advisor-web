@@ -20,7 +20,6 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
     // We compute weightedAverageWatts rather than use Strava's as I find it gets us closer to the others.
     // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter
     // so we will use their estimated power to compute weightedAverageWatts.
-
     let activityTypes;
 
     if (stravaActivity.device_watts) {
@@ -99,7 +98,7 @@ var processActivity = function(stravaActivity, trainingDay) {
     let newActivity = {};
 
     if (!trainingDay.user.thresholdPower) {
-      reject(new Error(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
+      return reject(new Error(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
     }
 
     if (!stravaActivity.id) {
@@ -110,6 +109,7 @@ var processActivity = function(stravaActivity, trainingDay) {
 
     if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
       // We have already processed this stravaActivity.
+      console.log('We have already processed this stravaActivity.: ', stravaActivity.id.toString());
       return resolve();
     }
 
@@ -117,7 +117,7 @@ var processActivity = function(stravaActivity, trainingDay) {
       .then(function(weightedAverageWatts) {
         if (!weightedAverageWatts && !stravaActivity.suffer_score) {
           console.log(`stravaUtil.getAverageWatts returned no watttage for user: ${trainingDay.user.username} and suffer_score is not provided, payload: ${JSON.stringify(stravaActivity)}`);
-          return resolve(false);
+          return resolve();
         }
 
         if ((!weightedAverageWatts || (!stravaActivity.device_watts && trainingDay.user.favorSufferScoreOverEstimatedPower)) && stravaActivity.suffer_score) {
@@ -212,6 +212,8 @@ module.exports.downloadActivities = function(user, trainingDay) {
       },
       params = {};
 
+    console.log('Strava: Initiating downloadActivities for TacitTraining user: ', user.username);
+
     // Retrieve activities from strava.
     // By default only first 30 activities will be returned.
     strava.athlete.listActivities({ 'access_token': getAccessToken(user), 'after': searchDate }, function(err, payload) {
@@ -250,7 +252,7 @@ module.exports.downloadActivities = function(user, trainingDay) {
       }))
         .then(function(results) {
           if (activityCount < 1) {
-            statusMessage.text = 'We found no new Strava activities for the day. Note that activities without power data are not downloaded.';
+            statusMessage.text = 'We found no new Strava activities for the day.';
             statusMessage.type = 'info';
             trainingDay.lastStatus = statusMessage;
             return trainingDay;
@@ -295,9 +297,10 @@ module.exports.downloadAllActivities = function(user, startDateNumeric) {
       statusMessage = {
         type: '',
         text: '',
-        title: 'Strava Download',
+        title: 'Strava Sync',
         created: Date.now(),
-        username: user.username
+        username: user.username,
+        activityCount: 0
       },
       params = {};
 
@@ -308,52 +311,59 @@ module.exports.downloadAllActivities = function(user, startDateNumeric) {
     strava.athlete.listActivities({ 'access_token': getAccessToken(user), 'after': searchDate, 'per_page': 200 }, function(err, payload) {
       if (err) {
         let errorMsg = `downloadAllActivities - strava.athlete.listActivities failed for user: ${user.username}, error: ${err}`;
-        console.log(errorMsg);
         return reject(new Error(errorMsg));
       }
 
       if (payload.errors) {
         let errorMsg = `downloadAllActivities - strava.athlete.listActivities returned errors for user: ${user.username}, payload.message: ${payload.message}, payload: ${JSON.stringify(payload)}`;
-        console.log(errorMsg);
         return reject(new Error(errorMsg));
       }
 
-      console.log('Strava downloadAllActivities: activities returned: ' + payload.length);
+      // console.log('Strava downloadAllActivities: activities returned: ' + payload.length);
 
       if (payload.length < 1) {
-        return resolve(0);
+        statusMessage.text = 'No Strava activities were returned.';
+        statusMessage.type = 'info';
+        return resolve(statusMessage);
       }
 
-      return Promise.all(payload.map(function(stravaActivity) {
-        // Do I need to be worried about concurrency here? What if I need to process two activities for the same day?
-        // Might one step on the other when I save?
+      // We are using reduce function here to process each activity sequentially.
+      // Using Promise.all we had trainingDay save collisions.
+      payload.reduce(function(promise, stravaActivity) {
+        return promise.then(function() {
+          // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
+          let numericDate = util.toNumericDate(stravaActivity.start_date_local);
+          return dbUtil.getTrainingDayDocument(user, numericDate)
+            .then(function(trainingDay) {
+              return processActivity(stravaActivity, trainingDay);
+            })
+            .then(function(processedTrainingDay) {
+              if (processedTrainingDay) {
+                // console.log('===> Strava: We found a keeper for user ', user.username);
+                activityCount++;
+                return processedTrainingDay.save();
+              }
 
-        // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
-        let numericDate = util.toNumericDate(stravaActivity.start_date_local);
+              return Promise.resolve();
+            })
+            .then(function(savedTrainingDay) {
+              if (savedTrainingDay) {
+                if (savedTrainingDay.dateNumeric < startDateNumeric) {
+                  return Promise.resolve(savedTrainingDay);
+                }
 
-        dbUtil.getTrainingDayDocument(user, numericDate)
-          .then(function(trainingDay) {
-            return processActivity(stravaActivity, trainingDay);
-          })
-          .then(function(processedTrainingDay) {
-            if (processedTrainingDay) {
-              console.log('===> Strava: We found a keeper for user ', user.username);
-              activityCount++;
-              return processedTrainingDay.save();
-            }
+                return adviceEngine.refreshAdvice(user, savedTrainingDay);
+              }
 
-            return Promise.resolve(true);
-          })
-          .catch(function(err) {
-            let errorMsg = `downloadAllActivities trainingDay.save failed for user: ${user.username}, error: ${err}`;
-            console.log('errorMsg: ', errorMsg);
-            throw (errorMsg);
-          });
-      }))
+              return Promise.resolve();
+            });
+        });
+      }, Promise.resolve())
         .then(function(results) {
+          statusMessage.activityCount = activityCount;
+
           if (activityCount < 1) {
-            console.log('No new Strava activities.');
-            statusMessage.text = 'We found no new Strava activities. Note that activities without power data are not downloaded.';
+            statusMessage.text = 'We found no new Strava activities.';
             statusMessage.type = 'info';
             return resolve(statusMessage);
           }
@@ -367,22 +377,6 @@ module.exports.downloadAllActivities = function(user, startDateNumeric) {
           statusMessage.text = 'We downloaded ' + countPhrase + '.';
           statusMessage.type = 'success';
           return resolve(statusMessage);
-
-          //refreshAdvice as completedActivities likely has changed.
-          // adviceEngine.refreshAdvice(user, trainingDay)
-          //   .then(function(updatedTrainingDay) {
-          //     statusMessage.text = 'We downloaded ' + countPhrase + '.';
-          //     statusMessage.type = 'success';
-          //     updatedTrainingDay.lastStatus = statusMessage;
-          //     return callback(null, updatedTrainingDay);
-          //   })
-          //   .catch(function(err) {
-          //     console.log('Strava: downloadActivities refreshAdvice err: ', err);
-          //     statusMessage.text = 'We downloaded ' + countPhrase + ' but encountered an error when we tried to update your training advice.';
-          //     statusMessage.type = 'warning';
-          //     trainingDay.lastStatus = statusMessage;
-          //     return callback(null, trainingDay);
-          //   });
         })
         .catch(function(err) {
           return reject(err);

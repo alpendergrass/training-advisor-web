@@ -37,6 +37,9 @@ module.exports = function (app) {
   app.route('/api/trainingDays/downloadActivities/:trainingDayId').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.downloadActivities);
 
+  app.route('/api/trainingDays/downloadAllActivities/:todayNumeric').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.downloadAllActivities);
+
   // Finish by binding the trainingDay middleware
   app.param('trainingDayId', trainingDays.trainingDayByID);
 };

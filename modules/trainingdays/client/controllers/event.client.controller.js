@@ -140,11 +140,10 @@ angular.module('trainingDays')
         modalInstance.result.then(function(recurrenceSpec) {
           $scope.recurrenceSpec = recurrenceSpec;
         }, function() {
-          //User cancelled out of dialog.
+          //User canceled out of dialog.
           $scope.recurs = false;
           $scope.recurrenceSpec = null;
-        }).finally(function() {
-        });
+        }).finally(function() {});
       };
 
       $scope.createEvent = function(isValid) {

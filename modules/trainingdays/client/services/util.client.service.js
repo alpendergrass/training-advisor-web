@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('trainingDays').service('Util', ['_', 'moment',
-  function (_, moment) {
+  function(_, moment) {
     var getMetrics = function(trainingDay, metricsType) {
       return _.find(trainingDay.metrics, ['metricsType', metricsType]);
     };
@@ -11,30 +11,28 @@ angular.module('trainingDays').service('Util', ['_', 'moment',
     };
 
     var mapActivityTypeToVerbiage = function(activityType) {
-      var activityTypeVerbiageLookups = [
-        {
-          activityType: 'choice',
-          phrase: 'Choice Day'
-        }, {
-          activityType: 'rest',
-          phrase: 'Rest Day'
-        }, {
-          activityType: 'easy',
-          phrase: 'Low Load Day'
-        }, {
-          activityType: 'moderate',
-          phrase: 'Moderate Load Day'
-        }, {
-          activityType: 'hard',
-          phrase: 'High Load Day'
-        }, {
-          activityType: 'test',
-          phrase: 'Power Testing Day'
-        }, {
-          activityType: 'event',
-          phrase: 'Event'
-        }
-      ];
+      var activityTypeVerbiageLookups = [{
+        activityType: 'choice',
+        phrase: 'Choice Day'
+      }, {
+        activityType: 'rest',
+        phrase: 'Rest Day'
+      }, {
+        activityType: 'easy',
+        phrase: 'Low Load Day'
+      }, {
+        activityType: 'moderate',
+        phrase: 'Moderate Load Day'
+      }, {
+        activityType: 'hard',
+        phrase: 'High Load Day'
+      }, {
+        activityType: 'test',
+        phrase: 'Power Testing Day'
+      }, {
+        activityType: 'event',
+        phrase: 'Event'
+      }];
 
       return _.find(activityTypeVerbiageLookups, { 'activityType': activityType }).phrase;
     };

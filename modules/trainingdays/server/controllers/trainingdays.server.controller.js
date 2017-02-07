@@ -709,6 +709,46 @@ exports.downloadActivities = function(req, res) {
   // }
 };
 
+exports.downloadAllActivities = function(req, res) {
+  let pageData = null;
+  let eventData = { category: 'Training Day', action: 'Download All Activities', path: '/api/trainingDays/downloadAllActivities' };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
+  let user = req.user;
+  let numericToday = parseInt(req.params.todayNumeric, 10);
+  let errorMessage = {
+    type: 'error',
+    text: 'We encountered an error retrieving Strava activities.',
+    title: 'Strava Sync',
+    created: Date.now(),
+    username: user.username,
+    activityCount: 0
+  };
+
+  // TODO: We should also use true-up days as start.
+  dbUtil.getStartDay(user, numericToday, function(err, startDay) {
+    if (err) {
+      console.log('Strava downloadAllActivities err: ', err);
+      return res.json(errorMessage);
+    }
+
+    if (startDay) {
+      // TODO: we don't want to go back more than ???
+      //
+      stravaUtil.downloadAllActivities(req.user, startDay.dateNumeric)
+        .then(function(response) {
+        })
+        .catch(function(err) {
+          console.log('Strava downloadAllActivities err: ', err);
+          return res.json(errorMessage);
+        });
+    } else {
+
+    }
+  });
+};
+
 //TrainingDay middleware
 exports.trainingDayByID = function(req, res, next, id) {
 
