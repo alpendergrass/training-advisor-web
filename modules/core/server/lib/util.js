@@ -25,14 +25,14 @@ module.exports.logAnalytics = function(req, pageData, eventData, user) {
         pageData.title = _.startCase(req.headers.referer.replace(/^\w+\:{1}\/{2}[\w.:]+\/?\w*\/{1}/, ''));
       }
 
-      visitor.pageview({ dp: pageData.path, dt: pageData.title, dh: req.app.locals.googleAnalyticsHost, userId: userId }).send();
+      visitor.pageview({ dp: pageData.path, dt: pageData.title, dh: req.app.locals.googleAnalyticsHost, uid: userId }).send();
     }
 
     if (eventData) {
       let eventParms = {
         ec: eventData.category,
         ea: eventData.action,
-        userId: userId,
+        uid: userId,
         el: eventData.label || null,
         ev: eventData.value || null,
         // I do not see where event path shows up in GA.
