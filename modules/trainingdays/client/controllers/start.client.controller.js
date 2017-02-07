@@ -20,7 +20,7 @@ angular.module('trainingDays')
         opened: false
       };
 
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(6, 'months').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(4, 'months').startOf('day').toDate();
       var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
 
       $scope.startDate = moment().subtract(1, 'day').startOf('day').toDate();
@@ -73,7 +73,7 @@ angular.module('trainingDays')
             } else {
               toastr.success('Your season start day has been created.', 'Start Saved');
             }
-            $state.go('season');
+            $state.go('trainingDays.syncActivities');
           }
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {

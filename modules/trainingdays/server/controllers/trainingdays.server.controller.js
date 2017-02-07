@@ -710,6 +710,7 @@ exports.downloadActivities = function(req, res) {
 };
 
 exports.downloadAllActivities = function(req, res) {
+console.log('controller.downloadAllActivities: ');
   let pageData = null;
   let eventData = { category: 'Training Day', action: 'Download All Activities', path: '/api/trainingDays/downloadAllActivities' };
 
@@ -734,17 +735,33 @@ exports.downloadAllActivities = function(req, res) {
     }
 
     if (startDay) {
-      // TODO: we don't want to go back more than ???
-      //
-      stravaUtil.downloadAllActivities(req.user, startDay.dateNumeric)
+      let numericLimitDate = util.toNumericDate(moment().subtract(4, 'months'));
+      if (numericLimitDate < startDay.dateNumeric) {
+        numericLimitDate = startDay.dateNumeric;
+      }
+
+      stravaUtil.downloadAllActivities(req.user, numericLimitDate)
         .then(function(response) {
+          let syncResponse = response;
+
+          if (syncResponse.activityCount > 0) {
+            let notifications = [];
+            notifications.push({ notificationType: 'plangen', lookup: '', add: true });
+
+            userUtil.updateNotifications(user, notifications, true)
+              .then(function(response) {})
+              .catch(function(err) {});
+          }
+          // No need to wait for updateNotifications as we are not returning user.
+          return res.json(syncResponse);
         })
         .catch(function(err) {
           console.log('Strava downloadAllActivities err: ', err);
           return res.json(errorMessage);
         });
     } else {
-
+      errorMessage.text = 'A start day is required in order to sync with Strava.';
+      return res.json(errorMessage);
     }
   });
 };

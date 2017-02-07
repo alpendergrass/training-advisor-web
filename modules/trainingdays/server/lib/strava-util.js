@@ -4,6 +4,7 @@ var path = require('path'),
   _ = require('lodash'),
   moment = require('moment-timezone'),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
+  adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   util = require('./util'),
   dbUtil = require('./db-util'),
@@ -97,20 +98,23 @@ var processActivity = function(stravaActivity, trainingDay) {
   return new Promise(function(resolve, reject) {
     let newActivity = {};
 
-    if (!trainingDay.user.thresholdPower) {
-      return reject(new Error(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
-    }
-
     if (!stravaActivity.id) {
       // Not sure why but I added this check at some point.
       console.log(`No ID for this stravaActivity: ${JSON.stringify(stravaActivity)}`);
       return resolve();
     }
 
+    if (stravaActivity.type !== 'Ride' && stravaActivity.type !== 'VirtualRide') {
+      return resolve();
+    }
+
     if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
       // We have already processed this stravaActivity.
-      console.log('We have already processed this stravaActivity.: ', stravaActivity.id.toString());
       return resolve();
+    }
+
+    if (!trainingDay.user.thresholdPower) {
+      return reject(new Error(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
     }
 
     getWeightedAverageWatts(trainingDay.user, stravaActivity)
@@ -349,9 +353,11 @@ module.exports.downloadAllActivities = function(user, startDateNumeric) {
             .then(function(savedTrainingDay) {
               if (savedTrainingDay) {
                 if (savedTrainingDay.dateNumeric < startDateNumeric) {
+                  // It's possible we got activities for the day prior to our start data - timezone caution.
                   return Promise.resolve(savedTrainingDay);
                 }
 
+                // RefreshAdvice to ensure metrics are up to date thru tomorrow.
                 return adviceEngine.refreshAdvice(user, savedTrainingDay);
               }
 
