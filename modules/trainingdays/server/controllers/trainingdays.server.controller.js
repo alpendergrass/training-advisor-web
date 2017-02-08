@@ -710,7 +710,6 @@ exports.downloadActivities = function(req, res) {
 };
 
 exports.downloadAllActivities = function(req, res) {
-console.log('controller.downloadAllActivities: ');
   let pageData = null;
   let eventData = { category: 'Training Day', action: 'Download All Activities', path: '/api/trainingDays/downloadAllActivities' };
 

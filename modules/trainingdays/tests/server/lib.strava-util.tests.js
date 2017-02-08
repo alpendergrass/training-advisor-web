@@ -150,6 +150,7 @@ describe('strava-util Unit Tests:', function() {
     activity = {
       id: activityID,
       name: 'Lunch Ride',
+      type: 'Ride',
       start_date_local: moment.utc(workoutDate).format(),
       weighted_average_watts: 189,
       device_watts: true,
@@ -358,6 +359,22 @@ describe('strava-util Unit Tests:', function() {
         });
     });
 
+    it('should resolve with no trainingDay when activity is not a ride ', function() {
+      activity.type = 'Run';
+
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, noWattagePayload);
+      };
+
+      return stravaUtil.fetchActivity(user, activityID)
+        .then(function(td) {
+          should.not.exist(td);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
     it('should resolve when activity has suffer score but no watts ', function() {
       activity.weighted_average_watts = null;
       activity.device_watts = false;
@@ -421,6 +438,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'VirtualRide',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -478,6 +496,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'VirtualRide',
         start_date_local: moment.utc(workoutDate).subtract(1, 'day').format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -485,6 +504,7 @@ describe('strava-util Unit Tests:', function() {
       }, {
         id: 752757129,
         name: 'Lunch Ride',
+        type: 'VirtualRide',
         start_date_local: moment.utc(workoutDate).add(1, 'day').format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -508,6 +528,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -532,6 +553,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -539,6 +561,7 @@ describe('strava-util Unit Tests:', function() {
       }, {
         id: 752757128,
         name: 'Dinner Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).add(1, 'second').format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -563,6 +586,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -596,6 +620,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
           id: activityID,
           name: 'Lunch Ride',
+          type: 'Ride',
           start_date_local: moment.utc(workoutDate).format(),
           weighted_average_watts: 189,
           device_watts: true,
@@ -642,6 +667,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -688,7 +714,7 @@ describe('strava-util Unit Tests:', function() {
 
       return stravaUtil.downloadAllActivities(user, startDateNumeric)
         .then(function(statusMessage) {
-          (statusMessage.text).should.containEql('found no missing Strava activities');
+          (statusMessage.text).should.containEql('No Strava activities were returned');
         },
         function(err) {
           throw err;
@@ -699,6 +725,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).subtract(1, 'day').format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -706,6 +733,7 @@ describe('strava-util Unit Tests:', function() {
       }, {
         id: 752757129,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).add(1, 'day').format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -729,6 +757,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -752,6 +781,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -759,6 +789,7 @@ describe('strava-util Unit Tests:', function() {
       }, {
         id: 752757128,
         name: 'Dinner Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).add(1, 'second').format(),
         weighted_average_watts: 189,
         device_watts: true,
@@ -782,6 +813,7 @@ describe('strava-util Unit Tests:', function() {
       var activities = [{
         id: activityID,
         name: 'Lunch Ride',
+        type: 'Ride',
         start_date_local: moment.utc(workoutDate).format(),
         weighted_average_watts: 189,
         device_watts: true,
