@@ -42,7 +42,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Core
         function(errorResponse) {
           console.log('Core.getAppVersion errorResponse: ', errorResponse);
         });
-    }, (1000 * 60 * 60) * 6); // every 6 hours
+    }, (1000 * 60 * 60) * 4); // every 4 hours
 
     // Collapsing the menu after navigation
     $scope.$on('$stateChangeSuccess', function () {
