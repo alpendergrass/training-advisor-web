@@ -33,13 +33,6 @@ angular.module('trainingDays')
         maxDate: maxStartDate
       };
 
-      $scope.trueUpDateOptions = {
-        formatYear: 'yy',
-        startingDay: 1,
-        showWeeks: false,
-        maxDate: maxStartDate
-      };
-
       $scope.openDatePicker = function($event) {
         $scope.datePickerStatus.opened = true;
       };

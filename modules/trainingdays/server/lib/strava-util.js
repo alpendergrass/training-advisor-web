@@ -19,17 +19,20 @@ var getAccessToken = function(user) {
 var getWeightedAverageWatts = function(user, stravaActivity) {
   return new Promise(function(resolve, reject) {
     // We compute weightedAverageWatts rather than use Strava's as I find it gets us closer to the others.
-    // If stravaActivity.weighted_average_watts is undefined then this is a ride without a power meter
-    // so we will use their estimated power to compute weightedAverageWatts.
+    // 2/8/17: Strava's weighted_average_watts is a lot closer to my computations (and others) than they
+    // used to be, beginning 12/10/16 or thereabouts. They must have made a change to their calculations.
+    // TODO: consider using stravaActivity.weighted_average_watts if we have power meter wattage if performance becomes an issue.
+
     let activityTypes;
 
+    // If not stravaActivity.device_watts then this is a ride without a power meter
+    // so we will use their estimated power to compute weightedAverageWatts.
     if (stravaActivity.device_watts) {
       activityTypes = 'time,watts';
     } else {
       activityTypes = 'time,watts_calc';
     }
-    // average_watts is based on estimated wattage if weighted_average_watts is not present.
-    // Need to get stream and compute weighted_average_watts.
+
     strava.streams.activity({ 'access_token': getAccessToken(user), 'id': stravaActivity.id, 'types': activityTypes }, function(err, payload) {
       if (err) {
         return reject(new Error(`strava.streams.activity failed. username: ${user.username}, stravaActivity: ${stravaActivity}, err: ${err}`));

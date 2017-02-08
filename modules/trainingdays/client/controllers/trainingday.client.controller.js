@@ -294,7 +294,10 @@ angular.module('trainingDays')
       };
 
       $scope.checkGiveFeedback = function(trainingDay) {
-        if (trainingDay.completedActivities.length > 0 && Util.getMetrics(trainingDay, 'actual').loadRating === 'hard' && trainingDay.trainingEffortFeedback === null) {
+        if (moment(trainingDay.dateNumeric.toString()).isAfter(moment().subtract(4, 'days')) &&
+          trainingDay.completedActivities.length > 0 &&
+          Util.getMetrics(trainingDay, 'actual').loadRating === 'hard' &&
+          trainingDay.trainingEffortFeedback === null) {
           $scope.openGiveFeedback(trainingDay);
         }
       };
