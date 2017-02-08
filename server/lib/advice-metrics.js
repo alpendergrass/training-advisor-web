@@ -130,13 +130,12 @@ function updateMetricsForDay(params, callback) {
       //TODO: return prior day metrics here instead of TD?
       var priorDayMetrics;
 
-      if (params.trainingDay.startingPoint || params.trainingDay.fitnessAndFatigueTrueUp) {
-        //Special cases:
-        //1. If called with the first trainingDay of the training period, no point in looking for prior day.
-        //2. User has done a F&F trueup: she has manually entered these values and we do not want to recompute them.
-        //We will return null for prior day and check for null prior day below.
+      if (params.trainingDay.startingPoint) {
+        // Special cases:
+        // If called with the first trainingDay of the training period, no point in looking for prior day.
+        // We will return null for prior day and check for null prior day below.
         if (params.metrics.fitness === 0 && params.metrics.fatigue === 0) {
-          err = new RangeError('Starting day or F&F true-up day should not have fitness and fatigue equal to zero.');
+          err = new RangeError('Starting day should not have fitness and fatigue equal to zero.');
           return callback(err, null);
         }
 
@@ -191,7 +190,7 @@ function updateMetricsForDay(params, callback) {
       fatigueTimeConstant = params.user.fatigueTimeConstant || adviceConstants.defaultFatigueTimeConstant;
 
       //Compute fitness and fatigue for current trainingDay.
-      //If priorDayMetrics does not exist, params.trainingDay is our starting day or is a F&F trueup and
+      //If priorDayMetrics does not exist, params.trainingDay is our starting day and
       //fitness and fatigue would have been supplied by the user.
       if (results.priorDayMetrics) {
         params.metrics.fitness = Math.round((results.priorDayMetrics.fitness + ((currentTrainingDayTotalLoad - results.priorDayMetrics.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
