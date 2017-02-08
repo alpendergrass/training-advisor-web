@@ -98,8 +98,8 @@ angular.module('core').controller('FAQController',
         question: 'My private activities in Strava are not showing up. How do I fix this?',
         answer: 'You need to log out and then log back into Tacit Training. When you log in Strava should ask you to authorize access of private events as part of the authorization process.'
       }, {
-        question: 'I have not input my rides into Tacit Training for a day/week/month or two but I want to start using it again. Do I have to input all the workouts I’ve done since the last time I used it?',
-        answer: 'No. You need to do a Fitness and Fatigue True-Up - see the Training Days menu.'
+        question: 'I am missing some Strava rides. What should I do?',
+        answer: 'Go to Sync Strava Activities on the Training Days menu. This will import any missing rides.'
       }, {
         question: 'I do not have a power meter on my mountain/cross/whatever bike. Can I still use Tacit Training?',
         answer: 'Yes you can. Strava provides estimated power for rides without power meter data using weight and elevations (<a href="https://support.strava.com/hc/en-us/articles/216919427-How-to-Get-Calculated-Power-for-Your-Rides" target="_blank">see here for how they do it</a>) and we use these estimates when actual power data is not available. If Strava does not provide either actual or estimated power, your ride will not be imported into Tacit Training. In this case you can manually enter a ride and provide an estimated Training Load. Use similar rides for which you have data as a guide for estimating.'

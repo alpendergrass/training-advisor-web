@@ -6,7 +6,6 @@
       </md-button>
       {{trainingDay.date | date:'EEEE, MMM d, y'}} - <a href="#" editable-textarea="trainingDay.name" e-rows="1" e-cols="26" onbeforesave="update()"><small ng-hide="trainingDay.name" class="text-default">training day name</small><span ng-show="trainingDay.name">{{trainingDay.name}}</span></a>
       <small class="text-danger" ng-show="trainingDay.startingPoint">This is your season start</small>
-      <small class="text-danger" ng-show="trainingDay.fitnessAndFatigueTrueUp && !trainingDay.startingPoint">This is a Fitness and Fatigue True Up Day</small>
       <md-button class='md-icon-button pull-right' ng-click='getDay(nextDay)' aria-label='Previous day'>
         <md-icon md-svg-src="/modules/trainingdays/client/img/svg/chevron-right.svg"></md-icon>
       </md-button>
@@ -191,7 +190,7 @@
           <th>Actual</th>
           <td>{{ actualMetrics.fitness }}</td>
           <td>{{ actualMetrics.fatigue }}</td>
-          <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.fitnessAndFatigueTrueUp || trainingDay.startingPoint" class="text-info small" title="Today is season start or true-up day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start or true-up day, the current day's Fitness and Fatigue are used.">approximate</abbr>
+          <td>{{ actualMetrics.form }} <abbr ng-show="trainingDay.startingPoint" class="text-info small" title="Today is season start day. Form is usually calculated from the previous day's Fitness and Fatigue. On a start day, the current day's Fitness and Fatigue are used.">approximate</abbr>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayTargetRampRate }}</td>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayRampRate }}</td>
           <td ng-show="authentication.user.levelOfDetail > 2">{{ actualMetrics.sevenDayAverageRampRate }}</td>

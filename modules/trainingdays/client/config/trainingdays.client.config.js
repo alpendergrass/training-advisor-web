@@ -40,12 +40,6 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'True-Up Fitness & Fatigue',
-      state: 'trainingDays.trueUp',
-      roles: ['user']
-    });
-
-    Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'My Calendar',
       state: 'trainingDays.calendar',
       roles: ['user']

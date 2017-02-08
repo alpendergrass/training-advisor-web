@@ -169,7 +169,6 @@ module.exports.getStartDay = function(user, numericSearchDate, callback) {
     user: user,
     startingPoint: true,
     dateNumeric: { $lte: numericSearchDate },
-    // date: { $lte: trainingDate },
     cloneOfId: null
   };
 
@@ -350,7 +349,6 @@ module.exports.clearFutureMetricsAndAdvice = function(params, callback) {
     TrainingDay.update({
       user: params.user,
       dateNumeric: { $gte: params.numericDate },
-      fitnessAndFatigueTrueUp: false,
       startingPoint: false,
       cloneOfId: null,
       'metrics.metricsType': params.metricsType,

@@ -29,7 +29,7 @@ function getTrainingDay(id, callback) {
 }
 
 function createTrainingDay(req, callback) {
-  //This function is used to create start days, true-up days and events.
+  //This function is used to create start days and events.
   //It is possible that a document already exists for this day so we must treat this as an update.
   let numericDate = parseInt(req.body.dateNumeric, 10);
 
@@ -37,28 +37,25 @@ function createTrainingDay(req, callback) {
     .then(function(trainingDay) {
       let actualMetrics = util.getMetrics(trainingDay, 'actual');
 
-      if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+      if (req.body.startingPoint) {
         //Preserve existing name, if any.
         if (typeof req.body.name !== 'undefined') {
           trainingDay.name = trainingDay.name ? trainingDay.name + ', ' + req.body.name : req.body.name;
         }
 
         trainingDay.startingPoint = req.body.startingPoint;
-        trainingDay.fitnessAndFatigueTrueUp = req.body.fitnessAndFatigueTrueUp;
         actualMetrics.fitness = req.body.actualFitness;
         actualMetrics.fatigue = req.body.actualFatigue;
-        // Normally form is calculated using the preceding day's fitness and fatigue but for a start day
-        // we do not have prior day and for a true-up day we treat as a new start.
+        // Normally form is calculated using the preceding day's fitness and fatigue
+        // but for a start day we do not have prior day.
         actualMetrics.form = Math.round((req.body.actualFitness - req.body.actualFatigue) * 100) / 100;
 
-        if (req.body.startingPoint) {
-          // Planning metrics should not be affected by a true-up. I think.
-          let plannedMetrics = util.getMetrics(trainingDay, 'planned');
-          plannedMetrics.fitness = req.body.actualFitness;
-          plannedMetrics.fatigue = req.body.actualFatigue;
-          plannedMetrics.form = actualMetrics.form;
-        }
+        let plannedMetrics = util.getMetrics(trainingDay, 'planned');
+        plannedMetrics.fitness = req.body.actualFitness;
+        plannedMetrics.fatigue = req.body.actualFatigue;
+        plannedMetrics.form = actualMetrics.form;
       } else if (req.body.scheduledEventRanking) {
+        // If not an event we should not be here but just to be safe...
         trainingDay.name = req.body.name;
         trainingDay.scheduledEventRanking = Math.round(req.body.scheduledEventRanking); //This will do a string to number conversion.
         trainingDay.estimatedLoad = req.body.estimatedLoad;
@@ -86,7 +83,7 @@ function createTrainingDay(req, callback) {
           return callback(err, null);
         }
 
-        if (req.body.startingPoint || req.body.fitnessAndFatigueTrueUp) {
+        if (req.body.startingPoint) {
           adviceEngine.refreshAdvice(req.user, trainingDay)
             .then(function(trainingDay) {
               if (req.body.startingPoint) {
@@ -197,9 +194,6 @@ exports.create = function(req, res) {
   if (req.body.startingPoint) {
     pageData.title = 'Create Start';
     eventData.label = 'Start';
-  } else if (req.body.fitnessAndFatigueTrueUp) {
-    pageData.title = 'True-Up Fitness and Fatigue';
-    eventData.label = 'True-Up';
   } else if (req.body.scheduledEventRanking) {
     pageData.title = 'Schedule Event';
     switch (req.body.scheduledEventRanking) {
@@ -266,7 +260,7 @@ exports.create = function(req, res) {
 
       let today = util.getTodayInUserTimezone(user);
 
-      if (moment(trainingDay.date).isAfter(today) || req.body.fitnessAndFatigueTrueUp || req.body.startingPoint) {
+      if (moment(trainingDay.date).isAfter(today) || req.body.startingPoint) {
         notifications.push({ notificationType: 'plangen', lookup: '', add: true });
       }
 
@@ -726,7 +720,6 @@ exports.downloadAllActivities = function(req, res) {
     activityCount: 0
   };
 
-  // TODO: We should also use true-up days as start.
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
       console.log('Strava downloadAllActivities err: ', err);

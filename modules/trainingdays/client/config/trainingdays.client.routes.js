@@ -112,13 +112,6 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
           roles: ['user', 'admin']
         }
       })
-      .state('trainingDays.trueUp', {
-        url: '/trueUp',
-        templateUrl: 'modules/trainingDays/client/views/true-up.client.view.html',
-        data: {
-          roles: ['user', 'admin']
-        }
-      })
       .state('trainingDays.createEvent', {
         url: '/createEvent',
         params: {
@@ -148,7 +141,6 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
             TrainingDays.downloadAllActivities({
               todayNumeric: Util.toNumericDate(moment())
             }, function(response) {
-              console.log('response: ', response);
               toastr[response.type](response.text, response.title);
               $uibModalInstance.close(response);
             }, function(errorResponse) {

@@ -84,11 +84,6 @@ var TrainingDaySchema = new Schema({
     type: Boolean,
     default: false
   },
-  //We set this flag to suppress recomputation if the user manually updates F&F.
-  fitnessAndFatigueTrueUp: {
-    type: Boolean,
-    default: false
-  },
   name: {
     type: String,
     default: '',

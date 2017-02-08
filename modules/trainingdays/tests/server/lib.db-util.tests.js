@@ -681,31 +681,6 @@ describe('db-util Unit Tests:', function() {
       });
     });
 
-    it('should return match count of 0 and modified count of 0 if one dirty trainingDay exists past trainingDate but is true-up day', function(done) {
-      testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, testTD) {
-        if (err) {
-          console.log('createTrainingDay error: ' + err);
-        }
-
-        testTD.fitness = 99;
-        testTD.fitnessAndFatigueTrueUp = true;
-
-        testHelpers.updateTrainingDay(testTD, function(err) {
-          if (err) {
-            console.log('updateTrainingDay: ' + err);
-          }
-
-          metricsParams.numericDate = util.toNumericDate(moment(trainingDate).subtract(2, 'days'));
-          return dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
-            should.not.exist(err);
-            (rawResponse.n).should.equal(0);
-            (rawResponse.nModified).should.equal(0);
-            done();
-          });
-        });
-      });
-    });
-
     it('should return match count of 0 and modified count of 0 if one dirty trainingDay exists past trainingDate but is startingPoint day', function(done) {
       testHelpers.createTrainingDay(user, moment(trainingDate).subtract(1, 'day').add(1, 'second').toDate(), null, function(err, testTD) {
         if (err) {

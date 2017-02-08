@@ -31,7 +31,6 @@ angular.module('trainingDays')
 
         content += trainingDay.name ? '<b>' + trainingDay.name + '</b> ' : '';
         content += trainingDay.startingPoint ? '<b class="small text-danger">Season Start</b> ' : '';
-        content += trainingDay.fitnessAndFatigueTrueUp ? '<b class="small text-danger">Fitness and Fatigue True Up</b> ' : '';
 
         content += '<small>';
         lengthOfFixedContent += 7;

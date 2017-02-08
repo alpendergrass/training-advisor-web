@@ -44,8 +44,7 @@ angular.module('trainingDays')
         $scope.datePickerStatus.opened = true;
       };
 
-      // Create new starting point of a training season or a true-up day.
-      $scope.createStartingPoint = function(isValid, isTrueUp) {
+      $scope.createStartingPoint = function(isValid) {
         $scope.error = null;
 
         if (!isValid) {
@@ -54,8 +53,7 @@ angular.module('trainingDays')
         }
 
         var trainingDay = new TrainingDays({
-          startingPoint: !isTrueUp,
-          fitnessAndFatigueTrueUp: isTrueUp,
+          startingPoint: true,
           dateNumeric: Util.toNumericDate(this.startDate),
           name: this.name,
           actualFitness: this.fitness,
@@ -67,12 +65,7 @@ angular.module('trainingDays')
           if ($stateParams.forwardTo) {
             $state.go($stateParams.forwardTo);
           } else {
-            if (isTrueUp) {
-              toastr.success('Your new fitness and fatigue values have been recorded.', 'True-Up Saved');
-
-            } else {
-              toastr.success('Your season start day has been created.', 'Start Saved');
-            }
+            toastr.success('Your season start day has been created.', 'Start Saved');
             $state.go('trainingDays.syncActivities');
           }
         }, function(errorResponse) {
