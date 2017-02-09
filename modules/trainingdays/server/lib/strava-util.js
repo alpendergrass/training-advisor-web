@@ -289,6 +289,7 @@ module.exports.downloadActivities = function(user, trainingDay) {
           return resolve(updatedTrainingDay);
         })
         .catch(function(err) {
+          console.log('err: ', err);
           return reject(err);
         });
     });

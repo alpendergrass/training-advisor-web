@@ -1,7 +1,3 @@
-.undecorated-link:hover {
-  text-decoration: none;
-}
-
 .decorated-link {
   font-weight: bold;
   text-decoration: underline;
@@ -121,11 +117,23 @@ a:hover .header-profile-image {
   color: #FC4C02;
 }
 
-.strava-me img {
-  border-radius: 5px;
-  margin: 0;
+.strava-badge {
+  display: inline-block;
+  background-color: #FC4C02;
+  color: #fff;
+  padding: 5px 10px 5px 30px;
+  font-size: 11px;
+  font-family: Helvetica, Arial, sans-serif;
+  white-space: nowrap;
+  text-decoration: none;
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  border-radius: 3px;
+  background-image: url('http://badges.strava.com/logo-strava-echelon.png')
 }
 
-.strava-me:hover {
-  opacity: 0.6;
+.strava-badge:visited, .strava-badge:hover, .strava-badge:focus {
+  text-decoration: none !important;
+  color: white;
 }
+
