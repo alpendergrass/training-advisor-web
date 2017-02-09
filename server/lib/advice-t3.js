@@ -111,6 +111,7 @@ var rules = [
       this.plannedActivity.advice += ` Today you should do a long tempo ride.
  Tempo means you should spend much of your ride in power zone 3. Early in your ride zone 3 will feel easy
  but resist the temptation to go harder. Sustaining a tempo pace for an extended time is challenging.
+ If training time is limited, make this a sweet-spot ride, meaning high zone 3 to low zone 4.
  If your route includes hills keep effort in Zone 4 or below while climbing.
  As allways, keep cadence high.`;
       R.stop();
@@ -129,6 +130,7 @@ var rules = [
       this.plannedActivity.advice += ` Today you should do an endurance ride of moderate duration.
  Remember, endurance means spending most of your time in zone 2. When climbing your effort will rise beyond zone 2
  but stay out of zone 5. On the descents you should let effort fall into zone 1.
+ Ride in the sweet-spot - high zone 3 to low zone 4 - if time is limited.
  Whenever you think about it, increase your cadence a bit.`;
       R.stop();
     }

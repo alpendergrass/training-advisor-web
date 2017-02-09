@@ -74,7 +74,8 @@ var rules = [
       this.plannedActivity.rationale += ' t2EnduranceAdviceRule.';
       this.plannedActivity.advice += ` A long endurance ride is called for today.
  Most of your time should be spent in power zone 2. Intensity will be low but if you hit your target Training Load you will be fatigued after this ride.
- If riding in hilly terrain effort will naturally rise above zone 2 on the climbs but strive to keep the effort moderate.
+ If time is limited, this can be more of a tempo-to-sweet spot ride - zone 3 to low zone 4.
+ If riding in hilly terrain effort will naturally rise above zones 2/3 on the climbs but strive to keep the effort moderate.
  During your ride, on climbs and on the flats, you should periodically increase your cadence beyond your normal confort range.
  Learing to spin a higher cadence will make you a more efficient cyclist.`;
       R.stop();
@@ -92,7 +93,8 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t2ModerateHillsAdviceRule.';
-      this.plannedActivity.advice += ` Today you should do rolling hills at a moderate pace. Climb steady at a high cadence and try to keep power in Zone 3 - 4 when climbing.
+      this.plannedActivity.advice += ` Today you should do rolling hills at a moderate pace.
+ Climb steady at a high cadence and try to keep power in Zone 3 - 4 when climbing.
  It is easy for effort to rise higher than intended when climbing.
  If hills are not an option in your area a brisk headwind will suffice.
  Monitor Training Load during your ride to make sure you stay under your upper load target.`;

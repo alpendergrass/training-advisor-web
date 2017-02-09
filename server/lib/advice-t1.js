@@ -72,8 +72,9 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t1HardAdviceRule.';
-      this.plannedActivity.advice += ` You should do a long endurance workout today.
+      this.plannedActivity.advice += ` If you have time, you should do a long endurance workout today.
  Endurance means most of your time should be spent in power zone 2.
+ If limited time, ride easy tempo - low zone 3.
  This is the time of the season to build your endurance engine.
  Cross-training is still an option at this point in the season but keep the focus on endurance.
  If power data is not available for your selected activity you will need to estimate your training load.`;
@@ -91,6 +92,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.rationale += ' t1ModerateAdviceRule.';
       this.plannedActivity.advice += ` You should do a moderate endurance (power zone 2) workout today.
+ If time is limited, ride easy tempo - low zone 3.
  Cross-training is still on the table. Just remember to estimate your training load for the day if power data is not available.`;
       R.stop();
     }
