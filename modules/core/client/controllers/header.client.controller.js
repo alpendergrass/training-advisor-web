@@ -32,7 +32,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Core
 
             toastr.info('A new version of the application is available. <a class="refresh-link" href="javascript:window.location.reload()">REFRESH</a>', {
               allowHtml: true,
-              timeOut: 0,
+              timeOut: (1000 * 60 * 60),
               extendedTimeOut: 5000,
               closeButton: true,
               tapToDismiss: false
@@ -42,7 +42,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Core
         function(errorResponse) {
           console.log('Core.getAppVersion errorResponse: ', errorResponse);
         });
-    }, (1000 * 60 * 60) * 4); // every 4 hours
+    }, (1000 * 60 * 60) * 1); // every 1 hours
 
     // Collapsing the menu after navigation
     $scope.$on('$stateChangeSuccess', function () {
