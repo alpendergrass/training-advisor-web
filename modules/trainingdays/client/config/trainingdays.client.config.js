@@ -22,7 +22,7 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Sync Strava Activities',
+      title: 'Sync Strava Activities...',
       state: 'trainingDays.syncActivities',
       roles: ['user']
     });
@@ -36,6 +36,12 @@ angular.module('trainingDays').run(['Menus',
     Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'Get Advice',
       state: 'trainingDays.getAdvice',
+      roles: ['user']
+    });
+
+    Menus.addSubMenuItem('topbar', 'trainingDays', {
+      title: 'Set/Reset Season Start',
+      state: 'trainingDays.createStart',
       roles: ['user']
     });
 
