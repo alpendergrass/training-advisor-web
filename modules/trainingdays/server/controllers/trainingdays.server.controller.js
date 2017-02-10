@@ -84,7 +84,10 @@ function createTrainingDay(req, callback) {
         }
 
         if (req.body.startingPoint) {
-          adviceEngine.refreshAdvice(req.user, trainingDay)
+          dbUtil.removeSubsequentStartingPoints(req.user, trainingDay.dateNumeric)
+            .then(function() {
+              return adviceEngine.refreshAdvice(req.user, trainingDay);
+            })
             .then(function(trainingDay) {
               if (req.body.startingPoint) {
                 // Refresh plan metrics from start.

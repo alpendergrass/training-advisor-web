@@ -186,6 +186,28 @@ module.exports.getStartDay = function(user, numericSearchDate, callback) {
     });
 };
 
+module.exports.removeSubsequentStartingPoints = function(user, numericDate) {
+  return new Promise(function(resolve, reject) {
+    TrainingDay.update({
+      user: user,
+      startingPoint: true,
+      dateNumeric: { $gt: numericDate },
+    }, {
+      $set: {
+        startingPoint: false
+      }
+    }, {
+      multi: true
+    }).exec()
+      .then(function() {
+        return resolve();
+      })
+      .catch(function(err) {
+        return reject(err);
+      });
+  });
+};
+
 module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut) {
   //select priority n trainingDays after searchDate. Include searchDate
   return new Promise(function(resolve, reject) {
