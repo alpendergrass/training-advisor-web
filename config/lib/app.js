@@ -1,5 +1,7 @@
 'use strict';
 
+require('newrelic');
+
 var path = require('path'),
   config = require('../config'),
   mongoose = require('./mongoose'),

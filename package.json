@@ -1,7 +1,7 @@
 {
   "name": "training-advisor",
   "description": "Get cycling training advice on a daily basis.",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "private": true,
   "author": "Al Pendergrass",
   "engines": {
@@ -50,6 +50,7 @@
     "mongration": "0.0.15",
     "morgan": "^1.6.1",
     "multer": "^1.2.0",
+    "newrelic": "^1.37.0",
     "node-rules": "^3.1.0",
     "nodemailer": "^2.6.4",
     "nodemailer-sendinblue-transport": "^1.2.3",
