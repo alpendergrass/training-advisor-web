@@ -101,11 +101,12 @@ a:hover .header-profile-image {
 }
 
 .color-tacit-red {
-  color: #C21E24;
+  color: #BC2025;
+  /*The three colors recommended by Tailor #1EBCB6 #BC2025 #E35E62*/
 }
 
 .background-color-tacit-red {
-  background-color: #C21E24;
+  background-color: #BC2025;
   color: white;
 }
 
