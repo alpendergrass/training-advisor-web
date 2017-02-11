@@ -25,6 +25,7 @@ angular.module('trainingDays')
           planLoadArray,
           planFormArray,
           planFitnessArray,
+          planFatigueArray,
           targetRampRateArray,
           rampRateArray,
           actualAverageRampRateArray,
@@ -120,6 +121,10 @@ angular.module('trainingDays')
           return Util.getMetrics(td, 'actual').fitness;
         };
 
+        var getPlanFatigue = function(td) {
+          return Util.getMetrics(td, 'planned').fatigue;
+        };
+
         var getActualFatigue = function(td) {
           if (moment(td.date).isAfter($scope.today, 'day')) {
             return null;
@@ -189,6 +194,7 @@ angular.module('trainingDays')
               planLoadArray = _.flatMap($scope.season, getPlanLoad);
               planFormArray = _.flatMap($scope.season, getPlanForm);
               planFitnessArray = _.flatMap($scope.season, getPlanFitness);
+              planFatigueArray = _.flatMap($scope.season, getPlanFatigue);
               actualLoadArray = _.flatMap($scope.season, getActualLoad);
               actualFitnessArray = _.flatMap($scope.season, getActualFitness);
               actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
@@ -204,9 +210,9 @@ angular.module('trainingDays')
                 planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
                 actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
                 // $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
               } else {
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray];
+                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray];
               }
 
               $scope.chartDatasetOverride = [
@@ -259,11 +265,20 @@ angular.module('trainingDays')
                   type: 'line'
                 },
                 {
-                  label: 'Fatigue',
+                  label: 'Fatigue - Actual',
                   borderWidth: 3,
                   pointRadius: 0,
                   hitRadius: 4,
-                  type: 'line'
+                  type: 'line',
+                  hidden: true
+                },
+                {
+                  label: 'Fatigue - Planned',
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  hitRadius: 4,
+                  type: 'line',
+                  hidden: true
                 },
                 {
                   label: 'Target Ramp Rate',
@@ -337,12 +352,12 @@ angular.module('trainingDays')
           '#949FB1', //Fitness - Plan
           '#46BFBD', //Form - Actual
           '#4D5360', //Form - Plan
-          '#F7464A', //Fatigue
+          '#F7464A', //Fatigue - Actual
+          '#B23E5B', //Fatigue - Plan
           '#79B685', //Target Ramp Rate
-          '#B23E5B', //Ramp Rate
+          '#8AEB90', //Ramp Rate
           '#DF8B4D', //Average Ramp Rate - Actual
-          '#E2D769', //Average Ramp Rate - Plan
-          '#8AEB90'
+          '#E2D769' //Average Ramp Rate - Plan
 
         ];
 
