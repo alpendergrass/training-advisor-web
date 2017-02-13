@@ -30,7 +30,7 @@ module.exports = {
         'public/lib/angular-toastr/dist/angular-toastr.min.js',
         'public/lib/angular-toastr/dist/angular-toastr.tpls.min.js',
         'public/lib/spin.js/spin.min.js',
-        'public/lib/angular-spinner/angular-spinner.min.js',
+        'public/lib/angular-spinner/dist/angular-spinner.min.js',
         'public/lib/jstzdetect/jstz.min.js',
         'public/lib/angular-timezone-selector/dist/angular-timezone-selector.min.js',
         'public/lib/angular-aria/angular-aria.min.js',

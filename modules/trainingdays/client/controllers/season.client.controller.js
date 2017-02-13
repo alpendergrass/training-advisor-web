@@ -543,7 +543,7 @@ angular.module('trainingDays')
             commit: 'no'
           }, function(response) {
             initSimFlags();
-            loadChart();
+            $scope.genPlan();
           }, function(errorResponse) {
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;

@@ -32,7 +32,7 @@ module.exports = {
         'public/lib/angular-toastr/dist/angular-toastr.js',
         'public/lib/angular-toastr/dist/angular-toastr.tpls.js',
         'public/lib/spin.js/spin.js',
-        'public/lib/angular-spinner/angular-spinner.js',
+        'public/lib/angular-spinner/dist/angular-spinner.js',
         'public/lib/jstzdetect/jstz.js',
         'public/lib/angular-timezone-selector/dist/angular-timezone-selector.js',
         'public/lib/angular-aria/angular-aria.js',
