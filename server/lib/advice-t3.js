@@ -113,7 +113,7 @@ var rules = [
  but resist the temptation to go harder. Sustaining a tempo pace for an extended time is challenging.
  If training time is limited, make this a sweet-spot ride, meaning high zone 3 to low zone 4.
  If your route includes hills keep effort in Zone 4 or below while climbing.
- As allways, keep cadence high.`;
+ As always, keep cadence high.`;
       R.stop();
     }
   },
