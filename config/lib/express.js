@@ -67,7 +67,7 @@ module.exports.initMiddleware = function (app) {
   // Initialize favicon middleware
   app.use(favicon(app.locals.favicon));
 
-  // Enable logger (morgan)
+  // Enable express logging (morgan)
   app.use(morgan(logger.getFormat(), logger.getOptions()));
 
   // Environment dependent middleware

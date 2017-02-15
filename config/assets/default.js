@@ -41,6 +41,7 @@ module.exports = {
         'public/lib/material-calendar/dist/angular-material-calendar.js',
         'public/lib/chart.js/dist/Chart.js',
         'public/lib/angular-chart.js/dist/angular-chart.js',
+        'public/lib/angular-local-storage/dist/angular-local-storage.js',
         'public/lib/owasp-password-strength-test/owasp-password-strength-test.js'
       ],
       tests: ['public/lib/angular-mocks/angular-mocks.js']

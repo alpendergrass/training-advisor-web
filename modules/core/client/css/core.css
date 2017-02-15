@@ -138,3 +138,10 @@ a:hover .header-profile-image {
   color: white;
 }
 
+.toast-success {
+  background-color: rgb(63, 81, 181);
+}
+
+.toast-info {
+  background-color: rgb(63, 81, 181);
+}

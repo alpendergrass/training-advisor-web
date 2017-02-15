@@ -52,14 +52,6 @@ calendar-md md-content.agenda > div > div > div {
   padding: 0 !important;
 }
 
-.toast-success {
-  background-color: rgb(63, 81, 181);
-}
-
-.toast-info {
-  background-color: rgb(63, 81, 181);
-}
-
 .fff-table {
   width: 30%;
 }

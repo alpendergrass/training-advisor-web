@@ -8,6 +8,9 @@ module.exports = function (app) {
   app.route('/api/core/getAppVersion')
     .get(core.getAppVersion);
 
+  app.route('/api/core/getReleaseNotes')
+    .get(core.getReleaseNotes);
+
   // Define error pages
   app.route('/server-error').get(core.renderServerError);
 

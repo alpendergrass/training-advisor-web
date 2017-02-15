@@ -16,7 +16,7 @@ angular.module(ApplicationConfiguration.applicationModuleName)
       $httpProvider.interceptors.push('authInterceptor');
 
       angular.extend(toastrConfig, {
-        timeOut: 3000,
+        timeOut: 3000
       });
     }
   ]);

@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('core').controller('HeaderController', ['$scope', '$state', 'Core', 'Authentication', 'Menus', '_', 'toastr',
-  function ($scope, $state, Core, Authentication, Menus, _, toastr) {
+angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdDialog', 'Core', 'Authentication', 'Menus', '_', 'toastr', 'localStorageService',
+  function ($scope, $state, $mdDialog, Core, Authentication, Menus, _, toastr, localStorageService) {
     var jQuery = window.jQuery;
 
     //The following makes lodash available in html.
@@ -16,9 +16,41 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Core
       function(response) {
         clientAppVersion = response.appVersion;
         console.log('app version: ', clientAppVersion);
+        var storedVersion = localStorageService.get('app_version');
+        console.log('stored app version: ', storedVersion);
+
+        // Compare current app version to the version in local storage.
+        // If not the same, store this version in ls, request release notes and display for this version.
+        if (storedVersion !== clientAppVersion) {
+          localStorageService.set('app_version', clientAppVersion);
+
+          Core.getReleaseNotes({},
+            function(response) {
+              var releaseNotes = response.releaseNotes;
+
+              if (releaseNotes[0].version === clientAppVersion) {
+                var releaseMessage = `<h4>${releaseNotes[0].message}</h4><p><ul>`;
+                releaseNotes[0].features.forEach(function (feature) {
+                  releaseMessage += `<li>${feature}</li>`;
+                });
+                releaseMessage += '</ul></p>';
+
+                var alert = $mdDialog.alert({
+                  title: releaseNotes[0].title ? releaseNotes[0].title : 'Changes in Version ' + releaseNotes[0].version,
+                  content: releaseMessage,
+                  ok: 'Close'
+                });
+
+                $mdDialog.show(alert);
+              }
+            },
+            function(errorResponse) {
+              console.error(errorResponse);
+            });
+        }
       },
       function(errorResponse) {
-        console.log('Core.getAppVersion errorResponse: ', errorResponse);
+        console.error(errorResponse);
       });
 
     // Check for new app version every so often.
@@ -33,7 +65,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Core
             toastr.info('A new version of the application is available. <a class="refresh-link" href="javascript:window.location.reload()">REFRESH</a>', {
               allowHtml: true,
               timeOut: (1000 * 60 * 60),
-              extendedTimeOut: 5000,
+              extendedTimeOut: (1000 * 5),
               closeButton: true,
               tapToDismiss: false
             });

@@ -7,6 +7,10 @@ angular.module('core').factory('Core', ['$resource',
       getAppVersion: {
         method: 'GET',
         url: 'api/core/getAppVersion'
+      },
+      getReleaseNotes: {
+        method: 'GET',
+        url: 'api/core/getReleaseNotes'
       }
     });
   }

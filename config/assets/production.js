@@ -39,6 +39,7 @@ module.exports = {
         'public/lib/material-calendar/dist/angular-material-calendar.min.js',
         'public/lib/chart.js/dist/Chart.min.js',
         'public/lib/angular-chart.js/dist/angular-chart.min.js',
+        'public/lib/angular-local-storage/dist/angular-local-storage.min.js',
         'public/lib/owasp-password-strength-test/owasp-password-strength-test.js'
       ]
     },

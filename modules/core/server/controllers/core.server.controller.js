@@ -1,7 +1,6 @@
 'use strict';
 
-// var path = require('path'),
-//   coreUtil = require(path.resolve('./modules/core/server/lib/util'));
+var releaseNotes = require('../lib/release-notes');
 
 // Render the main application page
 exports.renderIndex = function (req, res) {
@@ -42,4 +41,8 @@ exports.renderNotFound = function (req, res) {
 
 exports.getAppVersion = function (req, res) {
   return res.json({ 'appVersion': req.app.locals.version });
+};
+
+exports.getReleaseNotes = function (req, res) {
+  return res.json({ 'releaseNotes': releaseNotes.notes });
 };
