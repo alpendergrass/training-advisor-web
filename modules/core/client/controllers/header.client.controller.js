@@ -10,7 +10,8 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdD
     $scope.authentication = Authentication;
     $scope.menu = Menus.getMenu('topbar');
 
-    var clientAppVersion = null;
+    var clientAppVersion = null,
+      versionCheckInterval = (1000 * 60 * 60) * 0.1; // every n hours
     // Init local version number.
     Core.getAppVersion({},
       function(response) {
@@ -64,7 +65,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdD
 
             toastr.info('A new version of the application is available. <a class="refresh-link" href="javascript:window.location.reload()">REFRESH</a>', {
               allowHtml: true,
-              timeOut: (1000 * 60 * 60),
+              timeOut: versionCheckInterval,
               extendedTimeOut: (1000 * 5),
               closeButton: true,
               tapToDismiss: false
@@ -74,7 +75,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdD
         function(errorResponse) {
           console.log('Core.getAppVersion errorResponse: ', errorResponse);
         });
-    }, (1000 * 60 * 60) * 1); // every 1 hours
+    }, versionCheckInterval);
 
     // Collapsing the menu after navigation
     $scope.$on('$stateChangeSuccess', function () {
