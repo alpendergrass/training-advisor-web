@@ -29,6 +29,11 @@ var trainingPeaksAccountTypes = {
   message: 'Invalid Training Peaks Account Type.'
 };
 
+var ftpSources = {
+  values: 'strava|manual|migration'.split('|'),
+  message: invalidDataErrorMessage
+};
+
 var notificationTypes = {
   values: 'ftp|timezone|fetchstrava|start|goal|plangen|terrain'.split('|'),
   message: invalidDataErrorMessage
@@ -41,8 +46,8 @@ var blockableNotificationTypes = {
 
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
-var minThresholdPower = [0, minMessage];
-var maxThresholdPower = [999, maxMessage];
+var minFTP = [0, minMessage];
+var maxFTP = [999, maxMessage];
 
 var UserSchema = new Schema({
   firstName: {
@@ -104,8 +109,8 @@ var UserSchema = new Schema({
   // },
   thresholdPower: {
     type: Number,
-    min: minThresholdPower,
-    max: maxThresholdPower,
+    min: minFTP,
+    max: maxFTP,
     required: 'Please provide threshold power',
     default: 0
   },
@@ -114,6 +119,25 @@ var UserSchema = new Schema({
     required: 'Please provide threshold power test date',
     default: Date.now
   },
+  ftpLog: [{
+    ftp: {
+      type: Number,
+      min: minFTP,
+      max: maxFTP,
+      required: 'Please provide threshold power',
+      default: 0
+    },
+    ftpTestDate: {
+      type: Date,
+      required: 'Please provide threshold power test date',
+      default: Date.now
+    },
+    ftpSource: {
+      type: String,
+      enum: ftpSources,
+      default: ftpSources.values[0]
+    }
+  }],
   preferredRestDays: [{
     type: String
   }],

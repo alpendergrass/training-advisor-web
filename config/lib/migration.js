@@ -38,6 +38,7 @@ module.exports.migrate = function() {
   migration.add(path.join(__dirname, './migrations/refresh-metrics.js'));
   migration.add(path.join(__dirname, './migrations/migration-rename-periods.js'));
   migration.add(path.join(__dirname, './migrations/migration-rename-activity-type.js'));
+  migration.add(path.join(__dirname, './migrations/migration-restructure-ftp.js'));
   // List future migrations here. Leave previous in place above.
 
   return new Promise(function(resolve, reject) {
