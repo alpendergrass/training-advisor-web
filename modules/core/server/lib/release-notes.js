@@ -19,6 +19,7 @@ var releaseNotes = [
     fixes: [
       'When setting up sim are we reloading chart after changing day. Stop, it takes too long.',
       'Update of xeditable or something related broke xeditable radio button value validations.'
+    ]
   },
   {
     version: '0.6.9',
