@@ -641,7 +641,8 @@ angular.module('trainingDays')
           modalInstance.result
             .then(function(trainingDay) {
               trainingDay.$update(function(trainingDay) {
-                loadChart();
+                // let's not reload chart - this can take a while with long plans
+                // loadChart();
                 $scope.simConfigUnderway = true;
               }, function(errorResponse) {
                 if (errorResponse.data && errorResponse.data.message) {

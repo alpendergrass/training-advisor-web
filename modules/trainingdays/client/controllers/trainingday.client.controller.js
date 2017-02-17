@@ -119,15 +119,7 @@ angular.module('trainingDays')
         };
 
         $scope.updateEventRanking = function(priority) {
-          //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
-          var n = ~~Number(priority);
-
-          if (n === $scope.trainingDay.scheduledEventRanking) {
-            //no change.
-            return;
-          }
-
-          if (String(n) === priority && (n >= 0 && n <= 3) || n === 9) {
+          if ((priority >= 0 && priority <= 3) || priority === 9) {
             return $scope.update($scope.trainingDay, function(trainingDay) {
               if (trainingDay) {
                 resetViewObjects(trainingDay);
@@ -139,6 +131,7 @@ angular.module('trainingDays')
         };
 
         $scope.updateEstimatedLoad = function(estimate) {
+          //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
           var n = ~~Number(estimate);
 
           if (n === $scope.trainingDay.estimatedLoad) {
@@ -158,14 +151,7 @@ angular.module('trainingDays')
         };
 
         $scope.updateEventTerrain = function(terrain) {
-          var n = ~~Number(terrain);
-
-          if (n === $scope.trainingDay.eventTerrain) {
-            //no change.
-            return;
-          }
-
-          if (String(n) === terrain && n >= 0 && n <= 5) {
+          if (terrain >= 0 && terrain <= 5) {
             return $scope.update($scope.trainingDay, function(trainingDay) {
               if (trainingDay) {
                 resetViewObjects(trainingDay);
