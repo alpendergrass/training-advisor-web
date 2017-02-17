@@ -98,7 +98,7 @@
           <tr ng-repeat="completedActivity in trainingDay.completedActivities">
             <td>
               <span class="text-capitalize">{{ completedActivity.source }}</span></a></span><span class="small" ng-if="completedActivity.source !== 'manual' && completedActivity.edited"> (edited)</span>
-              <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link"><br>View on Strava
+              <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link"><br>View on Strava</a></span>
             </td>
             <td>
               <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span><span class="small" ng-if="completedActivity.loadIsFromEstimatedPower"> (from estimated power)</span><span class="small" ng-if="completedActivity.loadIsSufferScore"> (Suffer Score)</span>
