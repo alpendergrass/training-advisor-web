@@ -1,260 +1,97 @@
-<section ng-controller="EditProfileController as profile">
-  <form name="userForm" ng-submit="profile.updateUserProfile(userForm.$valid)" class="signin" novalidate autocomplete="off">
-    <fieldset>
-    <div class="row">
-      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <label>About You</label>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="firstName">First Name *</label>
-              <input type="text" id="firstName" name="firstName" class="form-control" ng-model="profile.user.firstName" placeholder="First Name" required>
-              <div ng-messages="userForm.firstName.$error" role="alert">
-                <p class="help-block error-text" ng-message="required">First name is required.</p>
-              </div>
-            </div>
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="lastName">Last Name *</label>
-              <input type="text" id="lastName" name="lastName" class="form-control" ng-model="profile.user.lastName" placeholder="Last Name" required>
-              <div ng-messages="userForm.lastName.$error" role="alert">
-                <p class="help-block error-text" ng-message="required">Last name is required.</p>
-              </div>
-            </div>
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="email">Email *</label>
-              <input type="email" id="email" name="email" class="form-control" ng-model="profile.user.email" placeholder="Email" lowercase required>
-              <div ng-messages="userForm.email.$error" role="alert">
-                <p class="help-block error-text" ng-message="required">Email address is required.</p>
-                <p class="help-block error-text" ng-message="email">Email address is invalid.</p>
-              </div>
-            </div>
-            <div class="form-group input-group-sm">
-              <label class="small" for="timezone">Your Timezone *</label>
-              <div>
-                <timezone-selector ng-model="profile.user.timezone" sort-by="offset" show-local="true" set-local="true" width="230px" class="small"></timezone-selector>
-              </div>
-           </div>
-          </div>
+<section ng-controller="EditProfileController">
+  <div class="row">
+    <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-5">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>About You</h4>
         </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <label for="emailNewsletter">Tacit Training Newsletter</label>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <input type="checkbox" name="emailNewsletter" ng-model="profile.user.emailNewsletter" id="emailNewsletter"> Send me the Tacit Training email newsletter
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <label>Day of Week Preferences</label>
-          </div>
-          <div class="panel-body">
-            <div class="form-group" show-errors>
-              <a tabindex="0" role="button" data-toggle="popover" data-content="You may select one or more days that you typically rest to have Tacit Training schedule these days as rest days."><label class="small" for="preferredRestDays">Rest Day(s)</label></a>
-              <br>
-              <select multiple name="preferredRestDays" class="form-control" ng-model="profile.user.preferredRestDays">
-                <option ng-repeat="option in profile.data.daysOfTheWeek" value="{{option.id}}" ng-selected="{{profile.user.preferredRestDays.indexOf(option.id) > -1}}">{{option.name}}</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-
-
-
-
-
-
-      </div>
-
-      <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-3">
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If you select 'Fetch Strava activities automatically', when Strava notifies us of new activities we will retrieve your activity data from Strava. Otherwise you will need to manually sync your Strava activities on the My Training Day page."><label for="autoFetchStravaActivities">Strava Auto-Sync</label></a>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="autoFetchStravaActivities" ng-model="profile.user.autoFetchStravaActivities" id="autoFetchStravaActivitiesTrue" value="true"> Fetch Strava activities automatically
-                </label>
-              </div>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="autoFetchStravaActivities" ng-model="profile.user.autoFetchStravaActivities" id="autoFetchStravaActivitiesFalse" value="false" checked> Do not automatically fetch
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If power meter data is not available for a ride, by default we use Strava's estimated power to compute Training Load. However, some users report that estimated power is not reliable in their region. If you prefer, we can use Strava's Suffer Score for your Training Load rather than computing Training Load using estimated power. Note that Strava provides Suffer Score for Strava Premium members only and is only provided if heart rate is recorded for your ride."><label for="favorSufferScoreOverEstimatedPower">Use Suffer Score</label></a><br><span class="small text-warning"><em>Experimental</em></span>
-          </div>
-          <div class="panel-body">
-            <div class="form-group input-group-sm" show-errors>
-              <input type="checkbox" name="favorSufferScoreOverEstimatedPower" ng-model="profile.user.favorSufferScoreOverEstimatedPower" id="favorSufferScoreOverEstimatedPower">  Use Suffer Score For Training Load When No Power Meter
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="'row">s
-      <div class="col-xs-11">
-        <div class="text-center form-group">
-          <button type="submit" class="btn btn-primary">Save Profile</button>
-        </div>
-      </div>
-    </div>
-    </fieldset>
-  </form>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <label for="levelOfDetail">Tacit Training Level of Detail</label>
-          </div>
-          <div class="panel-body">
-
-
-            <a href="#" editable-radiolist="profile.user.levelOfDetail" e-ng-options="s.value as s.text for s in ::profile.data.levelsOfDetail track by s.value" buttons="no" onbeforesave="profile.updateLevelOfDetail($data)">{{ profile.showLevelOfDetail() }}</a>
-
-            <!-- <div class="form-group input-group-sm" show-errors>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="levelOfDetail" ng-model="profile.user.levelOfDetail" id="levelOfDetail1" value="1" checked> Show me advice
-                </label>
-              </div>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="levelOfDetail" ng-model="profile.user.levelOfDetail" id="levelOfDetail2" value="2"> Show me advice and some numbers
-                </label>
-              </div>
-              <div class="radio" ng-show="profile.user.roles.indexOf('admin') > -1">
-                <label>
-                  <input type="radio" name="levelOfDetail" ng-model="profile.user.levelOfDetail" id="levelOfDetail3" value="3"> Give me super powers
-                </label>
-              </div>
-            </div> -->
-
-
-          </div>
-        </div>
-
-
-        <div class="panel panel-default" ng-class="{ 'panel-danger' : profile.needsFTP }">
-          <div class="panel-heading">
-            <label>Functional Threshold Power</label>
-          </div>
-          <div class="panel-body">
-
-            <div ng-show="profile.user.ftpLog.length > 0">
+        <div class="panel-body">
+          <div class="top-buffer">
+            <label>Name * :&nbsp;
+              <a href="#" editable-text="user.firstName" e-required onbeforesave="checkFirstName($data)">{{ user.firstName  }}</a>&nbsp;
+              <a href="#" editable-text="user.lastName"e-required onbeforesave="checkLastName($data)">{{ user.lastName  }}</a></label>
+            <hr>
+            <label>Email * :&nbsp;
+              <a href="#" editable-email="user.email" e-required onbeforesave="checkEmail($data)">{{ user.email || 'email' }}</a>
+            </label>
+            <hr>
+            <label for="timezone">Your Timezone *</label>
+            <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile(true)" sort-by="offset" show-local="true" set-local="true" width="230px" class="small"></timezone-selector>
+            <hr>
+            <label>Functional Threshold Power *</label>
+            <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* FTP is Required *</strong></div>
+            <div ng-show="user.ftpLog.length > 0">
               <p>
-                <table class="table table-bordered table-hover table-condensed">
-                  <tr style="font-weight: bold">
-                    <td style="width:30%">FTP</td>
-                    <td style="width:60%">Test Date</td>
-                    <!-- <td style="width:10%">Source</td> -->
-                  </tr>
-                  <tr ng-repeat="ftpLogItem in profile.user.ftpLog">
-                    <td>
-                      <span editable-number="ftpLogItem.ftp" e-name="ftp" e-min="1" e-max="999" e-step="1" e-required onbeforesave="profile.updateUserProfile(true)">{{ ftpLogItem.ftp }}</span>
-                        <!-- <input name="ftpLogItem.ftp" type="number" min="1" max="999" step="1" ng-model="ftpLogItem.ftp" id="ftpLogItem.ftp" class="form-control" placeholder="Threshold Power" required>
-                        <div ng-messages="ftpLogItem.ftp.$error" role="alert">
-                          <p class="help-block error-text" ng-message="required">Threshold Power is required.</p>
-                        </div>
-                        <div ng-messages="ftpLogItem.ftp.$error" role="alert">
-                          <p class="help-block error-text" ng-message="min">Threshold Power must be between 1 and 999.</p>
-                        </div>
-                        <div ng-messages="ftpLogItem.ftp.$error" role="alert">
-                          <p class="help-block error-text" ng-message="max">Threshold Power must be between 1 and 999.</p>
-                        </div> -->
-                    </td>
-                    <td>
-                      <a href="#" editable-bsdate="ftpLogItem.ftpTestDate" onbeforesave="profile.updateUserProfile(true)"
-                        e-required
-                        e-readonly="true"
-                        e-show-calendar-button="false"
-                        e-datepicker-options="profile.ftpDateOptions"
-                        e-is-open="true"
-                        e-show-button-bar="false"
-                        e-ng-click="profile.openDatePicker($event,'$data')"
-                        e-datepicker-popup="dd MMMM yyyy">
+                <table class="table table-hover">
+                  <thead>
+                    <tr style="font-weight: bold">
+                      <th>FTP</th>
+                      <th>Test Date</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="ftpLogItem in user.ftpLog">
+                      <td>
+                        <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="1" e-max="999" e-step="1" e-required onbeforesave="updateUserProfile(true)">{{ ftpLogItem.ftp }}</a>
+                      </td>
+                      <td>
+                        <a href="#" editable-bsdate="ftpLogItem.ftpTestDate" onbeforesave="updateUserProfile(true)" e-required e-readonly="true" e-show-calendar-button="false" e-datepicker-options="ftpDateOptions" e-is-open="true" e-show-button-bar="false" e-ng-click="openDatePicker($event,'$data')" e-datepicker-popup="dd MMMM yyyy">
                         {{ ftpLogItem.ftpTestDate | date:"dd MMMM yyyy" }}
-                      </a> <!-- e-is-open="profile.datePickerOpened.$data" -->
-                      <!-- <div class="form-group input-group-sm" show-errors>
-                        <p class="input-group">
-                        <input type="text" id="ftpLogItem.ftpTestDate" name="ftpLogItem.ftpTestDate" class="form-control" uib-datepicker-popup="dd MMM yyyy" ng-model="ftpLogItem.ftpTestDate" is-open="profile.datePickerStatus.opened" datepicker-options="profile.ftpDateOptions" required close-text="Close" >
-                        <span class="input-group-btn">
-                          <button type="button" class="btn btn-default" ng-click="profile.openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-                        </span>
-                        </p>
-                          <div ng-messages="ftpLogItem.ftpTestDate.$error" role="alert">
-                            <p class="help-block error-text" ng-message="required">Threshold Power Test Date is required.</p>
-                          </div>
-                      </div> -->
-                    </td>
-                    <!-- <td>
-                      <span class="text-capitalize">{{ ftpLogItem.ftpSource }}</span>
-                    </td> -->
-                  </tr>
+                      </a>
+                      </td>
+                      <td>
+                        <button class="btn btn-default" title="Add ftpLogItem" ng-click="removeFTP(ftpLogItem)">
+                          <span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
                 </table>
               </p>
             </div>
-
             <div>
               <p>
-                <button class="btn btn-default" title="Add ftpLogItem" ng-click="profile.addFTP()">
+                <button class="btn btn-default" title="Add ftpLogItem" ng-click="addFTP()">
                   <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
                 </button>
               </p>
             </div>
-
-
-
-
-            <!-- <div class="form-group input-group-sm" ng-class="{ 'text-danger' : profile.needsFTP }" show-errors>
-              <label class="small" for="thresholdPower">Watts *</label>
-              <input name="thresholdPower" type="number" min="1" max="999" step="1" ng-model="profile.user.thresholdPower" id="thresholdPower" class="form-control" placeholder="Threshold Power" required>
-              <div ng-messages="userForm.thresholdPower.$error" role="alert">
-                <p class="help-block error-text" ng-message="required">Threshold Power is required.</p>
-              </div>
-              <div ng-messages="userForm.thresholdPower.$error" role="alert">
-                <p class="help-block error-text" ng-message="min">Threshold Power must be between 1 and 999.</p>
-              </div>
-              <div ng-messages="userForm.thresholdPower.$error" role="alert">
-                <p class="help-block error-text" ng-message="max">Threshold Power must be between 1 and 999.</p>
-              </div>
-            </div>
-            <div class="form-group input-group-sm" show-errors>
-              <label class="small" for="thresholdPowerTestDate">Last Test Date *</label>
-              <p class="input-group">
-              <input type="text" id="thresholdPowerTestDate" name="thresholdPowerTestDate" class="form-control" uib-datepicker-popup="dd MMMM yyyy" ng-model="profile.user.thresholdPowerTestDate" is-open="profile.datePickerStatus.opened" datepicker-options="profile.ftpDateOptions" required close-text="Close" >
-              <span class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="profile.openDatePicker($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-              </span>
-              </p>
-              <div ng-messages="userForm.thresholdPowerTestDate.$error" role="alert">
-                <p class="help-block error-text" ng-message="required">Threshold Power Test Date is required.</p>
-              </div>
-            </div> -->
-
-
           </div>
         </div>
-
-
-
+      </div>
+    </div>
+    <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-5">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Preferences</h4>
+        </div>
+        <div class="panel-body">
+          <div class="top-buffer">
+            <label for="emailNewsletter">Newsletter :&nbsp;
+              <a href="#" editable-checkbox="user.emailNewsletter" e-title="Send the Tacit Training newsletter?" buttons="no" onaftersave="updateUserProfile(true)">{{ user.emailNewsletter && "Send me the email newsletter" || "Do not send me the email newsletter" }}</a></label>
+            <hr>
+            <label>
+              <a tabindex="0" role="button" data-toggle="popover" data-content="You may select one or more days that you typically rest to have Tacit Training schedule these days as rest days.">
+                <span class="popup-link text-muted">Rest Days</span></a> :&nbsp;
+              <a href="#" editable-select="user.preferredRestDays" e-multiple e-ng-options="s.value as s.text for s in ::data.daysOfTheWeek" onaftersave="updateUserProfile(true)">{{ showRestDays() }}</a></label>
+            <hr>
+            <label>
+              <a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If you select 'Fetch Strava activities automatically', when Strava notifies us of new activities we will retrieve your activity data from Strava. Otherwise you will need to manually sync your Strava activities on the My Training Day page.">
+                <span class="popup-link text-muted">Strava Sync</span>
+              </a> :&nbsp;
+              <a href="#" editable-checkbox="user.autoFetchStravaActivities" e-title="Fetch Strava activities automatically?" buttons="no" onaftersave="updateUserProfile(true)">{{ user.autoFetchStravaActivities && "Auto-fetch" || "Do not auto-fetch" }}</a></label>
+            <hr>
+            <label for="levelOfDetail">Level of Detail :&nbsp;
+              <a href="#" editable-radiolist="user.levelOfDetail" e-ng-options="s.value as s.text for s in ::data.levelsOfDetail track by s.value" buttons="no" onaftersave="updateUserProfile(true)">{{ showLevelOfDetail() }}</a></label>
+            <hr>
+            <label><a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If power meter data is not available for a ride, by default we use Strava's estimated power to compute Training Load. However, some users report that estimated power is not reliable in their region. If you prefer, we can use Strava's Suffer Score for your Training Load rather than computing Training Load using estimated power. Note that Strava provides Suffer Score for Strava Premium members only and is only provided if heart rate is recorded for your ride."><span class="popup-link text-muted">Estimated Power or Suffer Score</span></a>
+              <span class="small text-danger"><em>Experimental</em></span> :&nbsp;
+            <br>
+            <a href="#" editable-checkbox="user.favorSufferScoreOverEstimatedPower" e-title="Use Suffer Score When No Power Meter?" buttons="no" onaftersave="updateUserProfile(true)">{{ user.favorSufferScoreOverEstimatedPower && "Use Suffer Score When No Power Meter" || "Use Estimated Power When No Power Meter" }}</a></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>

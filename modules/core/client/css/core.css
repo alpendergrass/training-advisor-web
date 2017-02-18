@@ -100,9 +100,25 @@ a:hover .header-profile-image {
   margin-top: 40px;
 }
 
+.bottom-buffer {
+  margin-bottom: 10px;
+}
+
+/*The three colors recommended by Tailor #1EBCB6 #BC2025 #E35E62*/
 .color-tacit-red {
   color: #BC2025;
-  /*The three colors recommended by Tailor #1EBCB6 #BC2025 #E35E62*/
+}
+
+.color-tacit-pink {
+  color: #E35E62;
+}
+
+.color-tacit-blue {
+  color: #1EBCB6;
+}
+
+.popup-link {
+  text-decoration: underline;
 }
 
 .background-color-tacit-red {

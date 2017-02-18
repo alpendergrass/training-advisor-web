@@ -3,31 +3,30 @@
 angular.module('users').controller('EditProfileController', ['$scope', '$http', '$state', '$filter', 'Users', 'Authentication', 'moment', 'toastr',
   function($scope, $http, $state, $filter, Users, Authentication, moment, toastr) {
     var jQuery = window.jQuery;
+
     angular.element(document).ready(function() {
       jQuery('[data-toggle="popover"]').popover({ trigger: 'hover' });
     });
 
-    this.user = Authentication.user;
-    this.user.thresholdPowerTestDate = new Date(this.user.thresholdPowerTestDate);
-    this.user.ftpLog.forEach(function (ftpLogItem) {
-      ftpLogItem.ftpTestDate = new Date(ftpLogItem.ftpTestDate);
-    });
+    var initUser = function(user) {
+      $scope.user = user;
+      $scope.user.thresholdPowerTestDate = new Date($scope.user.thresholdPowerTestDate);
+      $scope.user.ftpLog.forEach(function (ftpLogItem) {
+        ftpLogItem.ftpTestDate = new Date(ftpLogItem.ftpTestDate);
+      });
+    }
 
+    initUser(Authentication.user);
 
-    this.user.autoFetchStravaActivities = this.user.autoFetchStravaActivities === null ? null : this.user.autoFetchStravaActivities.toString();
-
-    // We highlight fields that need to be updated.
-    this.needsFTP = !this.user.thresholdPower;
-
-    this.data = {
+    $scope.data = {
       daysOfTheWeek: [
-        { id: '1', name: 'Monday' },
-        { id: '2', name: 'Tuesday' },
-        { id: '3', name: 'Wednesday' },
-        { id: '4', name: 'Thursday' },
-        { id: '5', name: 'Friday' },
-        { id: '6', name: 'Saturday' },
-        { id: '0', name: 'Sunday' }
+        { value: '1', text: 'Monday' },
+        { value: '2', text: 'Tuesday' },
+        { value: '3', text: 'Wednesday' },
+        { value: '4', text: 'Thursday' },
+        { value: '5', text: 'Friday' },
+        { value: '6', text: 'Saturday' },
+        { value: '0', text: 'Sunday' }
       ],
       levelsOfDetail: [
         { value: 1, text: 'Show me advice' },
@@ -36,76 +35,92 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       ]
     };
 
-    // this.user.levelOfDetail = this.user.levelOfDetail.toString();
-
-    this.showLevelOfDetail = function() {
-      var selected = $filter('filter')(this.data.levelsOfDetail, { value: this.user.levelOfDetail });
+    $scope.showLevelOfDetail = function() {
+      var selected = $filter('filter')($scope.data.levelsOfDetail, { value: $scope.user.levelOfDetail });
       return selected[0].text;
     };
 
-    //Begin Datepicker stuff.
-    // this.datePickerStatus = {
-    //   opened: false
-    // };
+    $scope.showRestDays = function() {
+      var selected = [];
 
-    // this.datePickerOpened = {};
+      angular.forEach($scope.data.daysOfTheWeek, function(dow) {
+        if ($scope.user.preferredRestDays.indexOf(dow.value) >= 0) {
+          selected.push(dow.text);
+        }
+      });
 
-    // this.openDatePicker = function($event, elementOpened) {
-    //   // this.datePickerStatus.opened = true;
-    //   $event.preventDefault();
-    //   $event.stopPropagation();
-    //   this.datePickerOpened[elementOpened] = !this.datePickerOpened[elementOpened];
-    // };
+      return selected.length ? selected.join(', ') : 'None set';
+    };
 
-    this.ftpDateOptions = {
+    $scope.ftpDateOptions = {
       formatYear: 'yy',
       startingDay: 1,
       showWeeks: false,
       maxDate: moment().toDate()
     };
-    //End Datepicker stuff.
 
-    this.addFTP = function() {
+    $scope.addFTP = function() {
       var inserted = {
-        ftp: 0,
+        ftp: 99,
         ftpTestDate: new Date(),
         ftpSource: 'manual'
       };
-      this.user.ftpLog.push(inserted);
+      $scope.user.ftpLog.push(inserted);
+      return $scope.updateUserProfile(true);
     };
 
-    this.updateLevelOfDetail = function(level) {
-      //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
-      var n = ~~Number(level);
+    $scope.removeFTP = function(ftpItem) {
+      _.pull($scope.user.ftpLog, ftpItem);
+      return $scope.updateUserProfile(true);
+    };
 
-      if (n === this.user.levelOfDetail) {
-        //no change.
-        return;
+    //TODO: if FTP is edited, change source to manual.
+
+    $scope.checkFirstName = function(name) {
+      if (!name) {
+        return 'First name is required';
       }
 
-      if (String(n) === level && (n >= 1 && n <= 3)) {
-        return this.updateUserProfile(true);
+      $scope.user.firstName = name;
+      return $scope.updateUserProfile(true);
+    };
+
+    $scope.checkLastName = function(name) {
+      if (!name) {
+        return 'Last name is required';
       }
 
-      return 'Valid levelsOfDetail are 1, 2 and 3.';
-    }
+      $scope.user.lastName = name;
+      return $scope.updateUserProfile(true);
+    };
 
-    // Update a user profile
-    this.updateUserProfile = function(isValid) {
+    $scope.checkEmail = function(email) {
+      var EMAIL_REGEXP = /^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
+
+      if (!EMAIL_REGEXP.test(email)) {
+        return 'Invalid email address';
+      }
+
+      $scope.user.email = email;
+      return $scope.updateUserProfile(true);
+    };
+
+    $scope.updateUserProfile = function(isValid) {
       if (!isValid) {
         $scope.$broadcast('show-errors-check-validity', 'userForm');
         return false;
       }
 
-      var user = new Users(this.user);
+      var user = new Users($scope.user);
 
       user.$update(function(response) {
-        $scope.$broadcast('show-errors-reset', 'userForm');
         toastr.success('Your profile has been updated.', 'Profile Saved');
         Authentication.user = response;
-        //$state.go('season');
+        initUser(Authentication.user);
+        return true;
       }, function(response) {
         toastr.error(response.data.message);
+        return false;
       });
     };
   }
