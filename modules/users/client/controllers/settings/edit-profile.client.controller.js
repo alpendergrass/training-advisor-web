@@ -1,20 +1,26 @@
 'use strict';
 
-angular.module('users').controller('EditProfileController', ['$scope', '$http', '$state', '$filter', 'Users', 'Authentication', 'moment', 'toastr',
-  function($scope, $http, $state, $filter, Users, Authentication, moment, toastr) {
+angular.module('users').controller('EditProfileController', ['$scope', '$http', '$state', '$filter', '_', 'Users', 'Authentication', 'moment', 'toastr',
+  function($scope, $http, $state, $filter, _, Users, Authentication, moment, toastr) {
     var jQuery = window.jQuery;
 
     angular.element(document).ready(function() {
       jQuery('[data-toggle="popover"]').popover({ trigger: 'hover' });
     });
 
+    // TODO: this is a dup of a function in the TD Util service.
+    // Should be in a Core Util service.
+    var toNumericDate = function(date) {
+      var dateString = moment(date).format('YYYYMMDD');
+      return parseInt(dateString, 10);
+    };
+
     var initUser = function(user) {
       $scope.user = user;
-      $scope.user.thresholdPowerTestDate = new Date($scope.user.thresholdPowerTestDate);
       $scope.user.ftpLog.forEach(function (ftpLogItem) {
-        ftpLogItem.ftpTestDate = new Date(ftpLogItem.ftpTestDate);
+        ftpLogItem.ftpDate = new Date(ftpLogItem.ftpDate);
       });
-    }
+    };
 
     initUser(Authentication.user);
 
@@ -32,6 +38,10 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
         { value: 1, text: 'Show me advice' },
         { value: 2, text: 'Show me advice and numbers' },
         { value: 3, text: 'Give me super powers' }
+      ],
+      autoFetchOptions: [
+        { value: true, text: 'Fetch Strava activities automatically' },
+        { value: false, text: 'Do not fetch Strava activities automatically' }
       ]
     };
 
@@ -62,16 +72,16 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.addFTP = function() {
       var inserted = {
         ftp: 99,
-        ftpTestDate: new Date(),
+        ftpDate: new Date(),
         ftpSource: 'manual'
       };
       $scope.user.ftpLog.push(inserted);
-      return $scope.updateUserProfile(true);
+      return $scope.updateUserProfile();
     };
 
     $scope.removeFTP = function(ftpItem) {
       _.pull($scope.user.ftpLog, ftpItem);
-      return $scope.updateUserProfile(true);
+      return $scope.updateUserProfile();
     };
 
     //TODO: if FTP is edited, change source to manual.
@@ -82,7 +92,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       }
 
       $scope.user.firstName = name;
-      return $scope.updateUserProfile(true);
+      return $scope.updateUserProfile();
     };
 
     $scope.checkLastName = function(name) {
@@ -91,7 +101,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       }
 
       $scope.user.lastName = name;
-      return $scope.updateUserProfile(true);
+      return $scope.updateUserProfile();
     };
 
     $scope.checkEmail = function(email) {
@@ -102,16 +112,18 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       }
 
       $scope.user.email = email;
-      return $scope.updateUserProfile(true);
+      return $scope.updateUserProfile();
     };
 
-    $scope.updateUserProfile = function(isValid) {
-      if (!isValid) {
-        $scope.$broadcast('show-errors-check-validity', 'userForm');
-        return false;
-      }
-
+    $scope.updateUserProfile = function() {
       var user = new Users($scope.user);
+
+      //Sort ftpLog by newest to oldest test date.
+      user.ftpLog = _.orderBy(user.ftpLog, 'ftpDate', 'desc');
+
+      _.forEach(user.ftpLog, function(item) {
+        item.ftpDateNumeric = toNumericDate(item.ftpDate);
+      });
 
       user.$update(function(response) {
         toastr.success('Your profile has been updated.', 'Profile Saved');

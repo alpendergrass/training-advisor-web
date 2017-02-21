@@ -1,6 +1,6 @@
 <section ng-controller="EditProfileController">
   <div class="row">
-    <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-5">
+    <div class="col-xs-offset-1 col-xs-10 col-xl-offset-1 col-xl-5">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4>About You</h4>
@@ -16,28 +16,29 @@
             </label>
             <hr>
             <label for="timezone">Your Timezone *</label>
-            <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile(true)" sort-by="offset" show-local="true" set-local="true" width="230px" class="small"></timezone-selector>
+            <div class="text-danger bottom-buffer" ng-show="!user.timezone"><strong>* Please select your timezone *</strong></div>
+            <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile()" sort-by="offset" show-local="true" width="230px" class="small"></timezone-selector>
             <hr>
             <label>Functional Threshold Power *</label>
-            <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* FTP is Required *</strong></div>
+            <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* Please provide FTP *</strong></div>
             <div ng-show="user.ftpLog.length > 0">
               <p>
                 <table class="table table-hover">
                   <thead>
                     <tr style="font-weight: bold">
                       <th>FTP</th>
-                      <th>Test Date</th>
+                      <th style="width:80%">Test Date</th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr ng-repeat="ftpLogItem in user.ftpLog">
                       <td>
-                        <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="1" e-max="999" e-step="1" e-required onbeforesave="updateUserProfile(true)">{{ ftpLogItem.ftp }}</a>
+                        <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="1" e-max="999" e-step="1" e-required onaftersave="updateUserProfile()">{{ ftpLogItem.ftp }}</a>
                       </td>
                       <td>
-                        <a href="#" editable-bsdate="ftpLogItem.ftpTestDate" onbeforesave="updateUserProfile(true)" e-required e-readonly="true" e-show-calendar-button="false" e-datepicker-options="ftpDateOptions" e-is-open="true" e-show-button-bar="false" e-ng-click="openDatePicker($event,'$data')" e-datepicker-popup="dd MMMM yyyy">
-                        {{ ftpLogItem.ftpTestDate | date:"dd MMMM yyyy" }}
+                        <a href="#" editable-bsdate="ftpLogItem.ftpDate" onaftersave="updateUserProfile()" e-required e-readonly="true" e-show-calendar-button="false" e-datepicker-options="ftpDateOptions" e-is-open="true" e-show-button-bar="false" e-ng-click="openDatePicker($event,'$data')" e-datepicker-popup="dd MMMM yyyy">
+                        {{ ftpLogItem.ftpDate | date:"dd MMMM yyyy" }}
                       </a>
                       </td>
                       <td>
@@ -61,7 +62,7 @@
         </div>
       </div>
     </div>
-    <div class="col-xs-offset-1 col-xs-10 col-md-offset-1 col-md-5">
+    <div class="col-xs-offset-1 col-xs-10 col-xl-offset-1 col-xl-5">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4>Preferences</h4>
@@ -69,26 +70,29 @@
         <div class="panel-body">
           <div class="top-buffer">
             <label for="emailNewsletter">Newsletter :&nbsp;
-              <a href="#" editable-checkbox="user.emailNewsletter" e-title="Send the Tacit Training newsletter?" buttons="no" onaftersave="updateUserProfile(true)">{{ user.emailNewsletter && "Send me the email newsletter" || "Do not send me the email newsletter" }}</a></label>
+              <a href="#" editable-checkbox="user.emailNewsletter" e-title="Send the Tacit Training newsletter?" buttons="no" onaftersave="updateUserProfile()">{{ user.emailNewsletter && "Send me the email newsletter" || "Do not send me the email newsletter" }}</a></label>
             <hr>
             <label>
               <a tabindex="0" role="button" data-toggle="popover" data-content="You may select one or more days that you typically rest to have Tacit Training schedule these days as rest days.">
                 <span class="popup-link text-muted">Rest Days</span></a> :&nbsp;
-              <a href="#" editable-select="user.preferredRestDays" e-multiple e-ng-options="s.value as s.text for s in ::data.daysOfTheWeek" onaftersave="updateUserProfile(true)">{{ showRestDays() }}</a></label>
+              <a href="#" editable-select="user.preferredRestDays" e-multiple e-ng-options="s.value as s.text for s in ::data.daysOfTheWeek" onaftersave="updateUserProfile()">{{ showRestDays() }}</a>
+            </label>
             <hr>
             <label>
-              <a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If you select 'Fetch Strava activities automatically', when Strava notifies us of new activities we will retrieve your activity data from Strava. Otherwise you will need to manually sync your Strava activities on the My Training Day page.">
+              <a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If you select 'Fetch Strava activities automatically', when Strava notifies us of new activities we will retrieve your activity data from Strava. Otherwise you will need to manually sync your Strava activities on My Training Day page.">
                 <span class="popup-link text-muted">Strava Sync</span>
               </a> :&nbsp;
-              <a href="#" editable-checkbox="user.autoFetchStravaActivities" e-title="Fetch Strava activities automatically?" buttons="no" onaftersave="updateUserProfile(true)">{{ user.autoFetchStravaActivities && "Auto-fetch" || "Do not auto-fetch" }}</a></label>
+              <a href="#" editable-radiolist="user.autoFetchStravaActivities" e-ng-options="s.value as s.text for s in ::data.autoFetchOptions track by s.value" buttons="no" onaftersave="updateUserProfile()">{{ user.autoFetchStravaActivities && "Auto-fetch" || "Do not auto-fetch" }}</a></label>
+
+            </label>
+            <div class="text-danger bottom-buffer" ng-show="user.autoFetchStravaActivities === null"><strong>* Please select an auto-fetch option *</strong></div>
             <hr>
             <label for="levelOfDetail">Level of Detail :&nbsp;
-              <a href="#" editable-radiolist="user.levelOfDetail" e-ng-options="s.value as s.text for s in ::data.levelsOfDetail track by s.value" buttons="no" onaftersave="updateUserProfile(true)">{{ showLevelOfDetail() }}</a></label>
+              <a href="#" editable-radiolist="user.levelOfDetail" e-ng-options="s.value as s.text for s in ::data.levelsOfDetail track by s.value" buttons="no" onaftersave="updateUserProfile()">{{ showLevelOfDetail() }}</a></label>
             <hr>
             <label><a tabindex="0" role="button" data-toggle="popover" data-placement="top" data-content="If power meter data is not available for a ride, by default we use Strava's estimated power to compute Training Load. However, some users report that estimated power is not reliable in their region. If you prefer, we can use Strava's Suffer Score for your Training Load rather than computing Training Load using estimated power. Note that Strava provides Suffer Score for Strava Premium members only and is only provided if heart rate is recorded for your ride."><span class="popup-link text-muted">Estimated Power or Suffer Score</span></a>
               <span class="small text-danger"><em>Experimental</em></span> :&nbsp;
-            <br>
-            <a href="#" editable-checkbox="user.favorSufferScoreOverEstimatedPower" e-title="Use Suffer Score When No Power Meter?" buttons="no" onaftersave="updateUserProfile(true)">{{ user.favorSufferScoreOverEstimatedPower && "Use Suffer Score When No Power Meter" || "Use Estimated Power When No Power Meter" }}</a></label>
+            <a href="#" editable-checkbox="user.favorSufferScoreOverEstimatedPower" e-title="Use Suffer Score When No Power Meter?" buttons="no" onaftersave="updateUserProfile()">{{ user.favorSufferScoreOverEstimatedPower && "Use Suffer Score When No Power Meter" || "Use Estimated Power When No Power Meter" }}</a></label>
           </div>
         </div>
       </div>
