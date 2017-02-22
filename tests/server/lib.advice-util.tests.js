@@ -1,6 +1,5 @@
 'use strict';
 
-
 var path = require('path'),
   should = require('should'),
   mongoose = require('mongoose'),
@@ -8,6 +7,7 @@ var path = require('path'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
+  tdUtil = require(path.resolve('./modules/trainingdays/server/lib/util')),
   adviceConstants = require('../../server/lib/advice-constants'),
   adviceUtil = require('../../server/lib/advice-util');
 
@@ -31,13 +31,13 @@ describe('advice-util Unit Tests:', function () {
 
   describe('Method isTestingDue', function () {
     it('should return true if testing is due', function (done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+      user.ftpLog[0].ftpDateNumeric = tdUtil.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate());
       (adviceUtil.isTestingDue(user, trainingDay)).should.match(true);
       done();
     });
 
     it('should return false if testing is not due', function (done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
+      user.ftpLog[0].ftpDateNumeric = tdUtil.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate());
       (adviceUtil.isTestingDue(user, trainingDay)).should.match(false);
       done();
     });

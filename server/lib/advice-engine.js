@@ -160,7 +160,7 @@ function generateActivityFromAdvice(params, callback) {
 
       if (planActivity.activityType === 'test') {
         //Make it look as if the user tested when recommended.
-        user.thresholdPowerTestDate = moment(trainingDay.dateNumeric.toString()).toDate();
+        user.ftpLog[0].ftpDateNumeric = trainingDay.dateNumeric;
         user.save(function(err) {
           if (err) {
             return callback(err, null);
@@ -194,7 +194,7 @@ module.exports.generatePlan = function(params, callback) {
 
   var user = params.user,
     adviceParams = _.clone(params),
-    savedThresholdPowerTestDate = user.thresholdPowerTestDate,
+    savedFTPDateNumeric = user.ftpLog[0].ftpDateNumeric,
     numericEffectiveGoalDate;
 
   // Make the following a async.series, use promises or something to clean it up. Yuck.
@@ -291,7 +291,7 @@ module.exports.generatePlan = function(params, callback) {
 
                         dbUtil.removePlanGenerationCompletedActivities(user)
                           .then(function() {
-                            user.thresholdPowerTestDate = savedThresholdPowerTestDate;
+                            user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
                             return user.save();
                           })
                           .then(function() {

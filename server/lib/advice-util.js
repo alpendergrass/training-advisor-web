@@ -13,7 +13,7 @@ module.exports.isTestingDue = function(user, trainingDay) {
   }
 
   var now = moment(trainingDay.dateNumeric.toString());
-  var testDate = moment(user.thresholdPowerTestDate);
+  var testDate = moment(user.ftpLog[0].ftpDateNumeric.toString()).toDate(); //first ftp should be most recent.
   var howLong = now.diff(testDate, 'days');
   return howLong >= adviceConstants.testingNagDayCount;
 };

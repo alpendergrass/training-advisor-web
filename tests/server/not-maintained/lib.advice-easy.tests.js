@@ -221,7 +221,6 @@ describe('advice-easy Unit Tests:', function() {
               if (err) {
                 console.log('updateMetrics: ' + err);
               }
-              //console.log('returned metricizedTrainingDay: ' + metricizedTrainingDay);
               trainingDay.period = 't6';
 
               return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
@@ -238,7 +237,7 @@ describe('advice-easy Unit Tests:', function() {
     });
 
     it('should return easy recommendation if testing is due and somewhat fatigued', function(done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       let metrics = util.getMetrics(trainingDay, 'actual');
       metrics.form = adviceConstants.testingEligibleFormThreshold;
 

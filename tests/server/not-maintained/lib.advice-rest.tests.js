@@ -50,7 +50,7 @@ describe('advice-rest Unit Tests:', function() {
 
     it('should not return rest if today is not a preferred rest day, testing is not overdue and not overly fatigued', function(done) {
       user.preferredRestDays = [moment(trainingDate).add(1, 'days').day().toString()];
-      user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate())
       metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
@@ -90,7 +90,7 @@ describe('advice-rest Unit Tests:', function() {
     });
 
     it('should not return rest if testing is not due and not overly fatigued', function(done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate())
       metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
@@ -103,7 +103,7 @@ describe('advice-rest Unit Tests:', function() {
     });
 
     it('should return rest recommendation if testing is due and somewhat fatigued', function(done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       metrics.form = adviceConstants.restNeededForTestingThreshold;
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
@@ -117,7 +117,7 @@ describe('advice-rest Unit Tests:', function() {
     });
 
     it('should not return rest if testing is due and somewhat fatigued but in t6 period', function(done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       metrics.form = adviceConstants.restNeededForTestingThreshold;
       trainingDay.period = 't6';
 

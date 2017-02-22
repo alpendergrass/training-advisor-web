@@ -1,6 +1,5 @@
 'use strict';
 
-
 var path = require('path'),
   should = require('should'),
   mongoose = require('mongoose'),
@@ -33,7 +32,7 @@ describe('advice-test Unit Tests:', function () {
 
   describe('Test Rules', function () {
     it('should not return test recommendation if testing is not due', function (done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate())
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
         should.not.exist(err);
@@ -45,7 +44,7 @@ describe('advice-test Unit Tests:', function () {
     });
 
     it('should return test recommendation if testing is due and form is recovered', function (done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
 
       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
@@ -58,7 +57,7 @@ describe('advice-test Unit Tests:', function () {
     });
 
     it('should not return test recommendation if testing is due and form is recovered but in t6 period', function (done) {
-      user.thresholdPowerTestDate = moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days');
+      user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
       trainingDay.period = 't6';
 
