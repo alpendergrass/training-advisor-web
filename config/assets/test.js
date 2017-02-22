@@ -13,6 +13,7 @@ module.exports = {
     // server: ['modules/advisor/tests/server/*.js'],
     // server: ['modules/advisor/tests/server/lib.advice-load.tests.js'],
     // server: ['modules/users/tests/server/**/*.js'],
+    // server: ['modules/users/tests/server/user.server.routes.tests.js'],
     e2e: ['modules/*/tests/e2e/**/*.js']
   }
 };

@@ -1,14 +1,16 @@
 'use strict';
 
 
-var mongoose = require('mongoose'),
+var path = require('path'),
+  mongoose = require('mongoose'),
   moment = require('moment'),
   _ = require('lodash'),
   Schema = mongoose.Schema,
   crypto = require('crypto'),
   validator = require('validator'),
   generatePassword = require('generate-password'),
-  owasp = require('owasp-password-strength-test');
+  owasp = require('owasp-password-strength-test'),
+  tdUtil = require(path.resolve('./modules/trainingdays/server/lib/util'));
 
 mongoose.Promise = global.Promise;
 
@@ -124,13 +126,15 @@ var UserSchema = new Schema({
       type: Number,
       min: minFTP,
       max: maxFTP,
-      required: 'Please provide threshold power',
       default: 0
     },
-    ftpTestDate: {
+    ftpDate: {
       type: Date,
-      required: 'Please provide threshold power test date',
       default: Date.now
+    },
+    ftpDateNumeric: {
+      type: Number,
+      default: tdUtil.toNumericDate(moment().toDate())
     },
     ftpSource: {
       type: String,

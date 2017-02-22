@@ -5,6 +5,7 @@ var path = require('path'),
   moment = require('moment-timezone'),
   TrainingDay = mongoose.model('TrainingDay'),
   User = mongoose.model('User'),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util'));
 
 mongoose.Promise = global.Promise;
@@ -51,14 +52,16 @@ module.exports = {
 
 function restructureFTP(user) {
   return new Promise(function(resolve, reject) {
-
     if (!user.thresholdPower || !user.thresholdPowerTestDate) {
-      return resolve(true);
+      return resolve(false);
     }
+
+    let userTimezone = user.timezone || 'America/New_York';
 
     let ftpData = {
       ftp: user.thresholdPower,
-      ftpTestDate: user.thresholdPowerTestDate,
+      ftpDate: user.thresholdPowerTestDate,
+      ftpDateNumeric: util.toNumericDate(moment.tz(user.thresholdPowerTestDate, userTimezone).startOf('day').toDate()),
       ftpSource: 'migration'
     };
 
@@ -78,7 +81,6 @@ function restructureFTP(user) {
 
 function rollbackFTPRestructure(user) {
   return new Promise(function(resolve, reject) {
-
     user.ftpLog = [];
     user.save()
       .then(function(results) {

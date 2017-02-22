@@ -282,12 +282,12 @@ describe('strava-util Unit Tests:', function() {
         });
     });
 
-    it('should return error when thresholdPower has not been set ', function(done) {
+    it('should return error when ftp has not been set ', function(done) {
       stravaStub.streams.activity = function(parm, callback) {
         return callback(null, wattagePayload);
       };
 
-      startingPoint.user.thresholdPower = 0;
+      startingPoint.user.ftpLog = [];
 
       testHelpers.updateTrainingDay(startingPoint, function(err) {
         if (err) {
@@ -296,11 +296,11 @@ describe('strava-util Unit Tests:', function() {
 
         return stravaUtil.fetchActivity(user, activityID) //.should.be.rejected();
           .then(function(result) {
-            done(new Error('Promise was unexpectedly fulfilled in thresholdPower test. Result: ' + result));
+            done(new Error('Promise was unexpectedly fulfilled in missing ftp test. Result: ' + result));
           },
           function(err) {
             should.exist(err);
-            (err.message).should.containEql('user.thresholdPower is not set');
+            (err.message).should.containEql('user ftp is not set');
             done();
           }).catch(function (err) {
             done(err);
@@ -627,8 +627,8 @@ describe('strava-util Unit Tests:', function() {
           moving_time: 9342
         }],
         weightedAverageWatts = 189,
-        intensity = Math.round((weightedAverageWatts / user.thresholdPower) * 100) / 100,
-        expectedLoad = Math.round(((9342 * weightedAverageWatts * intensity) / (user.thresholdPower * 3600)) * 100);
+        intensity = Math.round((weightedAverageWatts / user.ftpLog[0].ftp) * 100) / 100,
+        expectedLoad = Math.round(((9342 * weightedAverageWatts * intensity) / (user.ftpLog[0].ftp * 3600)) * 100);
 
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(null, activities);
@@ -839,32 +839,6 @@ describe('strava-util Unit Tests:', function() {
           done(err);
         });
     });
-
-    // it('should return correct load for completedActivity when strava.athlete.listActivities returns activity for requested day', function() {
-    //   var activities = [{
-    //       id: activityID,
-    //       name: 'Lunch Ride',
-    //       start_date_local: moment.utc(workoutDate).format(),
-    //       weighted_average_watts: 189,
-    //       device_watts: true,
-    //       moving_time: 9342
-    //     }],
-    //     weightedAverageWatts = 189,
-    //     intensity = Math.round((weightedAverageWatts / user.thresholdPower) * 100) / 100,
-    //     expectedLoad = Math.round(((9342 * weightedAverageWatts * intensity) / (user.thresholdPower * 3600)) * 100);
-
-    //   stravaStub.athlete.listActivities = function(parm, callback) {
-    //     return callback(null, activities);
-    //   };
-
-    //   return stravaUtil.downloadAllActivities(user, startDateNumeric)
-    //     .then(function(statusMessage) {
-    //       (statusMessage.text).should.containEql('downloaded one new Strava activity');
-    //     },
-    //     function(err) {
-    //       throw err;
-    //     });
-    // });
 
   });
 

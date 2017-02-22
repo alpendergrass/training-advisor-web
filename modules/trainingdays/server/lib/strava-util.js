@@ -116,9 +116,6 @@ var processActivity = function(stravaActivity, trainingDay) {
       return resolve();
     }
 
-    if (!trainingDay.user.thresholdPower) {
-      return reject(new Error(`user.thresholdPower is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
-    }
 
     getWeightedAverageWatts(trainingDay.user, stravaActivity)
       .then(function(weightedAverageWatts) {
@@ -134,12 +131,18 @@ var processActivity = function(stravaActivity, trainingDay) {
           newActivity.load = stravaActivity.suffer_score;
           newActivity.loadIsSufferScore = true;
         } else {
+          if (trainingDay.user.ftpLog.length < 1) {
+            return reject(new Error(`user ftp is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
+          }
+
           // IF = NP/FTP
-          newActivity.intensity = Math.round((weightedAverageWatts / trainingDay.user.thresholdPower) * 100) / 100;
+          let ftp = util.getFTP(trainingDay.user, trainingDay.dateNumeric);
+          console.log('ftp: ', ftp);
+          newActivity.intensity = Math.round((weightedAverageWatts / ftp) * 100) / 100;
 
           // TSS = [(s x W x IF) / (FTP x 3600)] x 100
           // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
-          newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * newActivity.intensity) / (trainingDay.user.thresholdPower * 3600)) * 100);
+          newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * newActivity.intensity) / (ftp * 3600)) * 100);
 
           if (!stravaActivity.device_watts) {
             newActivity.loadIsFromEstimatedPower = true;
@@ -289,7 +292,6 @@ module.exports.downloadActivities = function(user, trainingDay) {
           return resolve(updatedTrainingDay);
         })
         .catch(function(err) {
-          console.log('err: ', err);
           return reject(err);
         });
     });

@@ -204,7 +204,7 @@ angular.module('trainingDays')
         };
 
         $scope.downloadActivities = function(provider) {
-          if (!$scope.authentication.user.thresholdPower) {
+          if ($scope.authentication.user.ftpLog.length < 1) {
             toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', {
               allowHtml: true, timeOut: 7000
             });

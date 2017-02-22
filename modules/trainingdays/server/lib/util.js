@@ -36,10 +36,34 @@ module.exports.setMetricsType = function(source) {
   }
 };
 
+//TODO: the following two methods should be in user util.
 module.exports.getTodayInUserTimezone = function(user) {
-  let useTimezone = user.timezone || 'America/New_York';
+  let userTimezone = user.timezone || 'America/New_York';
   let now = moment(); //Fri Nov 04 2016 02:13:27 GMT+0000 (UTC)
-  return moment.tz(now, useTimezone).startOf('day').toDate(); //Thu Nov 03 2016 06:00:00 GMT+0000 (UTC)
+  return moment.tz(now, userTimezone).startOf('day').toDate(); //Thu Nov 03 2016 06:00:00 GMT+0000 (UTC)
+};
+
+module.exports.getFTP = function(user, trainingDateNumeric) {
+  if (user.ftpLog.length < 1) {
+    //should not get here without having at least one ftp.
+    throw new Error(`User ${user.username} has no ftpLog.`);
+  }
+  console.log('trainingDateNumeric: ', trainingDateNumeric);
+
+  // ftpLog is stored sorted by date newest to oldest.
+  // We will return the first ftp that has a date earlier or equal to current.
+  let ftpItem = _.find(user.ftpLog, function(item) {
+    console.log('item.ftpDate: ', (item.ftpDate));
+    console.log('item.ftpDate: ', toNumericDate(item.ftpDate));
+    return toNumericDate(item.ftpDate) <= trainingDateNumeric;
+  });
+
+  if (ftpItem) {
+    return ftpItem.ftp;
+  }
+
+  // if no match, return oldest.
+  return user.ftpLog[user.ftpLog.length - 1].ftp;
 };
 
 // module.exports.sendMessageToUser = function (message, user) {

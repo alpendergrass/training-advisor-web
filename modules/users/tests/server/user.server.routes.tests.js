@@ -35,12 +35,14 @@ describe('User server routes tests', function () {
       email: 'test@test.com',
       username: credentials.username,
       password: credentials.password,
+      notifications: [],
+      ftpLog: [],
       provider: 'local'
     };
 
     user = new User(_user);
 
-    // Save a user to the test db and create new article
+    // Save a user to the test db
     user.save(function (err) {
       should.not.exist(err);
       done();
@@ -621,6 +623,8 @@ describe('User server routes tests', function () {
           var userUpdate = {
             firstName: 'user_update_first',
             lastName: 'user_update_last',
+            notifications: [],
+            ftpLog: []
           };
 
           agent.put('/api/users')
@@ -662,6 +666,8 @@ describe('User server routes tests', function () {
           var userUpdate = {
             firstName: 'user_update_first',
             lastName: 'user_update_last',
+            notifications: [],
+            ftpLog: [],
             roles: ['user', 'admin']
           };
 
@@ -719,6 +725,8 @@ describe('User server routes tests', function () {
           var userUpdate = {
             firstName: 'user_update_first',
             lastName: 'user_update_last',
+            notifications: [],
+            ftpLog: [],
             username: user.username
           };
 
@@ -771,6 +779,8 @@ describe('User server routes tests', function () {
           var userUpdate = {
             firstName: 'user_update_first',
             lastName: 'user_update_last',
+            notifications: [],
+            ftpLog: [],
             email: user.email
           };
 

@@ -13,6 +13,13 @@ var path = require('path'),
 module.exports = {};
 
 module.exports.createUser = function(callback) {
+  let ftpLog = [{
+    ftp: 250,
+    ftpDate: moment().subtract(1, 'days'), //by default, let's make testing not due
+    ftpDateNumeric: util.toNumericDate(moment().subtract(1, 'days').toDate()),
+    ftpSource: 'manual'
+  }];
+
   var user = new User({
     firstName: 'Full',
     lastName: 'Name',
@@ -22,8 +29,7 @@ module.exports.createUser = function(callback) {
     providerData: {},
     username: 'testUsername',
     password: 'M3@n.jsI$Aw3$0m3',
-    thresholdPower: 250,
-    thresholdPowerTestDate: moment().subtract(1, 'days') //by default, let's make testing not due
+    ftpLog: ftpLog
   });
 
   user.save(function (err) {

@@ -140,8 +140,8 @@ exports.oauthCallback = function(strategy) {
           //   return res.redirect('/admin/users');
           // }
 
-          // If user needs to set FTP we should redirect to profile page.
-          if (!user.thresholdPower) {
+          // If user needs to set FTP, timezone or auto-fetch preference we should redirect to profile page.
+          if (!user.ftpLog || user.ftpLog.length < 1 || !user.timezone || user.autoFetchStravaActivities === null) {
             return res.redirect('/settings/profile');
           }
 
@@ -206,7 +206,9 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
               });
 
               if (providerUserProfile.providerData.ftp) {
-                user.thresholdPower = providerUserProfile.providerData.ftp;
+                user.ftpLog = [{
+                  ftp: providerUserProfile.providerData.ftp
+                }];
               }
 
               let eventData = { category: 'User', action: 'New User Login', path: path };

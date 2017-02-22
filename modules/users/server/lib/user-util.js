@@ -16,7 +16,6 @@ var TrainingDay = mongoose.model('TrainingDay'),
 var removeOrphanedNotifications = function(notifications) {
   // Here we will remove any notifications that are associated with training days that no longer exist.
   return new Promise(function(resolve, reject) {
-
     return Promise.all(notifications.map(function(notification) {
       if (notification.lookup) {
         // We are assuming that the lookup is an TD ID.
@@ -73,7 +72,7 @@ var adornNotification = function(notification) {
       notificationType: 'fetchstrava',
       message: 'You need to set your Strava Sync preference.',
       state: 'settings.profile',
-      alert: false,
+      alert: true,
       blocks: ''
     }, {
       notificationType: 'plangen',
@@ -239,7 +238,7 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
 module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, callback) {
   let notifications = [];
 
-  if (!updatedUser.thresholdPower) {
+  if (!updatedUser.ftpLog || updatedUser.ftpLog.length < 1) {
     notifications.push({ notificationType: 'ftp', lookup: '', add: true });
   } else {
     notifications.push({ notificationType: 'ftp', lookup: '' });
@@ -257,8 +256,8 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
     notifications.push({ notificationType: 'fetchstrava', lookup: '' });
   }
 
-  if (userBefore &&
-    (!moment(userBefore.thresholdPowerTestDate).isSame(updatedUser.thresholdPowerTestDate, 'day') ||
+  if (userBefore && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
+    (!moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day') ||
     !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
     notifications.push({ notificationType: 'plangen', lookup: '', add: true });
   }
