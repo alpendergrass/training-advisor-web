@@ -44,6 +44,10 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       autoFetchOptions: [
         { value: true, text: 'Fetch Strava activities automatically' },
         { value: false, text: 'Do not fetch Strava activities automatically' }
+      ],
+      favorSufferScoreOptions: [
+        { value: false, text: 'Use Estimated Power When No Power Meter' },
+        { value: true, text: 'Use Suffer Score When No Power Meter' }
       ]
     };
 
