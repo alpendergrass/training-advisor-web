@@ -135,8 +135,14 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
         url: '/syncActivities',
         parent: 'season',
         templateUrl: '/modules/trainingdays/client/views/partials/sync-activities.client.view.html',
-        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'TrainingDays', 'Util', function($scope, $uibModalInstance, moment, toastr, TrainingDays, Util) {
+        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util', function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util) {
           $scope.syncActivities = function() {
+            if (Authentication.user.ftpLog.length < 1) {
+              toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', {
+                allowHtml: true, timeOut: 7000
+              });
+              return;
+            }
             toastr.info('Strava sync started.', 'Strava Sync');
             TrainingDays.downloadAllActivities({
               todayNumeric: Util.toNumericDate(moment())
@@ -145,6 +151,9 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
               $uibModalInstance.close(response);
             }, function(errorResponse) {
               console.log('errorResponse: ', errorResponse);
+              toastr.error(errorResponse.data.message, {
+                timeOut: 7000
+              });
             });
             $uibModalInstance.close('sync');
           };

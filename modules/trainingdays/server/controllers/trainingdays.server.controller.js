@@ -362,10 +362,6 @@ exports.update = function(req, res) {
 
     let user = req.user;
 
-    // if (refreshAdvice) {
-    //   notifications.push({ notificationType: 'plangen', lookup: '', add: true });
-    // }
-
     if (trainingDay.scheduledEventRanking === 1) {
       // We prefer to know terrain for goal events.
       if (trainingDay.eventTerrain) {
@@ -714,19 +710,13 @@ exports.downloadAllActivities = function(req, res) {
 
   let user = req.user;
   let numericToday = parseInt(req.params.todayNumeric, 10);
-  let errorMessage = {
-    type: 'error',
-    text: 'We encountered an error retrieving Strava activities.',
-    title: 'Strava Sync',
-    created: Date.now(),
-    username: user.username,
-    activityCount: 0
-  };
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
       console.log('Strava downloadAllActivities err: ', err);
-      return res.json(errorMessage);
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
     }
 
     if (startDay) {
@@ -752,11 +742,14 @@ exports.downloadAllActivities = function(req, res) {
         })
         .catch(function(err) {
           console.log('Strava downloadAllActivities err: ', err);
-          return res.json(errorMessage);
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
         });
     } else {
-      errorMessage.text = 'A start day is required in order to sync with Strava.';
-      return res.json(errorMessage);
+      return res.status(400).send({
+        message: 'A start day is required in order to sync with Strava.'
+      });
     }
   });
 };

@@ -15,10 +15,10 @@
     <hr>
     <label>Functional Threshold Power *</label>
     <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* Please provide FTP *</strong></div>
-    <div ng-show="user.ftpLog.length > 0">
+    <div>
       <p>
         <table class="table table-hover">
-          <thead>
+          <thead ng-show="user.ftpLog.length > 0">
             <tr style="font-weight: bold">
               <th>FTP</th>
               <th>Date</th>

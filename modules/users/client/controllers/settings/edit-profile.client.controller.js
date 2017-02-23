@@ -89,11 +89,12 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
 
     $scope.addFTP = function() {
       $scope.newFtp = {
-        ftp: 0,
+        ftp: 100,
         ftpDate: new Date(),
         ftpSource: 'manual'
       };
-      $scope.newFtpForm.$show()
+
+      $scope.newFtpForm.$show();
     };
 
     $scope.cancelAddFTP = function() {

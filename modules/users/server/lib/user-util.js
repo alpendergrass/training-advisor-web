@@ -256,9 +256,11 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
     notifications.push({ notificationType: 'fetchstrava', lookup: '' });
   }
 
-  if (userBefore && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
-    (!moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day') ||
-    !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
+  // If latest ftp date was changed or if rest days were changed, recommend plangen.
+  if (userBefore &&
+    (userBefore.ftpLog && userBefore.ftpLog.length > 0 && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
+    !moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day')) ||
+    !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays)) {
     notifications.push({ notificationType: 'plangen', lookup: '', add: true });
   }
 
