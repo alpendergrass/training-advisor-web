@@ -10,6 +10,7 @@ function toNumericDate(date) {
 
 module.exports = {};
 
+// TODO: the toNumericDate method should be in core util.
 module.exports.toNumericDate = toNumericDate;
 
 module.exports.getMetrics = function(trainingDay, metricsType) {
@@ -36,7 +37,7 @@ module.exports.setMetricsType = function(source) {
   }
 };
 
-//TODO: the following two methods should be in user util.
+// TODO: the following two methods should be in user util.
 module.exports.getTodayInUserTimezone = function(user) {
   let userTimezone = user.timezone || 'America/New_York';
   let now = moment(); //Fri Nov 04 2016 02:13:27 GMT+0000 (UTC)

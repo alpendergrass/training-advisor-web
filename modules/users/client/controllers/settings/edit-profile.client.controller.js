@@ -24,6 +24,8 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
 
     initUser(Authentication.user);
 
+    $scope.newFtp = null;
+
     $scope.data = {
       daysOfTheWeek: [
         { value: '1', text: 'Monday' },
@@ -69,15 +71,35 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       maxDate: moment().toDate()
     };
 
+    $scope.ftpDatePickerStatus = {
+      opened: false
+    };
+
+    $scope.openFtpDatePicker = function($event) {
+      $scope.ftpDatePickerStatus.opened = true;
+    };
+
+    $scope.newFtpDatePickerStatus = {
+      opened: false
+    };
+
+    $scope.openNewFtpDatePicker = function($event) {
+      $scope.newFtpDatePickerStatus.opened = true;
+    };
+
     $scope.addFTP = function() {
-      var inserted = {
-        ftp: 99,
+      $scope.newFtp = {
+        ftp: 0,
         ftpDate: new Date(),
         ftpSource: 'manual'
       };
-      $scope.user.ftpLog.push(inserted);
-      return $scope.updateUserProfile();
+      $scope.newFtpForm.$show()
     };
+
+    $scope.cancelAddFTP = function() {
+      $scope.newFtp = null;
+    };
+
 
     $scope.removeFTP = function(ftpItem) {
       _.pull($scope.user.ftpLog, ftpItem);
@@ -115,8 +137,22 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       return $scope.updateUserProfile();
     };
 
+    $scope.validateFtp = function(ftp) {
+      // Because control is defined as a number with max and min, invalid
+      // values will not be passed. FTP likely will be null in this case.
+      if (!Number.isInteger(ftp) || ftp < 1 || ftp > 999) {
+        return 'Valid value 1 - 999.';
+      }
+
+      return;
+    };
+
     $scope.updateUserProfile = function() {
       var user = new Users($scope.user);
+
+      if ($scope.newFtp) {
+        user.ftpLog.push($scope.newFtp);
+      }
 
       //Sort ftpLog by newest to oldest test date.
       user.ftpLog = _.orderBy(user.ftpLog, 'ftpDate', 'desc');
@@ -126,6 +162,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       });
 
       user.$update(function(response) {
+        $scope.newFtp = null;
         toastr.success('Your profile has been updated.', 'Profile Saved');
         Authentication.user = response;
         initUser(Authentication.user);

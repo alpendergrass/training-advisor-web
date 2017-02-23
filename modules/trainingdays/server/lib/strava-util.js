@@ -135,9 +135,9 @@ var processActivity = function(stravaActivity, trainingDay) {
             return reject(new Error(`user ftp is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
           }
 
-          // IF = NP/FTP
           let ftp = util.getFTP(trainingDay.user, trainingDay.dateNumeric);
-          console.log('ftp: ', ftp);
+
+          // IF = NP/FTP
           newActivity.intensity = Math.round((weightedAverageWatts / ftp) * 100) / 100;
 
           // TSS = [(s x W x IF) / (FTP x 3600)] x 100
