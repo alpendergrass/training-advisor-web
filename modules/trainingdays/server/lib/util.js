@@ -49,13 +49,10 @@ module.exports.getFTP = function(user, trainingDateNumeric) {
     //should not get here without having at least one ftp.
     throw new Error(`User ${user.username} has no ftpLog.`);
   }
-  console.log('trainingDateNumeric: ', trainingDateNumeric);
 
   // ftpLog is stored sorted by date newest to oldest.
   // We will return the first ftp that has a date earlier or equal to current.
   let ftpItem = _.find(user.ftpLog, function(item) {
-    console.log('item.ftpDate: ', (item.ftpDate));
-    console.log('item.ftpDate: ', toNumericDate(item.ftpDate));
     return toNumericDate(item.ftpDate) <= trainingDateNumeric;
   });
 
