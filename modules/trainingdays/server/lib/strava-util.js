@@ -39,9 +39,17 @@ var updateFtpFromStrava = function(user) {
           ftpDateNumeric: util.toNumericDate(today),
           ftpSource: 'strava'
         };
-        user.ftpLog.push(newFtp);
+
         //Sort ftpLog by newest to oldest test date.
         user.ftpLog = _.orderBy(user.ftpLog, 'ftpDate', 'desc');
+
+        // If we download ftp for same date as latest existing, replace existing.
+        if (user.ftpLog[0].ftpDateNumeric === newFtp.ftpDateNumeric) {
+          user.ftpLog[0] = newFtp;
+        } else {
+          user.ftpLog.push(newFtp);
+          user.ftpLog = _.orderBy(user.ftpLog, 'ftpDate', 'desc');
+        }
 
         user.save()
           .then(function(updatedUser) {
@@ -178,7 +186,7 @@ var processActivity = function(stravaActivity, trainingDay) {
           }
 
           let ftp = util.getFTP(trainingDay.user, trainingDay.dateNumeric);
-
+          console.log('date, ftp: ', trainingDay.dateNumeric, ftp);
           // IF = NP/FTP
           newActivity.intensity = Math.round((weightedAverageWatts / ftp) * 100) / 100;
 
