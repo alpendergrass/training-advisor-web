@@ -37,7 +37,7 @@ var ftpSources = {
 };
 
 var notificationTypes = {
-  values: 'ftp|timezone|fetchstrava|start|goal|plangen|terrain'.split('|'),
+  values: 'ftp|timezone|fetchstrava|fetchstravaftp|start|goal|plangen|terrain'.split('|'),
   message: invalidDataErrorMessage
 };
 
@@ -169,6 +169,10 @@ var UserSchema = new Schema({
   providerData: {},
   additionalProvidersData: {},
   autoFetchStravaActivities: {
+    type: Boolean,
+    default: null
+  },
+  autoUpdateFtpFromStrava: {
     type: Boolean,
     default: null
   },

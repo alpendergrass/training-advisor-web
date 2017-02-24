@@ -141,7 +141,7 @@ exports.oauthCallback = function(strategy) {
           // }
 
           // If user needs to set FTP, timezone or auto-fetch preference we should redirect to profile page.
-          if (!user.ftpLog || user.ftpLog.length < 1 || !user.timezone || user.autoFetchStravaActivities === null) {
+          if (!user.ftpLog || user.ftpLog.length < 1 || !user.timezone || user.autoFetchStravaActivities === null|| user.autoUpdateFtpFromStrava === null) {
             return res.redirect('/settings/profile');
           }
 

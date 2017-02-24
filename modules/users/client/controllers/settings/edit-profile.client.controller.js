@@ -41,9 +41,13 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
         { value: 2, text: 'Show me advice and numbers' },
         { value: 3, text: 'Give me super powers' }
       ],
-      autoFetchOptions: [
+      autoFetchActivityOptions: [
         { value: true, text: 'Fetch Strava activities automatically' },
         { value: false, text: 'Do not fetch Strava activities automatically' }
+      ],
+      autoUpdateFtpOptions: [
+        { value: true, text: 'Update FTP when Strava FTP update is detected' },
+        { value: false, text: 'Do not update FTP from Strava' }
       ],
       favorSufferScoreOptions: [
         { value: false, text: 'Use Estimated Power When No Power Meter' },

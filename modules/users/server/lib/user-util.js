@@ -70,7 +70,13 @@ var adornNotification = function(notification) {
       blocks: ''
     }, {
       notificationType: 'fetchstrava',
-      message: 'You need to set your Strava Sync preference.',
+      message: 'You need to set your Strava Activity Sync preference.',
+      state: 'settings.profile',
+      alert: true,
+      blocks: ''
+    }, {
+      notificationType: 'fetchstravaftp',
+      message: 'You need to set your Strava FTP Sync preference.',
       state: 'settings.profile',
       alert: true,
       blocks: ''
@@ -254,6 +260,12 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
     notifications.push({ notificationType: 'fetchstrava', lookup: '', add: true });
   } else {
     notifications.push({ notificationType: 'fetchstrava', lookup: '' });
+  }
+
+  if (updatedUser.autoUpdateFtpFromStrava === null) {
+    notifications.push({ notificationType: 'fetchstravaftp', lookup: '', add: true });
+  } else {
+    notifications.push({ notificationType: 'fetchstravaftp', lookup: '' });
   }
 
   // If latest ftp date was changed or if rest days were changed, recommend plangen.
