@@ -32,11 +32,17 @@ var updateFtpFromStrava = function(user) {
       }
 
       if (!user.ftpLog || user.ftpLog.length < 1 || payload.ftp !== user.ftpLog[0].ftp) {
+        // With a manual FTP update, we get dateNumeric from client-side and use it to populate date.
+        // Imitating that here.
         let today = util.getTodayInUserTimezone(user);
+        let ftpDateNumeric = util.toNumericDate(today, user);
+        let timezone = user.timezone || 'America/New_York';
+        let ftpDate = moment.tz(ftpDateNumeric.toString(), timezone).toDate();
+
         let newFtp = {
           ftp: payload.ftp,
-          ftpDate: today,
-          ftpDateNumeric: util.toNumericDate(today),
+          ftpDate: ftpDate,
+          ftpDateNumeric: ftpDateNumeric,
           ftpSource: 'strava'
         };
 
@@ -186,7 +192,7 @@ var processActivity = function(stravaActivity, trainingDay) {
           }
 
           let ftp = util.getFTP(trainingDay.user, trainingDay.dateNumeric);
-          console.log('date, ftp: ', trainingDay.dateNumeric, ftp);
+
           // IF = NP/FTP
           newActivity.intensity = Math.round((weightedAverageWatts / ftp) * 100) / 100;
 
@@ -437,15 +443,15 @@ module.exports.downloadAllActivities = function(user, startDateNumeric) {
               statusMessage.activityCount = activityCount;
 
               if (activityCount < 1) {
-                statusMessage.text = 'We found no new Strava activities.';
+                statusMessage.text = 'No Strava activities are missing from Tacit Training.';
                 statusMessage.type = 'info';
                 return resolve(statusMessage);
               }
 
               if (activityCount > 1) {
-                countPhrase = activityCount + ' new Strava activities';
+                countPhrase = activityCount + ' Strava activities';
               } else {
-                countPhrase = 'one new Strava activity';
+                countPhrase = 'one Strava activity';
               }
 
               statusMessage.text = 'We downloaded ' + countPhrase + '.';

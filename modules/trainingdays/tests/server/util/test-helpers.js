@@ -13,10 +13,15 @@ var path = require('path'),
 module.exports = {};
 
 module.exports.createUser = function(callback) {
+  // let timezone = 'America/Denver';
+  // let timezone = 'Europe/Berlin';
+  let timezone = 'Australia/Adelaide';
+  // 'America/New_York' is default
+  let today = util.getTodayInUserTimezone({ timezone: timezone });
   let ftpLog = [{
     ftp: 250,
-    ftpDate: moment().subtract(1, 'days'), //by default, let's make testing not due
-    ftpDateNumeric: util.toNumericDate(moment().subtract(1, 'days').toDate()),
+    ftpDate: moment(today).subtract(1, 'days'), //by default, let's make testing not due
+    ftpDateNumeric: util.toNumericDate(moment(today).subtract(1, 'days').toDate(), { timezone: timezone }),
     ftpSource: 'manual'
   }];
 
@@ -29,6 +34,7 @@ module.exports.createUser = function(callback) {
     providerData: {},
     username: 'testUsername',
     password: 'M3@n.jsI$Aw3$0m3',
+    timezone: timezone,
     ftpLog: ftpLog
   });
 
@@ -71,9 +77,14 @@ module.exports.createTrainingDayObject = function(trainingDate, user) {
   plannedActivities[0] = {};
   plannedActivities[0].activityType = '';
 
+
+  // Normally we get dateNumeric from client-side and use it to populate date.
+  // Imitating that here.
+  let dateNumeric = util.toNumericDate(trainingDate, user);
+
   var trainingDay = new TrainingDay({
-    date: trainingDate,
-    dateNumeric: util.toNumericDate(trainingDate),
+    date: moment.tz(dateNumeric.toString(), user.timezone).toDate(),
+    dateNumeric: dateNumeric,
     name: 'Incoming trainingDay',
     plannedActivities: plannedActivities,
     metrics: metrics,

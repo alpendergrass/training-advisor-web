@@ -1,6 +1,8 @@
 <section ng-controller="EditProfileController">
-  <h3>About Me</h3>
-  <div class="top-buffer-4x">
+  <div class="page-header">
+    <h2>About Me</h2>
+  </div>
+  <div class="top-buffer-2x">
     <label>Name * :&nbsp;
       <a href="#" editable-text="user.firstName" e-required onbeforesave="checkFirstName($data)">{{ user.firstName  }}</a>&nbsp;
       <a href="#" editable-text="user.lastName" e-required onbeforesave="checkLastName($data)">{{ user.lastName  }}</a></label>
@@ -71,8 +73,9 @@
       </p>
     </div>
   </div>
-  <hr>
-  <h3>Preferences</h3>
+  <div class="page-header">
+    <h2>Preferences</h2>
+  </div>
   <div class="top-buffer-4x">
     <label for="emailNewsletter">Newsletter :&nbsp;
       <a href="#" editable-checkbox="user.emailNewsletter" e-title="Send the Tacit Training newsletter?" buttons="no" onaftersave="updateUserProfile()">{{ user.emailNewsletter && "Send me the email newsletter" || "Do not send me the email newsletter" }}</a></label>

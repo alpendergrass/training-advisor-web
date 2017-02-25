@@ -14,12 +14,14 @@ var path = require('path'),
 var stravaUtil,
   stravaStub,
   user,
+  today,
+  todayNumeric,
   workoutDate,
   workoutDateOffset,
   trainingDate,
   trainingDay,
   startingPoint,
-  startDateNumeric,
+  downloadAllStartDateNumeric,
   activityID = 752757127,
   activity,
   wattagePayload = [{
@@ -132,33 +134,6 @@ describe('strava-util Unit Tests:', function() {
   });
 
   beforeEach(function(done) {
-    // We need start_date_local to be a local date but formatted as utc.
-    // moment.utc(workoutDate).format() gives us the correct format but converts to utc.
-    // If we add the offset from utc before we call moment.utc() then we
-    // end up with local time in utc format.
-
-    //starting from moment().toDate():  2016-10-25T00:11:29.094Z
-    workoutDateOffset = moment().utcOffset(); // -360 for MDT
-    workoutDate = moment().add(workoutDateOffset, 'minutes').subtract(1, 'day').toDate(); // workout yesterday by default.
-    // workoutDate:                      2016-10-23T18:11:29.367Z - this is a JS date
-    // moment.utc(workoutDate).format(): 2016-10-23T18:11:29Z
-    // Strava returns this format and this is what we do below in each test where we use workoutDate.
-
-    startDateNumeric = util.toNumericDate(moment().subtract(1, 'day'));
-    trainingDate = moment().subtract(1, 'day').startOf('day').toDate();
-
-    activity = {
-      id: activityID,
-      name: 'Lunch Ride',
-      type: 'Ride',
-      start_date_local: moment.utc(workoutDate).format(),
-      weighted_average_watts: 189,
-      device_watts: true,
-      suffer_score: 99,
-      moving_time: 9342,
-      total_elevation_gain: 123
-    };
-
     testHelpers.createUser(function(err, newUser) {
       if (err) {
         return done(err);
@@ -169,7 +144,44 @@ describe('strava-util Unit Tests:', function() {
 
       user.save()
         .then(function(user) {
+
+          // We need start_date_local to be a local date but formatted as utc.
+          // moment.utc(workoutDate).format() gives us the correct format but converts to utc.
+          // If we add the offset from utc before we call moment.utc() then we
+          // end up with local time in utc format.
+          // offset -360 for MDT.
+
+          today = util.getTodayInUserTimezone(user);
+          todayNumeric = util.toNumericDate(today, user);
+          workoutDateOffset = moment(todayNumeric.toString()).utcOffset();
+          workoutDate = moment(todayNumeric.toString()).add(workoutDateOffset, 'minutes').subtract(1, 'day').toDate();
+
+          activity = {
+            id: activityID,
+            name: 'Lunch Ride',
+            type: 'Ride',
+            start_date_local: moment.utc(workoutDate).format(), // Strava returns this format.
+            weighted_average_watts: 189,
+            device_watts: true,
+            suffer_score: 99,
+            moving_time: 9342,
+            total_elevation_gain: 123
+          };
+
+          trainingDate = moment(todayNumeric.toString()).subtract(1, 'day').startOf('day').toDate();
+          downloadAllStartDateNumeric = util.toNumericDate(moment(todayNumeric.toString()).subtract(1, 'day'));
+
           trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
+
+          // user.timezone:  America/Denver
+          // today:  2017-02-25T07:00:00.000Z
+          // todayNumeric:  20170225
+          // workoutDateOffset:  -420
+          // workoutDate:  2017-02-24T00:00:00.000Z
+          // start_date_local: moment.utc(workoutDate).format():  2017-02-24T00:00:00Z
+          // trainingDate:  2017-02-24T07:00:00.000Z
+          // downloadAllStartDateNumeric:  20170224
+          // trainingDay.dateNumeric:  20170224
 
           //Need a starting day to avoid error from update metrics.
           testHelpers.createStartingPoint(user, trainingDate, 2, 9, 9, function(err, newStartingPoint) {
@@ -734,6 +746,11 @@ describe('strava-util Unit Tests:', function() {
     });
 
     it('should return correct load for completedActivity when new ftp is fetched from Strava', function() {
+      // New ftp date will be today so we need to be processing today's TD and activity.
+      trainingDate = moment(todayNumeric.toString()).startOf('day').toDate();
+      trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
+      workoutDate = moment(todayNumeric.toString()).add(workoutDateOffset, 'minutes').toDate();
+
       var activities = [{
           id: activityID,
           name: 'Lunch Ride',
@@ -757,7 +774,6 @@ describe('strava-util Unit Tests:', function() {
       };
 
       user.autoUpdateFtpFromStrava = true;
-
       return stravaUtil.downloadActivities(user, trainingDay)
         .then(function(returnedTrainingDay) {
           (returnedTrainingDay.lastStatus.text).should.containEql('downloaded one new Strava activity');
@@ -777,7 +793,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(new Error('Stubbed athlete.listActivities error'));
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(result) {
           throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
         },
@@ -806,7 +822,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(new Error('Stubbed streams.activity error'), null);
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(result) {
           throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
         },
@@ -821,7 +837,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, { message: 'payload error message', errors: ['payload Error'] });
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(result) {
           throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
         },
@@ -842,7 +858,7 @@ describe('strava-util Unit Tests:', function() {
 
       user.autoUpdateFtpFromStrava = false;
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function() {
           (user.ftpLog.length).should.equal(1);
           (user.ftpLog[0].ftpSource).should.equal('manual');
@@ -864,7 +880,7 @@ describe('strava-util Unit Tests:', function() {
 
       user.autoUpdateFtpFromStrava = true;
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function() {
           (user.ftpLog.length).should.equal(2);
           (user.ftpLog[0].ftpSource).should.equal('strava');
@@ -880,7 +896,7 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, []);
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(statusMessage) {
           (statusMessage.text).should.containEql('No Strava activities were returned');
         },
@@ -912,9 +928,9 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(statusMessage) {
-          (statusMessage.text).should.containEql('downloaded 2 new Strava activities');
+          (statusMessage.text).should.containEql('downloaded 2 Strava activities');
         },
         function(err) {
           throw err;
@@ -936,9 +952,9 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(statusMessage) {
-          (statusMessage.text).should.containEql('downloaded one new Strava activity');
+          (statusMessage.text).should.containEql('downloaded one Strava activity');
         },
         function(err) {
           throw err;
@@ -968,9 +984,9 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      return stravaUtil.downloadAllActivities(user, startDateNumeric)
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(statusMessage) {
-          (statusMessage.text).should.containEql('downloaded 2 new Strava activities');
+          (statusMessage.text).should.containEql('downloaded 2 Strava activities');
         },
         function(err) {
           throw err;
@@ -992,11 +1008,11 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, activities);
       };
 
-      stravaUtil.downloadAllActivities(user, startDateNumeric)
+      stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
         .then(function(firstReturnedTrainingDay) {
-          return stravaUtil.downloadAllActivities(user, startDateNumeric)
+          return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
             .then(function(statusMessage) {
-              (statusMessage.text).should.containEql('found no new Strava activities');
+              (statusMessage.text).should.containEql('No Strava activities are missing');
               done();
             },
             function(err) {

@@ -143,7 +143,7 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
               });
               return;
             }
-            toastr.info('Strava sync started.', 'Strava Sync');
+            toastr.info('Strava sync started. We will notify you when completed.', 'Strava Sync');
             TrainingDays.downloadAllActivities({
               todayNumeric: Util.toNumericDate(moment())
             }, function(response) {
