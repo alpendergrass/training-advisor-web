@@ -357,11 +357,11 @@ module.exports.refreshAdvice = function(user, trainingDay) {
   // and then advise for today (maybe) and tomorrow.
 
   return new Promise(function(resolve, reject) {
-    let tdDate = moment(trainingDay.dateNumeric.toString()); //Thu Nov 03 2016 00:00:00 GMT+0000 (UTC)
-    let today = util.getTodayInUserTimezone(user);
-    let tomorrow = moment(today).add(1, 'day').startOf('day').toDate(); //Fri Nov 04 2016 00:00:00 GMT+0000
+    let tdDate = moment.tz(trainingDay.dateNumeric.toString(), user.timezone);  // toDate:  2017-02-25T13:30:00.000Z
+    let today = util.getTodayInUserTimezone(user);            // 2017-02-25T13:30:00.000Z
+    let tomorrow = moment(today).add(1, 'day').toDate();      //  2017-02-26T13:30:00.000Z
 
-    if (tdDate.isAfter(tomorrow)) {
+    if (tdDate.isAfter(tomorrow, 'day')) {
       return resolve(trainingDay);
     }
 
@@ -385,16 +385,16 @@ module.exports.refreshAdvice = function(user, trainingDay) {
       adviceParams.source = 'advised';
       adviceParams.alternateActivity = null;
 
-      if (tdDate.isSameOrBefore(today)) {
+      if (tdDate.isSameOrBefore(today, 'day')) {
         //getAdvice for today and tomorrow.
-        adviceParams.numericDate = util.toNumericDate(today);
+        adviceParams.numericDate = util.toNumericDate(today, user);
 
         module.exports.advise(adviceParams, function(err, advisedToday) {
           if (err) {
             return reject(err);
           }
 
-          adviceParams.numericDate = util.toNumericDate(tomorrow);
+          adviceParams.numericDate = util.toNumericDate(tomorrow, user);
 
           module.exports.advise(adviceParams, function(err, advisedTomorrow) {
             if (err) {
@@ -410,7 +410,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
         });
       } else {
         //tdDate is tomorrow -> getAdvice for tomorrow.
-        adviceParams.numericDate = util.toNumericDate(tomorrow);
+        adviceParams.numericDate = util.toNumericDate(tomorrow, user);
 
         module.exports.advise(adviceParams, function(err, advisedTomorrow) {
           if (err) {
