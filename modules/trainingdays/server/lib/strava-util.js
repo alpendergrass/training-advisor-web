@@ -157,7 +157,7 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
     let newActivity = {};
 
     if (!stravaActivity.id) {
-      // Not sure why but I added this check at some point.
+      // If Strava returns an error page, like when they are down, this will catch that.
       console.log(`No ID for this stravaActivity: ${JSON.stringify(stravaActivity)}`);
       return resolve();
     }
@@ -309,6 +309,12 @@ module.exports.downloadActivities = function(user, trainingDay) {
             return resolve(trainingDay);
           }
 
+          if (!Array.isArray(payload)) {
+            // If Strava is down we may get an error page here.
+            let errorMsg = 'Strava appears to be down. Please try your download again later.';
+            return reject(new Error(errorMsg));
+          }
+
           Promise.all(payload.map(function(stravaActivity) {
             // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
             var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
@@ -411,6 +417,13 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
 
           // We are using reduce function here to process each activity sequentially.
           // Using Promise.all we had trainingDay save collisions.
+
+          if (!Array.isArray(payload)) {
+            // If Strava is down we may get an error page here.
+            let errorMsg = 'Strava appears to be down. Please try your sync again later.';
+            return reject(new Error(errorMsg));
+          }
+
           payload.reduce(function(promise, stravaActivity) {
             return promise.then(function() {
               // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
