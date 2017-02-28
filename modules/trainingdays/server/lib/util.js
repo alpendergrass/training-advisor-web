@@ -24,8 +24,7 @@ function toNumericDate(date, user) {
   if (user) {
     // When we are working with a date in user timezone - like that returned by getTodayInUserTimezone() -
     // we need to format is using that timezone. Otherwise it will be formatted using server timezone.
-    let timezone = user.timezone || 'America/New_York';
-    dateMoment = moment.tz(date, timezone);
+    dateMoment = moment.tz(date, user.timezone);
   } else {
     // The following will format the date in the server timezone.
     // Start of day in NY will become 10 pm the day before in MT
@@ -44,9 +43,8 @@ module.exports.toNumericDate = toNumericDate;
 
 // TODO: the following method should be in user util.
 module.exports.getTodayInUserTimezone = function(user) {
-  let userTimezone = user.timezone || 'America/New_York';
   let now = moment(); //Fri Nov 04 2016 02:13:27 GMT+0000 (UTC)
-  return moment.tz(now, userTimezone).startOf('day').toDate(); //Thu Nov 03 2016 06:00:00 GMT+0000 (UTC)
+  return moment.tz(now, user.timezone).startOf('day').toDate(); //Thu Nov 03 2016 06:00:00 GMT+0000 (UTC)
 };
 
 // TODO: the following method should be in user util.

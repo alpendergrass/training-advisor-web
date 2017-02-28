@@ -273,7 +273,7 @@ function processWorkouts(user, trainingDay, client, personId, workouts, callback
   var args = {},
     trainingDate,
     offset,
-    timezone = user.timezone || 'America/New_York';
+    timezone = user.timezone;
 
   if (!workouts) {
     //Previous method did not find any workouts.

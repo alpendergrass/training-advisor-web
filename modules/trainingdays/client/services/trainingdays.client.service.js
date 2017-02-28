@@ -46,7 +46,8 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
       },
       downloadAllActivities: {
         method: 'GET',
-        url: 'api/trainingDays/downloadAllActivities/:todayNumeric'
+        url: 'api/trainingDays/downloadAllActivities/:todayNumeric',
+        params: { replaceExisting: false }
       }
     });
   }

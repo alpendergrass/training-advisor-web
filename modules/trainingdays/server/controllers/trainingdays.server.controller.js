@@ -130,8 +130,7 @@ function generateRecurrences(req, callback) {
   var spec = req.body.recurrenceSpec,
     startDate = moment(req.body.date),
     nextDate,
-    timezone = req.user.timezone || 'America/New_York',
-    endDate = moment.tz(req.body.recurrenceSpec.endsOn, timezone).add(1, 'day'),
+    endDate = moment.tz(req.body.recurrenceSpec.endsOn, req.user.timezone).add(1, 'day'),
     trainingDay;
 
   req.body.eventRecurrenceID = Math.floor(Math.random() * 999999999999999) + 1;
@@ -710,6 +709,7 @@ exports.downloadAllActivities = function(req, res) {
 
   let user = req.user;
   let numericToday = parseInt(req.params.todayNumeric, 10);
+  let replaceExisting = JSON.parse(req.query.replaceExisting); // Converts string to boolean.
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
@@ -720,12 +720,12 @@ exports.downloadAllActivities = function(req, res) {
     }
 
     if (startDay) {
-      let numericLimitDate = util.toNumericDate(moment().subtract(4, 'months'));
+      let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(4, 'months'));
       if (numericLimitDate < startDay.dateNumeric) {
         numericLimitDate = startDay.dateNumeric;
       }
 
-      stravaUtil.downloadAllActivities(req.user, numericLimitDate)
+      stravaUtil.downloadAllActivities(req.user, numericLimitDate, replaceExisting)
         .then(function(response) {
           let syncResponse = response;
 

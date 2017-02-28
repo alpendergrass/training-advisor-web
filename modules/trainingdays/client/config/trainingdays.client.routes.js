@@ -135,32 +135,35 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
         url: '/syncActivities',
         parent: 'season',
         templateUrl: '/modules/trainingdays/client/views/partials/sync-activities.client.view.html',
-        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util', function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util) {
-          $scope.syncActivities = function() {
-            if (Authentication.user.ftpLog.length < 1) {
-              toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', {
-                allowHtml: true, timeOut: 7000
+        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util',
+          function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util) {
+            $scope.replaceExisting = false;
+            $scope.syncActivities = function() {
+              if (Authentication.user.ftpLog.length < 1) {
+                toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', {
+                  allowHtml: true, timeOut: 7000
+                });
+                return;
+              }
+              toastr.info('Strava sync started. We will notify you when completed.', 'Strava Sync');
+              TrainingDays.downloadAllActivities({
+                todayNumeric: Util.toNumericDate(moment()),
+                replaceExisting: $scope.replaceExisting
+              }, function(response) {
+                toastr[response.type](response.text, response.title);
+                $uibModalInstance.close(response);
+              }, function(errorResponse) {
+                console.log('errorResponse: ', errorResponse);
+                toastr.error(errorResponse.data.message, {
+                  timeOut: 7000
+                });
               });
-              return;
-            }
-            toastr.info('Strava sync started. We will notify you when completed.', 'Strava Sync');
-            TrainingDays.downloadAllActivities({
-              todayNumeric: Util.toNumericDate(moment())
-            }, function(response) {
-              toastr[response.type](response.text, response.title);
-              $uibModalInstance.close(response);
-            }, function(errorResponse) {
-              console.log('errorResponse: ', errorResponse);
-              toastr.error(errorResponse.data.message, {
-                timeOut: 7000
-              });
-            });
-            $uibModalInstance.close('sync');
-          };
-          $scope.cancelSync = function() {
-            $uibModalInstance.dismiss('cancel');
-          };
-        }],
+              $uibModalInstance.close('sync');
+            };
+            $scope.cancelSync = function() {
+              $uibModalInstance.dismiss('cancel');
+            };
+          }],
         resolve: {}
       });
   }

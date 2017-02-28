@@ -16,7 +16,7 @@ module.exports.createUser = function(callback) {
   // let timezone = 'America/Denver';
   // let timezone = 'Europe/Berlin';
   let timezone = 'Australia/Adelaide';
-  // 'America/New_York' is default
+  // 'America/New_York'
   let today = util.getTodayInUserTimezone({ timezone: timezone });
   let ftpLog = [{
     ftp: 250,

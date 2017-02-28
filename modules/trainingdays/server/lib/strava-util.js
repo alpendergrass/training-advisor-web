@@ -36,8 +36,7 @@ var updateFtpFromStrava = function(user) {
         // Imitating that here.
         let today = util.getTodayInUserTimezone(user);
         let ftpDateNumeric = util.toNumericDate(today, user);
-        let timezone = user.timezone || 'America/New_York';
-        let ftpDate = moment.tz(ftpDateNumeric.toString(), timezone).toDate();
+        let ftpDate = moment.tz(ftpDateNumeric.toString(), user.timezone).toDate();
 
         let newFtp = {
           ftp: payload.ftp,
@@ -153,7 +152,7 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
   });
 };
 
-var processActivity = function(stravaActivity, trainingDay) {
+var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
   return new Promise(function(resolve, reject) {
     let newActivity = {};
 
@@ -167,11 +166,17 @@ var processActivity = function(stravaActivity, trainingDay) {
       return resolve();
     }
 
-    if (_.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
+    if (!replaceExisting && _.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) {
       // We have already processed this stravaActivity.
       return resolve();
     }
 
+    if (replaceExisting) {
+      let removeThese = _.filter(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString(), 'edited': false });
+      _.forEach(removeThese, function(removeThis) {
+        trainingDay.completedActivities.pull(removeThis.id);
+      });
+    }
 
     getWeightedAverageWatts(trainingDay.user, stravaActivity)
       .then(function(weightedAverageWatts) {
@@ -364,10 +369,9 @@ module.exports.downloadActivities = function(user, trainingDay) {
   });
 };
 
-module.exports.downloadAllActivities = function(user, startDateNumeric) {
-  // We need to subtract one day for our search start to make sure we get current day in Australia - it's a time zone thing, of course.
+module.exports.downloadAllActivities = function(user, startDateNumeric, replaceExisting) {
   return new Promise(function(resolve, reject) {
-    let searchDate = moment(startDateNumeric.toString()).subtract(1, 'day').unix(),
+    let searchDate = moment(startDateNumeric.toString()).unix(),
       activityCount = 0,
       countPhrase = '',
       statusMessage = {
@@ -413,11 +417,10 @@ module.exports.downloadAllActivities = function(user, startDateNumeric) {
               let numericDate = util.toNumericDate(stravaActivity.start_date_local);
               return dbUtil.getTrainingDayDocument(user, numericDate)
                 .then(function(trainingDay) {
-                  return processActivity(stravaActivity, trainingDay);
+                  return processActivity(stravaActivity, trainingDay, replaceExisting);
                 })
                 .then(function(processedTrainingDay) {
                   if (processedTrainingDay) {
-                    // console.log('===> Strava: We found a keeper for user ', user.username);
                     activityCount++;
                     return processedTrainingDay.save();
                   }
