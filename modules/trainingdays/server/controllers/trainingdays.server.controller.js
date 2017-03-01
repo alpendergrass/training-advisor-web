@@ -720,7 +720,7 @@ exports.downloadAllActivities = function(req, res) {
     }
 
     if (startDay) {
-      let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(3, 'months'));
+      let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
       if (numericLimitDate < startDay.dateNumeric) {
         numericLimitDate = startDay.dateNumeric;
       }
