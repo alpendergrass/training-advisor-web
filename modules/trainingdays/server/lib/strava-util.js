@@ -167,7 +167,7 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
     }
 
     if ((!replaceExisting && _.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString() })) ||
-      (replaceExisting && _.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString(), 'edited': true  }))) {
+      (replaceExisting && _.find(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString(), 'edited': true }))) {
       // We have already processed this stravaActivity.
       return resolve();
     }
