@@ -20,7 +20,7 @@ angular.module('trainingDays')
         opened: false
       };
 
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(4, 'months').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(3, 'months').startOf('day').toDate();
       var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
 
       $scope.startDate = moment().subtract(1, 'day').startOf('day').toDate();
