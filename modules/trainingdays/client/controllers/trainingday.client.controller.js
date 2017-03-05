@@ -139,7 +139,7 @@ angular.module('trainingDays')
             return;
           }
 
-          if (String(n) === estimate && n >= 0 && n <= 999) {
+          if (String(n) === estimate && n >= 0 && n <= 9999) {
             return $scope.update($scope.trainingDay, function(trainingDay) {
               if (trainingDay) {
                 resetViewObjects(trainingDay);
@@ -147,7 +147,7 @@ angular.module('trainingDays')
             });
           }
 
-          return 'Estimated load must be a positive whole number less than 1000.';
+          return 'Estimated load must be a positive whole number less than 10000.';
         };
 
         $scope.updateEventTerrain = function(terrain) {

@@ -36,6 +36,14 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdD
                 });
                 releaseMessage += '</ul></p>';
 
+                if (releaseNotes[0].fixes.length > 0) {
+                  releaseMessage += '<p><strong>Bugs Fixed:<ul>';
+                  releaseNotes[0].fixes.forEach(function (fix) {
+                    releaseMessage += '<li><strong>' + fix + '</strong></li>';
+                  });
+                  releaseMessage += '</ul></p>';
+                }
+
                 var alert = $mdDialog.alert({
                   title: releaseNotes[0].title ? releaseNotes[0].title : 'Changes in Version ' + releaseNotes[0].version,
                   content: releaseMessage,

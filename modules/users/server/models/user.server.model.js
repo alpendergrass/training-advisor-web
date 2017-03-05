@@ -48,8 +48,10 @@ var blockableNotificationTypes = {
 
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
+// Note that in the UI we limit to 50 - 500 but here we allow a lower value from Strava.
+// Strava's limits are 0 - 500.
 var minFTP = [0, minMessage];
-var maxFTP = [999, maxMessage];
+var maxFTP = [500, maxMessage];
 
 var UserSchema = new Schema({
   firstName: {
@@ -126,7 +128,7 @@ var UserSchema = new Schema({
       type: Number,
       min: minFTP,
       max: maxFTP,
-      default: 0
+      default: 100
     },
     ftpDate: {
       type: Date,

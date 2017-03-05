@@ -30,7 +30,7 @@
           <tbody>
             <tr ng-repeat="ftpLogItem in user.ftpLog">
               <td>
-                <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="1" e-max="999" e-step="1" e-required onaftersave="updateUserProfile()">{{ ftpLogItem.ftp }}</a>
+                <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="50" e-max="500" e-step="1" e-required onaftersave="updateUserProfile()">{{ ftpLogItem.ftp }}</a>
               </td>
               <td>
                 <a href="#" editable-bsdate="ftpLogItem.ftpDate" onaftersave="updateUserProfile()" e-required e-readonly="true" e-show-calendar-button="true" e-datepicker-options="ftpDateOptions" e-is-open="ftpDatePickerStatus.opened" e-show-button-bar="false" e-ng-click="openFtpDatePicker($event)" e-datepicker-popup="dd MMMM yyyy">
@@ -45,7 +45,7 @@
             </tr>
             <tr ng-show="newFtp">
               <td>
-                <span editable-number="newFtp.ftp" e-name="newFtp.ftp" e-min="1" e-max="999" e-step="1" e-form="newFtpForm" onbeforesave="validateFtp($data)"></span>
+                <span editable-number="newFtp.ftp" e-name="newFtp.ftp" e-min="50" e-max="500" e-step="1" e-form="newFtpForm" onbeforesave="validateFtp($data)"></span>
               </td>
               <td>
                 <span editable-bsdate="newFtp.ftpDate" e-name="newFtp.ftpDate" e-readonly="true" e-show-calendar-button="true" e-datepicker-options="ftpDateOptions" e-is-open="newFtpDatePickerStatus.opened" e-show-button-bar="false" e-ng-click="openNewFtpDatePicker($event)" e-datepicker-popup="dd MMMM yyyy" e-form="newFtpForm"></span>

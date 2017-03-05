@@ -2,6 +2,19 @@
 
 var releaseNotes = [
   {
+    version: '0.7.1',
+    title: 'FTP Management Features and a Bug Fix, Release 0.7.1',
+    message: '',
+    features: [
+      'We now keep your previous threshold power values when you provide a new FTP. You can also manually enter previous values. See My Profile page.',
+      'And, when Syncing with Strava, you can now specify that we should replace existing rides in Tacit Training. We will use the appropriate FTP when processing the rides. This will improve the accuracy of your historical data.',
+      'Also, when downloading activities from Strava, we can check Strava for a new FTP and update in Tacit Training if different. This is a preference on My Profile page.'
+    ],
+    fixes: [
+      'Detect and ignore invalid FTPs from Strava.'
+    ]
+  },
+  {
     version: '0.7.0',
     title: 'Historical FTP Release - 0.7.0',
     message: '',
@@ -10,9 +23,7 @@ var releaseNotes = [
       'And, when Syncing with Strava, you can now specify that we should replace existing rides in Tacit Training. We will use the appropriate FTP when processing the rides. This will improve the accuracy of your historical data.',
       'Also, when downloading activities from Strava, we can check Strava for a new FTP and update in Tacit Training if different. This is a preference on My Profile page.'
     ],
-    fixes: [
-      ''
-    ]
+    fixes: []
   },
   {
     version: '0.6.10',

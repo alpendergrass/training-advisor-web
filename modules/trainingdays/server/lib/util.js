@@ -38,7 +38,7 @@ function toNumericDate(date, user) {
 
 module.exports = {};
 
-// TODO: the toNumericDate method should be in core util.
+// TODO: the following method should be in user util.
 module.exports.toNumericDate = toNumericDate;
 
 // TODO: the following method should be in user util.
@@ -60,12 +60,19 @@ module.exports.getFTP = function(user, trainingDateNumeric) {
     return item.ftpDateNumeric <= trainingDateNumeric;
   });
 
-  if (ftpItem) {
+  // Somehow a null ftp slipped through. Shouldn't happen but just in case let's check.
+  if (ftpItem && Number.isInteger(ftpItem.ftp)) {
     return ftpItem.ftp;
   }
 
   // if no match, return oldest.
-  return user.ftpLog[user.ftpLog.length - 1].ftp;
+  ftpItem = user.ftpLog[user.ftpLog.length - 1];
+
+  if (Number.isInteger(ftpItem.ftp)) {
+    return ftpItem.ftp;
+  }
+
+  throw new Error(`User ${user.username} has no valid ftp.`);
 };
 
 module.exports.getMetrics = function(trainingDay, metricsType) {

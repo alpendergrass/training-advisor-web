@@ -101,7 +101,7 @@
               <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link"><br>View on Strava</a></span>
             </td>
             <td>
-              <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span><span class="small" ng-if="completedActivity.loadIsFromEstimatedPower"> (from estimated power)</span><span class="small" ng-if="completedActivity.loadIsSufferScore"> (Suffer Score)</span>
+              <span editable-number="completedActivity.load" e-name="load" e-min="0" e-max="9999" e-step="1" e-form="completedActivityForm" e-required>{{ completedActivity.load }}</span><span class="small" ng-if="completedActivity.loadIsFromEstimatedPower"> (from estimated power)</span><span class="small" ng-if="completedActivity.loadIsSufferScore"> (Suffer Score)</span>
             </td>
             <td>
               <span editable-number="completedActivity.intensity" e-name="intensity" e-min="0.00" e-max="9" e-step="0.01" e-form="completedActivityForm" e-required>{{ completedActivity.intensity }}</span><span class="small" ng-if="!completedActivity.intensity"> (unknown)</span>

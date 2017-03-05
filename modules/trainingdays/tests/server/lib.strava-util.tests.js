@@ -342,6 +342,28 @@ describe('strava-util Unit Tests:', function() {
         });
     });
 
+    it('user.ftpLog should not contain new FTP when FTP from Strava is null', function() {
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, wattagePayload);
+      };
+
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: null });
+      };
+
+      user.autoUpdateFtpFromStrava = true;
+
+      return stravaUtil.fetchActivity(user, activityID)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.user.ftpLog.length).should.equal(1);
+          (returnedTrainingDay.user.ftpLog[0].ftpSource).should.equal('manual');
+          (returnedTrainingDay.user.ftpLog[0].ftp).should.not.equal(null);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
     it('user.ftpLog should contain new FTP when updated FTP is fetched from Strava', function() {
       stravaStub.streams.activity = function(parm, callback) {
         return callback(null, wattagePayload);
@@ -362,6 +384,60 @@ describe('strava-util Unit Tests:', function() {
         function(err) {
           throw err;
         });
+    });
+
+    it('should return error when ftp is null ', function(done) {
+      // This should not happen in production...anymore.
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, wattagePayload);
+      };
+
+      startingPoint.user.ftpLog[0].ftp = null;
+
+      testHelpers.updateTrainingDay(startingPoint, function(err) {
+        if (err) {
+          console.log('updateTrainingDay: ' + err);
+        }
+
+        return stravaUtil.fetchActivity(user, activityID) //.should.be.rejected();
+          .then(function(result) {
+            done(new Error('Promise was unexpectedly fulfilled in null ftp test. Result: ' + result));
+          },
+          function(err) {
+            should.exist(err);
+            (err.message).should.containEql('has no valid ftp');
+            done();
+          }).catch(function (err) {
+            done(err);
+          });
+      });
+    });
+
+    it('should return error when ftp is zero ', function(done) {
+      // This should not happen in production.
+      stravaStub.streams.activity = function(parm, callback) {
+        return callback(null, wattagePayload);
+      };
+
+      startingPoint.user.ftpLog[0].ftp = 0;
+
+      testHelpers.updateTrainingDay(startingPoint, function(err) {
+        if (err) {
+          console.log('updateTrainingDay: ' + err);
+        }
+
+        return stravaUtil.fetchActivity(user, activityID) //.should.be.rejected();
+          .then(function(result) {
+            done(new Error('Promise was unexpectedly fulfilled in null ftp test. Result: ' + result));
+          },
+          function(err) {
+            should.exist(err);
+            (err.message).should.containEql('load or intensity calculated to Infinity');
+            done();
+          }).catch(function (err) {
+            done(err);
+          });
+      });
     });
 
     it('should resolve when activity has estimated watts and suffer score and user.favorSufferScoreOverEstimatedPower ', function(done) {
@@ -564,6 +640,28 @@ describe('strava-util Unit Tests:', function() {
           (returnedTrainingDay.user.ftpLog.length).should.equal(1);
           (returnedTrainingDay.user.ftpLog[0].ftpSource).should.equal('manual');
           (returnedTrainingDay.user.ftpLog[0].ftp).should.not.equal(456);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+    it('user.ftpLog should not contain new FTP when FTP from Strava is null', function() {
+      stravaStub.athlete.listActivities = function(parm, callback) {
+        return callback(null, []);
+      };
+
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: null });
+      };
+
+      user.autoUpdateFtpFromStrava = true;
+
+      return stravaUtil.downloadActivities(user, trainingDay)
+        .then(function(returnedTrainingDay) {
+          (returnedTrainingDay.user.ftpLog.length).should.equal(1);
+          (returnedTrainingDay.user.ftpLog[0].ftpSource).should.equal('manual');
+          (returnedTrainingDay.user.ftpLog[0].ftp).should.not.equal(null);
         },
         function(err) {
           throw err;
@@ -863,6 +961,28 @@ describe('strava-util Unit Tests:', function() {
           (user.ftpLog.length).should.equal(1);
           (user.ftpLog[0].ftpSource).should.equal('manual');
           (user.ftpLog[0].ftp).should.not.equal(456);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+    it('user.ftpLog should not contain new FTP when FTP from Strava is null', function() {
+      stravaStub.athlete.listActivities = function(parm, callback) {
+        return callback(null, []);
+      };
+
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: null });
+      };
+
+      user.autoUpdateFtpFromStrava = true;
+
+      return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
+        .then(function() {
+          (user.ftpLog.length).should.equal(1);
+          (user.ftpLog[0].ftpSource).should.equal('manual');
+          (user.ftpLog[0].ftp).should.not.equal(null);
         },
         function(err) {
           throw err;

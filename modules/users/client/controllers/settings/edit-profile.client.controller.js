@@ -149,8 +149,8 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.validateFtp = function(ftp) {
       // Because control is defined as a number with max and min, invalid
       // values will not be passed. FTP likely will be null in this case.
-      if (!Number.isInteger(ftp) || ftp < 1 || ftp > 999) {
-        return 'Valid value 1 - 999.';
+      if (!Number.isInteger(ftp) || ftp < 1 || ftp > 500) {
+        return 'Valid value 50 - 500.';
       }
 
       return;

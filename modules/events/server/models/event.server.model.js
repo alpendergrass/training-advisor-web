@@ -17,11 +17,6 @@ var sourceValues = {
   message: invalidDataErrorMessage
 };
 
-var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
-var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
-var minFitnessOrFatigueValue = [0, minMessage];
-var maxFitnessOrFatigueValue = [999, maxMessage];
-
 var EventSchema = new Schema({
   created: {
     type: Date,

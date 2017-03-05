@@ -31,6 +31,11 @@ var updateFtpFromStrava = function(user) {
         return reject(new Error(`strava.athlete.get returned errors for user: ${user.username}, payload: ${JSON.stringify(payload)}`));
       }
 
+      // We have gotten a few null FTP values from Strava.
+      if (!payload.ftp || !Number.isInteger(payload.ftp)) {
+        return resolve(user);
+      }
+
       if (!user.ftpLog || user.ftpLog.length < 1 || payload.ftp !== user.ftpLog[0].ftp) {
         // With a manual FTP update, we get dateNumeric from client-side and use it to populate date.
         // Imitating that here.
@@ -205,6 +210,10 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
           // TSS = [(s x W x IF) / (FTP x 3600)] x 100
           // where s is duration in seconds, W is Normalized Power in watts, IF is Intensity Factor, FTP is FTP and 3.600 is number of seconds in 1 hour.
           newActivity.load = Math.round(((stravaActivity.moving_time * weightedAverageWatts * newActivity.intensity) / (ftp * 3600)) * 100);
+
+          if (!isFinite(newActivity.intensity) || !isFinite(newActivity.load)) {
+            return reject(new Error(`load or intensity calculated to Infinity, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
+          }
 
           if (!stravaActivity.device_watts) {
             newActivity.loadIsFromEstimatedPower = true;
