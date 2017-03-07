@@ -35,6 +35,33 @@
         <h1 class="panel-title text-center season-panel-title">SIMULATION MODE</h1>
       </div>
       <div class="panel-body">
+        <div>
+          <md-button ng-disabled="startX == 0" class='md-icon-button' ng-click='showPrevDays()' title="Show from season start" aria-label='Show from season start'>
+            <i class="material-icons md-24">first_page</i>
+          </md-button>
+          <md-button ng-disabled="startX == 0" class='md-icon-button' ng-click='showPrevDays(7)' title="Back 7 days" aria-label='Back 7 days'>
+            <i class="material-icons md-24">chevron_left</i>
+          </md-button>
+          <md-button ng-disabled="startX >= todayX - 1" class='md-icon-button' ng-click='showPrevDays(-7)' title="Forward 7 days" aria-label='Forward 7 days'>
+            <i class="material-icons md-24">chevron_right</i>
+          </md-button>
+          <md-button ng-disabled="startX >= todayX - 1" class='md-icon-button' ng-click='showPrevDays(0)' title="Show from yesterday" aria-label='Show from yesterday'>
+            <i class="material-icons md-24">last_page</i>
+          </md-button>
+
+          <md-button ng-disabled="viewLength >= seasonLength" class='md-icon-button pull-right' ng-click='showNextDays()' title="Show thru season end" aria-label='Show thru season end'>
+            <i class="material-icons md-24">last_page</i>
+          </md-button>
+          <md-button ng-disabled="viewLength >= seasonLength" class='md-icon-button pull-right' ng-click='showNextDays(7)' title="Forward 7 days" aria-label='Forward 7 days'>
+            <i class="material-icons md-24">chevron_right</i>
+          </md-button>
+          <md-button ng-disabled="viewLength <= todayX + 1" class='md-icon-button pull-right' ng-click='showNextDays(-7)' title="Back 7 days" aria-label='Back 7 days'>
+            <i class="material-icons md-24">chevron_left</i>
+          </md-button>
+          <md-button ng-disabled="viewLength <= todayX + 1" class='md-icon-button pull-right' ng-click='showNextDays(0)' title="Show thru today" aria-label='Show thru today'>
+            <i class="material-icons md-24">first_page</i>
+          </md-button>
+        </div>
         <canvas id="base" class="chart chart-bar" chart-options="chartOptions" chart-colors="chartColors" chart-data="chartData" chart-labels="chartLabels" chart-dataset-override="chartDatasetOverride" chart-click="onChartClick">
         </canvas>
         <md-button ng-disabled="simMode || isWorking" class="color-tacit-red" ng-click="startSim()" aria-label="Start">

@@ -20,7 +20,6 @@ angular.module('trainingDays')
           actualFormArray,
           actualFitnessArray,
           actualFatigueArray,
-          // actualFormPointBorderColors,
           formPointRadius,
           planLoadArray,
           planFormArray,
@@ -33,6 +32,7 @@ angular.module('trainingDays')
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
+          console.log('td.isSimDay: ', td.isSimDay);
           // Highlight goal event days.
           if (td.scheduledEventRanking === 1) {
             return '#BD7E7D';
@@ -48,6 +48,7 @@ angular.module('trainingDays')
           }
 
           if (td.isSimDay) {
+            console.log('sim day!: ');
             // Highlight sim days when in what-if mode.
             return '#ffe4b3';
           }
@@ -171,7 +172,121 @@ angular.module('trainingDays')
           return moment(td.date).format('ddd MMM D');
         };
 
+        var loadChartData = function() {
+          console.log('loadChartData: ');
+          planLoadArray = _.flatMap($scope.season, getPlanLoad);
+          planFormArray = _.flatMap($scope.season, getPlanForm);
+          planFitnessArray = _.flatMap($scope.season, getPlanFitness);
+          planFatigueArray = _.flatMap($scope.season, getPlanFatigue);
+          actualLoadArray = _.flatMap($scope.season, getActualLoad);
+          actualFitnessArray = _.flatMap($scope.season, getActualFitness);
+          actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
+          actualFormArray = _.flatMap($scope.season, getActualForm);
+          planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
+          formPointRadius = _.flatMap($scope.season, setFormPointRadius);
+          $scope.chartLabels = _.flatMap($scope.season, extractDate);
+
+          if ($scope.authentication.user.levelOfDetail > 2) {
+            targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
+            planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
+            actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
+            $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
+          } else {
+            $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray];
+          }
+
+          $scope.chartDatasetOverride = [
+            {
+              label: 'Load - Actual',
+              yAxisID: 'y-axis-0',
+              borderWidth: 1,
+              type: 'bar'
+            },
+            {
+              label: 'Load - Plan ',
+              yAxisID: 'y-axis-0',
+              borderWidth: 1,
+              backgroundColor: planLoadBackgroundColors,
+              type: 'bar'
+            },
+            {
+              label: 'Fitness - Actual',
+              yAxisID: 'y-axis-0',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line'
+            },
+            {
+              label: 'Fitness - Plan',
+              yAxisID: 'y-axis-0',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line'
+            },
+            {
+              label: 'Form - Actual',
+              yAxisID: 'y-axis-0',
+              borderWidth: 3,
+              pointRadius: formPointRadius,
+              hitRadius: 4,
+              type: 'line'
+            },
+            {
+              label: 'Form - Plan',
+              yAxisID: 'y-axis-0',
+              borderWidth: 3,
+              pointRadius: formPointRadius,
+              hitRadius: 4,
+              type: 'line'
+            },
+            {
+              label: 'Fatigue - Actual',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line',
+              hidden: true
+            },
+            {
+              label: 'Fatigue - Planned',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line',
+              hidden: true
+            },
+            {
+              label: 'Target Ramp Rate',
+              yAxisID: 'y-axis-1',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line'
+            },
+            {
+              label: 'Average Ramp Rate - Actual',
+              yAxisID: 'y-axis-1',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line'
+            },
+            {
+              label: 'Average Ramp Rate - Plan',
+              yAxisID: 'y-axis-1',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line'
+            }
+          ];
+        };
+
+
         var loadChart = function() {
+
           usSpinnerService.spin('tdSpinner');
           $scope.isWorking = true;
 
@@ -181,7 +296,6 @@ angular.module('trainingDays')
                 $state.go('trainingDays.createStart');
               }
 
-              $scope.season = season.days;
               // Reload user object as notifications may have been updated.
               Authentication.user = season.user;
               $scope.hasEnd = season.hasEnd;
@@ -191,128 +305,25 @@ angular.module('trainingDays')
                 $scope.checkGiveFeedback(season.yesterday);
               }
 
-              planLoadArray = _.flatMap($scope.season, getPlanLoad);
-              planFormArray = _.flatMap($scope.season, getPlanForm);
-              planFitnessArray = _.flatMap($scope.season, getPlanFitness);
-              planFatigueArray = _.flatMap($scope.season, getPlanFatigue);
-              actualLoadArray = _.flatMap($scope.season, getActualLoad);
-              actualFitnessArray = _.flatMap($scope.season, getActualFitness);
-              actualFatigueArray = _.flatMap($scope.season, getActualFatigue);
-              actualFormArray = _.flatMap($scope.season, getActualForm);
-              planLoadBackgroundColors = _.flatMap($scope.season, setPlanLoadBackgroundColor);
-              formPointRadius = _.flatMap($scope.season, setFormPointRadius);
-              // actualFormPointBorderColors = _.flatMap($scope.season, setActualFormPointColor);
-              $scope.chartLabels = _.flatMap($scope.season, extractDate);
+              var todayNumeric = Util.toNumericDate(moment()),
+                lookBackDefault = 20,
+                lookAheadDefault = 41; // will show lookAheadDefault - 1 days in the future.
 
-              if ($scope.authentication.user.levelOfDetail > 2) {
-                targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
-                // rampRateArray = _.flatMap($scope.season, getRampRate);
-                planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
-                actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
-                // $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, targetRampRateArray, rampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
-              } else {
-                $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray];
+              $scope.seasonAllDays = season.days;
+
+              $scope.todayX = _.findIndex(season.days, { 'dateNumeric': todayNumeric });
+
+              if (!Number.isInteger($scope.startX)) {
+                $scope.startX = $scope.todayX > lookBackDefault ? $scope.todayX - lookBackDefault : 0;
               }
 
-              $scope.chartDatasetOverride = [
-                {
-                  label: 'Load - Actual',
-                  yAxisID: 'y-axis-0',
-                  borderWidth: 1,
-                  // backgroundColor: actualLoadBackgroundColors,
-                  type: 'bar'
-                },
-                {
-                  label: 'Load - Plan ',
-                  yAxisID: 'y-axis-0',
-                  borderWidth: 1,
-                  backgroundColor: planLoadBackgroundColors,
-                  type: 'bar'
-                },
-                {
-                  label: 'Fitness - Actual',
-                  yAxisID: 'y-axis-0',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line'
-                },
-                {
-                  label: 'Fitness - Plan',
-                  yAxisID: 'y-axis-0',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line'
-                },
-                {
-                  label: 'Form - Actual',
-                  yAxisID: 'y-axis-0',
-                  borderWidth: 3,
-                  pointRadius: formPointRadius,
-                  hitRadius: 4,
-                  // pointBorderColor: actualFormPointBorderColors,
-                  type: 'line'
-                },
-                {
-                  label: 'Form - Plan',
-                  yAxisID: 'y-axis-0',
-                  borderWidth: 3,
-                  pointRadius: formPointRadius,
-                  hitRadius: 4,
-                  // pointBorderColor: '#4D5360',
-                  type: 'line'
-                },
-                {
-                  label: 'Fatigue - Actual',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line',
-                  hidden: true
-                },
-                {
-                  label: 'Fatigue - Planned',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line',
-                  hidden: true
-                },
-                {
-                  label: 'Target Ramp Rate',
-                  yAxisID: 'y-axis-1',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line'
-                },
-                // {
-                //   label: 'Ramp Rate',
-                //   yAxisID: 'y-axis-1',
-                //   borderWidth: 3,
-                //   pointRadius: 0,
-                //   hitRadius: 4,
-                //   type: 'line'
-                // },
-                {
-                  label: 'Average Ramp Rate - Actual',
-                  yAxisID: 'y-axis-1',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line'
-                },
-                {
-                  label: 'Average Ramp Rate - Plan',
-                  yAxisID: 'y-axis-1',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  hitRadius: 4,
-                  type: 'line'
-                }
-              ];
+              $scope.viewLength = $scope.viewLength || $scope.todayX + lookAheadDefault;
+              $scope.seasonLength = $scope.seasonAllDays.length;
+
+              // Note that slice extracts up to but not including end.
+              $scope.season = season.days.slice($scope.startX, $scope.viewLength);
+
+              loadChartData();
             }
 
             usSpinnerService.stop('tdSpinner');
@@ -358,7 +369,6 @@ angular.module('trainingDays')
           '#8AEB90', //Ramp Rate
           '#DF8B4D', //Average Ramp Rate - Actual
           '#E2D769' //Average Ramp Rate - Plan
-
         ];
 
         $scope.chartOptions = {
@@ -453,6 +463,49 @@ angular.module('trainingDays')
               }
             }
           }
+        };
+
+        $scope.showPrevDays = function(days) {
+          if (days === 0) {
+            // Show from yesterday.
+            $scope.startX = $scope.todayX - 1;
+          } else if (!days) {
+            // Show from season start.
+             $scope.startX = 0;
+          } else if (days > 0) {
+            // Show more days.
+            $scope.startX = $scope.startX > days ? $scope.startX - days : 0;
+          } else {
+            // If days is negative we move start forward.
+            $scope.startX = $scope.startX - days > $scope.todayX - 1 ? $scope.todayX - 1 : $scope.startX - days;
+          }
+
+          // Note that slice extracts up to but not including end.
+          $scope.season = $scope.seasonAllDays.slice($scope.startX, $scope.viewLength);
+
+          loadChartData();
+        };
+
+        $scope.showNextDays = function(days) {
+          if (days === 0) {
+            // Show no future days.
+            $scope.viewLength = $scope.todayX + 1;
+          } else if (!days) {
+            // Show thru season end.
+            $scope.viewLength = $scope.seasonLength;
+          } else if (days > 0) {
+            // Show more days.
+            $scope.viewLength = $scope.viewLength + days > $scope.seasonLength ? $scope.seasonLength : $scope.viewLength + days;
+          } else {
+            // If days is negative we move backward that many days.
+            // Below we subtract 1 more from viewlength to account for the fact that we are subtracting an index from length, not another index.
+            $scope.viewLength = $scope.viewLength - $scope.todayX - 1 > days * -1 ? $scope.viewLength + days : $scope.todayX + 1;
+          }
+
+          // Note that slice extracts up to but not including end.
+          $scope.season = $scope.seasonAllDays.slice($scope.startX, $scope.viewLength);
+
+          loadChartData();
         };
 
         $scope.onChartClick = function(points) {
