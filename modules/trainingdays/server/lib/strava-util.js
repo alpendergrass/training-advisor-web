@@ -187,7 +187,7 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
     getWeightedAverageWatts(trainingDay.user, stravaActivity)
       .then(function(weightedAverageWatts) {
         if (!weightedAverageWatts && !stravaActivity.suffer_score) {
-          console.log(`stravaUtil.getAverageWatts returned no watttage for user: ${trainingDay.user.username} and suffer_score is not provided, payload: ${JSON.stringify(stravaActivity)}`);
+          // console.log(`stravaUtil.getAverageWatts returned no watttage for user: ${trainingDay.user.username} and suffer_score is not provided, payload: ${JSON.stringify(stravaActivity)}`);
           return resolve();
         }
 

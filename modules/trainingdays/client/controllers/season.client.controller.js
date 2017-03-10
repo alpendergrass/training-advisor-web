@@ -32,7 +32,6 @@ angular.module('trainingDays')
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
-          console.log('td.isSimDay: ', td.isSimDay);
           // Highlight goal event days.
           if (td.scheduledEventRanking === 1) {
             return '#BD7E7D';
@@ -471,7 +470,7 @@ angular.module('trainingDays')
             $scope.startX = $scope.todayX - 1;
           } else if (!days) {
             // Show from season start.
-             $scope.startX = 0;
+            $scope.startX = 0;
           } else if (days > 0) {
             // Show more days.
             $scope.startX = $scope.startX > days ? $scope.startX - days : 0;

@@ -489,15 +489,26 @@ module.exports.revertSimulation = function(user, callback) {
   });
 };
 
-module.exports.removePlanGenerationActivities = function(user) {
+module.exports.removePlanGenerationActivities = function(user, numericDate) {
   return new Promise(function(resolve, reject) {
     if (!user) {
       err = new TypeError('removePlanGenerationActivities valid user is required');
       return reject(err);
     }
 
+    if (!numericDate) {
+      err = new TypeError('removePlanGenerationActivities numericDate is required');
+      return reject(err);
+    }
+
+    if (!moment(numericDate.toString()).isValid()) {
+      err = new TypeError('removePlanGenerationActivities numericDate ' + numericDate + ' is not a valid date');
+      return reject(err);
+    }
+
     TrainingDay.update({
-      user: user
+      user: user,
+      dateNumeric: { $gt: numericDate }
     }, {
       $pull: { plannedActivities: { source: 'plangeneration' }, completedActivities: { source: 'plangeneration' } }
     }, {
@@ -515,7 +526,7 @@ module.exports.removePlanGenerationActivities = function(user) {
 module.exports.removePlanGenerationCompletedActivities = function(user) {
   return new Promise(function(resolve, reject) {
     if (!user) {
-      err = new TypeError('removePlanGenerationActivities valid user is required');
+      err = new TypeError('removePlanGenerationCompletedActivities valid user is required');
       return reject(err);
     }
 

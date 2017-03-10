@@ -11,7 +11,7 @@ var path = require('path'),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require('../../server/lib/db-util');
 
-var user, trainingDate, numericDate, numericEndDate, endDate, trainingDay, metricsParams;
+var user, trainingDate, numericDate, tomorrowDate, numericEndDate, endDate, trainingDay, metricsParams;
 
 describe('db-util Unit Tests:', function() {
 
@@ -25,6 +25,8 @@ describe('db-util Unit Tests:', function() {
 
       trainingDate = moment().startOf('day').toDate();
       numericDate = util.toNumericDate(trainingDate);
+      tomorrowDate = moment().add(1, 'day').toDate();
+      // numericTomorrowDate = util.toNumericDate(tomorrowDate);
       endDate = moment().add(2, 'days').toDate();
       numericEndDate = util.toNumericDate(endDate);
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
@@ -780,33 +782,76 @@ describe('db-util Unit Tests:', function() {
 
   describe('Method removePlanGenerationActivities', function() {
     it('should return error if no user', function(done) {
-      dbUtil.removePlanGenerationActivities(null)
+      dbUtil.removePlanGenerationActivities(null, null)
         .catch(function(err) {
           (err.message).should.containEql('valid user is required');
           done();
         });
     });
 
-    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
-      dbUtil.removePlanGenerationActivities(user)
-        .then(function(rawResponse) {
-          (rawResponse.n).should.equal(0);
-          (rawResponse.nModified).should.equal(0);
+    it('should return error if missing date', function(done) {
+      dbUtil.removePlanGenerationActivities(user, null)
+        .catch(function(err) {
+          (err.message).should.containEql('numericDate is required');
           done();
         });
     });
 
-    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists', function(done) {
+    it('should return error if invalid date', function(done) {
+      dbUtil.removePlanGenerationActivities(user, 'erty')
+        .catch(function(err) {
+          (err.message).should.containEql('not a valid date');
+          done();
+        });
+    });
+
+    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
+      dbUtil.removePlanGenerationActivities(user, numericDate)
+        .then(function(rawResponse) {
+          (rawResponse.n).should.equal(0);
+          (rawResponse.nModified).should.equal(0);
+          done();
+        },
+        function(err) {
+          // should.not.exist(err);
+          done(err);
+        });
+    });
+
+    it('should return match count of 0 and modified count of 0 if only prior trainingDay exists', function(done) {
       testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanGenerationActivities(user)
+        dbUtil.removePlanGenerationActivities(user, numericDate)
+          .then(function(rawResponse) {
+            (rawResponse.n).should.equal(0);
+            (rawResponse.nModified).should.equal(0);
+            done();
+          },
+          function(err) {
+            // should.not.exist(err);
+            done(err);
+          });
+      });
+    });
+
+    it('should return match count of 1 and modified count of 0 if one clean trainingDay exists', function(done) {
+      testHelpers.createTrainingDay(user, tomorrowDate, null, function(err, testTD) {
+        if (err) {
+          console.log('createTrainingDay error: ' + err);
+        }
+
+        dbUtil.removePlanGenerationActivities(user, numericDate)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(0);
             done();
+          },
+          function(err) {
+            // should.not.exist(err);
+            done(err);
           });
       });
     });
@@ -817,22 +862,26 @@ describe('db-util Unit Tests:', function() {
         source: 'plangeneration'
       }];
 
-      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
+      testHelpers.createTrainingDay(user, tomorrowDate, completedActivities, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanGenerationActivities(user)
+        dbUtil.removePlanGenerationActivities(user, numericDate)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
             done();
+          },
+          function(err) {
+            // should.not.exist(err);
+            done(err);
           });
       });
     });
 
     it('should return match count of 1 and modified count of 1 if one trainingDay with plangeneration plannedActivities exists', function(done) {
-      testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
+      testHelpers.createTrainingDay(user, tomorrowDate, null, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
@@ -848,11 +897,15 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          dbUtil.removePlanGenerationActivities(user)
+          dbUtil.removePlanGenerationActivities(user, numericDate)
             .then(function(rawResponse) {
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
               done();
+            },
+            function(err) {
+              // should.not.exist(err);
+              done(err);
             });
         });
       });
@@ -864,7 +917,7 @@ describe('db-util Unit Tests:', function() {
         source: 'plangeneration'
       }];
 
-      testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
+      testHelpers.createTrainingDay(user, tomorrowDate, completedActivities, function(err, testTD) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
@@ -880,11 +933,15 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          dbUtil.removePlanGenerationActivities(user)
+          dbUtil.removePlanGenerationActivities(user, numericDate)
             .then(function(rawResponse) {
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
               done();
+            },
+            function(err) {
+              // should.not.exist(err);
+              done(err);
             });
         });
       });
