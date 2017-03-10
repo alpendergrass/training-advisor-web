@@ -229,7 +229,7 @@ module.exports.generatePlan = function(params, callback) {
 
             //As a precaution we remove all planning data.
             //If we errored out last time there could be some left overs.
-            dbUtil.removePlanGenerationActivities(user)
+            dbUtil.removePlanGenerationActivities(user, params.numericDate)
               .then(function() {
                 //get all training days from tomorrow thru last goal.
                 let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
