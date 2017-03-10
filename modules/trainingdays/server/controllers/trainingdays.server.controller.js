@@ -719,38 +719,38 @@ exports.downloadAllActivities = function(req, res) {
       });
     }
 
-    if (startDay) {
-      let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
-      if (numericLimitDate < startDay.dateNumeric) {
-        numericLimitDate = startDay.dateNumeric;
-      }
-
-      stravaUtil.downloadAllActivities(req.user, numericLimitDate, replaceExisting)
-        .then(function(response) {
-          let syncResponse = response;
-
-          if (syncResponse.activityCount > 0) {
-            let notifications = [];
-            notifications.push({ notificationType: 'plangen', lookup: '', add: true });
-
-            userUtil.updateNotifications(user, notifications, true)
-              .then(function(response) {})
-              .catch(function(err) {});
-          }
-          // No need to wait for updateNotifications as we are not returning user.
-          return res.json(syncResponse);
-        })
-        .catch(function(err) {
-          console.log('Strava downloadAllActivities err: ', err);
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        });
-    } else {
+    if (!startDay) {
       return res.status(400).send({
         message: 'A start day is required in order to sync with Strava.'
       });
     }
+
+    let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
+    if (numericLimitDate < startDay.dateNumeric) {
+      numericLimitDate = startDay.dateNumeric;
+    }
+
+    stravaUtil.downloadAllActivities(req.user, numericLimitDate, replaceExisting)
+      .then(function(response) {
+        let syncResponse = response;
+
+        if (syncResponse.activityCount > 0) {
+          let notifications = [];
+          notifications.push({ notificationType: 'plangen', lookup: '', add: true });
+
+          userUtil.updateNotifications(user, notifications, true)
+            .then(function(response) {})
+            .catch(function(err) {});
+        }
+        // No need to wait for updateNotifications as we are not returning user.
+        return res.json(syncResponse);
+      })
+      .catch(function(err) {
+        console.log('Strava downloadAllActivities err: ', err);
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      });
   });
 };
 

@@ -41,7 +41,7 @@ angular.module('trainingDays').provider('modalState', ['$stateProvider', functio
           .finally(function() {
             $timeout(function() { // to let populate $state.$current
               if ($state.$current.name === stateName)
-                $state.go(options.parent || '^');
+                $state.go(options.parent || '^', {}, { reload: options.reloadParent });
             });
           });
       });
@@ -132,33 +132,38 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
 
     modalStateProvider
       .state('trainingDays.syncActivities', {
+        backdrop: 'static', // click on backdrop does not close modal.
+        reloadParent: true,
         url: '/syncActivities',
         parent: 'season',
         templateUrl: '/modules/trainingdays/client/views/partials/sync-activities.client.view.html',
-        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util',
-          function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util) {
+        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util', 'usSpinnerService',
+          function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util, usSpinnerService) {
             $scope.replaceExisting = false;
+            $scope.syncUnderway = false;
             $scope.syncActivities = function() {
               if (Authentication.user.ftpLog.length < 1) {
-                toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', {
-                  allowHtml: true, timeOut: 7000
-                });
+                toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', { allowHtml: true, timeOut: 7000 });
                 return;
               }
-              toastr.info('Strava sync started. We will notify you when completed.', 'Strava Sync');
+              toastr.info('Strava sync started. We will notify you when completed. This could take a while. Perhaps now would be a good time for a cup of tea.', 'Strava Sync', { timeOut: 6000 });
+              $scope.syncUnderway = true;
+              usSpinnerService.spin('tdSpinner');
               TrainingDays.downloadAllActivities({
                 todayNumeric: Util.toNumericDate(moment()),
                 replaceExisting: $scope.replaceExisting
               }, function(response) {
-                toastr[response.type](response.text, response.title);
+                $scope.syncUnderway = false;
+                usSpinnerService.stop('tdSpinner');
+                toastr[response.type](response.text, response.title, { timeOut: 6000 });
                 $uibModalInstance.close(response);
               }, function(errorResponse) {
                 console.log('errorResponse: ', errorResponse);
-                toastr.error(errorResponse.data.message, {
-                  timeOut: 7000
-                });
+                $scope.syncUnderway = false;
+                usSpinnerService.stop('tdSpinner');
+                toastr.error(errorResponse.data.message, { timeOut: 7000 });
+                $uibModalInstance.close('sync');
               });
-              $uibModalInstance.close('sync');
             };
             $scope.cancelSync = function() {
               $uibModalInstance.dismiss('cancel');
