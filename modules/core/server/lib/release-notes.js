@@ -2,6 +2,18 @@
 
 var releaseNotes = [
   {
+    version: '0.7.2',
+    title: 'Season View Navigation and a Couple of Bug Fixes, Release 0.7.2',
+    message: '',
+    features: [
+      'On My Season page, you can now expand and contract the season view with navigation buttons.'
+    ],
+    fixes: [
+      'Long-running Strava Syncs were causing database update conflicts. The sync process now has to complete before anything else can be done.',
+      'Update Season was wiping out planning for past days.'
+    ]
+  },
+  {
     version: '0.7.1',
     title: 'FTP Management Features and a Bug Fix, Release 0.7.1',
     message: '',
