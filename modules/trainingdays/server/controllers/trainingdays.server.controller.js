@@ -479,6 +479,7 @@ exports.getSeason = function(req, res) {
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
+      console.log('getSeason getStartDay err: ', err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
@@ -522,6 +523,7 @@ exports.getSeason = function(req, res) {
 
         dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {
           if (err) {
+            console.log('getSeason getTrainingDays err: ', err);
             return res.status(400).send({
               message: errorHandler.getErrorMessage(err)
             });
@@ -544,6 +546,7 @@ exports.getSeason = function(req, res) {
         });
       })
       .catch(function(err) {
+        console.log('getSeason err: ', err);
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
@@ -567,6 +570,7 @@ exports.getAdvice = function(req, res) {
 
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
+      console.log('getAdvice err: ', err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
@@ -589,6 +593,7 @@ exports.genPlan = function(req, res) {
 
   adviceEngine.generatePlan(params, function(err, response) {
     if (err) {
+      console.log('genPlan err: ', err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
@@ -615,6 +620,7 @@ exports.getSimDay = function(req, res) {
   } else {
     dbUtil.makeSimDay(trainingDay, function(err, simDay) {
       if (err) {
+        console.log('getSimDay err: ', err);
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
@@ -639,6 +645,7 @@ exports.finalizeSim = function(req, res) {
   if (req.params.commit === 'yes') {
     dbUtil.commitSimulation(req.user, function(err) {
       if (err) {
+        console.log('finalizeSim commitSimulation err: ', err);
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
@@ -658,6 +665,7 @@ exports.finalizeSim = function(req, res) {
   } else {
     dbUtil.revertSimulation(req.user, function(err) {
       if (err) {
+        console.log('finalizeSim revertSimulation err: ', err);
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
@@ -682,6 +690,7 @@ exports.downloadActivities = function(req, res) {
         return res.json(response);
       })
       .catch(function(err) {
+        console.log('Strava downloadActivities err: ', err);
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
@@ -713,7 +722,7 @@ exports.downloadAllActivities = function(req, res) {
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
-      console.log('Strava downloadAllActivities err: ', err);
+      console.log('Strava downloadAllActivities getStartDay err: ', err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });

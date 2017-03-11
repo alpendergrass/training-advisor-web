@@ -45,6 +45,7 @@ exports.update = function(req, res) {
 
     user.save(function(err) {
       if (err) {
+        console.log('user update save err: ', err);
         return res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
