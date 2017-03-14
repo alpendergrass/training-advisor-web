@@ -46,7 +46,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdD
 
                 var alert = $mdDialog.alert({
                   title: releaseNotes[0].title ? releaseNotes[0].title : 'Changes in Version ' + releaseNotes[0].version,
-                  content: releaseMessage,
+                  htmlContent: releaseMessage,
                   ok: 'Close'
                 });
 
