@@ -1,5 +1,60 @@
 <section ng-controller="DashboardController">
-  <div class="page-header">
-    <h2>Dashboard</h2>
-  </div>
+  <md-content layout="row" layout-sm="column" layout-xs="column">
+    <div flex>
+      <md-card>
+        <md-card-header>
+          <!-- <md-card-avatar>
+          <img class="md-user-avatar" src="avatar.png">
+        </md-card-avatar> -->
+          <md-card-header-text>
+            <span class="md-title">Today's Advice</span>
+            <span class="md-subhead">{{todayFormatted}}</span>
+          </md-card-header-text>
+        </md-card-header>
+        <!-- <img ng-src="card-image.png" class="md-card-image" alt="image caption"> -->
+        <!-- <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Card headline</span>
+          <span class="md-subhead">Card subheader</span>
+        </md-card-title-text>
+      </md-card-title> -->
+        <!-- <md-card-actions layout="row" layout-align="start center">
+        <md-button>Action 1</md-button>
+        <md-button>Action 2</md-button>
+        <md-card-icon-actions>
+          <md-button class="md-icon-button" aria-label="icon">
+            <md-icon md-svg-icon="icon"></md-icon>
+          </md-button>
+        </md-card-icon-actions>
+      </md-card-actions> -->
+        <md-card-title>
+          <md-card-title-text>
+            <span class="md-title">
+            <span ng-show="plannedActivity.activityType === 'choice'">You decide. Cross-training is a viable alternative today.</span>
+            <span ng-show="plannedActivity.activityType === 'rest'">You should rest.</span>
+            <span ng-show="plannedActivity.activityType === 'easy'">You should do a low load ride.</span>
+            <span ng-show="plannedActivity.activityType === 'moderate'">You should do a moderate load ride.</span>
+            <span ng-show="plannedActivity.activityType === 'hard'">You should do a high load ride.</span>
+            <span ng-show="plannedActivity.activityType === 'test'">You should do a threshold power test. Training load is not a consideration.</span>
+            <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 1"><b>You have a Goal Event Today!</b></span>
+            <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 2"><b>You have a Medium Priority Event Today</b></span>
+            <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 3"><b>You have a Low Priority Event Today</b></span>
+            </span>
+            <span class="md-subhead" ng-show="_.includes(['easy', 'moderate', 'hard', 'event'], plannedActivity.activityType) && trainingDay.scheduledEventRanking !== 9">
+              Training Load between <strong>{{plannedActivity.targetMinLoad}}</strong> and <strong>{{plannedActivity.targetMaxLoad}}</strong>.
+            </span>
+          </md-card-title-text>
+        </md-card-title>
+        <md-card-content>
+          <p>
+            {{plannedActivity.advice}}
+          </p>
+        </md-card-content>
+      </md-card>
+    </div>
+    <div flex>
+      I'm below on mobile, and to the right on larger devices.
+    </div>
+    </div>
+  </md-content>
 </section>

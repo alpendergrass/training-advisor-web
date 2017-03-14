@@ -39,9 +39,9 @@
         <label ng-hide="plannedActivity.activityType == 'event'">Today's Advice:</label>
         <span ng-show="plannedActivity.activityType === 'choice'">You decide. Cross-training is a viable alternative today.</span>
         <span ng-show="plannedActivity.activityType === 'rest'">You should rest.</span>
-        <span ng-show="plannedActivity.activityType === 'easy'">You should do a low load ride</span>
-        <span ng-show="plannedActivity.activityType === 'moderate'">You should do a moderate load ride</span>
-        <span ng-show="plannedActivity.activityType === 'hard'">You should do a high load ride</span>
+        <span ng-show="plannedActivity.activityType === 'easy'">You should do a low load ride.</span>
+        <span ng-show="plannedActivity.activityType === 'moderate'">You should do a moderate load ride.</span>
+        <span ng-show="plannedActivity.activityType === 'hard'">You should do a high load ride.</span>
         <span ng-show="plannedActivity.activityType === 'test'">You should do a threshold power test. Training load is not a consideration.</span>
         <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 1"><b>You have a Goal Event Today!</b></span>
         <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 2"><b>You have a Medium Priority Event Today</b></span>
