@@ -69,6 +69,13 @@ angular.module('trainingDays').provider('modalState', ['$stateProvider', functio
 angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
   function($stateProvider, modalStateProvider) {
     $stateProvider
+      .state('dashboard', {
+        url: '/dashboard',
+        templateUrl: 'modules/trainingDays/client/views/dashboard.client.view.html',
+        data: {
+          roles: ['user', 'admin']
+        }
+      })
       .state('season', {
         url: '/season',
         templateUrl: 'modules/trainingDays/client/views/season.client.view.html',

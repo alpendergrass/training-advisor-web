@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('CalendarController', ['$scope', '$state', '$stateParams', '$location', '$compile', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment', 'usSpinnerService', 'MaterialCalendarData',
-    function($scope, $state, $stateParams, $location, $compile, $anchorScroll, Authentication, TrainingDays, Season, Util, _, moment, usSpinnerService, MaterialCalendarData) {
+  .controller('CalendarController', ['$scope', '$state', '$stateParams', '$location', '$compile', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment', 'usSpinnerService', 'MaterialCalendarData',
+    function($scope, $state, $stateParams, $location, $compile, Authentication, TrainingDays, Season, Util, _, moment, usSpinnerService, MaterialCalendarData) {
       $scope.authentication = Authentication;
       $scope.hasStart = true;
       $scope.hasEnd = true;

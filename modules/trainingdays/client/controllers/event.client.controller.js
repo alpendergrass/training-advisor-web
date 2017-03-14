@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('EventController', ['$scope', '$state', '$stateParams', '$compile', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Util', '_', 'moment',
-    function($scope, $state, $stateParams, $compile, $uibModal, $anchorScroll, Authentication, TrainingDays, Util, _, moment) {
+  .controller('EventController', ['$scope', '$state', '$stateParams', '$compile', '$uibModal', 'Authentication', 'TrainingDays', 'Util', '_', 'moment',
+    function($scope, $state, $stateParams, $compile, $uibModal, Authentication, TrainingDays, Util, _, moment) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;

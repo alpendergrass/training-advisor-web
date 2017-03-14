@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', '$anchorScroll', 'Authentication', 'TrainingDays', 'Season', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
-    function($scope, $state, $stateParams, $compile, $filter, $uibModal, $anchorScroll, Authentication, TrainingDays, Season, Feedback, Util, _, moment, toastr, usSpinnerService) {
+  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', 'Authentication', 'TrainingDays', 'Season', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
+    function($scope, $state, $stateParams, $compile, $filter, $uibModal, Authentication, TrainingDays, Season, Feedback, Util, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -172,7 +172,6 @@ angular.module('trainingDays')
         };
 
         var loadChartData = function() {
-          console.log('loadChartData: ');
           planLoadArray = _.flatMap($scope.season, getPlanLoad);
           planFormArray = _.flatMap($scope.season, getPlanForm);
           planFitnessArray = _.flatMap($scope.season, getPlanFitness);

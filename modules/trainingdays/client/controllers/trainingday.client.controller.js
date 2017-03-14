@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$anchorScroll', 'Authentication', 'TrainingDays', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
-    function($scope, $state, $stateParams, $compile, $filter, $anchorScroll, Authentication, TrainingDays, Feedback, Util, _, moment, toastr, usSpinnerService) {
+  .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$compile', '$filter', 'Authentication', 'TrainingDays', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
+    function($scope, $state, $stateParams, $compile, $filter, Authentication, TrainingDays, Feedback, Util, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;

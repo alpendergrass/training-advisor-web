@@ -3,6 +3,12 @@
 angular.module('trainingDays').run(['Menus',
   function (Menus) {
     Menus.addMenuItem('topbar', {
+      title: 'Dashboard',
+      state: 'dashboard',
+      roles: ['user']
+    });
+
+    Menus.addMenuItem('topbar', {
       title: 'My Training Day',
       state: 'trainingDayView',
       roles: ['user']
