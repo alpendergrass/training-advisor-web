@@ -155,10 +155,10 @@ module.exports.loadRatingLookups = [
     upperLoadFactor: 0.00,
   }, {
     rating: 'easy',
-    upperLoadFactor: 0.40,
+    upperLoadFactor: 0.70,
   }, {
     rating: 'moderate',
-    upperLoadFactor: 1.10,
+    upperLoadFactor: 1.25,
   }
 ];
 

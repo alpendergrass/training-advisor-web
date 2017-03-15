@@ -319,7 +319,7 @@ describe('advice-metrics Unit Tests:', function () {
 
         var tDate = moment(trainingDate);
         var completedActivities = [{
-          load: 1
+          load: (expectedTargetAvgDailyLoad * 0.40) // Easy is 0.40 or less.
         }];
 
         testHelpers.createTrainingDay(user, tDate, completedActivities, function(err) {
@@ -425,16 +425,15 @@ describe('advice-metrics Unit Tests:', function () {
       });
     });
 
-    it('should return loadRating of hard if a completed activitiy of sufficient load exists for current trainingDay', function (done) {
+    it('should return loadRating of hard if a completed activity of sufficient load exists for current trainingDay', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 1, 9, 9, function(err, startDay) {
         if (err) {
           console.log('createStartingPoint: ' + err);
         }
 
         var tDate = moment(trainingDate);
-        //moderate upperLoadFactor is 1.20
         var completedActivities = [{
-          load: (expectedTargetAvgDailyLoad * 1.21)
+          load: (expectedTargetAvgDailyLoad * 1.26) // Moderate is 1.25 or less.
         }];
 
         testHelpers.createTrainingDay(user, tDate, completedActivities, function(err) {
