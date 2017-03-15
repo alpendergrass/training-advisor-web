@@ -49,11 +49,42 @@
           <p>
             {{plannedActivity.advice}}
           </p>
+          <div ng-show="trainingDayToday.completedActivities.length > 0"><u>Completed Activities</u>
+            <div ng-repeat="completedActivity in trainingDayToday.completedActivities" class="">
+              <span>{{completedActivity}}</span>
+            </div>
+          </div>
         </md-card-content>
       </md-card>
     </div>
     <div flex>
-      I'm below on mobile, and to the right on larger devices.
+      <md-card>
+        <md-card-header>
+          <md-card-header-text>
+            <span class="md-title">Your Scheduled Events</span>
+          </md-card-header-text>
+        </md-card-header>
+        <md-card-content>
+          <div ng-repeat="futureEvent in futureEvents">
+            <a ui-sref="trainingDayView({trainingDayId: futureEvent._id})" class="list-group-item">
+              <h5 class="list-group-item-heading">{{futureEvent.date | date:'EEEE, d MMM y'}}<span ng-show="futureEvent.name"> - {{futureEvent.name}}</span></h5>
+              <small>
+                <div ng-show="futureEvent.scheduledEventRanking">
+                  <p class="list-group-item-text"><b>
+                    <span ng-show="futureEvent.scheduledEventRanking === 1">Goal Event!</span>
+                    <span ng-show="futureEvent.scheduledEventRanking === 2">Medium Priority Event.</span>
+                    <span ng-show="futureEvent.scheduledEventRanking === 3">Low Priority Event.</span>
+                    <span ng-show="futureEvent.scheduledEventRanking === 9">Off Day.</span>
+                    </b>
+                    <!-- <span ng-show="futureEvent.estimatedLoad > 0"> Estimated Event Load is {{futureEvent.estimatedLoad}}.</span> -->
+                  </p>
+                </div>
+
+              </small>
+            </a>
+          </div>
+        </md-card-content>
+      </md-card>
     </div>
     </div>
   </md-content>

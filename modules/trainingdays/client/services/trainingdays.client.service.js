@@ -34,6 +34,11 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
         url: 'api/trainingDays/getSeason/:todayNumeric',
         isArray: true
       },
+      getFutureEvents: {
+        method: 'GET',
+        url: 'api/trainingDays/getFutureEvents/:trainingDateNumeric',
+        isArray: true
+      },
       genPlan: {
         method: 'GET',
         url: 'api/trainingDays/genPlan/:trainingDateNumeric',

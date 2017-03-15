@@ -31,7 +31,7 @@ module.exports = function (app) {
   app.route('/api/trainingDays/getAdvice/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getAdvice);
 
-  app.route('/api/trainingDays/getFutureEventsn/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
+  app.route('/api/trainingDays/getFutureEvents/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getFutureEvents);
 
   app.route('/api/trainingDays/genPlan/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
