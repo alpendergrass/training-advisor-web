@@ -452,6 +452,28 @@ describe('db-util Unit Tests:', function() {
         });
       });
     });
+
+    it('should return array of two event days if two event days exist within time limit', function(done) {
+      testHelpers.createGoalEvent(user, trainingDate, 10, function(err, newGoalDay) {
+        if (err) {
+          console.log('createGoalEvent: ' + err);
+        }
+
+        testHelpers.createGoalEvent(user, trainingDate, 20, function(err, newPriority2Day) {
+          if (err) {
+            console.log('createGoalEvent: ' + err);
+          }
+
+          dbUtil.getFuturePriorityDays(user, numericDate, null, 20)
+            .then(function(priorityDays) {
+              priorityDays.should.have.length(2);
+              (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
+              (priorityDays[1].date.toString()).should.be.equal(newPriority2Day.date.toString());
+              done();
+            });
+        }, 2); // <-- note sneaky last (optional) parm to createGoalEvent
+      });
+    });
   });
 
   describe('Method getMostRecentGoalDay', function() {

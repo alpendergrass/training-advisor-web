@@ -117,12 +117,12 @@ module.exports.createStartingPoint = function(user, trainingDate, daysBack, fitn
   });
 };
 
-module.exports.createGoalEvent = function(user, trainingDate, daysForward, callback) {
+module.exports.createGoalEvent = function(user, trainingDate, daysForward, callback, eventRanking = 1) {
   var computedDate = moment(trainingDate).add(daysForward, 'days'),
     trainingDay = this.createTrainingDayObject(computedDate, user);
 
   trainingDay.name = 'Goal trainingDay';
-  trainingDay.scheduledEventRanking = 1;
+  trainingDay.scheduledEventRanking = eventRanking;
   trainingDay.estimatedLoad = 567;
 
   trainingDay.save(function (err) {

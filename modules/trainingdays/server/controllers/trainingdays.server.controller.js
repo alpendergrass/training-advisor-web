@@ -580,6 +580,29 @@ exports.getAdvice = function(req, res) {
   });
 };
 
+exports.getFutureEvents = function(req, res) {
+  // Get all future events including off days.
+  var params = {},
+    user = req.user,
+    numericDate = parseInt(req.params.trainingDateNumeric, 10);
+
+  // let pageData = null;
+  // let eventData = { category: 'Training Day', action: params.isSim ? 'Run Sim' : 'Update Plan', value: params.numericDate, path: '/api/trainingDays/genPlan/:trainingDateNumeric' };
+
+  // coreUtil.logAnalytics(req, pageData, eventData);
+
+  dbUtil.getFuturePriorityDays(user, numericDate, null, adviceConstants.maxDaysToLookAheadForFutureGoals)
+    .then(function(priorityDays) {
+      return res.json(priorityDays);
+    })
+    .catch(function(err) {
+      console.log('getFutureEvents getFuturePriorityDays err: ', err);
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    });
+};
+
 exports.genPlan = function(req, res) {
   var params = {};
   params.user = req.user;

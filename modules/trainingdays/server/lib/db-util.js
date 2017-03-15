@@ -230,7 +230,7 @@ module.exports.getFuturePriorityDays = function(user, numericSearchDate, priorit
 
     var query = {
       user: user,
-      scheduledEventRanking: priority,
+      scheduledEventRanking: priority ? priority : { $gt: 0 },
       dateNumeric: { $gte: numericSearchDate, $lte: numericMaxDate },
       cloneOfId: null
     };
