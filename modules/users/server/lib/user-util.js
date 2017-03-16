@@ -227,13 +227,16 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
 
         user.markModified('notifications');
         // I do not understand why I have to do this as notifications is not a schema-less type.
+        // But it seems I have to for it to work.
 
-        user.save(function(err) {
-          if (err) {
+        user.save()
+          .then(function(user) {
+            return resolve({ user: user, saved: true });
+          })
+          .catch(function(err){
+            console.log('updateNotifications user save err: ', err);
             return reject(err);
-          }
-          return resolve({ user: user, saved: true });
-        });
+          });
       })
       .catch(function(err){
         return reject(err);
@@ -242,47 +245,49 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
 };
 
 module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, callback) {
-  let notifications = [];
+  return new Promise(function(resolve, reject) {
+    let notifications = [];
 
-  if (!updatedUser.ftpLog || updatedUser.ftpLog.length < 1) {
-    notifications.push({ notificationType: 'ftp', lookup: '', add: true });
-  } else {
-    notifications.push({ notificationType: 'ftp', lookup: '' });
-  }
+    if (!updatedUser.ftpLog || updatedUser.ftpLog.length < 1) {
+      notifications.push({ notificationType: 'ftp', lookup: '', add: true });
+    } else {
+      notifications.push({ notificationType: 'ftp', lookup: '' });
+    }
 
-  if (!updatedUser.timezone) {
-    notifications.push({ notificationType: 'timezone', lookup: '', add: true });
-  } else {
-    notifications.push({ notificationType: 'timezone', lookup: '' });
-  }
+    if (!updatedUser.timezone) {
+      notifications.push({ notificationType: 'timezone', lookup: '', add: true });
+    } else {
+      notifications.push({ notificationType: 'timezone', lookup: '' });
+    }
 
-  if (updatedUser.autoFetchStravaActivities === null) {
-    notifications.push({ notificationType: 'fetchstrava', lookup: '', add: true });
-  } else {
-    notifications.push({ notificationType: 'fetchstrava', lookup: '' });
-  }
+    if (updatedUser.autoFetchStravaActivities === null) {
+      notifications.push({ notificationType: 'fetchstrava', lookup: '', add: true });
+    } else {
+      notifications.push({ notificationType: 'fetchstrava', lookup: '' });
+    }
 
-  if (updatedUser.autoUpdateFtpFromStrava === null) {
-    notifications.push({ notificationType: 'fetchstravaftp', lookup: '', add: true });
-  } else {
-    notifications.push({ notificationType: 'fetchstravaftp', lookup: '' });
-  }
+    if (updatedUser.autoUpdateFtpFromStrava === null) {
+      notifications.push({ notificationType: 'fetchstravaftp', lookup: '', add: true });
+    } else {
+      notifications.push({ notificationType: 'fetchstravaftp', lookup: '' });
+    }
 
-  // If latest ftp date was changed or if rest days were changed, recommend plangen.
-  if (userBefore &&
-    ((userBefore.ftpLog && userBefore.ftpLog.length > 0 && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
-    !moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day')) ||
-    !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
-    notifications.push({ notificationType: 'plangen', lookup: '', add: true });
-  }
+    // If latest ftp date was changed or if rest days were changed, recommend plangen.
+    if (userBefore &&
+      ((userBefore.ftpLog && userBefore.ftpLog.length > 0 && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
+      !moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day')) ||
+      !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
+      notifications.push({ notificationType: 'plangen', lookup: '', add: true });
+    }
 
-  module.exports.updateNotifications(updatedUser, notifications, saveUser)
-    .then(function(response) {
-      return callback(null, response);
-    })
-    .catch(function(err) {
-      return callback(err, null);
-    });
+    module.exports.updateNotifications(updatedUser, notifications, saveUser)
+      .then(function(response) {
+        return resolve(response);
+      })
+      .catch(function(err) {
+        reject(err);
+      });
+  });
 };
 
 module.exports.getUserByStravaID = function(id) {

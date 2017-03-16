@@ -129,25 +129,29 @@ exports.oauthCallback = function(strategy) {
           return res.redirect('/waitlist');
         }
 
-        userUtil.verifyUserSettings(user, null, true, function(err, response) {
-          if (err) {
-            console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
-          } else {
+        userUtil.verifyUserSettings(user, null, true)
+          .then(function(response) {
             user = response.user;
-          }
+          })
+          .catch(function(err) {
+            console.log(`oauthCallback verifyUserSettings failed for user ${user.username} err: ${err}`);
+          })
+          .then(function() {
+            // if (_.includes(user.roles, 'admin')) {
+            //   return res.redirect('/admin/users');
+            // }
 
-          // if (_.includes(user.roles, 'admin')) {
-          //   return res.redirect('/admin/users');
-          // }
+            // If user needs to set FTP, timezone or auto-fetch preference we should redirect to profile page.
+            if (!user.ftpLog || user.ftpLog.length < 1 || !user.timezone || user.autoFetchStravaActivities === null || user.autoUpdateFtpFromStrava === null) {
+              return res.redirect('/settings/profile');
+            }
 
-          // If user needs to set FTP, timezone or auto-fetch preference we should redirect to profile page.
-          if (!user.ftpLog || user.ftpLog.length < 1 || !user.timezone || user.autoFetchStravaActivities === null || user.autoUpdateFtpFromStrava === null) {
-            return res.redirect('/settings/profile');
-          }
-
-          // We do not want to redirect to the home page after auth.
-          return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/')? sessionRedirectURL : '/trainingDay/');
-        });
+            // We do not want to redirect to the home page after auth.
+            return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/')? sessionRedirectURL : '/trainingDay/');
+          })
+          .catch(function(err) {
+            return res.redirect('/trainingDay/');
+          });
       });
     })(req, res, next);
   };

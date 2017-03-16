@@ -620,12 +620,9 @@ describe('User server routes tests', function () {
             return done(signinErr);
           }
 
-          var userUpdate = {
-            firstName: 'user_update_first',
-            lastName: 'user_update_last',
-            notifications: [],
-            ftpLog: []
-          };
+          var userUpdate = user;
+          userUpdate.firstName = 'user_update_first';
+          userUpdate.lastName = 'user_update_last';
 
           agent.put('/api/users')
             .send(userUpdate)
@@ -649,7 +646,7 @@ describe('User server routes tests', function () {
     });
   });
 
-  it('should not be able to update own user details and add roles if not admin', function (done) {
+  it('should not be able to update user subdocs if user update doc is stale', function (done) {
     user.roles = ['user'];
 
     user.save(function (err) {
@@ -664,12 +661,45 @@ describe('User server routes tests', function () {
           }
 
           var userUpdate = {
-            firstName: 'user_update_first',
-            lastName: 'user_update_last',
             notifications: [],
-            ftpLog: [],
-            roles: ['user', 'admin']
+            ftpLog: []
           };
+
+          agent.put('/api/users')
+            .send(userUpdate)
+            .expect(409)
+            .end(function (userInfoErr, userInfoRes) {
+              if (userInfoErr) {
+                return done(userInfoErr);
+              }
+
+              // Call the assertion callback
+              userInfoRes.body.message.should.containEql('User data is out of date');
+
+              return done();
+            });
+        });
+    });
+  });
+
+  it('should not be able to update own user details and add roles if not admin', function (done) {
+    user.roles = ['user'];
+
+    user.save(function (err) {
+      should.not.exist(err);
+      agent.post('/api/auth/signin')
+        .send(credentials)
+        .expect(200)
+        .end(function (signinErr, signinRes) {
+          // Handle signin error
+          if (signinErr) {
+            return done(signinErr);
+          }
+
+          var userUpdate = user;
+          userUpdate.firstName = 'user_update_first';
+          userUpdate.lastName = 'user_update_last';
+          userUpdate.roles = ['user', 'admin'];
 
           agent.put('/api/users')
             .send(userUpdate)
@@ -697,14 +727,12 @@ describe('User server routes tests', function () {
 
     var _user2 = _user;
 
-    _user2.username = 'user2_username';
-    _user2.email = 'user2_email@test.com';
-
     var credentials2 = {
       username: 'username2',
       password: 'M3@n.jsI$Aw3$0m3'
     };
 
+    _user2.email = 'user2_email@test.com';
     _user2.username = credentials2.username;
     _user2.password = credentials2.password;
 
@@ -722,26 +750,33 @@ describe('User server routes tests', function () {
             return done(signinErr);
           }
 
-          var userUpdate = {
-            firstName: 'user_update_first',
-            lastName: 'user_update_last',
-            notifications: [],
-            ftpLog: [],
-            username: user.username
-          };
-
-          agent.put('/api/users')
-            .send(userUpdate)
-            .expect(400)
-            .end(function (userInfoErr, userInfoRes) {
-              if (userInfoErr) {
-                return done(userInfoErr);
+          agent.post('/api/auth/signin')
+            .send(credentials)
+            .expect(200)
+            .end(function (signinErr, signinRes) {
+              // Handle signin error
+              if (signinErr) {
+                return done(signinErr);
               }
 
-              // Call the assertion callback
-              userInfoRes.body.message.should.containEql('username already exists');
+              var userUpdate = user;
+              userUpdate.firstName = 'user_update_first';
+              userUpdate.lastName = 'user_update_last';
+              userUpdate.username = _user2.username;
 
-              return done();
+              agent.put('/api/users')
+                .send(userUpdate)
+                .expect(400)
+                .end(function (userInfoErr, userInfoRes) {
+                  if (userInfoErr) {
+                    return done(userInfoErr);
+                  }
+
+                  // Call the assertion callback
+                  userInfoRes.body.message.should.containEql('username already exists');
+
+                  return done();
+                });
             });
         });
     });
@@ -776,27 +811,35 @@ describe('User server routes tests', function () {
             return done(signinErr);
           }
 
-          var userUpdate = {
-            firstName: 'user_update_first',
-            lastName: 'user_update_last',
-            notifications: [],
-            ftpLog: [],
-            email: user.email
-          };
 
-          agent.put('/api/users')
-            .send(userUpdate)
-            .expect(400)
-            .end(function (userInfoErr, userInfoRes) {
-              if (userInfoErr) {
-                return done(userInfoErr);
+          agent.post('/api/auth/signin')
+            .send(credentials)
+            .expect(200)
+            .end(function (signinErr, signinRes) {
+              // Handle signin error
+              if (signinErr) {
+                return done(signinErr);
               }
 
-              // Call the assertion callback
-              userInfoRes.body.message.should.containEql('email already exists');
+              var userUpdate = user;
+              userUpdate.firstName = 'user_update_first';
+              userUpdate.lastName = 'user_update_last';
+              userUpdate.email = _user2.email;
 
-              return done();
-            });
+              agent.put('/api/users')
+                .send(userUpdate)
+                .expect(400)
+                .end(function (userInfoErr, userInfoRes) {
+                  if (userInfoErr) {
+                    return done(userInfoErr);
+                  }
+
+                  // Call the assertion callback
+                  userInfoRes.body.message.should.containEql('email already exists');
+
+                  return done();
+                });
+              });
         });
     });
   });
@@ -815,7 +858,7 @@ describe('User server routes tests', function () {
 
       agent.put('/api/users')
         .send(userUpdate)
-        .expect(400)
+        .expect(403)
         .end(function (userInfoErr, userInfoRes) {
           if (userInfoErr) {
             return done(userInfoErr);
