@@ -839,7 +839,7 @@ describe('User server routes tests', function () {
 
                   return done();
                 });
-              });
+            });
         });
     });
   });
