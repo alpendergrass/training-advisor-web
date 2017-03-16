@@ -25,7 +25,7 @@ describe('User server routes tests', function () {
   beforeEach(function (done) {
     credentials = {
       username: 'username',
-      password: 'M3@n.jsI$Aw3$0m3'
+      password: 'M3@n.jsI$Aw3$0m'
     };
 
     _user = {
