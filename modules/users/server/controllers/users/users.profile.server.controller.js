@@ -24,6 +24,8 @@ exports.update = function(req, res) {
     });
   }
 
+  console.log('My Profile update active user: ', user.username);
+
   if (user.__v !== userUpdate.__v) {
     // req.user, if updated in another tab, could have a greater version (__v) number than req.body user.
     // (Likely, notifications were updated elsewhere.)

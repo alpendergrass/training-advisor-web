@@ -2,6 +2,15 @@
 
 var releaseNotes = [
   {
+    version: '0.7.4',
+    title: 'User Profile Bug Fix, Release 0.7.4',
+    message: '',
+    features: [],
+    fixes: [
+      'Fixed overlapping data updates during update season.'
+    ]
+  },
+  {
     version: '0.7.3',
     title: 'User Profile Bug Fix, Release 0.7.3',
     message: '',
