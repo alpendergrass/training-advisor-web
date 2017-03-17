@@ -591,16 +591,37 @@ exports.genPlan = function(req, res) {
 
   coreUtil.logAnalytics(req, pageData, eventData);
 
-  adviceEngine.generatePlan(params, function(err, response) {
-    if (err) {
-      console.log('genPlan err: ', err);
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      res.json(response);
-    }
-  });
+  let genPlanResponse = null;
+
+  adviceEngine.generatePlan(params)
+    .then(function(response) {
+      genPlanResponse = response;
+
+      if (params.isSim) {
+        // Don't mess with notifications if we are running a sim.
+        return Promise.resolve({ user: response.user, saved: false });
+      }
+
+      //remove genPlan notification if it exists
+      let notifications = [{ notificationType: 'plangen', lookup: '' }];
+      return userUtil.updateNotifications(response.user, notifications, true);
+    })
+    .then(function(response) {
+      genPlanResponse.user = response.user;
+      res.json(genPlanResponse);
+    })
+    .catch(function(err) {
+      if (!genPlanResponse) {
+        console.log('genPlan err: ', err);
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } else {
+        console.log('genPlan updateNotifications err: ', err);
+        // Ignore this error, we don't care that much about notifications.
+        res.json(genPlanResponse);
+      }
+    });
 };
 
 exports.getSimDay = function(req, res) {
