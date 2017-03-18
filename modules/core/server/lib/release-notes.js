@@ -2,6 +2,15 @@
 
 var releaseNotes = [
   {
+    version: '0.7.5',
+    title: 'User Profile Bug Fix Fix, Release 0.7.5',
+    message: '',
+    features: [],
+    fixes: [
+      'Reverted part of previous change that caused season to be generated incorrectly.'
+    ]
+  },
+  {
     version: '0.7.4',
     title: 'User Profile Bug Fix, Release 0.7.4',
     message: '',
