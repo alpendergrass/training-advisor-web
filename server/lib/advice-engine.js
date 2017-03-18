@@ -165,25 +165,25 @@ function generateActivityFromAdvice(params, callback) {
         // Note that we could be over-writing an FTP update if the user updated FTP
         // while we are genning plan.
 
-        User.findById(user.id, '-salt -password').exec(function(err, retrievedUser) {
+        // User.findById(user.id, '-salt -password').exec(function(err, retrievedUser) {
+        //   if (err) {
+        //     return callback(err, null);
+        //   }
+
+        //   if (!retrievedUser.ftpLog || retrievedUser.ftpLog.length < 1) {
+        //     return callback(new Error('FTP has been removed during season update. FTP is required.'), null);
+        //   }
+
+        //   user = retrievedUser;
+        user.ftpLog[0].ftpDateNumeric = trainingDay.dateNumeric;
+        user.save(function(err) {
           if (err) {
             return callback(err, null);
           }
 
-          if (!retrievedUser.ftpLog || retrievedUser.ftpLog.length < 1) {
-            return callback(new Error('FTP has been removed during season update. FTP is required.'), null);
-          }
-
-          user = retrievedUser;
-          user.ftpLog[0].ftpDateNumeric = trainingDay.dateNumeric;
-          user.save(function(err) {
-            if (err) {
-              return callback(err, null);
-            }
-
-            return callback(null, trainingDay);
-          });
+          return callback(null, trainingDay);
         });
+        // });
       } else {
         return callback(null, trainingDay);
       }
@@ -309,19 +309,19 @@ module.exports.generatePlan = function(params) {
                           // Let's get latest user document to prevent potential version error here.
                           // Note that we could be over-writing an FTP update if the user updated FTP
                           // while we are genning plan.
-                          User.findById(user.id, '-salt -password').exec(function(err, retrievedUser) {
-                            if (err) {
-                              return reject(err);
-                            }
+                          // User.findById(user.id, '-salt -password').exec(function(err, retrievedUser) {
+                          //   if (err) {
+                          //     return reject(err);
+                          //   }
 
-                            if (!retrievedUser.ftpLog || retrievedUser.ftpLog.length < 1) {
-                              return reject(new Error('FTP has been removed during season update. FTP is required.'));
-                            }
+                          //   if (!retrievedUser.ftpLog || retrievedUser.ftpLog.length < 1) {
+                          //     return reject(new Error('FTP has been removed during season update. FTP is required.'));
+                          //   }
 
-                            user = retrievedUser;
-                            user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
-                            return user.save();
-                          });
+                          //   user = retrievedUser;
+                          user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
+                          return user.save();
+                          // });
                         })
                         .then(function() {
                           // We need to refresh advice for today and tomorrow because
