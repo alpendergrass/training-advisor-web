@@ -172,7 +172,6 @@ angular.module('trainingDays')
         };
 
         var loadChartData = function() {
-          console.log('loadChartData: ');
           planLoadArray = _.flatMap($scope.season, getPlanLoad);
           planFormArray = _.flatMap($scope.season, getPlanForm);
           planFitnessArray = _.flatMap($scope.season, getPlanFitness);

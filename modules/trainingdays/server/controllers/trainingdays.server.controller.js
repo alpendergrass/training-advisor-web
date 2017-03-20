@@ -571,8 +571,15 @@ exports.getAdvice = function(req, res) {
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
       console.log('getAdvice err: ', err);
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
+      let statusCode = 400;
+      let message = errorHandler.getErrorMessage(err);
+
+      if (message === 'Starting date for current training period was not found.') {
+        statusCode = 418;
+      }
+
+      return res.status(statusCode).send({
+        message: message
       });
     } else {
       res.json(trainingDay);
@@ -712,8 +719,15 @@ exports.downloadActivities = function(req, res) {
       })
       .catch(function(err) {
         console.log('Strava downloadActivities err: ', err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
+        let statusCode = 400;
+        let message = errorHandler.getErrorMessage(err);
+
+        if (message === 'Starting date for current training period was not found.') {
+          statusCode = 418;
+        }
+
+        return res.status(statusCode).send({
+          message: message
         });
       });
   }
@@ -750,7 +764,7 @@ exports.downloadAllActivities = function(req, res) {
     }
 
     if (!startDay) {
-      return res.status(400).send({
+      return res.status(418).send({
         message: 'A start day is required in order to sync with Strava.'
       });
     }
