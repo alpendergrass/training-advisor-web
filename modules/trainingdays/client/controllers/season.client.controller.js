@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', 'Authentication', 'TrainingDays', 'Season', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
-    function($scope, $state, $stateParams, $compile, $filter, $uibModal, Authentication, TrainingDays, Season, Feedback, Util, _, moment, toastr, usSpinnerService) {
+  .controller('SeasonController', ['$scope', '$state', '$stateParams', '$compile', '$filter', '$uibModal', 'Authentication', 'TrainingDays', 'Season', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService', 'blockUI',
+    function($scope, $state, $stateParams, $compile, $filter, $uibModal, Authentication, TrainingDays, Season, Feedback, Util, _, moment, toastr, usSpinnerService, blockUI) {
       $scope.authentication = Authentication;
 
       var jQuery = window.jQuery;
@@ -285,8 +285,8 @@ angular.module('trainingDays')
 
         var loadChart = function() {
 
+          blockUI.start('Loading season data...');
           usSpinnerService.spin('tdSpinner');
-          $scope.isWorking = true;
 
           Season.getSeason(function(errorMessage, season) {
             if (season) {
@@ -325,7 +325,7 @@ angular.module('trainingDays')
             }
 
             usSpinnerService.stop('tdSpinner');
-            $scope.isWorking = false;
+            blockUI.stop();
             $scope.error = errorMessage;
           });
         };
@@ -524,20 +524,16 @@ angular.module('trainingDays')
         };
 
         $scope.genPlan = function(isSim) {
-          var toastMsg,
-            toastTitle;
-          $scope.isWorking = true;
+          var blockMsg;
           usSpinnerService.spin('tdSpinner');
 
           if (isSim) {
-            toastTitle = 'Season Simulation';
-            toastMsg = 'Simulation is running...';
+            blockMsg = 'Simulation is running...';
           } else {
-            toastTitle = 'Season Update';
-            toastMsg = 'Update has been initiated.';
+            blockMsg = 'Updating your season...';
             isSim = false;
           }
-          toastr.info(toastMsg, toastTitle); //, { timeOut: 7000 });
+          blockUI.start(blockMsg);
 
           $scope.error = null;
 
@@ -545,14 +541,13 @@ angular.module('trainingDays')
             trainingDateNumeric: Util.toNumericDate($scope.today),
             isSim: isSim
           }, function(response) {
+            blockUI.stop();
             usSpinnerService.stop('tdSpinner');
-            $scope.isWorking = false;
-            toastr.success(response.statusMessage.text, response.statusMessage.title); //, { timeOut: 10000 });
             // Reload user object as notifications may have been updated.
             Authentication.user = response.user;
             loadChart();
           }, function(errorResponse) {
-            $scope.isWorking = false;
+            blockUI.stop();
             usSpinnerService.stop('tdSpinner');
             if (errorResponse.data && errorResponse.data.message) {
               $scope.error = errorResponse.data.message;

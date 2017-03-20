@@ -2,6 +2,42 @@
 
 var releaseNotes = [
   {
+    version: '0.7.6',
+    title: '',
+    message: '',
+    features: [
+      'We now block the UI when loading or updating your season.'
+    ],
+    fixes: []
+  },
+  {
+    version: '0.7.5',
+    title: 'User Profile Bug Fix Fix, Release 0.7.5',
+    message: '',
+    features: [],
+    fixes: [
+      'Reverted part of previous change that caused season to be generated incorrectly.'
+    ]
+  },
+  {
+    version: '0.7.4',
+    title: 'User Profile Bug Fix, Release 0.7.4',
+    message: '',
+    features: [],
+    fixes: [
+      'Fixed overlapping data updates during update season.'
+    ]
+  },
+  {
+    version: '0.7.3',
+    title: 'User Profile Bug Fix, Release 0.7.3',
+    message: '',
+    features: [],
+    fixes: [
+      'Fixed user profile update error caused by overlapping updates.'
+    ]
+  },
+  {
     version: '0.7.2',
     title: 'Season View Navigation and a Couple of Bug Fixes, Release 0.7.2',
     message: '',

@@ -571,8 +571,15 @@ exports.getAdvice = function(req, res) {
   adviceEngine.advise(params, function(err, trainingDay) {
     if (err) {
       console.log('getAdvice err: ', err);
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
+      let statusCode = 400;
+      let message = errorHandler.getErrorMessage(err);
+
+      if (message === 'Starting date for current training period was not found.') {
+        statusCode = 418;
+      }
+
+      return res.status(statusCode).send({
+        message: message
       });
     } else {
       res.json(trainingDay);
@@ -614,16 +621,37 @@ exports.genPlan = function(req, res) {
 
   coreUtil.logAnalytics(req, pageData, eventData);
 
-  adviceEngine.generatePlan(params, function(err, response) {
-    if (err) {
-      console.log('genPlan err: ', err);
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      res.json(response);
-    }
-  });
+  let genPlanResponse = null;
+
+  adviceEngine.generatePlan(params)
+    .then(function(response) {
+      genPlanResponse = response;
+
+      if (params.isSim) {
+        // Don't mess with notifications if we are running a sim.
+        return Promise.resolve({ user: response.user, saved: false });
+      }
+
+      //remove genPlan notification if it exists
+      let notifications = [{ notificationType: 'plangen', lookup: '' }];
+      return userUtil.updateNotifications(response.user, notifications, true);
+    })
+    .then(function(response) {
+      genPlanResponse.user = response.user;
+      res.json(genPlanResponse);
+    })
+    .catch(function(err) {
+      if (!genPlanResponse) {
+        console.log('genPlan err: ', err);
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } else {
+        console.log('genPlan updateNotifications err: ', err);
+        // Ignore this error, we don't care that much about notifications.
+        res.json(genPlanResponse);
+      }
+    });
 };
 
 exports.getSimDay = function(req, res) {
@@ -714,8 +742,15 @@ exports.downloadActivities = function(req, res) {
       })
       .catch(function(err) {
         console.log('Strava downloadActivities err: ', err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
+        let statusCode = 400;
+        let message = errorHandler.getErrorMessage(err);
+
+        if (message === 'Starting date for current training period was not found.') {
+          statusCode = 418;
+        }
+
+        return res.status(statusCode).send({
+          message: message
         });
       });
   }
@@ -752,7 +787,7 @@ exports.downloadAllActivities = function(req, res) {
     }
 
     if (!startDay) {
-      return res.status(400).send({
+      return res.status(418).send({
         message: 'A start day is required in order to sync with Strava.'
       });
     }

@@ -20,7 +20,7 @@
           <md-button ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
         </div>
         <div class="pull-left">
-          <md-button ng-class="{'color-tacit-red' : needsPlanGen}" ng-disabled="isWorking" ng-click="genPlan()">Update Season</md-button>
+          <md-button ng-class="{'color-tacit-red' : needsPlanGen}" ng-click="genPlan()">Update Season</md-button>
         </div>
         <div class="pull-right">
           <md-button aria-label="Season Help" data-toggle="modal" data-target="#seasonHelp">
@@ -64,7 +64,7 @@
         </div>
         <canvas id="base" class="chart chart-bar" chart-options="chartOptions" chart-colors="chartColors" chart-data="chartData" chart-labels="chartLabels" chart-dataset-override="chartDatasetOverride" chart-click="onChartClick">
         </canvas>
-        <md-button ng-disabled="simMode || isWorking" class="color-tacit-red" ng-click="startSim()" aria-label="Start">
+        <md-button ng-disabled="simMode" class="color-tacit-red" ng-click="startSim()" aria-label="Start">
           What If?
         </md-button>
         <md-button ng-disabled="!simConfigUnderway" ng-class="{'color-tacit-red' : simConfigUnderway}" ng-click="runSim()" aria-label="Run">

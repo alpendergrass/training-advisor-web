@@ -177,8 +177,14 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
         initUser(Authentication.user);
         return true;
       }, function(response) {
-        toastr.error(response.data.message);
-        return false;
+        if (response.status === 409) {
+          toastr.error('Profile update failed. Please try your update again.');
+          Authentication.user = response.data.user;
+          $state.reload();
+        } else {
+          toastr.error(response.data.message);
+          return false;
+        }
       });
     };
   }

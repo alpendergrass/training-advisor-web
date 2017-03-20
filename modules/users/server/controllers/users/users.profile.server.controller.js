@@ -19,8 +19,20 @@ exports.update = function(req, res) {
   delete userUpdate.roles;
 
   if (!user) {
-    return res.status(400).send({
+    return res.status(403).send({
       message: 'User is not signed in'
+    });
+  }
+
+  console.log('My Profile update active user: ', user.username);
+
+  if (user.__v !== userUpdate.__v) {
+    // req.user, if updated in another tab, could have a greater version (__v) number than req.body user.
+    // (Likely, notifications were updated elsewhere.)
+    // We will return the current user so the client can sort itself out.
+    return res.status(409).send({
+      user: user,
+      message: 'User data is out of date.'
     });
   }
 
@@ -30,36 +42,40 @@ exports.update = function(req, res) {
 
   coreUtil.logAnalytics(req, pageData, eventData);
 
-  userUtil.verifyUserSettings(userUpdate, user, false, function(err, verified) {
-    if (err) {
-      console.log(`verifyUserSettings failed for user ${user.username} err: ${err}`);
-    } else {
+  userUtil.verifyUserSettings(userUpdate, user, false)
+    .then(function(verified) {
       userUpdate = verified.user;
-    }
+    })
+    .catch(function(err) {
+      console.log(`user.update verifyUserSettings failed for user ${user.username} err: ${err}`);
+    })
+    .then(function() {
+      // Merge updates with existing user
+      user = _.extend(user, userUpdate);
 
-    // Merge updates with existing user
-    user = _.extend(user, userUpdate);
+      user.updated = Date.now();
+      user.displayName = user.firstName + ' ' + user.lastName;
 
-    user.updated = Date.now();
-    user.displayName = user.firstName + ' ' + user.lastName;
-
-    user.save(function(err) {
-      if (err) {
-        console.log('user update save err: ', err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } else {
-        req.login(user, function (err) {
-          if (err) {
-            res.status(400).send(err);
-          } else {
-            res.json(user);
-          }
-        });
-      }
+      user.save(function(err) {
+        if (err) {
+          console.log('user update save err: ', err);
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } else {
+          req.login(user, function (err) {
+            if (err) {
+              res.status(400).send(err);
+            } else {
+              res.json(user);
+            }
+          });
+        }
+      });
+    })
+    .catch(function(err) {
+      return res.redirect('/trainingDay/');
     });
-  });
 };
 
 exports.changeProfilePicture = function(req, res) {
