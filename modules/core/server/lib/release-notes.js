@@ -2,6 +2,15 @@
 
 var releaseNotes = [
   {
+    version: '0.7.6',
+    title: '',
+    message: '',
+    features: [
+      'We now block the UI when loading or updating your season.'
+    ],
+    fixes: []
+  },
+  {
     version: '0.7.5',
     title: 'User Profile Bug Fix Fix, Release 0.7.5',
     message: '',
