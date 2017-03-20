@@ -9,6 +9,7 @@ module.exports = {
         'public/lib/angular-xeditable/dist/css/xeditable.min.css',
         'public/lib/angular-toastr/dist/angular-toastr.min.css',
         'public/lib/angular-timezone-selector/dist/angular-timezone-selector.min.css',
+        'public/lib/angular-block-ui/dist/angular-block-ui.min.css',
         'public/lib/angular-material/angular-material.min.css'
       ],
       js: [
@@ -40,6 +41,7 @@ module.exports = {
         'public/lib/chart.js/dist/Chart.min.js',
         'public/lib/angular-chart.js/dist/angular-chart.min.js',
         'public/lib/angular-local-storage/dist/angular-local-storage.min.js',
+        'public/lib/angular-block-ui/dist/angular-block-ui.min.js',
         'public/lib/owasp-password-strength-test/owasp-password-strength-test.js'
       ]
     },

@@ -11,6 +11,7 @@ module.exports = {
         'public/lib/angular-xeditable/dist/css/xeditable.css',
         'public/lib/angular-toastr/dist/angular-toastr.css',
         'public/lib/angular-timezone-selector/dist/angular-timezone-selector.css',
+        'public/lib/angular-block-ui/dist/angular-block-ui.css',
         'public/lib/angular-material/angular-material.css'
       ],
       js: [
@@ -42,6 +43,7 @@ module.exports = {
         'public/lib/chart.js/dist/Chart.js',
         'public/lib/angular-chart.js/dist/angular-chart.js',
         'public/lib/angular-local-storage/dist/angular-local-storage.js',
+        'public/lib/angular-block-ui/dist/angular-block-ui.js',
         'public/lib/owasp-password-strength-test/owasp-password-strength-test.js'
       ],
       tests: ['public/lib/angular-mocks/angular-mocks.js']

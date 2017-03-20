@@ -9,8 +9,8 @@ angular.module(ApplicationConfiguration.applicationModuleName).constant('moment'
 
 // Setting HTML5 Location Mode
 angular.module(ApplicationConfiguration.applicationModuleName)
-  .config(['$locationProvider', '$httpProvider', 'toastrConfig',
-    function($locationProvider, $httpProvider, toastrConfig) {
+  .config(['$locationProvider', '$httpProvider', 'toastrConfig', 'blockUIConfig',
+    function($locationProvider, $httpProvider, toastrConfig, blockUIConfig) {
       $locationProvider.html5Mode(true).hashPrefix('!');
 
       $httpProvider.interceptors.push('authInterceptor');
@@ -18,6 +18,8 @@ angular.module(ApplicationConfiguration.applicationModuleName)
       angular.extend(toastrConfig, {
         timeOut: 3000
       });
+
+      blockUIConfig.autoBlock = false;
     }
   ]);
 
