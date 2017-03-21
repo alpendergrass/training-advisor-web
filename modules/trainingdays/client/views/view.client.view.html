@@ -36,19 +36,11 @@
   <div ng-show="(source === 'advised' || authentication.user.levelOfDetail > 2) && plannedActivity.activityType">
     <p>
       <div>
-        <label ng-hide="plannedActivity.activityType == 'event'">Today's Advice:</label>
-        <span ng-show="plannedActivity.activityType === 'choice'">You decide. Cross-training is a viable alternative today.</span>
-        <span ng-show="plannedActivity.activityType === 'rest'">You should rest.</span>
-        <span ng-show="plannedActivity.activityType === 'easy'">You should do a low load ride.</span>
-        <span ng-show="plannedActivity.activityType === 'moderate'">You should do a moderate load ride.</span>
-        <span ng-show="plannedActivity.activityType === 'hard'">You should do a high load ride.</span>
-        <span ng-show="plannedActivity.activityType === 'test'">You should do a threshold power test. Training load is not a consideration.</span>
-        <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 1"><b>You have a Goal Event Today!</b></span>
-        <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 2"><b>You have a Medium Priority Event Today</b></span>
-        <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 3"><b>You have a Low Priority Event Today</b></span>
+        <strong><span ng-hide="plannedActivity.activityType == 'event'">Today's Advice:</span>
+        {{plannedActivityDescription.namePhrase}}</strong>
 
-        <span ng-show="_.includes(['easy', 'moderate', 'hard', 'event'], plannedActivity.activityType) && trainingDay.scheduledEventRanking !== 9">
-          - Training Load between <strong>{{plannedActivity.targetMinLoad}}</strong> and <strong>{{plannedActivity.targetMaxLoad}}</strong>.
+        <span ng-show="plannedActivityDescription.loadPhrase">
+          - {{plannedActivityDescription.loadPhrase}}
         </span>
       </div>
       <div>
@@ -71,7 +63,7 @@
     <hr />
   </div>
 
-  <div ng-show="source === 'plangeneration' && plannedActivity.activityType && _.includes(['easy', 'moderate', 'hard', 'event'], plannedActivity.activityType) && trainingDay.scheduledEventRanking !== 9">
+  <div ng-show="source === 'plangeneration' && plannedActivity.activityType && _.includes(['easy', 'moderate', 'hard'], plannedActivity.activityType)">
     <p>
       <div>
           Training Load between <strong><u>{{plannedActivity.targetMinLoad}}</u></strong> and <strong><u>{{plannedActivity.targetMaxLoad}}</u></strong>.

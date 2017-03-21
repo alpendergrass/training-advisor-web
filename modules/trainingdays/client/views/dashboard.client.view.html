@@ -1,91 +1,100 @@
 <section ng-controller="DashboardController">
-  <md-content layout="row" layout-sm="column" layout-xs="column">
-    <div flex>
+  <div  layout-xs="column" layout="row">
+    <div flex-xs="" flex-gt-xs="50" layout="column">
       <md-card>
         <md-card-header>
-          <!-- <md-card-avatar>
-          <img class="md-user-avatar" src="avatar.png">
-        </md-card-avatar> -->
           <md-card-header-text>
-            <span class="md-title">Today's Advice</span>
+            <span class="md-title"><a ui-sref="trainingDayView({trainingDayId: trainingDayToday._id})">Today<span ng-show="trainingDayToday.name"> - {{trainingDayToday.name}}</span></a>
+            </span>
             <span class="md-subhead">{{todayFormatted}}</span>
           </md-card-header-text>
         </md-card-header>
-        <!-- <img ng-src="card-image.png" class="md-card-image" alt="image caption"> -->
-        <!-- <md-card-title>
-        <md-card-title-text>
-          <span class="md-headline">Card headline</span>
-          <span class="md-subhead">Card subheader</span>
-        </md-card-title-text>
-      </md-card-title> -->
-        <!-- <md-card-actions layout="row" layout-align="start center">
-        <md-button>Action 1</md-button>
-        <md-button>Action 2</md-button>
-        <md-card-icon-actions>
-          <md-button class="md-icon-button" aria-label="icon">
-            <md-icon md-svg-icon="icon"></md-icon>
-          </md-button>
-        </md-card-icon-actions>
-      </md-card-actions> -->
-        <md-card-title>
-          <md-card-title-text>
-            <span class="md-title">
-            <span ng-show="plannedActivity.activityType === 'choice'">You decide. Cross-training is a viable alternative today.</span>
-            <span ng-show="plannedActivity.activityType === 'rest'">You should rest.</span>
-            <span ng-show="plannedActivity.activityType === 'easy'">You should do a low load ride.</span>
-            <span ng-show="plannedActivity.activityType === 'moderate'">You should do a moderate load ride.</span>
-            <span ng-show="plannedActivity.activityType === 'hard'">You should do a high load ride.</span>
-            <span ng-show="plannedActivity.activityType === 'test'">You should do a threshold power test. Training load is not a consideration.</span>
-            <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 1"><b>You have a Goal Event Today!</b></span>
-            <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 2"><b>You have a Medium Priority Event Today</b></span>
-            <span ng-show="plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking === 3"><b>You have a Low Priority Event Today</b></span>
-            </span>
-            <span class="md-subhead" ng-show="_.includes(['easy', 'moderate', 'hard', 'event'], plannedActivity.activityType) && trainingDay.scheduledEventRanking !== 9">
-              Training Load between <strong>{{plannedActivity.targetMinLoad}}</strong> and <strong>{{plannedActivity.targetMaxLoad}}</strong>.
-            </span>
-          </md-card-title-text>
-        </md-card-title>
         <md-card-content>
-          <p>
-            {{plannedActivity.advice}}
-          </p>
-          <div ng-show="trainingDayToday.completedActivities.length > 0"><u>Completed Activities</u>
-            <div ng-repeat="completedActivity in trainingDayToday.completedActivities" class="">
-              <span>{{completedActivity}}</span>
-            </div>
+          <div>
+            <h4>
+              {{plannedActivityDescriptionToday.namePhrase}}
+              <small>{{plannedActivityDescriptionToday.loadPhrase}}</small>
+            </h4>
+            <p>
+              {{plannedActivityToday.advice}}
+            </p>
+          </div>
+          <div class="top-buffer-2x" ng-show="trainingDayToday.completedActivities.length > 0">
+            <h4>Completed Rides</h4>
+            <table class="table table-bordered table-hover table-condensed">
+              <tr>
+                <th>Source</th>
+                <th>Training Load</th>
+                <th>Intensity</th>
+              </tr>
+              <tr ng-repeat="completedActivity in trainingDayToday.completedActivities">
+                <td>
+                  <span class="text-capitalize">{{ completedActivity.source }}</span></a></span><span class="small" ng-if="completedActivity.source !== 'manual' && completedActivity.edited"> (edited)</span>
+                  <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link"><br>View on Strava</a></span>
+                </td>
+                <td>
+                  {{completedActivity.load}}<span class="small" ng-if="completedActivity.loadIsFromEstimatedPower"> (from estimated power)</span><span class="small" ng-if="completedActivity.loadIsSufferScore"> (Suffer Score)</span>
+                </td>
+                <td>
+                  {{completedActivity.intensity}}<span class="small" ng-if="!completedActivity.intensity"> (unknown)</span>
+                </td>
+              </tr>
+            </table>
           </div>
         </md-card-content>
       </md-card>
-    </div>
-    <div flex>
+
       <md-card>
         <md-card-header>
           <md-card-header-text>
-            <span class="md-title">Your Scheduled Events</span>
+            <span class="md-title"><a ui-sref="trainingDayView({trainingDayId: trainingDayTomorrow._id})">Tomorrow<span ng-show="trainingDayTomorrow.name"> - {{trainingDayTomorrow.name}}</span></a>
+            </span>
+            <span class="md-subhead">{{tomorrowFormatted}}</span>
           </md-card-header-text>
         </md-card-header>
         <md-card-content>
-          <div ng-repeat="futureEvent in futureEvents">
-            <a ui-sref="trainingDayView({trainingDayId: futureEvent._id})" class="list-group-item">
-              <h5 class="list-group-item-heading">{{futureEvent.date | date:'EEEE, d MMM y'}}<span ng-show="futureEvent.name"> - {{futureEvent.name}}</span></h5>
-              <small>
-                <div ng-show="futureEvent.scheduledEventRanking">
-                  <p class="list-group-item-text"><b>
-                    <span ng-show="futureEvent.scheduledEventRanking === 1">Goal Event!</span>
-                    <span ng-show="futureEvent.scheduledEventRanking === 2">Medium Priority Event.</span>
-                    <span ng-show="futureEvent.scheduledEventRanking === 3">Low Priority Event.</span>
-                    <span ng-show="futureEvent.scheduledEventRanking === 9">Off Day.</span>
-                    </b>
-                    <!-- <span ng-show="futureEvent.estimatedLoad > 0"> Estimated Event Load is {{futureEvent.estimatedLoad}}.</span> -->
-                  </p>
-                </div>
-
-              </small>
-            </a>
+          <div>
+            <h4>
+              {{plannedActivityDescriptionTomorrow.namePhrase}}
+              <small>{{plannedActivityDescriptionTomorrow.loadPhrase}}</small>
+            </h4>
+            <p>
+              {{plannedActivityTomorrow.advice}}
+            </p>
           </div>
         </md-card-content>
       </md-card>
     </div>
+
+    <div flex-xs="" flex-gt-xs="50" layout="column">
+      <div>
+        <md-card>
+          <md-card-header>
+            <md-card-header-text>
+              <span class="md-title">Your Scheduled Events</span>
+            </md-card-header-text>
+          </md-card-header>
+          <md-card-content>
+            <div ng-repeat="futureEvent in futureEvents">
+              <a ui-sref="trainingDayView({trainingDayId: futureEvent._id})" class="list-group-item">
+                <h5 class="list-group-item-heading">{{futureEvent.date | date:'EEEE, d MMM y'}}<span ng-show="futureEvent.name"> - {{futureEvent.name}}</span></h5>
+                <small>
+                  <div ng-show="futureEvent.scheduledEventRanking">
+                    <p class="list-group-item-text"><b>
+                      <span ng-show="futureEvent.scheduledEventRanking === 1">Goal Event!</span>
+                      <span ng-show="futureEvent.scheduledEventRanking === 2">Medium Priority Event</span>
+                      <span ng-show="futureEvent.scheduledEventRanking === 3">Low Priority Event</span>
+                      <span ng-show="futureEvent.scheduledEventRanking === 9">Off Day</span>
+                      </b>
+                    </p>
+                  </div>
+
+                </small>
+              </a>
+            </div>
+          </md-card-content>
+        </md-card>
+      </div>
     </div>
-  </md-content>
+  </div>
 </section>

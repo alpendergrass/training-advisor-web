@@ -56,6 +56,7 @@ angular.module('trainingDays')
 
         function resetViewObjects(trainingDay) {
           $scope.plannedActivity = Util.getPlannedActivity(trainingDay, $scope.source);
+          $scope.plannedActivityDescription = Util.getPlannedActivityDescription($scope.plannedActivity, trainingDay.scheduledEventRanking);
           $scope.requestedActivity = Util.getPlannedActivity(trainingDay, 'requested');
           $scope.plannedMetrics = Util.getMetrics($scope.trainingDay, 'planned');
           $scope.actualMetrics = Util.getMetrics($scope.trainingDay, 'actual');
