@@ -193,6 +193,10 @@ var TrainingDaySchema = new Schema({
       type: Number,
       default: 0
     },
+    totalLoad: {
+      type: Number,
+      default: 0
+    }
   }],
   planLoad: {
     type: Number,
