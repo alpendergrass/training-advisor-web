@@ -89,7 +89,7 @@ angular.module('trainingDays')
         };
 
         var getPlanLoad = function(td) {
-          return td.planLoad;
+          return Util.getMetrics(td, 'planned').totalLoad;
         };
 
         var getActualLoad = function(td) {

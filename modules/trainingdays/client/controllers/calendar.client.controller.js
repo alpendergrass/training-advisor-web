@@ -63,7 +63,7 @@ angular.module('trainingDays')
           if (planActivity) {
             content += Util.mapActivityTypeToVerbiage(planActivity.activityType) + ' - ';
           }
-          content += 'load: ' + trainingDay.planLoad + '</i>';
+          content += 'load: ' + Util.getMetrics(trainingDay, 'planned').totalLoad + '</i>';
         }
 
 
