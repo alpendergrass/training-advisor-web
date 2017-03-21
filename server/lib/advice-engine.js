@@ -144,7 +144,6 @@ function generateActivityFromAdvice(params, callback) {
     completedActivity.load = load;
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
-    trainingDay.planLoad = completedActivity.load;
 
     //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
     //when updateMetrics is called for the following day.
@@ -161,20 +160,6 @@ function generateActivityFromAdvice(params, callback) {
 
       if (planActivity.activityType === 'test') {
         // Make it look as if the user tested when recommended.
-        // Let's get latest user document to prevent potential version error here.
-        // Note that we could be over-writing an FTP update if the user updated FTP
-        // while we are genning plan.
-
-        // User.findById(user.id, '-salt -password').exec(function(err, retrievedUser) {
-        //   if (err) {
-        //     return callback(err, null);
-        //   }
-
-        //   if (!retrievedUser.ftpLog || retrievedUser.ftpLog.length < 1) {
-        //     return callback(new Error('FTP has been removed during season update. FTP is required.'), null);
-        //   }
-
-        //   user = retrievedUser;
         user.ftpLog[0].ftpDateNumeric = trainingDay.dateNumeric;
         user.save(function(err) {
           if (err) {
@@ -183,7 +168,6 @@ function generateActivityFromAdvice(params, callback) {
 
           return callback(null, trainingDay);
         });
-        // });
       } else {
         return callback(null, trainingDay);
       }
@@ -306,19 +290,6 @@ module.exports.generatePlan = function(params) {
 
                       dbUtil.removePlanGenerationCompletedActivities(user)
                         .then(function() {
-                          // Let's get latest user document to prevent potential version error here.
-                          // Note that we could be over-writing an FTP update if the user updated FTP
-                          // while we are genning plan.
-                          // User.findById(user.id, '-salt -password').exec(function(err, retrievedUser) {
-                          //   if (err) {
-                          //     return reject(err);
-                          //   }
-
-                          //   if (!retrievedUser.ftpLog || retrievedUser.ftpLog.length < 1) {
-                          //     return reject(new Error('FTP has been removed during season update. FTP is required.'));
-                          //   }
-
-                          //   user = retrievedUser;
                           user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
                           return user.save();
                           // });

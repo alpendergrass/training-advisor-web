@@ -180,21 +180,20 @@ function updateMetricsForDay(params, callback) {
 
       var totalBaseAndBuildDays,
         percentageOfTrainingTimeRemaining,
-        currentTrainingDayTotalLoad,
         fatigueTimeConstant,
         priorDayFitness,
         priorDayFatigue;
 
       params.trainingDay.period = results.periodData.period;
-      currentTrainingDayTotalLoad = sumBy(params.trainingDay.completedActivities, 'load');
+      params.metrics.totalLoad = sumBy(params.trainingDay.completedActivities, 'load');
       fatigueTimeConstant = params.user.fatigueTimeConstant || adviceConstants.defaultFatigueTimeConstant;
 
       //Compute fitness and fatigue for current trainingDay.
       //If priorDayMetrics does not exist, params.trainingDay is our starting day and
       //fitness and fatigue would have been supplied by the user.
       if (results.priorDayMetrics) {
-        params.metrics.fitness = Math.round((results.priorDayMetrics.fitness + ((currentTrainingDayTotalLoad - results.priorDayMetrics.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
-        params.metrics.fatigue = Math.round((results.priorDayMetrics.fatigue + ((currentTrainingDayTotalLoad - results.priorDayMetrics.fatigue) / fatigueTimeConstant)) * 10) / 10;
+        params.metrics.fitness = Math.round((results.priorDayMetrics.fitness + ((params.metrics.totalLoad - results.priorDayMetrics.fitness) / adviceConstants.defaultFitnessTimeConstant)) * 10) / 10;
+        params.metrics.fatigue = Math.round((results.priorDayMetrics.fatigue + ((params.metrics.totalLoad - results.priorDayMetrics.fatigue) / fatigueTimeConstant)) * 10) / 10;
         //Trello: We could use age as a factor in computing ATL for masters. This will cause TSB to drop faster
         //triggering R&R sooner. We will start with number of years past 35 / 2 as a percentage. So:
         //Age adjusted fatigue = yesterday’s (age-adjusted) fatigue + ((load * ((age - 35) / 2.) * 0.01 + 1) - yesterday’s (age-adjusted) fatigue) / 7)
@@ -232,7 +231,7 @@ function updateMetricsForDay(params, callback) {
       // Today's form is yesterday's fitness - fatigue. This is the way Coggan/TP does it.
       // Note that Strava uses today's F&F to compute today's form. I believe the Coggan way is more realistic.
       params.metrics.form = Math.round((priorDayFitness - priorDayFatigue) * 100) / 100;
-      params.metrics.loadRating = determineLoadRating(params.metrics.targetAvgDailyLoad, currentTrainingDayTotalLoad);
+      params.metrics.loadRating = determineLoadRating(params.metrics.targetAvgDailyLoad, params.metrics.totalLoad);
       params.metrics.totalElevationGain = sumBy(params.trainingDay.completedActivities, 'elevationGain');
 
       params.trainingDay.daysUntilNextGoalEvent = results.periodData.daysUntilNextGoalEvent;
