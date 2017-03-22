@@ -13,14 +13,14 @@ angular.module('trainingDays')
       $scope._ = _;
       $scope.today = moment().startOf('day').toDate();
       $scope.name = 'Season Start';
-      $scope.fitness = 10;
-      $scope.fatigue = 10;
+      $scope.fitness = 50;
+      $scope.fatigue = 50;
 
       $scope.datePickerStatus = {
         opened: false
       };
 
-      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(2, 'months').startOf('day').toDate();
+      var minStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : moment().subtract(4, 'months').startOf('day').toDate();
       var maxStartDate = $scope.authentication.user.levelOfDetail > 2 ? null : $scope.today;
 
       $scope.startDate = moment().subtract(1, 'day').startOf('day').toDate();

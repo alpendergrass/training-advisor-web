@@ -31,6 +31,9 @@ module.exports = function (app) {
   app.route('/api/trainingDays/getAdvice/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getAdvice);
 
+  app.route('/api/trainingDays/getLoadSummary/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
+    .get(trainingDays.getLoadSummary);
+
   app.route('/api/trainingDays/getFutureEvents/:trainingDateNumeric').all(trainingDaysPolicy.isAllowed)
     .get(trainingDays.getFutureEvents);
 

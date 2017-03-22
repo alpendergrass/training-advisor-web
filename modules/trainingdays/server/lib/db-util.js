@@ -199,15 +199,14 @@ module.exports.removeSubsequentStartingPoints = function(user, numericDate) {
     }, {
       multi: true
     }).exec()
-      .then(function() {
-        return resolve();
-      })
-      .catch(function(err) {
-        return reject(err);
-      });
+    .then(function() {
+      return resolve();
+    })
+    .catch(function(err) {
+      return reject(err);
+    });
   });
 };
-
 module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut) {
   //select priority n trainingDays after searchDate. Include searchDate
   return new Promise(function(resolve, reject) {
@@ -674,23 +673,113 @@ module.exports.computeAverageRampRate = function(user, numericSearchDate, metric
 
     let numericStartDate = util.toNumericDate(moment(numericSearchDate.toString()).subtract(7, 'days'));
 
-    TrainingDay.aggregate([{
-      $match: {
-        $and: [
-          { user: user._id },
-          { dateNumeric: { $gte: numericStartDate, $lt: numericSearchDate } }
-        ]
+    TrainingDay.aggregate([
+      {
+        $match: {
+          $and: [
+            { user: user._id },
+            { dateNumeric: { $gte: numericStartDate, $lt: numericSearchDate } }
+          ]
+        }
+      },
+      { $project: { _id: '$dateNumeric', metrics: 1 } },
+      { $unwind: '$metrics' },
+      { $match: { 'metrics.metricsType': metricsType } }, {
+        $group: {
+          _id: null,
+          averageRampRate: { $avg: '$metrics.sevenDayRampRate' },
+          dayCount: { $sum: 1 }
+        }
       }
-    },
-    { $project: { _id: '$dateNumeric', metrics: 1 } },
-    { $unwind: '$metrics' },
-    { $match: { 'metrics.metricsType': metricsType } }, {
-      $group: {
-        _id: null,
-        averageRampRate: { $avg: '$metrics.sevenDayRampRate' },
-        dayCount: { $sum: 1 }
+    ], function(err, results) {
+      if (err) {
+        return reject(err);
       }
-    }], function(err, results) {
+
+      return resolve(results);
+    });
+  });
+};
+
+module.exports.aggregateLoad = function(user, numericEndDate) {
+  // aggregate Load by week and month for the last year.
+  return new Promise(function(resolve, reject) {
+    if (!user) {
+      err = new TypeError('aggregateLoad valid user is required');
+      return reject(err);
+    }
+
+    if (!numericEndDate) {
+      err = new TypeError('numericEndDate is required to aggregateLoad');
+      return reject(err);
+    }
+
+    if (!moment(numericEndDate.toString()).isValid()) {
+      err = new TypeError('aggregateLoad numericEndDate ' + numericEndDate + ' is not a valid date');
+      return reject(err);
+    }
+
+    let numericStartDate = util.toNumericDate(moment(numericEndDate.toString()).startOf('month').subtract(4, 'months'));
+
+    TrainingDay.aggregate([
+      {
+        $match: {
+          $and: [
+            { user: user._id },
+            { dateNumeric: { $gte: numericStartDate, $lte: numericEndDate } }
+          ]
+        }
+      }, {
+        $project: {
+          year: {
+            $year: '$date'
+          },
+          week: {
+            $week: '$date'
+            // $week$ starts on Sunday, $isoWeek starts on Monday.
+            // $isoWeek: '$date' // isoWeek requires mongo 3.4+. 3/21/17: mLab is at 3.2.10
+            // In the meantime we need dayOfWeek  and the following two projections to make the adjustment.
+          },
+          dayOfWeek: {
+            $dayOfWeek: '$date'
+          },
+          _id: 1,
+          metrics: 1
+        }
+      }, {
+        $project: {
+          year: 1,
+          week: { $cond:[ { $eq: ['$dayOfWeek', 1] }, { $subtract:['$week', 1] }, '$week'] },
+          _id: 1,
+          metrics: 1
+        }
+      }, {
+        $project: {
+          // We have to adjust year and week if week is 0.
+          // This seems to work for 2017 however "An ISO week-numbering year (also called ISO year informally) has 52 or 53 full weeks."
+          // TODO: We need to implement $isoWeek above before the end of 2017.
+          year: { $cond:[ { $eq: ['$week', 0] }, { $subtract:['$year', 1] }, '$year'] },
+          week: { $cond:[ { $eq: ['$week', 0] }, 52, '$week'] },
+          _id: 1,
+          metrics: 1
+        }
+      }, {
+        $unwind: '$metrics'
+      }, {
+        $group : {
+          _id : {
+            metricsType: '$metrics.metricsType',
+            year : '$year',
+            week : '$week'
+          },
+          totalLoadWeekly : {
+            $sum : '$metrics.totalLoad'
+          }
+        }
+      }, {
+        $sort : { '_id.year': 1, '_id.week': 1 }
+      }
+    ], function(err, results) {
       if (err) {
         return reject(err);
       }

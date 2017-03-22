@@ -71,7 +71,8 @@
         <md-card>
           <md-card-header>
             <md-card-header-text>
-              <span class="md-title">Your Scheduled Events</span>
+              <span class="md-title">Your Future Events</span>
+              <span class="md-subhead" ng-show="futureEvents.length < 1">No scheduled events.</span>
             </md-card-header-text>
           </md-card-header>
           <md-card-content>
@@ -94,6 +95,24 @@
             </div>
           </md-card-content>
         </md-card>
+
+      <md-card>
+        <md-card-header>
+          <md-card-header-text>
+            <span class="md-title">
+              Load By Week
+            </span>
+            <span class="md-subhead">Plan vs. Actual</span>
+          </md-card-header-text>
+        </md-card-header>
+        <md-card-content>
+          <div>
+            <canvas id="bar" class="chart chart-bar" chart-options="loadOptions"
+              chart-data="loadData" chart-labels="loadLabels" chart-series="loadSeries">
+            </canvas>
+          </div>
+        </md-card-content>
+      </md-card>
       </div>
     </div>
   </div>

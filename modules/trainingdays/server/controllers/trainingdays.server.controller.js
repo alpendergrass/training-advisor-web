@@ -587,6 +587,24 @@ exports.getAdvice = function(req, res) {
   });
 };
 
+exports.getLoadSummary = function(req, res) {
+  let numericEndDate = parseInt(req.params.trainingDateNumeric, 10);
+
+  dbUtil.aggregateLoad(req.user, numericEndDate) //, params.metricsType)
+    .then(function(results) {
+      let aggregation = {
+        loadSummary: results
+      };
+      res.json(aggregation);
+    })
+    .catch(function(err) {
+      console.log('getLoadSummary err: ', err);
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    });
+};
+
 exports.getFutureEvents = function(req, res) {
   // Get all future events including off days.
   var params = {},
@@ -792,7 +810,7 @@ exports.downloadAllActivities = function(req, res) {
       });
     }
 
-    let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
+    let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(4, 'months'));
     if (numericLimitDate < startDay.dateNumeric) {
       numericLimitDate = startDay.dateNumeric;
     }

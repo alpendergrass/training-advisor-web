@@ -80,7 +80,36 @@ angular.module('trainingDays')
         }
       });
 
+      var getWeeklyLoad = function(doc) {
+        return doc.totalLoadWeekly;
+      };
 
+      var getLabel = function(doc) {
+        // Set date to the ISO first day of the week (Monday).
+        return moment(doc._id.year + '-' + doc._id.week, 'GGGG-W').format('D MMM YY');
+      };
 
+      TrainingDays.getLoadSummary({
+        trainingDateNumeric: Util.toNumericDate(today)
+      }, function(results) {
+        console.log('results: ', results);
+        let plannedLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'planned']);
+        let planedLoadArray = _.flatMap(plannedLoadSummary, getWeeklyLoad);
+        let actualLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'actual']);
+        let actualLoadArray = _.flatMap(actualLoadSummary, getWeeklyLoad);
+
+        $scope.loadData = [planedLoadArray, actualLoadArray];
+        $scope.loadLabels = _.flatMap(actualLoadSummary, getLabel);
+        $scope.loadSeries = ['Planned', 'Actual'];
+        $scope.loadOptions = { legend: { display: true } };
+
+      }, function(errorResponse) {
+        // TODO: what should we do if error?
+        if (errorResponse.data && errorResponse.data.message) {
+          $scope.error = errorResponse.data.message;
+        } else {
+          $scope.error = 'Server error prevented events retrieval.';
+        }
+      });
     }
   ]);
