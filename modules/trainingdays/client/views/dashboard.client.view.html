@@ -1,6 +1,22 @@
 <section ng-controller="DashboardController">
   <div  layout-xs="column" layout="row">
     <div flex-xs="" flex-gt-xs="50" layout="column">
+      <md-card ng-show="authentication.user.notifications && _.filter(authentication.user.notifications, ['blocked', false]).length">
+        <md-card-header>
+          <md-card-header-text>
+            <span class="md-title">
+              Alerts
+            </span>
+            <!-- <span class="md-subhead">Plan vs. Actual</span> -->
+          </md-card-header-text>
+        </md-card-header>
+        <md-card-content>
+          <div ng-repeat="notification in _.filter(authentication.user.notifications, ['blocked', false]) | orderBy:'alert':true" ui-sref-active="active">
+            <a ui-sref="{{notification.state}}" ng-bind="notification.message" class="list-group-item" ng-class="{ 'user-alert': notification.alert }"></a>
+          </div>
+        </md-card-content>
+      </md-card>
+
       <md-card>
         <md-card-header>
           <md-card-header-text>
@@ -103,9 +119,11 @@
                       </b>
                     </p>
                   </div>
-
                 </small>
               </a>
+            </div>
+            <div class="top-buffer-2x">
+              <a ui-sref="trainingDays.createEvent"><strong>Schedule event</strong></a>
             </div>
           </md-card-content>
         </md-card>
