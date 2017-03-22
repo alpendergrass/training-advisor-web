@@ -23,6 +23,7 @@ angular.module('trainingDays')
         $scope.todayFormatted = moment(trainingDayToday.date).format('dddd, d MMMM YYYY');
         $scope.plannedActivityToday = Util.getPlannedActivity(trainingDayToday, 'advised');
         $scope.plannedActivityDescriptionToday = Util.getPlannedActivityDescription($scope.plannedActivityToday, trainingDayToday.scheduledEventRanking);
+        $scope.requestedActivityToday = Util.getPlannedActivity(trainingDayToday, 'requested');
 
         TrainingDays.getAdvice({
           trainingDateNumeric: Util.toNumericDate(tomorrow),

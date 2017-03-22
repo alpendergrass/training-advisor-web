@@ -57,7 +57,7 @@
       </div>
       <div ng-show="requestedActivity">
         <span ng-show="requestedActivity.activityType !== 'test'">If you do a <strong>{{requestedActivity.activityType}} ride</strong> your Training Load should be between <strong><u>{{requestedActivity.targetMinLoad}}</u></strong> and <strong><u>{{requestedActivity.targetMaxLoad}}</u></strong>.</span>
-        <span ng-show="requestedActivity.activityType === 'test'">If you do a <strong>threshold power test</strong>, be sure to record your new FTP and test date on your My Profile page.</span>
+        <span ng-show="requestedActivity.activityType === 'test'">If you do a <strong>threshold power test</strong>, be sure to record your new FTP <span ng-show="authentication.user.autoUpdateFtpFromStrava">in Strava under Settings | My Performance</span><span ng-show="!authentication.user.autoUpdateFtpFromStrava">and test date on your My Profile page</span>.</span>
       </div>
     </p>
     <hr />
