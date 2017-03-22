@@ -65,9 +65,16 @@
               {{plannedActivityDescriptionTomorrow.namePhrase}}
               <small>{{plannedActivityDescriptionTomorrow.loadPhrase}}</small>
             </h4>
-            <p ng-show="trainingDayToday.completedActivities.length > 0">
-              {{plannedActivityTomorrow.advice}}
-            </p>
+            <div ng-show="trainingDayToday.completedActivities.length > 0">
+              <p>
+                {{plannedActivityTomorrow.advice}}
+              </p>
+              <div ng-show="requestedActivityTomorrow">
+                <h5>You selected an alternative:</h5>
+                <p ng-show="requestedActivityTomorrow.activityType !== 'test'">If you do a <strong>{{requestedActivityTomorrow.activityType}} ride</strong> your Training Load should be between <strong><u>{{requestedActivityTomorrow.targetMinLoad}}</u></strong> and <strong><u>{{requestedActivityTomorrow.targetMaxLoad}}</u></strong>.</p>
+                <p ng-show="requestedActivityTomorrow.activityType === 'test'">If you do a <strong>threshold power test</strong>, be sure to record  your new FTP <span ng-show="authentication.user.autoUpdateFtpFromStrava">in Strava under Settings | My Performance</span><span ng-show="!authentication.user.autoUpdateFtpFromStrava">and test date on your My Profile page</span>.</p>
+              </div>
+            </div>
           </div>
         </md-card-content>
       </md-card>

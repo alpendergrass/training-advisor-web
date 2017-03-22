@@ -34,6 +34,7 @@ angular.module('trainingDays')
           $scope.tomorrowFormatted = moment(trainingDayTomorrow.date).format('dddd, d MMMM YYYY');
           $scope.plannedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'advised');
           $scope.plannedActivityDescriptionTomorrow = Util.getPlannedActivityDescription($scope.plannedActivityTomorrow, trainingDayTomorrow.scheduledEventRanking);
+          $scope.requestedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'requested');
         }, function(errorResponse) {
           // TODO: what should we do if error?
           if (errorResponse.data && errorResponse.data.message) {
