@@ -100,7 +100,7 @@ Race results are not important. Remember that your future goals are the reason y
       this.plannedActivity.rationale += ` nonGoalEventInPeakOrRaceRule. Event is priority ${this.trainingDay.scheduledEventRanking}. In ${this.trainingDay.period} period.
 Goal event is ${this.trainingDay.daysUntilNextGoalEvent} days away.`;
       this.plannedActivity.advice += ` You have a non-goal event scheduled for today.
-However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent} days away.`;
+However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent} day(s) away.`;
       R.next();
     }
   },
@@ -160,7 +160,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
       this.plannedActivity.rationale += ' dayBeforeGoalEventRule.';
-      this.plannedActivity.advice += ` An easy-to-moderate day is recommended as your goal event is tomorrow .
+      this.plannedActivity.advice += ` An easy-to-moderate day is recommended as your goal event is tomorrow.
  You may do a few 90% sprints to sharpen the legs but otherwise keep it relaxed. Visualize your best performance!`;
       R.stop();
     }
