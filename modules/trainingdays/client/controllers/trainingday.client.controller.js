@@ -114,9 +114,9 @@ angular.module('trainingDays')
 
         // Remove existing TrainingDay
         $scope.remove = function() {
-          $scope.trainingDay.$remove(function(responseUser) {
+          $scope.trainingDay.$remove(function(deletedTD) {
             // Reload user to pick up changes in notifications.
-            Authentication.user = responseUser;
+            Authentication.user = deletedTD.user;
             $state.go('dashboard');
           });
         };
