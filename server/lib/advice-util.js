@@ -12,6 +12,11 @@ module.exports.isTestingDue = function(user, trainingDay) {
     return false;
   }
 
+  if (!user.ftpLog || user.ftpLog.length < 1) {
+    // We should have at least one ftp but possibly not.
+    return false;
+  }
+
   var now = moment(trainingDay.dateNumeric.toString());
   var testDate = moment(user.ftpLog[0].ftpDateNumeric.toString()).toDate(); //first ftp should be most recent.
   var howLong = now.diff(testDate, 'days');
