@@ -65,6 +65,7 @@ a:hover .header-profile-image {
 
 .navbar {
   border-bottom: 1px solid #e5e5e5;
+  font-weight: bold;
 }
 
 .footer {

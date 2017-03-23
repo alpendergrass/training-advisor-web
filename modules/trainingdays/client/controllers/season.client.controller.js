@@ -326,7 +326,9 @@ angular.module('trainingDays')
             }
 
             usSpinnerService.stop('tdSpinner');
-            blockUI.stop();
+            blockUI.stop(); //after we unblock, My Season in menu receives focus.
+            jQuery('#season-help').focus();
+
             $scope.error = errorMessage;
           });
         };
