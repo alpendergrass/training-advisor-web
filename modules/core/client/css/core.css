@@ -76,6 +76,17 @@ a:hover .header-profile-image {
   margin-left: 5px;
 }
 
+.footer .contribute {
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 5px;
+}
+
+.footer .facebook {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
 .user-alerts {
   color: #BC2025;
   font-weight: bold !important;
