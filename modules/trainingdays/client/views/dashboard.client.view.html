@@ -81,7 +81,7 @@
               {{plannedActivityDescriptionTomorrow.namePhrase}}
               <small>{{plannedActivityDescriptionTomorrow.loadPhrase}}</small>
             </h4>
-            <div ng-show="trainingDayToday.completedActivities.length > 0">
+            <div ng-show="trainingDayToday.completedActivities.length > 0 || plannedActivityToday.activityType === 'rest'">
               <p>
                 {{plannedActivityTomorrow.advice}}
               </p>
