@@ -155,19 +155,19 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
               }
               toastr.info('Strava sync started. We will notify you when completed. This could take a while. Perhaps now would be a good time for a cup of tea.', 'Strava Sync', { timeOut: 6000 });
               $scope.syncUnderway = true;
-              usSpinnerService.spin('tdSpinner');
+              usSpinnerService.spin('syncSpinner');
               TrainingDays.downloadAllActivities({
                 todayNumeric: Util.toNumericDate(moment()),
                 replaceExisting: $scope.replaceExisting
               }, function(response) {
                 $scope.syncUnderway = false;
-                usSpinnerService.stop('tdSpinner');
+                usSpinnerService.stop('syncSpinner');
                 toastr[response.type](response.text, response.title, { timeOut: 6000 });
                 $uibModalInstance.close(response);
               }, function(errorResponse) {
                 console.log('errorResponse: ', errorResponse);
                 $scope.syncUnderway = false;
-                usSpinnerService.stop('tdSpinner');
+                usSpinnerService.stop('syncSpinner');
                 toastr.error(errorResponse.data.message, { timeOut: 7000 });
                 $uibModalInstance.close('sync');
               });

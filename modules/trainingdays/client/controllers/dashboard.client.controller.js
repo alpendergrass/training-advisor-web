@@ -101,15 +101,14 @@ angular.module('trainingDays')
       TrainingDays.getLoadSummary({
         trainingDateNumeric: Util.toNumericDate(today)
       }, function(results) {
-        console.log('results: ', results);
-        let plannedLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'planned']);
-        let planedLoadArray = _.flatMap(plannedLoadSummary, getWeeklyLoad);
-        let actualLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'actual']);
-        let actualLoadArray = _.flatMap(actualLoadSummary, getWeeklyLoad);
+        var plannedLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'planned']);
+        var planedLoadArray = _.flatMap(plannedLoadSummary, getWeeklyLoad);
+        var actualLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'actual']);
+        var actualLoadArray = _.flatMap(actualLoadSummary, getWeeklyLoad);
 
-        $scope.loadData = [planedLoadArray, actualLoadArray];
+        $scope.loadData = [actualLoadArray, planedLoadArray];
         $scope.loadLabels = _.flatMap(actualLoadSummary, getLabel);
-        $scope.loadSeries = ['Planned', 'Actual'];
+        $scope.loadSeries = ['Actual', 'Planned'];
         $scope.loadOptions = { legend: { display: true } };
 
       }, function(errorResponse) {

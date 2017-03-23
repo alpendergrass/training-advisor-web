@@ -12,6 +12,8 @@ var path = require('path'),
 
 mongoose.Promise = global.Promise;
 
+var errCount = 0;
+
 module.exports = {
   id: 'migration-add-dailyload-to-metrics',
 
@@ -21,14 +23,31 @@ module.exports = {
 
     getUsers
       .then(function(users) {
-        return Promise.all(users.map(function(user) {
-          return addDailyLoad(user);
-        }));
-      })
-      .then(function(results) {
-        console.log(`${results.length} users processed.`);
-        console.log('migration-add-dailyload-to-metrics migration complete: ', new Date().toString());
-        return callback(null);
+
+        // We are using reduce function here to process each user sequentially.
+        // Using Promise.all we were running out of memory and/or timing out
+        // when running against production DB.
+        users.reduce(function(promise, user) {
+          return promise.then(function(results) {
+            return addDailyLoad(user)
+              .then(function (result) {
+                results.push(result);
+                return results;
+              });
+          });
+        }, Promise.resolve([]))
+
+        // return Promise.all(users.map(function(user) {
+        //   return addDailyLoad(user);
+        // }));
+        .then(function(results) {
+          console.log(`${results.length} users processed.`);
+          console.log('migration-add-dailyload-to-metrics migration complete: ', new Date().toString());
+          return callback(null);
+        })
+        .catch(function(err) {
+          return callback(err);
+        });
       })
       .catch(function(err) {
         return callback(err);
@@ -42,6 +61,7 @@ module.exports = {
 };
 
 function addDailyLoad(user) {
+
   return new Promise(function(resolve, reject) {
     var getTDs = TrainingDay.find({ user: user }).exec();
 
@@ -67,10 +87,16 @@ function addDailyLoad(user) {
       return resolve(true);
     })
     .catch(function(err) {
-      console.log('createNewMetrics failed for user: ', user.username);
+      console.log('migration-add-dailyload-to-metrics failed for user: ', user.username);
       console.log('err: ', err);
-      return resolve();
-      // return reject(err);
+      errCount++;
+      console.log('errCount: ', errCount);
+
+      if (errCount > 10) {
+        return reject(err);
+      } else {
+        return resolve();
+      }
     });
   });
 }

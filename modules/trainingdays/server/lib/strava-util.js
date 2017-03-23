@@ -425,15 +425,14 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
             return resolve(statusMessage);
           }
 
-          // We are using reduce function here to process each activity sequentially.
-          // Using Promise.all we had trainingDay save collisions.
-
           if (!Array.isArray(payload)) {
             // If Strava is down we may get an error page here.
             let errorMsg = 'Strava appears to be down. Please try your sync again later.';
             return reject(new Error(errorMsg));
           }
 
+          // We are using reduce function here to process each activity sequentially.
+          // Using Promise.all we had trainingDay save collisions.
           payload.reduce(function(promise, stravaActivity) {
             return promise.then(function() {
               // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
@@ -464,7 +463,7 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
                   return Promise.resolve();
                 });
             });
-          }, Promise.resolve())
+          }, Promise.resolve()) // Resolved promise is initial value passed into payload.reduce().
             .then(function(results) {
               statusMessage.activityCount = activityCount;
 
