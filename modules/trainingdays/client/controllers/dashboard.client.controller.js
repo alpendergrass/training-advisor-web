@@ -98,26 +98,26 @@ angular.module('trainingDays')
         return moment(doc._id.year + '-' + doc._id.week, 'GGGG-W').format('D MMM YY');
       };
 
-      TrainingDays.getLoadSummary({
-        trainingDateNumeric: Util.toNumericDate(today)
-      }, function(results) {
-        var plannedLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'planned']);
-        var planedLoadArray = _.flatMap(plannedLoadSummary, getWeeklyLoad);
-        var actualLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'actual']);
-        var actualLoadArray = _.flatMap(actualLoadSummary, getWeeklyLoad);
+      // TrainingDays.getLoadSummary({
+      //   trainingDateNumeric: Util.toNumericDate(today)
+      // }, function(results) {
+      //   var plannedLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'planned']);
+      //   var planedLoadArray = _.flatMap(plannedLoadSummary, getWeeklyLoad);
+      //   var actualLoadSummary = _.filter(results.loadSummary, ['_id.metricsType', 'actual']);
+      //   var actualLoadArray = _.flatMap(actualLoadSummary, getWeeklyLoad);
 
-        $scope.loadData = [actualLoadArray, planedLoadArray];
-        $scope.loadLabels = _.flatMap(actualLoadSummary, getLabel);
-        $scope.loadSeries = ['Actual', 'Planned'];
-        $scope.loadOptions = { legend: { display: true } };
+      //   $scope.loadData = [actualLoadArray, planedLoadArray];
+      //   $scope.loadLabels = _.flatMap(actualLoadSummary, getLabel);
+      //   $scope.loadSeries = ['Actual', 'Planned'];
+      //   $scope.loadOptions = { legend: { display: true } };
 
-      }, function(errorResponse) {
-        // TODO: what should we do if error?
-        if (errorResponse.data && errorResponse.data.message) {
-          $scope.error = errorResponse.data.message;
-        } else {
-          $scope.error = 'Server error prevented events retrieval.';
-        }
-      });
+      // }, function(errorResponse) {
+      //   // TODO: what should we do if error?
+      //   if (errorResponse.data && errorResponse.data.message) {
+      //     $scope.error = errorResponse.data.message;
+      //   } else {
+      //     $scope.error = 'Server error prevented events retrieval.';
+      //   }
+      // });
     }
   ]);

@@ -89,10 +89,12 @@ angular.module('trainingDays')
         };
 
         var getPlanLoad = function(td) {
-          return Util.getMetrics(td, 'planned').totalLoad;
+          return td.planLoad;
+          // return Util.getMetrics(td, 'planned').totalLoad;
         };
 
         var getActualLoad = function(td) {
+          // TODO: we should be using totalLoad.
           var load = 0;
 
           if (moment(td.date).isAfter($scope.today, 'day')) {
