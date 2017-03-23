@@ -55,6 +55,9 @@ angular.module('trainingDays')
         });
 
         trainingDay.$create(function(createdTrainingDay) {
+          // Reload user to pick up changes in notifications.
+          Authentication.user = createdTrainingDay.user;
+
           if ($stateParams.forwardTo) {
             $state.go($stateParams.forwardTo);
           } else {

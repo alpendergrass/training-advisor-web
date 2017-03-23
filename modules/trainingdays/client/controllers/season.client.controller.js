@@ -290,12 +290,13 @@ angular.module('trainingDays')
 
           Season.getSeason(function(errorMessage, season) {
             if (season) {
+              // Reload user object as notifications may have been updated.
+              Authentication.user = season.user;
+
               if (!season.hasStart) {
                 $state.go('trainingDays.createStart');
               }
 
-              // Reload user object as notifications may have been updated.
-              Authentication.user = season.user;
               $scope.hasEnd = season.hasEnd;
               $scope.needsPlanGen = season.needsPlanGen;
 

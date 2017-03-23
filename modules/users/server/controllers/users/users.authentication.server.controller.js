@@ -137,20 +137,11 @@ exports.oauthCallback = function(strategy) {
             console.log(`oauthCallback verifyUserSettings failed for user ${user.username} err: ${err}`);
           })
           .then(function() {
-            // if (_.includes(user.roles, 'admin')) {
-            //   return res.redirect('/admin/users');
-            // }
-
-            // If user needs to set FTP, timezone or auto-fetch preference we should redirect to profile page.
-            if (!user.ftpLog || user.ftpLog.length < 1 || !user.timezone || user.autoFetchStravaActivities === null || user.autoUpdateFtpFromStrava === null) {
-              return res.redirect('/settings/profile');
-            }
-
             // We do not want to redirect to the home page after auth.
-            return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/')? sessionRedirectURL : '/trainingDay/');
+            return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/')? sessionRedirectURL : '/dashboard');
           })
           .catch(function(err) {
-            return res.redirect('/trainingDay/');
+            return res.redirect('/dashboard');
           });
       });
     })(req, res, next);

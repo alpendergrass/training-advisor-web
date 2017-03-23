@@ -66,8 +66,8 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
         // If successful we assign the response to the global user model
         this.authentication.user = response;
 
-        // And redirect to the previous or calendar page
-        $state.go($state.previous.state.name || 'season', $state.previous.params);
+        // And redirect to the previous or dashboard page
+        $state.go($state.previous.state.name || 'dashboard', $state.previous.params);
       }).error(function (response) {
         usSpinnerService.stop('authSpinner');
         this.error = response.message;

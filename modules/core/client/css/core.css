@@ -76,11 +76,12 @@ a:hover .header-profile-image {
 }
 
 .user-alerts {
-  color: #C01B21;
+  color: #BC2025;
   font-weight: bold !important;
 }
 
 .user-alert {
+  color: #BC2025 !important;
   font-weight: bold !important;
 }
 

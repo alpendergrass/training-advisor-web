@@ -12,7 +12,7 @@
         </md-card-header>
         <md-card-content>
           <div ng-repeat="notification in _.filter(authentication.user.notifications, ['blocked', false]) | orderBy:'alert':true" ui-sref-active="active">
-            <a ui-sref="{{notification.state}}" ng-bind="notification.message" class="list-group-item" ng-class="{ 'user-alert': notification.alert }"></a>
+            <a ui-sref="{{notification.state}}" class="list-group-item" ng-class="{ 'user-alert': notification.alert }"><strong>{{notification.message}}</strong></a>
           </div>
         </md-card-content>
       </md-card>

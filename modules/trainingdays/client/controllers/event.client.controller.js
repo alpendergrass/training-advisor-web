@@ -166,8 +166,10 @@ angular.module('trainingDays')
           notes: this.notes
         });
 
-        trainingDay.$create(function(response) {
-          $state.go('season');
+        trainingDay.$create(function(createdTrainingDay) {
+          // Reload user to pick up changes in notifications.
+          Authentication.user = createdTrainingDay.user;
+          $state.go('dashboard');
         }, function(errorResponse) {
           if (errorResponse.data && errorResponse.data.message) {
             $scope.error = errorResponse.data.message;

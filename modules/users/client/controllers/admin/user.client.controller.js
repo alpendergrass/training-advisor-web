@@ -42,7 +42,7 @@ angular.module('users.admin').controller('UserController', ['$scope', '$state', 
         userId: user_id
       }, function(user) {
         $scope.authentication.user = user;
-        $state.go('season');
+        $state.go('dashboard');
       }, function(errorResponse) {
         $scope.error = errorResponse.data.message;
       });

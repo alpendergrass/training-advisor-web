@@ -114,8 +114,10 @@ angular.module('trainingDays')
 
         // Remove existing TrainingDay
         $scope.remove = function() {
-          $scope.trainingDay.$remove(function(response) {
-            $state.go('season');
+          $scope.trainingDay.$remove(function(responseUser) {
+            // Reload user to pick up changes in notifications.
+            Authentication.user = responseUser;
+            $state.go('dashboard');
           });
         };
 

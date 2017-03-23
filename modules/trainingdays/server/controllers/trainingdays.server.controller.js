@@ -419,8 +419,7 @@ exports.delete = function(req, res) {
 
     userUtil.updateNotifications(req.user, notifications, true)
       .then(function(response) {
-        trainingDay.user = response.user;
-        return res.json(trainingDay);
+        return res.json(response.user);
       })
       .catch(function(err) {
         console.log('updateNotifications failed in TD.delete: ', err);

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('DashboardController', ['$scope', '$location', '$compile', 'Authentication', 'TrainingDays', 'Util', '_', 'moment',
-    function($scope, $location, $compile, Authentication, TrainingDays, Util, _, moment) {
+  .controller('DashboardController', ['$scope', '$location', '$compile', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment',
+    function($scope, $location, $compile, Authentication, TrainingDays, Season, Util, _, moment) {
       $scope.authentication = Authentication;
       $scope._ = _;
 
@@ -10,6 +10,13 @@ angular.module('trainingDays')
       // angular.element(document).ready(function() {
       //   jQuery('[data-toggle="popover"]').popover({ trigger: 'hover' });
       // });
+
+      Season.getSeason(function(errorMessage, season) {
+        if (season) {
+          // Reload user object as notifications may have been updated.
+          Authentication.user = season.user;
+        }
+      });
 
       var today = moment().toDate();
       var tomorrow = moment().add(1, 'day').toDate();

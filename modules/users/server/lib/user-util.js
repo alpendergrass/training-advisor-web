@@ -72,13 +72,13 @@ var adornNotification = function(notification) {
       notificationType: 'fetchstrava',
       message: 'You need to set your Strava Activity Sync preference.',
       state: 'settings.profile',
-      alert: true,
+      alert: false,
       blocks: ''
     }, {
       notificationType: 'fetchstravaftp',
       message: 'You need to set your Strava FTP Sync preference.',
       state: 'settings.profile',
-      alert: true,
+      alert: false,
       blocks: ''
     }, {
       notificationType: 'plangen',
