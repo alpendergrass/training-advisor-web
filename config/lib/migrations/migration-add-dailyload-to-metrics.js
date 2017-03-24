@@ -61,43 +61,86 @@ module.exports = {
 };
 
 function addDailyLoad(user) {
-
   return new Promise(function(resolve, reject) {
     var getTDs = TrainingDay.find({ user: user }).exec();
 
     getTDs.then(function(trainingDays) {
-      return Promise.all(trainingDays.map(function(td) {
-        if (td.planLoad) {
-          let plannedMetrics = util.getMetrics(td, 'planned');
-          plannedMetrics.totalLoad = td.planLoad;
-        }
+    //   return Promise.all(trainingDays.map(function(td) {
+    //     if (td.planLoad) {
+    //       let plannedMetrics = util.getMetrics(td, 'planned');
+    //       plannedMetrics.totalLoad = td.planLoad;
+    //     }
 
-        if (td.completedActivities && td.completedActivities.length > 0) {
-          let actualMetrics = util.getMetrics(td, 'actual');
-          if (actualMetrics) {
-            actualMetrics.totalLoad = _.sumBy(td.completedActivities, 'load');
-          }
-        }
+    //     if (td.completedActivities && td.completedActivities.length > 0) {
+    //       let actualMetrics = util.getMetrics(td, 'actual');
+    //       if (actualMetrics) {
+    //         actualMetrics.totalLoad = _.sumBy(td.completedActivities, 'load');
+    //       }
+    //     }
 
-        return td.save();
-      }));
-    })
-    .then(function(results) {
-      console.log(`${results.length} trainingDays processed for user ${user.username}.`);
-      return resolve(true);
+    //     return td.save();
+    //   }));
+    // })
+      trainingDays.reduce(function(promise, trainingDay) {
+        return promise.then(function(results) {
+          return computeDailyLoad(trainingDay)
+            .then(function (result) {
+              results.push(result);
+              return results;
+            });
+        });
+      }, Promise.resolve([]))
+      .then(function(results) {
+        console.log(`${results.length} trainingDays processed for user ${user.username}.`);
+        return resolve(true);
+      })
+      .catch(function(err) {
+        console.log('migration-add-dailyload-to-metrics failed for user: ', user.username);
+        console.log('err: ', err);
+        errCount++;
+        console.log('errCount: ', errCount);
+
+        if (errCount > 10) {
+          return reject(err);
+        } else {
+          return resolve();
+        }
+      });
     })
     .catch(function(err) {
-      console.log('migration-add-dailyload-to-metrics failed for user: ', user.username);
-      console.log('err: ', err);
-      errCount++;
-      console.log('errCount: ', errCount);
-
-      if (errCount > 10) {
-        return reject(err);
-      } else {
-        return resolve();
-      }
+      return reject(err);
     });
   });
 }
 
+function computeDailyLoad(td) {
+  let tdDirty = false;
+
+  return new Promise(function(resolve, reject) {
+    if (td.planLoad) {
+      tdDirty = true;
+      let plannedMetrics = util.getMetrics(td, 'planned');
+      plannedMetrics.totalLoad = td.planLoad;
+    }
+
+    if (td.completedActivities && td.completedActivities.length > 0) {
+      tdDirty = true;
+      let actualMetrics = util.getMetrics(td, 'actual');
+      if (actualMetrics) {
+        actualMetrics.totalLoad = _.sumBy(td.completedActivities, 'load');
+      }
+    }
+
+    if (!tdDirty) {
+      return resolve(td);
+    }
+
+    td.save()
+      .then(function(tdSaved) {
+        return resolve(true);
+      })
+      .catch(function (err) {
+        return reject(err);
+      });
+  });
+}
