@@ -2,6 +2,16 @@
 
 var releaseNotes = [
   {
+    version: '0.8.1',
+    title: 'The Dashboard Release plus - 0.8.1',
+    message: 'We have added a user dashboard to Tacit Training. This is your new Tacit Training homepage! We have included a starter set of dashboard widgets and will be adding more. Let us know what you would like to see on YOUR dashboard.',
+    features: [
+      'Created dashboard and the first set of dashboard widgets.',
+      'Added actual vs. planned load by week dashboard widget.'
+    ],
+    fixes: []
+  },
+  {
     version: '0.8.0',
     title: 'The Dashboard Release - 0.8.0',
     message: 'We have added a user dashboard to Tacit Training. This is your new Tacit Training homepage! We have included a starter set of dashboard widgets and will be adding more. Let us know what you would like to see on YOUR dashboard.',
