@@ -719,7 +719,7 @@ module.exports.aggregateLoad = function(user, numericEndDate) {
       return reject(err);
     }
 
-    let numericStartDate = util.toNumericDate(moment(numericEndDate.toString()).startOf('month').subtract(4, 'months'));
+    let numericStartDate = util.toNumericDate(moment(numericEndDate.toString()).startOf('month').subtract(9, 'months'));
 
     TrainingDay.aggregate([
       {

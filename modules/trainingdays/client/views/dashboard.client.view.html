@@ -1,6 +1,6 @@
 <section ng-controller="DashboardController">
-  <div  layout-xs="column" layout="row">
-    <div flex-xs="" flex-gt-xs="50" layout="column">
+  <div layout-xs="column" layout-sm="column" layout="row">
+    <div flex-sm="" flex-gt-sm="50" layout="column">
       <md-card ng-show="authentication.user.notifications && _.filter(authentication.user.notifications, ['blocked', false]).length">
         <md-card-header>
           <md-card-header-text>
@@ -96,7 +96,7 @@
       </md-card>
     </div>
 
-    <div flex-xs="" flex-gt-xs="50" layout="column">
+    <div flex-sm="" flex-gt-sm="50" layout="column">
       <div>
         <md-card>
           <md-card-header>
@@ -128,13 +128,13 @@
           </md-card-content>
         </md-card>
 
-<!--       <md-card>
+      <md-card>
         <md-card-header>
           <md-card-header-text>
             <span class="md-title">
               Load By Week
             </span>
-            <span class="md-subhead">Plan vs. Actual</span>
+            <span class="md-subhead">Actual vs. Plan</span>
           </md-card-header-text>
         </md-card-header>
         <md-card-content>
@@ -144,7 +144,7 @@
             </canvas>
           </div>
         </md-card-content>
-      </md-card> -->
+      </md-card>
       </div>
     </div>
   </div>

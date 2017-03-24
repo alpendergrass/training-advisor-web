@@ -89,25 +89,15 @@ angular.module('trainingDays')
         };
 
         var getPlanLoad = function(td) {
-          return td.planLoad;
-          // return Util.getMetrics(td, 'planned').totalLoad;
+          return Util.getMetrics(td, 'planned').totalLoad;
         };
 
         var getActualLoad = function(td) {
-          // TODO: we should be using totalLoad.
-          var load = 0;
-
           if (moment(td.date).isAfter($scope.today, 'day')) {
             return [];
           }
 
-          if (td.completedActivities.length > 0) {
-            load = _.sumBy(td.completedActivities, function(activity) {
-              return activity.load;
-            });
-          }
-
-          return load;
+          return Util.getMetrics(td, 'actual').totalLoad;
         };
 
         var getPlanFitness = function(td) {
