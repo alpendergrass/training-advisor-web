@@ -143,6 +143,15 @@ a:hover .header-profile-image {
   color: #FC4C02;
 }
 
+.strava-me img {
+  border-radius: 5px;
+  margin: 0;
+}
+
+.strava-me:hover {
+  opacity: 0.6;
+}
+
 .strava-link {
   color: #FC4C02;
 }
