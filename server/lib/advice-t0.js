@@ -13,7 +13,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += ' t0EasyRule.';
-      this.plannedActivity.advice += ' You expended some energy yesterday. You should do an easy workout today to ensure good recovery. You may want to consider cross-training. If you ride, keep it in zone 1-2.';
+      this.plannedActivity.advice += ' ';
       R.stop();
     }
   },
@@ -28,7 +28,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
       this.plannedActivity.rationale += ' t0ModerateRule.';
-      this.plannedActivity.advice += ' You should do a moderate workout today. Consider cross-training options. If you ride, keep it in zone 2. The focus is on endurance.';
+      // this.plannedActivity.advice += ' You should do a moderate workout today. Consider cross-training options. If you ride, keep it in zone 2. The focus is on endurance.';
       R.stop();
     }
   },
@@ -41,7 +41,7 @@ var rules = [
     'consequence': function(R) {
       this.plannedActivity.activityType = 'choice';
       this.plannedActivity.rationale += ' t0ChoiceRule.';
-      this.plannedActivity.advice += ' Today is a good day for cross-training. Enjoy yourself. If you ride, keep it mellow and fun.';
+      // this.plannedActivity.advice += ' Today is a good day for cross-training. Enjoy yourself. If you ride, keep it mellow and fun.';
       R.stop();
     }
   },

@@ -23,17 +23,18 @@ var path = require('path'),
   adviceT5 = require('./advice-t5'),
   adviceT6 = require('./advice-t6'),
   adviceRace = require('./advice-race'),
-  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
+  workoutUtil = require('./workout-util'),
+  tdUtil = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   err;
 
 function generateAdvice(user, trainingDay, source, callback) {
   var facts = {};
-  // var subsequentDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
-  var oneDayPriorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
-  var twoDaysPriorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(2, 'days'));
-  var metricsType = util.setMetricsType(source);
+  // var subsequentDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var oneDayPriorDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
+  var twoDaysPriorDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(2, 'days'));
+  var metricsType = tdUtil.setMetricsType(source);
 
   dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals)
     .then(function(goalDays) {
@@ -47,14 +48,14 @@ function generateAdvice(user, trainingDay, source, callback) {
     .then(function(oneDayPrior) {
       if (oneDayPrior) {
         facts.oneDayPrior = oneDayPrior;
-        facts.metricsOneDayPrior = util.getMetrics(oneDayPrior, metricsType);
+        facts.metricsOneDayPrior = tdUtil.getMetrics(oneDayPrior, metricsType);
       }
       return dbUtil.getExistingTrainingDayDocument(user, twoDaysPriorDate);
     })
     .then(function(twoDaysPrior) {
       if (twoDaysPrior) {
         facts.twoDaysPrior = twoDaysPrior;
-        facts.metricsTwoDaysPrior = util.getMetrics(twoDaysPrior, metricsType);
+        facts.metricsTwoDaysPrior = tdUtil.getMetrics(twoDaysPrior, metricsType);
       }
 
       facts.trainingState = null;
@@ -64,8 +65,8 @@ function generateAdvice(user, trainingDay, source, callback) {
       facts.todayDayOfWeek = moment(trainingDay.dateNumeric.toString()).day().toString();
       facts.tomorrowDayOfWeek = moment(trainingDay.dateNumeric.toString()).add(1, 'day').day().toString();
       facts.trainingDay = trainingDay;
-      facts.plannedActivity = util.getPlannedActivity(trainingDay, source);
-      facts.metrics = util.getMetrics(trainingDay, metricsType);
+      facts.plannedActivity = tdUtil.getPlannedActivity(trainingDay, source);
+      facts.metrics = tdUtil.getMetrics(trainingDay, metricsType);
 
       // Rule priority guide:
       // Event priorities are 90 - 99.
@@ -107,25 +108,31 @@ function generateAdvice(user, trainingDay, source, callback) {
       }
 
       R.execute(facts, function(result) {
-        adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {
-          if (err) {
-            console.log('setLoadRecommendations err: ', err);
-            return callback(err);
-          }
+        workoutUtil.getWorkout(trainingDay, source)
+          .then(trainingDay => {
+            adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {
+              if (err) {
+                console.log('setLoadRecommendations err: ', err);
+                return callback(err);
+              }
 
-          trainingDay.save(function(err) {
-            if (err) {
-              console.log('trainingDay.save err: ', err);
-              return callback(err, null);
-            } else {
-              return callback(null, trainingDay);
-            }
+              trainingDay.save(function(err) {
+                if (err) {
+                  console.log('trainingDay.save err: ', err);
+                  return callback(err, null);
+                } else {
+                  return callback(null, trainingDay);
+                }
+              });
+            });
+          })
+          .catch(err => {
+            return callback(err, null);
           });
-        });
       });
     })
     .catch(function(err) {
-      return callback(err, 0);
+      return callback(err, null);
     });
 }
 
@@ -136,8 +143,8 @@ function generateActivityFromAdvice(params, callback) {
   var completedActivity = {},
     trainingDay = params.trainingDay,
     user = params.user,
-    metrics = util.getMetrics(trainingDay, 'planned'),
-    planActivity = util.getPlannedActivity(trainingDay, 'plangeneration');
+    metrics = tdUtil.getMetrics(trainingDay, 'planned'),
+    planActivity = tdUtil.getPlannedActivity(trainingDay, 'plangeneration');
 
   if (planActivity) {
     let load = planActivity.activityType === 'rest' ? 0 : ((planActivity.targetMaxLoad - planActivity.targetMinLoad) / 2) + planActivity.targetMinLoad;
@@ -206,7 +213,7 @@ module.exports.generatePlan = function(params) {
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
         } else {
           // We will still generate a plan without a goal but it won't be very interesting.
-          numericEffectiveGoalDate = util.toNumericDate(moment().add(3, 'months'));
+          numericEffectiveGoalDate = tdUtil.toNumericDate(moment().add(3, 'months'));
         }
 
         let metricsParams = {
@@ -232,7 +239,7 @@ module.exports.generatePlan = function(params) {
             })
             .then(function() {
               //get all training days from tomorrow thru last goal.
-              let tomorrowNumeric = util.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
+              let tomorrowNumeric = tdUtil.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
               dbUtil.getTrainingDays(user, tomorrowNumeric, numericEffectiveGoalDate, function(err, trainingDays) {
                 if (err) {
@@ -280,7 +287,7 @@ module.exports.generatePlan = function(params) {
                     //We need to update metrics for last day as it will not be up to date otherwise.
                     // But if we call it for today we will clear the plannedActivity we just assigned to this day.
                     // So we call it for tomorrow.
-                    let nextDateNumeric = util.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
+                    let nextDateNumeric = tdUtil.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
                     metricsParams.numericDate = nextDateNumeric;
                     metricsParams.metricsType = 'planned';
 
@@ -345,7 +352,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
 
   return new Promise(function(resolve, reject) {
     let tdDate = moment.tz(trainingDay.dateNumeric.toString(), user.timezone);  // toDate:  2017-02-25T13:30:00.000Z
-    let today = util.getTodayInUserTimezone(user);            // 2017-02-25T13:30:00.000Z
+    let today = tdUtil.getTodayInUserTimezone(user);            // 2017-02-25T13:30:00.000Z
     let tomorrow = moment(today).add(1, 'day').toDate();      //  2017-02-26T13:30:00.000Z
 
     if (tdDate.isAfter(tomorrow, 'day')) {
@@ -374,14 +381,14 @@ module.exports.refreshAdvice = function(user, trainingDay) {
 
       if (tdDate.isSameOrBefore(today, 'day')) {
         //getAdvice for today and tomorrow.
-        adviceParams.numericDate = util.toNumericDate(today, user);
+        adviceParams.numericDate = tdUtil.toNumericDate(today, user);
 
         module.exports.advise(adviceParams, function(err, advisedToday) {
           if (err) {
             return reject(err);
           }
 
-          adviceParams.numericDate = util.toNumericDate(tomorrow, user);
+          adviceParams.numericDate = tdUtil.toNumericDate(tomorrow, user);
 
           module.exports.advise(adviceParams, function(err, advisedTomorrow) {
             if (err) {
@@ -397,7 +404,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
         });
       } else {
         //tdDate is tomorrow -> getAdvice for tomorrow.
-        adviceParams.numericDate = util.toNumericDate(tomorrow, user);
+        adviceParams.numericDate = tdUtil.toNumericDate(tomorrow, user);
 
         module.exports.advise(adviceParams, function(err, advisedTomorrow) {
           if (err) {
@@ -437,7 +444,7 @@ module.exports.advise = function(params, callback) {
   let metricsParams = {
     user: params.user,
     numericDate: params.numericDate,
-    metricsType: util.setMetricsType(params.source),
+    metricsType: tdUtil.setMetricsType(params.source),
     source: params.source
   };
 
