@@ -218,10 +218,20 @@ var TrainingDaySchema = new Schema({
       type: Date,
       default: Date.now
     },
+    finalized: {
+      type: Boolean,
+      default: false
+    },
     activityType: {
       type: String,
       enum: plannedActivityTypes,
       default: ''
+    },
+    terrain: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 0
     },
     source: {
       type: String,

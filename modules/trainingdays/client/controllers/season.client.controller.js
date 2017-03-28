@@ -371,7 +371,6 @@ angular.module('trainingDays')
           },
           scales: {
             xAxes: [{
-              stacked: true,
               gridLines: {
                 display: false
               }
