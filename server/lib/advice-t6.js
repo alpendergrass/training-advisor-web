@@ -12,7 +12,7 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t6HardRule.';
+      this.plannedActivity.rationale += 't6HardRule.';
       R.next();
     }
   },
@@ -27,12 +27,12 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
-      this.plannedActivity.rationale += ' t6ModerateAfterTwoHardRule.';
+      this.plannedActivity.rationale += 't6ModerateAfterTwoHardRule.';
       R.next();
     }
   },
   {
-    'name': 't6CruxHillAdviceRule',
+    'name': 't6Terrain1Rule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't6' &&
@@ -43,46 +43,21 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t6CruxHillAdviceRule.';
-      this.plannedActivity.advice += ` Your goal today is to do a climb that simulates the one you
- expect to be most significant in your goal event, the climb most likely to determine how well you do.
- Visualize racing the climb and hitting the top in the lead.
- The number of times you do the climb will be determined by the length and steepness of the climb but
- be careful not to do too much.
- Your Training Load targets will help you guage how much work to do.
- Your are peaking for your goal and are looking to put the right finishing touch on your fitness.`;
+      this.plannedActivity.rationale += 't6Terrain1Rule.';
+      this.plannedActivity.terrain = 1;
       R.stop();
     }
   },
   {
-    'name': 't6ThresholdAdviceRule',
-    'priority': -3,
+    'name': 't6StopRule',
+    'priority': -9,
     'condition': function(R) {
-      R.when(this && this.trainingDay.period === 't6' &&
-        _.includes(['hard'], this.plannedActivity.activityType)
+      R.when(this && this.plannedActivity.activityType &&
+        this.trainingDay.period === 't6'
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t6ThresholdAdviceRule.';
-      this.plannedActivity.advice += ` You should work on threshold (Zone 4) power today.
- Warm up well, then ride for an extended period at this pace, using your Training Load targets
- to guide the duration of the effort.
- Since you are peaking for your goal event, intensity should be high but your load targets are smaller.`;
-      R.stop();
-    }
-  },
-  {
-    'name': 't6EnduranceAdviceRule',
-    'priority': -1,
-    'condition': function(R) {
-      R.when(this && this.trainingDay.period === 't6' &&
-        _.includes(['moderate'], this.plannedActivity.activityType)
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.rationale += ' t6EnduranceAdviceRule.';
-      this.plannedActivity.advice += ` Today an shorter durantion endurance (power zone 2) ride is in order.
- You are peaking for your goal event and it is important to maintain endurace.`;
+      this.plannedActivity.rationale += 't6StopRule.';
       R.stop();
     }
   }

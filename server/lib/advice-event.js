@@ -144,7 +144,7 @@ However, your next goal event is only ${this.trainingDay.daysUntilNextGoalEvent}
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' twoDaysBeforeGoalEventRule.';
+      this.plannedActivity.rationale += 'twoDaysBeforeGoalEventRule.';
       this.plannedActivity.advice += ' Easy day is recommended as your goal event is in two days. Just loosen the legs, allow your body to recover and plan your performance.';
       R.stop();
     }

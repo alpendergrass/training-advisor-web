@@ -24,8 +24,10 @@ var loadRatings = {
 
 var minMessage = 'The value of `{PATH}` ({VALUE}) is less than the limit ({MIN}).';
 var maxMessage = 'The value of `{PATH}` ({VALUE}) exceeds the limit ({MAX}).';
+var minIntensityValue = [0, minMessage];
+var maxIntensityValue = [5, maxMessage];
 var minTerrainValue = [0, minMessage];
-var maxTerrainValue = [99999, maxMessage];
+var maxTerrainValue = [5, maxMessage];
 
 var WorkoutSchema = new Schema({
   name: {
@@ -43,15 +45,16 @@ var WorkoutSchema = new Schema({
     enum: loadRatings,
     required: 'workout loadRating is required'
   },
-  // intensityRating: {
-  //   type: String,
-  //   enum: intensityRatings
-  //   required: 'workout intensityRating is required'
-  // },
-  terrain: {
+  terrainRating: {
     type: Number,
     min: minTerrainValue,
     max: maxTerrainValue,
+    default: 0
+  },
+  intensityRating: {
+    type: Number,
+    min: minIntensityValue,
+    max: maxIntensityValue,
     default: 0
   },
   format: {
@@ -63,6 +66,10 @@ var WorkoutSchema = new Schema({
     type: String,
     default: '',
     trim: true
+  },
+  useCount: {
+    type: Number,
+    default: 0
   }
 });
 

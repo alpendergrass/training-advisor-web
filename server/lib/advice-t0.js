@@ -12,9 +12,9 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' t0EasyRule.';
+      this.plannedActivity.rationale += 't0EasyRule.';
       this.plannedActivity.advice += ' ';
-      R.stop();
+      R.next();
     }
   },
   {
@@ -27,9 +27,8 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
-      this.plannedActivity.rationale += ' t0ModerateRule.';
-      // this.plannedActivity.advice += ' You should do a moderate workout today. Consider cross-training options. If you ride, keep it in zone 2. The focus is on endurance.';
-      R.stop();
+      this.plannedActivity.rationale += 't0ModerateRule.';
+      R.next();
     }
   },
   {
@@ -40,11 +39,23 @@ var rules = [
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'choice';
-      this.plannedActivity.rationale += ' t0ChoiceRule.';
-      // this.plannedActivity.advice += ' Today is a good day for cross-training. Enjoy yourself. If you ride, keep it mellow and fun.';
-      R.stop();
+      this.plannedActivity.rationale += 't0ChoiceRule.';
+      R.next();
     }
   },
+  {
+    'name': 't0StopRule',
+    'priority': -9,
+    'condition': function(R) {
+      R.when(this && this.plannedActivity.activityType &&
+        this.trainingDay.period === 't0'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.rationale += 't0StopRule.';
+      R.stop();
+    }
+  }
 ];
 
 module.exports = {};

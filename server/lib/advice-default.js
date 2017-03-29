@@ -66,7 +66,7 @@ var rules = [
   },
   {
     'name': 'enduranceIsDefaultAdviceRule',
-    'priority': -9,
+    'priority': -99,
     'condition': function(R) {
       R.when(this && this.plannedActivity.activityType);
     },

@@ -7,13 +7,13 @@ var rules = [
     'priority': 9,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t5'], this.trainingDay.period) &&
+        this.trainingDay.period === 't5' &&
         this.metrics.form > this.adviceConstants.t5HardDayThreshold
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t5HardRule.';
+      this.plannedActivity.rationale += 't5HardRule.';
       R.next();
     }
   },
@@ -22,13 +22,13 @@ var rules = [
     'priority': 7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t5'], this.trainingDay.period) &&
+        this.trainingDay.period === 't5' &&
         this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'moderate'
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t5HardAfterModerateRule.';
+      this.plannedActivity.rationale += 't5HardAfterModerateRule.';
       R.next();
     }
   },
@@ -37,13 +37,13 @@ var rules = [
     'priority': 7,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t5'], this.trainingDay.period) &&
+        this.trainingDay.period === 't5' &&
         this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'rest'
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' t5HardAfterRestRule.';
+      this.plannedActivity.rationale += 't5HardAfterRestRule.';
       R.next();
     }
   },
@@ -52,18 +52,18 @@ var rules = [
     'priority': 5,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
-        _.includes(['t5'], this.trainingDay.period) &&
+        this.trainingDay.period === 't5' &&
         this.metrics.form > this.adviceConstants.t5ModerateDayThreshold
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'moderate';
-      this.plannedActivity.rationale += ' t5ModerateRule.';
+      this.plannedActivity.rationale += 't5ModerateRule.';
       R.next();
     }
   },
   {
-    'name': 't5RaceIntensityAdviceRule',
+    'name': 't5Intensity5Rule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't5' &&
@@ -72,17 +72,13 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t5RaceIntensityAdviceRule.';
-      this.plannedActivity.advice += ` Today you should work on race-pace intensity.
- If riding in a group, look for opportunities to attack in situations similar to what you might expect in your goal event
- If others are in an attacking mood, cover those attacks.
- If riding alone use your imagination to visualize race scenarios and ride as is you are racing them.
- The goal today is to simulate the intensity of your goal event.`;
+      this.plannedActivity.rationale += 't5Intensity5Rule.';
+      this.plannedActivity.intensity = 5;
       R.stop();
     }
   },
   {
-    'name': 't5GoalHillsAdviceRule',
+    'name': 't5Terrain3Rule',
     'priority': -1,
     'condition': function(R) {
       R.when(this && this.trainingDay.period === 't5' &&
@@ -93,26 +89,21 @@ var rules = [
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t5GoalHillsAdviceRule.';
-      this.plannedActivity.advice += ` Today is a climbing day. Ride hills similar to the ones in your goal event.
- Focus on climbing strongly without going into the red.
- Monitor total Training Load during your ride to ensure you stay within your target load range.`;
+      this.plannedActivity.rationale += 't5Terrain3Rule.';
+      this.plannedActivity.terrain = 3;
       R.stop();
     }
   },
   {
-    'name': 't5ThresholdAdviceRule',
-    'priority': -3,
+    'name': 't5StopRule',
+    'priority': -9,
     'condition': function(R) {
-      R.when(this && this.trainingDay.period === 't5' &&
-        _.includes(['hard', 'moderate'], this.plannedActivity.activityType)
+      R.when(this && this.plannedActivity.activityType &&
+        this.trainingDay.period === 't5'
       );
     },
     'consequence': function(R) {
-      this.plannedActivity.rationale += ' t5ThresholdAdviceRule.';
-      this.plannedActivity.advice += ` Your goal today is to work on riding for an extended period at threshold power.
- Threshold is Zone 4. After a good warmup, if the legs feel good, ride for at least 15 minutes at this pace,
- longer if you feel capable.`;
+      this.plannedActivity.rationale += 't5StopRule.';
       R.stop();
     }
   }
