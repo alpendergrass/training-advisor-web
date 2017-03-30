@@ -11,14 +11,9 @@ var path = require('path'),
 
 module.exports = {};
 
-module.exports.setLoadRecommendations = function(user, trainingDay, source, callback) {
+module.exports.setLoadRecommendations = function(trainingDay, source, callback) {
 
   callback = (typeof callback === 'function') ? callback : function(err, data) {};
-
-  if (!user) {
-    err = new TypeError('valid user is required');
-    return callback(err, null, null);
-  }
 
   if (!trainingDay) {
     err = new TypeError('valid trainingDay is required');

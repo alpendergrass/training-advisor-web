@@ -12,11 +12,6 @@ var periods = {
   message: invalidDataErrorMessage
 };
 
-var formats = {
-  values: 'unstructured|structured'.split('|'),
-  message: invalidDataErrorMessage
-};
-
 var loadRatings = {
   values: 'hard|moderate|easy|rest'.split('|'),
   message: invalidDataErrorMessage
@@ -56,11 +51,6 @@ var WorkoutSchema = new Schema({
     min: minIntensityValue,
     max: maxIntensityValue,
     default: 0
-  },
-  format: {
-    type: String,
-    enum: formats,
-    default: 'unstructured'
   },
   instruction: {
     type: String,

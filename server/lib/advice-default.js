@@ -1,6 +1,12 @@
 'use strict';
 var _ = require('lodash');
 
+// Rule priority guide:
+// Event priorities are 90 - 99.
+// Test: 80 - 89.
+// Default: 70 - 79, 1 for catch-all load rule.
+// By period activityType rules: 2 - 9.
+// Rule priority only applies if ALL rules have (non-zero) priority. Done.
 
 var rules = [
   {

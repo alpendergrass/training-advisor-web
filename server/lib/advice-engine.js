@@ -29,6 +29,8 @@ var path = require('path'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   err;
 
+mongoose.Promise = global.Promise;
+
 function generateAdvice(user, trainingDay, source, callback) {
   var facts = {};
   // var subsequentDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
@@ -73,7 +75,6 @@ function generateAdvice(user, trainingDay, source, callback) {
       // Test: 80 - 89.
       // Default: 70 - 79, 1 for catch-all load rule.
       // By period activityType rules: 2 - 9.
-      // By period chained advice rules: < 0..
       // Rule priority only applies if ALL rules have (non-zero) priority. Done.
 
       var R = new RuleEngine(adviceEvent.eventRules);
@@ -110,7 +111,7 @@ function generateAdvice(user, trainingDay, source, callback) {
       R.execute(facts, function(result) {
         workoutUtil.getWorkout(trainingDay, source)
           .then(trainingDay => {
-            adviceLoad.setLoadRecommendations(user, trainingDay, source, function(err, trainingDay) {
+            adviceLoad.setLoadRecommendations(trainingDay, source, function(err, trainingDay) {
               if (err) {
                 console.log('setLoadRecommendations err: ', err);
                 return callback(err);
@@ -169,16 +170,9 @@ function generateActivityFromAdvice(params, callback) {
       if (planActivity.activityType === 'test') {
         // Make it look as if the user tested when recommended.
         user.ftpLog[0].ftpDateNumeric = trainingDay.dateNumeric;
-        user.save(function(err) {
-          if (err) {
-            return callback(err, null);
-          }
-
-          return callback(null, trainingDay);
-        });
-      } else {
-        return callback(null, trainingDay);
       }
+
+      return callback(null, trainingDay);
     });
   }
 }
@@ -203,7 +197,9 @@ module.exports.generatePlan = function(params) {
       savedFTPDateNumeric = user.ftpLog[0].ftpDateNumeric,
       numericEffectiveGoalDate;
 
-    // Make the following a async.series, use promises or something to clean it up. Yuck.
+    // TODO: Use promises below to clean this up. Yuck.
+    // Replace async.eachSeries  with synchronous promises.
+    // Find ".reduce(" to see where I've done it elsewhere.
 
     // Get future goal days.
     dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd)
@@ -284,6 +280,8 @@ module.exports.generatePlan = function(params) {
                       return reject(err);
                     }
 
+                    user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
+
                     //We need to update metrics for last day as it will not be up to date otherwise.
                     // But if we call it for today we will clear the plannedActivity we just assigned to this day.
                     // So we call it for tomorrow.
@@ -297,11 +295,6 @@ module.exports.generatePlan = function(params) {
                       }
 
                       dbUtil.removePlanGenerationCompletedActivities(user)
-                        .then(function() {
-                          user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
-                          return user.save();
-                          // });
-                        })
                         .then(function() {
                           // We need to refresh advice for today and tomorrow because
                           // we called updateMetrics when we started which would clear
@@ -448,67 +441,50 @@ module.exports.advise = function(params, callback) {
     source: params.source
   };
 
-  async.series(
-    //series of one.
-    [
-      function(callback) {
-        adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
-          if (err) {
-            return callback(err);
-          }
+  adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
+    if (err) {
+      return callback(err);
+    }
 
-          return callback(null, trainingDay);
-        });
-      }
-    ],
-    function(err, results) {
-      if (err) {
-        return callback(err, null);
-      }
+    var plannedActivity = {};
 
-      var trainingDay = results[0];
-      var plannedActivity = {};
-      var source;
+    if (params.source === 'requested') {
+      //User has requested advice for a specific activity type.
+      //We just need to compute load for the requested activity.
 
-      if (params.source === 'requested') {
-        //User has requested advice for a specific activity type.
-        //We just need to compute load for the requested activity.
+      //Create planned activity for requested activity.
+      plannedActivity.activityType = params.alternateActivity;
+      plannedActivity.source = params.source;
+      trainingDay.plannedActivities.push(plannedActivity);
 
-        //Create planned activity for requested activity.
-        plannedActivity.activityType = params.alternateActivity;
-        plannedActivity.source = params.source;
-        trainingDay.plannedActivities.push(plannedActivity);
+      adviceLoad.setLoadRecommendations(trainingDay, params.source, function(err, recommendation) {
+        if (err) {
+          return callback(err);
+        }
 
-        //Determine load.
-        adviceLoad.setLoadRecommendations(params.user, trainingDay, params.source, function(err, recommendation) {
-          if (err) {
-            return callback(err);
-          }
-
-          recommendation.save(function(err) {
-            if (err) {
-              return callback(err, null);
-            }
-
-            return callback(null, recommendation);
-          });
-        });
-      } else {
-        //We are advising or planning an activity.
-
-        plannedActivity.source = params.source;
-        trainingDay.plannedActivities.push(plannedActivity);
-
-        generateAdvice(params.user, trainingDay, params.source, function(err, recommendation) {
+        recommendation.save(function(err) {
           if (err) {
             return callback(err, null);
           }
 
           return callback(null, recommendation);
         });
-      }
+      });
+    } else {
+      //We are advising or planning an activity.
+
+      plannedActivity.source = params.source;
+      trainingDay.plannedActivities.push(plannedActivity);
+
+      generateAdvice(params.user, trainingDay, params.source, function(err, recommendation) {
+        if (err) {
+          return callback(err, null);
+        }
+
+        return callback(null, recommendation);
+      });
     }
-  );
+  });
 };
 
 // The following is only exported for testing.
