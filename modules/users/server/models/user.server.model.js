@@ -238,6 +238,9 @@ var UserSchema = new Schema({
       default: true
     }
   }],
+  workoutLog: [{
+    type: String
+  }],
   roles: {
     type: [{
       type: String,
@@ -269,9 +272,7 @@ var UserSchema = new Schema({
   }
 });
 
-/**
- * Hook a pre save method to hash the password
- */
+// Hook a pre save method to hash the password
 UserSchema.pre('save', function (next) {
   if (this.password && this.isModified('password')) {
     this.salt = crypto.randomBytes(16).toString('base64');

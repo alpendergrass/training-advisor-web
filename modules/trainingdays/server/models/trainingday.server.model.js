@@ -11,22 +11,27 @@ var metricsTypes = {
   values: 'planned|actual'.split('|'),
   message: invalidDataErrorMessage
 };
+
 var plannedActivityTypes = {
   values: 'event|test|hard|moderate|easy|rest|choice|'.split('|'),
   message: invalidDataErrorMessage
 };
+
 var plannedActivitySources = {
   values: 'advised|requested|plangeneration'.split('|'),
   message: invalidDataErrorMessage
 };
+
 var loadRatings = {
   values: 'hard|moderate|easy|rest|'.split('|'),
   message: invalidDataErrorMessage
 };
+
 var periods = {
   values: 'race|t0|t1|t2|t3|t4|t5|t6|'.split('|'),
   message: invalidDataErrorMessage
 };
+
 var completedActivitySources = {
   values: 'manual|strava|trainingpeaks|plangeneration'.split('|'),
   message: invalidDataErrorMessage

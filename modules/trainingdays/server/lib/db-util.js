@@ -207,6 +207,7 @@ module.exports.removeSubsequentStartingPoints = function(user, numericDate) {
     });
   });
 };
+
 module.exports.getFuturePriorityDays = function(user, numericSearchDate, priority, numberOfDaysOut) {
   //select priority n trainingDays after searchDate. Include searchDate
   return new Promise(function(resolve, reject) {
