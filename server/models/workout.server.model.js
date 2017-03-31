@@ -57,7 +57,7 @@ var WorkoutSchema = new Schema({
     default: '',
     trim: true
   },
-  useCount: {
+  usageCount: {
     type: Number,
     default: 0
   }

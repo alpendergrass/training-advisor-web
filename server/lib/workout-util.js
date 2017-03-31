@@ -64,6 +64,13 @@ var selectWorkout = function(workouts, trainingDay) {
         }
       })
       .then(() => {
+        if (selectedWorkout) {
+          return Workout.update({ name: selectedWorkout.name }, { $inc: { usageCount: 1 } }).exec();
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .then(() => {
         return resolve(selectedWorkout);
       })
       .catch(err => {
@@ -81,7 +88,8 @@ module.exports.getWorkout = function(trainingDay, source) {
 
     // For testing purposes uncomment the levelOfDetail clause below but know that
     // the user.workoutLog will be corrupted as a result.
-    if (source === 'plangeneration') { //&& trainingDay.user.levelOfDetail < 3) {
+    // if (source === 'plangeneration' && trainingDay.user.levelOfDetail < 3) {
+    if (source === 'plangeneration') {
       return resolve(trainingDay);
     }
 
