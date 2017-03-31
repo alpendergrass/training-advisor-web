@@ -49,6 +49,7 @@
                 <th>Source</th>
                 <th>Training Load</th>
                 <th>Intensity</th>
+                <th>Elevation Gain</th>
               </tr>
               <tr ng-repeat="completedActivity in trainingDayToday.completedActivities">
                 <td>
@@ -60,6 +61,9 @@
                 </td>
                 <td>
                   {{completedActivity.intensity}}<span class="small" ng-if="!completedActivity.intensity"> (unknown)</span>
+                </td>
+                <td>
+                  {{completedActivity.elevationGain}}
                 </td>
               </tr>
             </table>

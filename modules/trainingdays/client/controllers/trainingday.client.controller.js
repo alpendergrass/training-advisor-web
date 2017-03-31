@@ -192,6 +192,7 @@ angular.module('trainingDays')
           $scope.inserted = {
             load: 0,
             intensity: 0,
+            elevationGain: 0,
             notes: ''
           };
           $scope.trainingDay.completedActivities.push($scope.inserted);
