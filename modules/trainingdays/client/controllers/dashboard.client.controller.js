@@ -27,7 +27,7 @@ angular.module('trainingDays')
       }, function(trainingDayToday) {
         trainingDayToday.date = moment(trainingDayToday.dateNumeric.toString()).toDate();
         $scope.trainingDayToday = trainingDayToday;
-        $scope.todayFormatted = moment(trainingDayToday.date).format('dddd, d MMMM YYYY');
+        $scope.todayFormatted = moment(trainingDayToday.date).format('dddd, D MMMM YYYY');
         $scope.plannedActivityToday = Util.getPlannedActivity(trainingDayToday, 'advised');
         $scope.plannedActivityDescriptionToday = Util.getPlannedActivityDescription($scope.plannedActivityToday, trainingDayToday.scheduledEventRanking);
         $scope.requestedActivityToday = Util.getPlannedActivity(trainingDayToday, 'requested');
@@ -38,7 +38,7 @@ angular.module('trainingDays')
         }, function(trainingDayTomorrow) {
           trainingDayTomorrow.date = moment(trainingDayTomorrow.dateNumeric.toString()).toDate();
           $scope.trainingDayTomorrow = trainingDayTomorrow;
-          $scope.tomorrowFormatted = moment(trainingDayTomorrow.date).format('dddd, d MMMM YYYY');
+          $scope.tomorrowFormatted = moment(trainingDayTomorrow.date).format('dddd, D MMMM YYYY');
           $scope.plannedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'advised');
           $scope.plannedActivityDescriptionTomorrow = Util.getPlannedActivityDescription($scope.plannedActivityTomorrow, trainingDayTomorrow.scheduledEventRanking);
           $scope.requestedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'requested');
