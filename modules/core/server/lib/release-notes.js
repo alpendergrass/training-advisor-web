@@ -2,6 +2,15 @@
 
 var releaseNotes = [
   {
+    version: '0.8.2',
+    title: 'Dashboard today/tomorrow date bug fix, Release 0.8.2',
+    message: '',
+    features: [],
+    fixes: [
+      'Fixed a bug on the dashboard that was causing the wrong dates to be displayed for today and tomorrow.'
+    ]
+  },
+  {
     version: '0.8.1',
     title: 'The Dashboard Release plus - 0.8.1',
     message: 'We have added a user dashboard to Tacit Training. This is your new Tacit Training homepage! We have included a starter set of dashboard widgets and will be adding more. Let us know what you would like to see on YOUR dashboard.',

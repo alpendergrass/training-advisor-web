@@ -1,7 +1,7 @@
 'use strict';
 
 //load environment variables from .env file
-require('dotenv-safe').load();
+require('dotenv').load();
 var app = require('./config/lib/app');
 var migration = require('./config/lib/migration');
 
