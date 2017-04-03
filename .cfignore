@@ -12,3 +12,4 @@ public/lib/*
 app/tests/coverage/
 .bower-*/
 .idea/
+.env
