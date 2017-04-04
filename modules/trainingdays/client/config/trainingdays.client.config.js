@@ -34,7 +34,7 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Schedule Events',
+      title: 'Schedule Events or Days Off',
       state: 'trainingDays.createEvent',
       roles: ['user']
     });
