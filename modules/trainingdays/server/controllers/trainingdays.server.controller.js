@@ -368,6 +368,12 @@ exports.update = function(req, res) {
       } else {
         notifications.push({ notificationType: 'terrain', lookup: trainingDay.id, add: true });
       }
+
+      if (trainingDay.estimatedLoad) {
+        notifications.push({ notificationType: 'loadestimate', lookup: trainingDay.id });
+      } else {
+        notifications.push({ notificationType: 'loadestimate', lookup: trainingDay.id, add: true });
+      }
     }
 
     if (refreshAdvice) {
@@ -514,6 +520,11 @@ exports.getSeason = function(req, res) {
             } else {
               // Remove any potentially erroneous terrain notifications. Can occur if user recreates a goal.
               notifications.push({ notificationType: 'terrain', lookup: goalDay.id });
+            }
+            if (!goalDay.estimatedLoad) {
+              notifications.push({ notificationType: 'loadestimate', lookup: goalDay.id, add: true });
+            } else {
+              notifications.push({ notificationType: 'loadestimate', lookup: goalDay.id });
             }
           });
         } else {

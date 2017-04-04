@@ -89,11 +89,19 @@ angular.module('trainingDays')
         };
 
         var getPlanLoad = function(td) {
+          // Return estimated load for goal event if provided.
+          if (td.scheduledEventRanking === 1 && td.estimatedLoad > 0) {
+            console.log('td.date: ', td.date);
+            console.log('td.estimatedLoad: ', td.estimatedLoad);
+            return td.estimatedLoad;
+          }
+
           return Util.getMetrics(td, 'planned').totalLoad;
         };
 
         var getActualLoad = function(td) {
           if (moment(td.date).isAfter($scope.today, 'day')) {
+            // return null;
             return [];
           }
 

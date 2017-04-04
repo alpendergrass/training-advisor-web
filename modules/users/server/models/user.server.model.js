@@ -37,7 +37,7 @@ var ftpSources = {
 };
 
 var notificationTypes = {
-  values: 'ftp|timezone|fetchstrava|fetchstravaftp|start|goal|plangen|terrain'.split('|'),
+  values: 'ftp|timezone|fetchstrava|fetchstravaftp|start|goal|plangen|terrain|loadestimate'.split('|'),
   message: invalidDataErrorMessage
 };
 

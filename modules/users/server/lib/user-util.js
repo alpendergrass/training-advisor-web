@@ -104,6 +104,12 @@ var adornNotification = function(notification) {
       state: 'trainingDayView({"trainingDayId": "||lookup||" })',
       alert: false,
       blocks: ''
+    }, {
+      notificationType: 'loadestimate',
+      message: 'You should provide an estimated load for your event.',
+      state: 'trainingDayView({"trainingDayId": "||lookup||" })',
+      alert: false,
+      blocks: ''
     }
   ];
 
