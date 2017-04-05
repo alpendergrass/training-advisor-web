@@ -49,7 +49,7 @@ describe('advice-moderate Unit Tests:', function() {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -71,7 +71,7 @@ describe('advice-moderate Unit Tests:', function() {
           console.log('createTrainingDay: ' + err);
         }
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -110,7 +110,7 @@ describe('advice-moderate Unit Tests:', function() {
                 console.log('updateMetrics: ' + err);
               }
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -154,7 +154,7 @@ describe('advice-moderate Unit Tests:', function() {
               }
 
               trainingDay.period = 't6';
-              return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 let plannedActivity = util.getPlannedActivity(trainingDay, source);

@@ -76,7 +76,7 @@ describe('advice-easy Unit Tests:', function() {
                 let metrics = util.getMetrics(trainingDay, 'actual');
                 metrics.form = adviceConstants.easyDaytNeededThreshold;
 
-                return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+                return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
                   should.not.exist(err);
                   should.exist(trainingDay);
                   let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -135,7 +135,7 @@ describe('advice-easy Unit Tests:', function() {
                   let metrics = util.getMetrics(trainingDay, 'actual');
                   metrics.form = adviceConstants.easyDaytNeededThreshold;
 
-                  return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+                  return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
                     should.not.exist(err);
                     should.exist(trainingDay);
                     let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -181,7 +181,7 @@ describe('advice-easy Unit Tests:', function() {
               let metrics = util.getMetrics(trainingDay, 'actual');
               metrics.form = adviceConstants.easyDaytNeededThreshold + 1;
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -223,7 +223,7 @@ describe('advice-easy Unit Tests:', function() {
               }
               trainingDay.period = 't6';
 
-              return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+              return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
                 should.not.exist(err);
                 should.exist(trainingDay);
                 let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -241,7 +241,7 @@ describe('advice-easy Unit Tests:', function() {
       let metrics = util.getMetrics(trainingDay, 'actual');
       metrics.form = adviceConstants.testingEligibleFormThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -257,7 +257,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextGoalEvent = 3;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -275,7 +275,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextGoalEvent = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -293,7 +293,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextPriority2Event = 2;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -311,7 +311,7 @@ describe('advice-easy Unit Tests:', function() {
         }
         trainingDay.daysUntilNextPriority3Event = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);

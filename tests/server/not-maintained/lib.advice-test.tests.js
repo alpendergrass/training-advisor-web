@@ -34,7 +34,7 @@ describe('advice-test Unit Tests:', function () {
     it('should not return test recommendation if testing is not due', function (done) {
       user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate())
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -47,7 +47,7 @@ describe('advice-test Unit Tests:', function () {
       user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -61,7 +61,7 @@ describe('advice-test Unit Tests:', function () {
       trainingDay.form = adviceConstants.testingEligibleFormThreshold + 0.1;
       trainingDay.period = 't6';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);

@@ -26,6 +26,7 @@ describe('advice-engine Unit Tests:', function () {
       params = {};
       params.user = user;
       params.source = 'advised';
+      params.selectNewWorkout = true;
 
       trainingDate = new Date();
       params.numericDate = util.toNumericDate(trainingDate);

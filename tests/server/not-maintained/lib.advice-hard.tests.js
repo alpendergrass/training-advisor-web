@@ -35,7 +35,7 @@ describe('advice-hard Unit Tests:', function () {
   describe('Hard Rules', function () {
     it('should return hard recommendation if in t6 period and no other recommendation applies', function (done) {
       trainingDay.period = 't6';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -47,7 +47,7 @@ describe('advice-hard Unit Tests:', function () {
 
     it('should return hard recommendation if in race period and no other recommendation applies', function (done) {
       trainingDay.period = 'race';
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -58,7 +58,7 @@ describe('advice-hard Unit Tests:', function () {
     });
 
     it('should return hard recommendation if no other recommendation applies', function (done) {
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);

@@ -38,7 +38,7 @@ describe('advice-rest Unit Tests:', function() {
     it('should return rest if today is a preferred rest day', function(done) {
       user.preferredRestDays = [moment(trainingDate).day().toString()];
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -53,7 +53,7 @@ describe('advice-rest Unit Tests:', function() {
       user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate())
       metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -65,7 +65,7 @@ describe('advice-rest Unit Tests:', function() {
     it('should return rest if overly fatigued', function(done) {
       metrics.form = adviceConstants.restNeededThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -79,7 +79,7 @@ describe('advice-rest Unit Tests:', function() {
       metrics.form = adviceConstants.restNeededForPeakingThreshold;
       trainingDay.period = 't6';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -93,7 +93,7 @@ describe('advice-rest Unit Tests:', function() {
       user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract((adviceConstants.testingNagDayCount - 1), 'days').toDate())
       metrics.form = adviceConstants.restNeededThreshold + 0.1;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -106,7 +106,7 @@ describe('advice-rest Unit Tests:', function() {
       user.ftpLog[0].ftpDateNumeric = util.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate())
       metrics.form = adviceConstants.restNeededForTestingThreshold;
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -121,7 +121,7 @@ describe('advice-rest Unit Tests:', function() {
       metrics.form = adviceConstants.restNeededForTestingThreshold;
       trainingDay.period = 't6';
 
-      return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+      return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
         should.not.exist(err);
         should.exist(trainingDay);
         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -138,7 +138,7 @@ describe('advice-rest Unit Tests:', function() {
 
         trainingDay.daysUntilNextGoalEvent = 2;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -157,7 +157,7 @@ describe('advice-rest Unit Tests:', function() {
 
         trainingDay.daysUntilNextPriority2Event = 1;
 
-        return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+        return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
           should.not.exist(err);
           should.exist(trainingDay);
           let plannedActivity = util.getPlannedActivity(trainingDay, source);

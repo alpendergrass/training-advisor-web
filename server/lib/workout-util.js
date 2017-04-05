@@ -82,7 +82,7 @@ var selectWorkout = function(workouts, trainingDay) {
 
 module.exports = {};
 
-module.exports.getWorkout = function(trainingDay, source) {
+module.exports.getWorkout = function(trainingDay, source, selectNewWorkout) {
   return new Promise((resolve, reject) => {
     let plannedActivity = tdUtil.getPlannedActivity(trainingDay, source);
 
@@ -97,26 +97,42 @@ module.exports.getWorkout = function(trainingDay, source) {
       return resolve(trainingDay);
     }
 
-    var query = {
-      period: trainingDay.period,
-      loadRating: plannedActivity.activityType,
-      intensityRating: plannedActivity.intensity || 0,
-      terrainRating: plannedActivity.terrain || 0
-    };
+    let workoutLookup = trainingDay.period + plannedActivity.activityType + (plannedActivity.intensity || 0) + (plannedActivity.terrain || 0);
+
+    let query = {};
+
+    if (!selectNewWorkout && trainingDay.currentWorkoutSpecs.workoutLookup === workoutLookup && trainingDay.currentWorkoutSpecs.workoutName) {
+      query = {
+        name: trainingDay.currentWorkoutSpecs.workoutName
+      };
+    } else {
+      query = {
+        period: trainingDay.period,
+        loadRating: plannedActivity.activityType,
+        intensityRating: plannedActivity.intensity || 0,
+        terrainRating: plannedActivity.terrain || 0
+      };
+    }
 
     Workout.find(query).sort({ name: 1 }).exec()
       .then(workouts => {
-        if (workouts.length > 0) {
+        if (!selectNewWorkout && workouts.length > 0) {
+          console.log('returning same workout: name: ', workouts[0].name);
+          return Promise.resolve(workouts[0]);
+        } else if (workouts.length > 0) {
+          console.log('returning new workout: lookup: ', workoutLookup);
           return selectWorkout(workouts, trainingDay);
         } else {
-          Promise.resolve(null);
+          return Promise.resolve(null);
         }
       })
       .then(selectedWorkout => {
+        trainingDay.currentWorkoutSpecs.workoutLookup = workoutLookup;
+
         if (selectedWorkout) {
           plannedActivity.advice += selectedWorkout.instruction;
           plannedActivity.rationale += `${selectedWorkout.name}.`;
-          // plannedActivity.finalized = true;
+          trainingDay.currentWorkoutSpecs.workoutName = selectedWorkout.name;
         }
 
         return resolve(trainingDay);

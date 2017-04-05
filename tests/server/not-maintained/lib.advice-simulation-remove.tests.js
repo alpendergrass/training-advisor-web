@@ -35,7 +35,7 @@
 //   describe('Simulation Rules', function() {
 //     it('should not return simulation if not build period', function(done) {
 //       trainingDay.period = 't3';
-//       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+//       return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
 //         should.not.exist(err);
 //         should.exist(trainingDay);
 //         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -58,7 +58,7 @@
 //           console.log('createTrainingDay: ' + err);
 //         }
 
-//         return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+//         return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
 //           should.not.exist(err);
 //           should.exist(trainingDay);
 //           let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -71,7 +71,7 @@
 //     it('should return simulation recommendation if in build period and today is our preferred simulation day', function(done) {
 //       trainingDay.period = 't4';
 //       user.preferredSimulationDay = [moment(trainingDate).day().toString()];
-//       return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+//       return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
 //         should.not.exist(err);
 //         should.exist(trainingDay);
 //         let plannedActivity = util.getPlannedActivity(trainingDay, source);
@@ -93,7 +93,7 @@
 //     //       console.log('createTrainingDay: ' + err);
 //     //     }
 
-//     //     return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+//     //     return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
 //     //       should.not.exist(err);
 //     //       should.exist(trainingDay);
 //     //       (plannedActivity.activityType).should.not.match(/simulation/);
@@ -114,7 +114,7 @@
 //     //         console.log('createTrainingDay: ' + err);
 //     //       }
 
-//     // return adviceEngine._testGenerateAdvice(user, trainingDay, source, function(err, trainingDay) {
+//     // return adviceEngine._testGenerateAdvice(user, trainingDay, source, true, function(err, trainingDay) {
 //     //         should.not.exist(err);
 //     //         should.exist(trainingDay);
 //     //         (plannedActivity.activityType).should.match(/simulation/);

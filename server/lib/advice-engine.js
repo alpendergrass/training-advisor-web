@@ -31,7 +31,7 @@ var path = require('path'),
 
 mongoose.Promise = global.Promise;
 
-function generateAdvice(user, trainingDay, source, callback) {
+function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
   var facts = {};
   // var subsequentDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
   var oneDayPriorDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
@@ -109,14 +109,13 @@ function generateAdvice(user, trainingDay, source, callback) {
       }
 
       R.execute(facts, function(result) {
-        workoutUtil.getWorkout(trainingDay, source)
+        workoutUtil.getWorkout(trainingDay, source, selectNewWorkout)
           .then(trainingDay => {
             adviceLoad.setLoadRecommendations(trainingDay, source, function(err, trainingDay) {
               if (err) {
                 console.log('setLoadRecommendations err: ', err);
                 return callback(err);
               }
-
               trainingDay.save(function(err) {
                 if (err) {
                   console.log('trainingDay.save err: ', err);
@@ -301,7 +300,7 @@ module.exports.generatePlan = function(params) {
                           // current advice for these days.
                           return module.exports.refreshAdvice(user, todayTrainingDay);
                         })
-                        .then(function(response) {
+                        .then(function() {
                           let statusMessage = {
                             type: 'success',
                             text: 'We have updated your season.',
@@ -348,8 +347,14 @@ module.exports.refreshAdvice = function(user, trainingDay) {
     let today = tdUtil.getTodayInUserTimezone(user);            // 2017-02-25T13:30:00.000Z
     let tomorrow = moment(today).add(1, 'day').toDate();      //  2017-02-26T13:30:00.000Z
 
+    let response = {
+      trainingDay: trainingDay,
+      advisedToday: null,
+      advisedTomorrow: null
+    };
+
     if (tdDate.isAfter(tomorrow, 'day')) {
-      return resolve(trainingDay);
+      return resolve(response);
     }
 
     let metricsParams = {
@@ -358,7 +363,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
       metricsType: 'actual'
     };
 
-    // if trainingDay is today, we do not need to update metrics as that will happen in advise.
+    // if trainingDay is today or tomorrow, we technically do not need to update metrics as that will happen in advise.
     adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
       // updateMetrics will clear future metrics and advice starting with trainingDay.
       // Calling advise below will regenerate metrics from trainingDay until today/tomorrow.
@@ -371,6 +376,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
       adviceParams.user = user;
       adviceParams.source = 'advised';
       adviceParams.alternateActivity = null;
+      adviceParams.selectNewWorkout = false;
 
       if (tdDate.isSameOrBefore(today, 'day')) {
         //getAdvice for today and tomorrow.
@@ -381,6 +387,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
             return reject(err);
           }
 
+          response.advisedToday = advisedToday;
           adviceParams.numericDate = tdUtil.toNumericDate(tomorrow, user);
 
           module.exports.advise(adviceParams, function(err, advisedTomorrow) {
@@ -388,11 +395,14 @@ module.exports.refreshAdvice = function(user, trainingDay) {
               return reject(err);
             }
 
+            response.advisedTomorrow = advisedTomorrow;
+
             if (trainingDay.dateNumeric === advisedToday.dateNumeric) {
-              return resolve(advisedToday);
-            } else {
-              return resolve(trainingDay);
+              // Let's return the advised version of today.
+              response.trainingDay = advisedToday;
             }
+
+            return resolve(response);
           });
         });
       } else {
@@ -404,7 +414,11 @@ module.exports.refreshAdvice = function(user, trainingDay) {
             return reject(err);
           }
 
-          return resolve(trainingDay);
+          // Let's return the advised version of tomorrow.
+          response.trainingDay = advisedTomorrow;
+          response.advisedTomorrow = advisedTomorrow;
+
+          return resolve(response);
         });
       }
     });
@@ -434,6 +448,11 @@ module.exports.advise = function(params, callback) {
     return callback(err, null);
   }
 
+  if (!_.has(params, 'selectNewWorkout')) {
+    err = new TypeError('advise selectNewWorkout is required');
+    return callback(err, null);
+  }
+
   let metricsParams = {
     user: params.user,
     numericDate: params.numericDate,
@@ -449,8 +468,8 @@ module.exports.advise = function(params, callback) {
     var plannedActivity = {};
 
     if (params.source === 'requested') {
-      //User has requested advice for a specific activity type.
-      //We just need to compute load for the requested activity.
+      //User has requested a specific activity type (load) different from what we recommend.
+      //We just need to compute load for the requested activity type.
 
       //Create planned activity for requested activity.
       plannedActivity.activityType = params.alternateActivity;
@@ -472,11 +491,10 @@ module.exports.advise = function(params, callback) {
       });
     } else {
       //We are advising or planning an activity.
-
       plannedActivity.source = params.source;
       trainingDay.plannedActivities.push(plannedActivity);
 
-      generateAdvice(params.user, trainingDay, params.source, function(err, recommendation) {
+      generateAdvice(params.user, trainingDay, params.source, params.selectNewWorkout, function(err, recommendation) {
         if (err) {
           return callback(err, null);
         }
