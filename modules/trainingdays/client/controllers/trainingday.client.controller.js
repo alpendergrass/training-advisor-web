@@ -243,7 +243,8 @@ angular.module('trainingDays')
         $scope.advise = function() {
           TrainingDays.getAdvice({
             trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
-            alternateActivity: $scope.alternateActivity || null
+            alternateActivity: $scope.alternateActivity || null,
+            selectNewWorkout: $scope.plannedActivity && !$scope.alternateActivity ? true : false
           }, function(trainingDay) {
             trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
             $scope.trainingDay = trainingDay;

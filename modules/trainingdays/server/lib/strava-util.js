@@ -238,7 +238,6 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
 module.exports = {};
 
 module.exports.fetchActivity = function(user, activityId) {
-  // We return trainingDay if we did something mainly to aid testing.
   return new Promise(function(resolve, reject) {
     strava.activities.get({ 'access_token': getAccessToken(user), 'id': activityId }, function(err, payload) {
       if (err) {
@@ -271,8 +270,9 @@ module.exports.fetchActivity = function(user, activityId) {
         .then(function(trainingDay) {
           return adviceEngine.refreshAdvice(user, trainingDay);
         })
-        .then(function(trainingDay) {
-          return resolve(trainingDay);
+        .then(function(response) {
+          // We return trainingDay mainly to aid testing. Could be null.
+          return resolve(response.trainingDay);
         })
         .catch(function(err) {
           return reject(new Error(`Strava fetchActivity failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
@@ -361,18 +361,18 @@ module.exports.downloadActivities = function(user, trainingDay) {
             })
             .then(function(savedTrainingDay) {
               if (activityCount < 1) {
-                return savedTrainingDay;
+                return { trainingDay: savedTrainingDay };
               }
 
               return adviceEngine.refreshAdvice(user, savedTrainingDay);
             })
-            .then(function(updatedTrainingDay) {
+            .then(function(response) {
               if (activityCount > 0) {
                 statusMessage.text = 'We downloaded ' + countPhrase + '.';
                 statusMessage.type = 'success';
-                updatedTrainingDay.lastStatus = statusMessage;
+                response.trainingDay.lastStatus = statusMessage;
               }
-              return resolve(updatedTrainingDay);
+              return resolve(response.trainingDay);
             })
             .catch(function(err) {
               return reject(err);
@@ -457,6 +457,7 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
                     }
 
                     // RefreshAdvice to ensure metrics are up to date thru tomorrow.
+                    // TODO: couldn't we just do this once? Call it for the last day processed? Or just updateMetrics?
                     return adviceEngine.refreshAdvice(user, savedTrainingDay);
                   }
 

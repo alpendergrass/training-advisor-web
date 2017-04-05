@@ -6,11 +6,6 @@ angular.module('trainingDays')
       $scope.authentication = Authentication;
       $scope._ = _;
 
-      // var jQuery = window.jQuery;
-      // angular.element(document).ready(function() {
-      //   jQuery('[data-toggle="popover"]').popover({ trigger: 'hover' });
-      // });
-
       Season.getSeason(function(errorMessage, season) {
         if (season) {
           // Reload user object as notifications may have been updated.
@@ -22,8 +17,7 @@ angular.module('trainingDays')
       var tomorrow = moment().add(1, 'day').toDate();
 
       TrainingDays.getAdvice({
-        trainingDateNumeric: Util.toNumericDate(today),
-        alternateActivity: null
+        trainingDateNumeric: Util.toNumericDate(today)
       }, function(trainingDayToday) {
         trainingDayToday.date = moment(trainingDayToday.dateNumeric.toString()).toDate();
         $scope.trainingDayToday = trainingDayToday;
@@ -33,8 +27,7 @@ angular.module('trainingDays')
         $scope.requestedActivityToday = Util.getPlannedActivity(trainingDayToday, 'requested');
 
         TrainingDays.getAdvice({
-          trainingDateNumeric: Util.toNumericDate(tomorrow),
-          alternateActivity: null
+          trainingDateNumeric: Util.toNumericDate(tomorrow)
         }, function(trainingDayTomorrow) {
           trainingDayTomorrow.date = moment(trainingDayTomorrow.dateNumeric.toString()).toDate();
           $scope.trainingDayTomorrow = trainingDayTomorrow;

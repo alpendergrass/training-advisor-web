@@ -86,27 +86,20 @@ function createTrainingDay(req, callback) {
         if (req.body.startingPoint) {
           dbUtil.removeSubsequentStartingPoints(req.user, trainingDay.dateNumeric)
             .then(function() {
-              return adviceEngine.refreshAdvice(req.user, trainingDay);
-            })
-            .then(function(trainingDay) {
-              if (req.body.startingPoint) {
-                // Refresh plan metrics from start.
-                // TODO: likely need to regen plan.
-                let params = {};
-                params.user = req.user;
-                params.numericDate = trainingDay.dateNumeric;
-                params.metricsType = 'planned';
+              // Refresh *plan* metrics from start.
+              // TODO: likely need to regen plan.
+              let params = {};
+              params.user = req.user;
+              params.numericDate = trainingDay.dateNumeric;
+              params.metricsType = 'planned';
 
-                adviceMetrics.updateMetrics(params, function(err, trainingDay) {
-                  if (err) {
-                    return callback(err, null);
-                  }
+              adviceMetrics.updateMetrics(params, function(err, trainingDay) {
+                if (err) {
+                  return callback(err, null);
+                }
 
-                  return callback(null, trainingDay);
-                });
-              } else {
                 return callback(null, trainingDay);
-              }
+              });
             })
             .catch(function(err) {
               return callback(err, null);
@@ -382,9 +375,9 @@ exports.update = function(req, res) {
           user = response.user;
           return adviceEngine.refreshAdvice(user, trainingDay);
         })
-        .then(function(trainingDay) {
-          trainingDay.user = user;
-          return res.json(trainingDay);
+        .then(function(response) {
+          response.trainingDay.user = user;
+          return res.json(response.trainingDay);
         })
         .catch(function(err) {
           if (err.message === 'Starting date for current training period was not found.') {
@@ -570,7 +563,10 @@ exports.getAdvice = function(req, res) {
   params.user = req.user;
   params.numericDate = parseInt(req.params.trainingDateNumeric, 10);
   params.alternateActivity = req.query.alternateActivity;
+  params.selectNewWorkout = JSON.parse(req.query.selectNewWorkout); // Converts string to boolean.
   params.source = params.alternateActivity ? 'requested' : 'advised';
+
+  console.log('params.selectNewWorkout: ', params.selectNewWorkout);
 
   let path = '/api/trainingDays/getAdvice/:trainingDateNumeric';
   // Do not log page hit if request comes from My Training Day page.

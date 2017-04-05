@@ -218,15 +218,23 @@ var TrainingDaySchema = new Schema({
     default: '',
     trim: true
   },
+  currentWorkoutSpecs: {
+    workoutLookup: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    workoutName: {
+      type: String,
+      default: '',
+      trim: true
+    }
+  },
   plannedActivities: [{
     created: {
       type: Date,
       default: Date.now
     },
-    // finalized: {
-    //   type: Boolean,
-    //   default: false
-    // },
     activityType: {
       type: String,
       enum: plannedActivityTypes,

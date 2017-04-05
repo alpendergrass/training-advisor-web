@@ -45,8 +45,7 @@ angular.module('trainingDays')
         var that = this;
 
         TrainingDays.getAdvice({
-          trainingDateNumeric: getAdviceDate,
-          alternateActivity: null
+          trainingDateNumeric: getAdviceDate
         }, function(trainingDay) {
           $location.path('trainingDay/' + trainingDay._id);
         }, function(errorResponse) {
