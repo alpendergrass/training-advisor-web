@@ -31,6 +31,13 @@ var selectWorkout = function(workouts, trainingDay) {
     User.findOne({ _id: trainingDay.user }).exec()
       .then(user => {
         let workoutLog = user.workoutLog;
+        // Let's ensure the current workout assigned to the day is not assigned again
+        // by making sure it only appears at the end of the log.
+        // This can happen when another day has the same lookup and was just given a workout.
+        // This will be less likely as the workout catalog grows.
+        _.pull(workoutLog, trainingDay.currentWorkoutSpecs.workoutName);
+        workoutLog.push(trainingDay.currentWorkoutSpecs.workoutName);
+
         let workoutList = _.flatMap(workouts, extractName);
 
         let eligibleWorkouts = _.difference(workoutList, workoutLog);
@@ -117,13 +124,10 @@ module.exports.getWorkout = function(trainingDay, source, selectNewWorkout) {
     Workout.find(query).sort({ name: 1 }).exec()
       .then(workouts => {
         if (!selectNewWorkout && workouts.length > 0) {
-          console.log('returning same workout: name: ', workouts[0].name);
           return Promise.resolve(workouts[0]);
         } else if (workouts.length > 0) {
-          console.log('returning new workout: lookup: ', workoutLookup);
           return selectWorkout(workouts, trainingDay);
         } else {
-          console.log('found no matching workout: query: ', query);
           return Promise.resolve(null);
         }
       })

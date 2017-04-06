@@ -250,6 +250,7 @@ module.exports.generatePlan = function(params) {
                 adviceParams.user = user;
                 adviceParams.source = 'plangeneration';
                 adviceParams.alternateActivity = null;
+                adviceParams.selectNewWorkout = false;
                 adviceParams.planGenUnderway = true;
 
                 let genActivityParams = {};
