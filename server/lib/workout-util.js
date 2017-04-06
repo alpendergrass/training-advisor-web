@@ -123,6 +123,7 @@ module.exports.getWorkout = function(trainingDay, source, selectNewWorkout) {
           console.log('returning new workout: lookup: ', workoutLookup);
           return selectWorkout(workouts, trainingDay);
         } else {
+          console.log('found no matching workout: query: ', query);
           return Promise.resolve(null);
         }
       })

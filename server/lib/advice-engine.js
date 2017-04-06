@@ -338,7 +338,7 @@ module.exports.generatePlan = function(params) {
   });
 };
 
-module.exports.refreshAdvice = function(user, trainingDay) {
+module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
   // if trainingDay is not beyond tomorrow we should update metrics for trainingDay (which will clear future)
   // and then advise for today (maybe) and tomorrow.
 
@@ -376,7 +376,7 @@ module.exports.refreshAdvice = function(user, trainingDay) {
       adviceParams.user = user;
       adviceParams.source = 'advised';
       adviceParams.alternateActivity = null;
-      adviceParams.selectNewWorkout = false;
+      adviceParams.selectNewWorkout = selectNewWorkout ? true : false;
 
       if (tdDate.isSameOrBefore(today, 'day')) {
         //getAdvice for today and tomorrow.
@@ -389,6 +389,9 @@ module.exports.refreshAdvice = function(user, trainingDay) {
 
           response.advisedToday = advisedToday;
           adviceParams.numericDate = tdUtil.toNumericDate(tomorrow, user);
+          // selectNewWorkout only applies to the first day we are advising,
+          // today or tomorrow but not both.
+          adviceParams.selectNewWorkout = false;
 
           module.exports.advise(adviceParams, function(err, advisedTomorrow) {
             if (err) {
