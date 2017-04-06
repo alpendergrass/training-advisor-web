@@ -43,11 +43,11 @@ angular.module('trainingDays')
 
           if (td.htmlID && td.htmlID === 'today') {
             // Highlight today by making it stand out a bit.
+            $scope.todayID = td._id;
             return '#FFA07A';
           }
 
           if (td.isSimDay) {
-            console.log('sim day!: ');
             // Highlight sim days when in what-if mode.
             return '#ffe4b3';
           }

@@ -28,7 +28,7 @@
         <md-card-content>
           <div>
             <h4>
-              {{plannedActivityDescriptionToday.namePhrase}}
+              <a ui-sref="trainingDayView({trainingDayId: trainingDayToday._id})">{{plannedActivityDescriptionToday.namePhrase}}</a>
               <small>{{plannedActivityDescriptionToday.loadPhrase}}</small>
             </h4>
             <div ng-show="trainingDayToday.completedActivities.length < 1">
@@ -82,7 +82,7 @@
         <md-card-content>
           <div>
             <h4>
-              {{plannedActivityDescriptionTomorrow.namePhrase}}
+              <a ui-sref="trainingDayView({trainingDayId: trainingDayTomorrow._id})">{{plannedActivityDescriptionTomorrow.namePhrase}}</a>
               <small>{{plannedActivityDescriptionTomorrow.loadPhrase}}</small>
             </h4>
             <div ng-show="trainingDayToday.completedActivities.length > 0 || plannedActivityToday.activityType === 'rest'">

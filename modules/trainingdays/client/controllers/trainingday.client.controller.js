@@ -241,7 +241,9 @@ angular.module('trainingDays')
         };
 
         $scope.advise = function() {
-          if ($scope.alternateActivity) {
+          // For normal users only call getAdvice if the user want an alternative activity.
+          // Allow super user to request advice for any day.
+          if ($scope.alternateActivity || ($scope.authentication.user.levelOfDetail > 2 && !moment($scope.trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day'))) {
             TrainingDays.getAdvice({
               trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
               alternateActivity: $scope.alternateActivity,
@@ -268,7 +270,7 @@ angular.module('trainingDays')
           } else {
             // We call refreshAdvice instead of getAdvice if we do not have a planned activity
             // or if the user wants different advice.
-            // That will ensure that tomorrow's advice is regenerated if
+            // If current day is today, this will ensure that tomorrow's advice is regenerated also.
             TrainingDays.refreshAdvice({
               trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
               selectNewWorkout: $scope.plannedActivity ? true : false

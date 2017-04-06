@@ -12,10 +12,10 @@
     <div class="panel" ng-class="{'panel-warning' : simMode}">
       <div class="panel-heading" ng-hide="simMode">
         <div class="pull-left">
-          <md-button ui-sref="trainingDays.getAdvice()">Get Advice</md-button>
+          <md-button ng-class="{'color-tacit-red' : needsPlanGen}" ng-click="genPlan()">Update Season</md-button>
         </div>
         <div class="pull-left">
-          <md-button ng-class="{'color-tacit-red' : needsPlanGen}" ng-click="genPlan()">Update Season</md-button>
+          <md-button ng-show="todayID" ui-sref="trainingDayView({trainingDayId: todayID})">Go To Today</md-button>
         </div>
         <div class="pull-right">
           <md-button id="season-help" aria-label="Season Help" data-toggle="modal" data-target="#seasonHelp">

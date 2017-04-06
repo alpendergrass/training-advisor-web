@@ -40,12 +40,6 @@ angular.module('trainingDays').run(['Menus',
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'Get Advice',
-      state: 'trainingDays.getAdvice',
-      roles: ['user']
-    });
-
-    Menus.addSubMenuItem('topbar', 'trainingDays', {
       title: 'Set/Reset Season Start',
       state: 'trainingDays.createStart',
       roles: ['user']
@@ -55,6 +49,14 @@ angular.module('trainingDays').run(['Menus',
       title: 'My Calendar',
       state: 'trainingDays.calendar',
       roles: ['user']
+    });
+
+    // *** admin only below ***
+
+    Menus.addSubMenuItem('topbar', 'trainingDays', {
+      title: 'Get Advice',
+      state: 'trainingDays.getAdvice',
+      roles: ['admin']
     });
 
     Menus.addSubMenuItem('topbar', 'trainingDays', {
