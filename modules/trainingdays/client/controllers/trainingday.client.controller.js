@@ -241,28 +241,58 @@ angular.module('trainingDays')
         };
 
         $scope.advise = function() {
-          TrainingDays.getAdvice({
-            trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
-            alternateActivity: $scope.alternateActivity || null,
-            selectNewWorkout: $scope.plannedActivity && !$scope.alternateActivity ? true : false
-          }, function(trainingDay) {
-            trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
-            $scope.trainingDay = trainingDay;
-            $scope.alternateActivity = null;
-            resetViewObjects(trainingDay);
-          }, function(errorResponse) {
-            if (errorResponse.data && errorResponse.data.message) {
-              if (errorResponse.data.message === 'Starting date for current training period was not found.') {
-                // We want to come back here after we create start.
-                $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
+          if ($scope.alternateActivity) {
+            TrainingDays.getAdvice({
+              trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
+              alternateActivity: $scope.alternateActivity,
+              // selectNewWorkout: !$scope.alternateActivity ? true : false
+              selectNewWorkout: false
+            }, function(trainingDay) {
+              trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+              $scope.trainingDay = trainingDay;
+              $scope.alternateActivity = null;
+              resetViewObjects(trainingDay);
+            }, function(errorResponse) {
+              if (errorResponse.data && errorResponse.data.message) {
+                if (errorResponse.data.message === 'Starting date for current training period was not found.') {
+                  // We want to come back here after we create start.
+                  $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
+                } else {
+                  $scope.error = errorResponse.data.message;
+                }
               } else {
-                $scope.error = errorResponse.data.message;
+                //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
+                $scope.error = 'Server error prevented advice retrieval.';
               }
-            } else {
-              //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
-              $scope.error = 'Server error prevented advice retrieval.';
-            }
-          });
+            });
+          } else {
+            // We call refreshAdvice instead of getAdvice if we do not have a planned activity
+            // or if the user wants different advice.
+            // That will ensure that tomorrow's advice is regenerated if
+            TrainingDays.refreshAdvice({
+              trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
+              selectNewWorkout: $scope.plannedActivity ? true : false
+            }, function(response) {
+              var trainingDay = response.advisedToday ? response.advisedToday : response.advisedTomorrow;
+              trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
+              $scope.trainingDay = trainingDay;
+              $scope.alternateActivity = null;
+              resetViewObjects(trainingDay);
+            }, function(errorResponse) {
+              if (errorResponse.data && errorResponse.data.message) {
+                if (errorResponse.data.message === 'Starting date for current training period was not found.') {
+                  // We want to come back here after we create start.
+                  $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
+                } else {
+                  $scope.error = errorResponse.data.message;
+                }
+              } else {
+                //Maybe this: errorResponse = Object {data: null, status: -1, config: Object, statusText: ''}
+                $scope.error = 'Server error prevented refreshAdvice.';
+              }
+            });
+          }
+
         };
 
         if (!$stateParams.trainingDayId) {

@@ -31,6 +31,9 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/trainingDays/getAdvice/:trainingDateNumeric',
       permissions: '*'
     }, {
+      resources: '/api/trainingDays/refreshAdvice/:trainingDateNumeric',
+      permissions: '*'
+    }, {
       resources: '/api/trainingDays/getLoadSummary/:trainingDateNumeric',
       permissions: '*'
     }, {
@@ -68,6 +71,9 @@ exports.invokeRolesPolicies = function () {
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getAdvice/:trainingDateNumeric',
+      permissions: ['get']
+    }, {
+      resources: '/api/trainingDays/refreshAdvice/:trainingDateNumeric',
       permissions: ['get']
     }, {
       resources: '/api/trainingDays/getLoadSummary/:trainingDateNumeric',

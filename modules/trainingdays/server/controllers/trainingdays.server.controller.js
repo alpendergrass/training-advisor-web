@@ -566,10 +566,8 @@ exports.getAdvice = function(req, res) {
   params.selectNewWorkout = JSON.parse(req.query.selectNewWorkout); // Converts string to boolean.
   params.source = params.alternateActivity ? 'requested' : 'advised';
 
-  console.log('params.selectNewWorkout: ', params.selectNewWorkout);
-
   let path = '/api/trainingDays/getAdvice/:trainingDateNumeric';
-  // Do not log page hit if request comes from My Training Day page.
+  // Do not log page hit if request comes from My Training Day page or Dashboard.
   let pageData = req.headers.referer.includes('getAdvice') ? { path: path, title: 'Get Advice' } : null;
   let eventData = { category: 'Training Day', action: params.alternateActivity ? 'Request Alternative Activity' : 'Get Advice', value: params.numericDate, path: path };
 
@@ -592,6 +590,31 @@ exports.getAdvice = function(req, res) {
       res.json(trainingDay);
     }
   });
+};
+
+exports.refreshAdvice = function(req, res) {
+  let numericDate = parseInt(req.params.trainingDateNumeric, 10);
+  let selectNewWorkout = JSON.parse(req.query.selectNewWorkout); // Converts string to boolean.
+
+  let path = '/api/trainingDays/refreshAdvice/:trainingDateNumeric';
+  // Do not log page hit if request comes from My Training Day page.
+  let pageData = { path: path, title: 'Dashboard' };
+  let eventData = { category: 'Training Day', action: 'Refresh Advice', value: numericDate, path: path };
+
+  coreUtil.logAnalytics(req, pageData, eventData);
+
+  dbUtil.getTrainingDayDocument(req.user, numericDate)
+    .then(function(trainingDay) {
+      return adviceEngine.refreshAdvice(req.user, trainingDay, selectNewWorkout);
+    })
+    .then(function(response) {
+      return res.json(response);
+    })
+    .catch(function(err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    });
 };
 
 exports.getLoadSummary = function(req, res) {

@@ -29,6 +29,11 @@ angular.module('trainingDays').factory('TrainingDays', ['$resource',
         url: 'api/trainingDays/getAdvice/:trainingDateNumeric',
         params: { alternateActivity: '', selectNewWorkout: false }
       },
+      refreshAdvice: {
+        method: 'GET',
+        url: 'api/trainingDays/refreshAdvice/:trainingDateNumeric',
+        params: { selectNewWorkout: false }
+      },
       getLoadSummary: {
         method: 'GET',
         url: 'api/trainingDays/getLoadSummary/:trainingDateNumeric'

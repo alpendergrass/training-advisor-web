@@ -16,9 +16,10 @@ angular.module('trainingDays')
       var today = moment().toDate();
       var tomorrow = moment().add(1, 'day').toDate();
 
-      TrainingDays.getAdvice({
+      TrainingDays.refreshAdvice({
         trainingDateNumeric: Util.toNumericDate(today)
-      }, function(trainingDayToday) {
+      }, function(response) {
+        var trainingDayToday = response.advisedToday;
         trainingDayToday.date = moment(trainingDayToday.dateNumeric.toString()).toDate();
         $scope.trainingDayToday = trainingDayToday;
         $scope.todayFormatted = moment(trainingDayToday.date).format('dddd, D MMMM YYYY');
@@ -26,30 +27,13 @@ angular.module('trainingDays')
         $scope.plannedActivityDescriptionToday = Util.getPlannedActivityDescription($scope.plannedActivityToday, trainingDayToday.scheduledEventRanking);
         $scope.requestedActivityToday = Util.getPlannedActivity(trainingDayToday, 'requested');
 
-        TrainingDays.getAdvice({
-          trainingDateNumeric: Util.toNumericDate(tomorrow)
-        }, function(trainingDayTomorrow) {
-          trainingDayTomorrow.date = moment(trainingDayTomorrow.dateNumeric.toString()).toDate();
-          $scope.trainingDayTomorrow = trainingDayTomorrow;
-          $scope.tomorrowFormatted = moment(trainingDayTomorrow.date).format('dddd, D MMMM YYYY');
-          $scope.plannedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'advised');
-          $scope.plannedActivityDescriptionTomorrow = Util.getPlannedActivityDescription($scope.plannedActivityTomorrow, trainingDayTomorrow.scheduledEventRanking);
-          $scope.requestedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'requested');
-        }, function(errorResponse) {
-          // TODO: what should we do if error?
-          if (errorResponse.data && errorResponse.data.message) {
-            // if (errorResponse.data.message === 'Starting date for current training period was not found.') {
-            //   // We want to come back here after we create start.
-            //   $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
-            // } else {
-            $scope.error = errorResponse.data.message;
-            // }
-          } else {
-            $scope.error = 'Server error prevented advice retrieval.';
-          }
-          console.log('errorResponse: ', errorResponse);
-        });
-
+        var trainingDayTomorrow = response.advisedTomorrow;
+        trainingDayTomorrow.date = moment(trainingDayTomorrow.dateNumeric.toString()).toDate();
+        $scope.trainingDayTomorrow = trainingDayTomorrow;
+        $scope.tomorrowFormatted = moment(trainingDayTomorrow.date).format('dddd, D MMMM YYYY');
+        $scope.plannedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'advised');
+        $scope.plannedActivityDescriptionTomorrow = Util.getPlannedActivityDescription($scope.plannedActivityTomorrow, trainingDayTomorrow.scheduledEventRanking);
+        $scope.requestedActivityTomorrow = Util.getPlannedActivity(trainingDayTomorrow, 'requested');
       }, function(errorResponse) {
         // TODO: what should we do if error?
         if (errorResponse.data && errorResponse.data.message) {
@@ -60,7 +44,7 @@ angular.module('trainingDays')
           $scope.error = errorResponse.data.message;
           // }
         } else {
-          $scope.error = 'Server error prevented advice retrieval.';
+          $scope.error = 'Server error prevented refreshAdvice.';
         }
       });
 
