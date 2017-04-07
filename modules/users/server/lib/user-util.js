@@ -61,7 +61,7 @@ var adornNotification = function(notification) {
       message: 'You need to set your Functional Threshold Power.',
       state: 'settings.profile',
       alert: true,
-      blocks: ''
+      blocks: 'start'
     }, {
       notificationType: 'timezone',
       message: 'You need to set your local timezone.',

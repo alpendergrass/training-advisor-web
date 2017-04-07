@@ -2,6 +2,22 @@
 
 var releaseNotes = [
   {
+    version: '0.9.0',
+    title: 'Expanded Workout Collection Release - 0.9.0',
+    message: 'We have restructured how we store workouts to make it easier to add new ones. And we have added some new ones! We will continue to expand the collection over the coming months. We will also be collecting statistics to help us tune our workout assignment logic. ',
+    features: [
+      'Restructure workout catalog.',
+      'Improve workout selection functionality.',
+      'Accumulate statistics on workout usage.',
+      'If provided by the user, show estimated load for goal events on season view.',
+      'Add alert if estimated load is missing from goal event.',
+      'Clarify that a day off is a type of an event.',
+      'Add elevation gain to training day activity list.',
+      'When recomputing advice for today, recompute for tomorrow also.'
+    ],
+    fixes: []
+  },
+  {
     version: '0.8.2',
     title: 'Dashboard today/tomorrow date bug fix, Release 0.8.2',
     message: '',

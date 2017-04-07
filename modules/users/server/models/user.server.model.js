@@ -42,7 +42,7 @@ var notificationTypes = {
 };
 
 var blockableNotificationTypes = {
-  values: 'plangen|'.split('|'),
+  values: 'plangen|start|'.split('|'),
   message: invalidDataErrorMessage
 };
 
