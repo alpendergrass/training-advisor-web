@@ -151,7 +151,6 @@ function generateActivityFromAdvice(params, callback) {
     completedActivity.load = load;
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
-    trainingDay.planLoad = completedActivity.load;
 
     //By setting fitness and fatigue to zero we trigger recomputation of metrics for this day
     //when updateMetrics is called for the following day.

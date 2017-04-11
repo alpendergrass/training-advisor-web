@@ -203,10 +203,6 @@ var TrainingDaySchema = new Schema({
       default: 0
     }
   }],
-  planLoad: {
-    type: Number,
-    default: 0
-  },
   trainingEffortFeedback: {
     type: Number,
     min: minTrainingEffortFeedback,
