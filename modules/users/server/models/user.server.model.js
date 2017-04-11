@@ -111,18 +111,6 @@ var UserSchema = new Schema({
   //   required: 'Please provide your birth year',
   //   default: 1986
   // },
-  thresholdPower: {
-    type: Number,
-    min: minFTP,
-    max: maxFTP,
-    required: 'Please provide threshold power',
-    default: 0
-  },
-  thresholdPowerTestDate: {
-    type: Date,
-    required: 'Please provide threshold power test date',
-    default: Date.now
-  },
   ftpLog: [{
     ftp: {
       type: Number,
