@@ -170,19 +170,6 @@ module.exports.updateFatigueTimeConstant = function(id, trainingEffortFeedback, 
   });
 };
 
-module.exports.getTrainingPeaksAutoDownloadUsers = function(callback) {
-
-  var query = User.where('trainingPeaksCredentials.autoDownload').equals(true);
-
-  query.find().exec(function(err, users) {
-    if (err) {
-      return callback(err, null);
-    }
-
-    return callback(null, users);
-  });
-};
-
 module.exports.updateNotifications = function(user, notificationUpdates, saveUser) {
   return new Promise(function(resolve, reject) {
     let notificationsModified = false;

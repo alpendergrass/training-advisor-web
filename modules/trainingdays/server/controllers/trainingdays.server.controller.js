@@ -11,7 +11,6 @@ var path = require('path'),
   dbUtil = require('../lib/db-util'),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
   stravaUtil = require('../lib/strava-util'),
-  downloadTrainingPeaks = require('../lib/download-trainingpeaks'),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   advicePeriod = require(path.resolve('./modules/advisor/server/lib/advice-period')),
@@ -802,18 +801,6 @@ exports.downloadActivities = function(req, res) {
         });
       });
   }
-
-  // if (req.query.provider === 'trainingpeaks') {
-  //   downloadTrainingPeaks.downloadActivities(req.user, trainingDay, function(err, trainingDay) {
-  //     if (err) {
-  //       return res.status(400).send({
-  //         message: errorHandler.getErrorMessage(err)
-  //       });
-  //     }
-
-  //     return res.json(trainingDay);
-  //   });
-  // }
 };
 
 exports.downloadAllActivities = function(req, res) {

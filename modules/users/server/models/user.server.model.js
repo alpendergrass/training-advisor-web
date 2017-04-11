@@ -26,11 +26,6 @@ var validateLocalStrategyEmail = function (email) {
 
 var invalidDataErrorMessage = 'The value of `{PATH}` ({VALUE}) is not a valid value.';
 
-var trainingPeaksAccountTypes = {
-  values: 'SharedFree|CoachedFree|SelfCoachedPremium|SharedSelfCoachedPremium|CoachedPremium|SharedCoachedPremium|'.split('|'),
-  message: 'Invalid Training Peaks Account Type.'
-};
-
 var ftpSources = {
   values: 'strava|manual|migration'.split('|'),
   message: invalidDataErrorMessage
@@ -169,25 +164,6 @@ var UserSchema = new Schema({
   favorSufferScoreOverEstimatedPower: {
     type: Boolean,
     default: false
-  },
-  trainingPeaksCredentials: {
-    username: {
-      type: String,
-      default: ''
-    },
-    password: {
-      type: String,
-      default: ''
-    },
-    accountType: {
-      type: String,
-      enum: trainingPeaksAccountTypes,
-      default: trainingPeaksAccountTypes.values[2]
-    },
-    autoDownload: {
-      type: Boolean,
-      default: false
-    }
   },
   notifications: [{
     notificationType: {

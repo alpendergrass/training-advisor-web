@@ -126,27 +126,6 @@ describe('user-util Unit Tests:', function() {
     });
   });
 
-  describe('Method getTrainingPeaksAutoDownloadUsers', function() {
-    it('should not return user if autoDownload is not true', function(done) {
-      return userUtil.getTrainingPeaksAutoDownloadUsers(function(err, users) {
-        should.not.exist(err);
-        (users.length).should.equal(0);
-        done();
-      });
-    });
-
-    it('should return user if autoDownload is true', function(done) {
-      user.trainingPeaksCredentials.autoDownload = true;
-      user.save(function(err) {
-        return userUtil.getTrainingPeaksAutoDownloadUsers(function(err, users) {
-          should.not.exist(err);
-          (users.length).should.equal(1);
-          done();
-        });
-      });
-    });
-  });
-
   afterEach(function(done) {
     User.remove().exec(done);
   });

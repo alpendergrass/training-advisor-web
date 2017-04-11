@@ -61,61 +61,9 @@ module.exports.init = function init(callback) {
       later.setInterval(eventsUtil.purgeEvents, sched);
     }
 
-
-    // //Schedule TP workout download job: need to figure out how to run this on only one instance.
-    // // var textSched = later.parse.text('every 1 min'); //time is GMT
-    // var textSched = later.parse.text('at 06:20 every 1 day'); //time is GMT
-
-    // if (textSched.error > -1) {
-    //   mailOptions.subject += ': Error';
-    //   mailOptions.text = 'Auto-download scheduling error: ' + textSched.error + ' (-1 is no error)';
-    //   console.log(mailOptions.text);
-    //   smtpTransport.sendMail(mailOptions, function (err) {
-    //     if (err) {
-    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-    //     }
-    //   });
-    // } else {
-    //   mailOptions.subject += ': Info';
-    //   mailOptions.text = 'next auto-download occurs: ' + later.schedule(textSched).next(1);
-    //   console.log(mailOptions.text);
-    //   smtpTransport.sendMail(mailOptions, function (err) {
-    //     if (err) {
-    //       console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-    //     }
-    //   });
-    //   var timer = later.setInterval(downloadTP, textSched);
-    // }
-
     if (callback) callback(null, app, db, config);
   });
 };
-
-function downloadTP() {
-  var downloadTrainingPeaks = require('../../modules/trainingdays/server/lib/download-trainingpeaks');
-  console.log(new Date() + ' Running scheduled TP download job.');
-  downloadTrainingPeaks.batchDownloadActivities(function(err) {
-    if (err) {
-      mailOptions.subject = mailSubjectPrefix + ': Error';
-      mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities returned error: ' + JSON.stringify(err);
-      console.log(mailOptions.text);
-      smtpTransport.sendMail(mailOptions, function(err) {
-        if (err) {
-          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        }
-      });
-    } else {
-      mailOptions.subject = mailSubjectPrefix + ': Info';
-      mailOptions.text = 'downloadTrainingPeaks.batchDownloadActivities completed successfully.';
-      console.log(mailOptions.text);
-      smtpTransport.sendMail(mailOptions, function(err) {
-        if (err) {
-          console.log('smtpTransport.sendMail returned error: ' + JSON.stringify(err));
-        }
-      });
-    }
-  });
-}
 
 module.exports.start = function start(callback) {
   var _this = this;
