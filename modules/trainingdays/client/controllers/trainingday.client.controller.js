@@ -297,6 +297,7 @@ angular.module('trainingDays')
 
         };
 
+        // This block runs on page load.
         if (!$stateParams.trainingDayId) {
           // The following will reload the page with today.
           $scope.getDay($scope.today);

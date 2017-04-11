@@ -333,9 +333,6 @@ exports.update = function(req, res) {
   }
 
   trainingDay.name = req.body.name;
-  // No longer updating f&f via this method/TD view page.
-  trainingDay.fitness = req.body.fitness;
-  trainingDay.fatigue = req.body.fatigue;
   trainingDay.scheduledEventRanking = req.body.scheduledEventRanking;
   trainingDay.estimatedLoad = req.body.estimatedLoad;
   trainingDay.eventTerrain = req.body.eventTerrain;

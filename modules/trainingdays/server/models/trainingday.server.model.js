@@ -69,22 +69,6 @@ var TrainingDaySchema = new Schema({
     type: Boolean,
     default: false
   },
-  fitness: {
-    type: Number,
-    min: minFitnessOrFatigueValue,
-    max: maxFitnessOrFatigueValue,
-    default: 0
-  },
-  fatigue: {
-    type: Number,
-    min: minFitnessOrFatigueValue,
-    max: maxFitnessOrFatigueValue,
-    default: 0
-  },
-  form: {
-    type: Number,
-    default: 0
-  },
   startingPoint: {
     type: Boolean,
     default: false
