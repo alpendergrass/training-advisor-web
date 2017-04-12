@@ -438,16 +438,16 @@ angular.module('trainingDays')
                   td = $scope.season[tooltipItems[0].index],
                   planActivity;
 
-                // Display load rating for passed days,
-                // advised activity type for today or tomorrow,
-                // planned activity type for future days.
+                // Display load rating for passed days.
+                // Do not display activity type for today or tomorrow as this may not correspond to planned load.
+                // Display planned activity type for future days.
                 if (moment(td.date).isBefore($scope.today, 'day')) {
                   text = Util.getMetrics(td, 'actual').loadRating + ' day';
                 } else if (!td.scheduledEventRanking && moment(td.date).isBetween($scope.today, $scope.tomorrow, 'day', '[]')) {
-                  planActivity = Util.getPlannedActivity(td, 'advised');
-                  if (planActivity) {
-                    text = Util.mapActivityTypeToVerbiage(planActivity.activityType);
-                  }
+                  // planActivity = Util.getPlannedActivity(td, 'advised');
+                  // if (planActivity) {
+                  //   text = Util.mapActivityTypeToVerbiage(planActivity.activityType);
+                  // }
                 } else if (!td.scheduledEventRanking) {
                   planActivity = Util.getPlannedActivity(td, 'plangeneration');
                   if (planActivity) {
