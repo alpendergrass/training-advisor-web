@@ -79,7 +79,7 @@ exports.postSendInBlueWebhookEvent = function(req, res) {
   //    ]
   // }
 
-  console.log('postSendInBlueWebhookEvent for email: ', req.body.email || 'no email received');
+  // console.log('postSendInBlueWebhookEvent for email: ', req.body.email || 'no email received');
 
   util.storeSendInBlueEvent(req.body)
     .then(function(event) {
@@ -88,7 +88,7 @@ exports.postSendInBlueWebhookEvent = function(req, res) {
     .catch(function(err) {
       // No reason to tell them about the error.
       // Probably for an event we do not care about.
-      console.log('postSendInBlueWebhookEvent error. req.body: ', JSON.stringify(req.body));
+      // console.log('postSendInBlueWebhookEvent error. req.body: ', JSON.stringify(req.body));
       return res.status(200).send();
     });
 };

@@ -46,6 +46,8 @@ module.exports.storeStravaEvent = function(data) {
 module.exports.storeSendInBlueEvent = function(data) {
   return new Promise(function(resolve, reject) {
     if (data.event === 'unsubscribe') {
+      console.log('SendInBlue unsubscribe request received for email ', data.email);
+
       let event = new EventModel({
         source: 'sendinblue',
         objectType: 'email_address',
