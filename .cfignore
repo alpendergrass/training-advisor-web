@@ -6,9 +6,11 @@ npm-debug.log
 node_modules/
 # I need to upload angular-timezone-selector because I am using a fork of the bowerfied version.
 # this one: https://github.com/j-w-miller/angular-timezone-selector
-!public/lib
-public/lib/*
-!public/lib/angular-timezone-selector
+# 4/12/17: using original version again: https://github.com/mishguruorg/angular-timezone-selector. Fingers crossed.
+public/lib/
+# !public/lib
+# public/lib/*
+# !public/lib/angular-timezone-selector
 app/tests/coverage/
 .bower-*/
 .idea/
