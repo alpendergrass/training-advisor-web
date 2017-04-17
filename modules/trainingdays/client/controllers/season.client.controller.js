@@ -91,8 +91,6 @@ angular.module('trainingDays')
         var getPlanLoad = function(td) {
           // Return estimated load for goal event if provided.
           if (td.scheduledEventRanking === 1 && td.estimatedLoad > 0) {
-            console.log('td.date: ', td.date);
-            console.log('td.estimatedLoad: ', td.estimatedLoad);
             return td.estimatedLoad;
           }
 

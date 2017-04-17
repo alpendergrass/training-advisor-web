@@ -45,7 +45,7 @@ exports.postStravaWebhookEvent = function(req, res) {
   //   "event_time": 1297286541
   // }
 
-  console.log('postStravaWebhookEvent for user: ', req.body.owner_id || 'no owner_id received');
+  console.log(`postStravaWebhookEvent for owner_id: ${req.body.owner_id || 'no owner_id received'}, object_id: ${req.body.object_id || 'no object_id received'}`);
 
   util.storeStravaEvent(req.body)
     .then(function(event) {
