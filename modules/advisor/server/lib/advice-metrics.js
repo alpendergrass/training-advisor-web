@@ -48,6 +48,7 @@ module.exports.updateMetrics = function(params, callback) {
   ],
     function(err, trainingDay) {
       if (err) {
+        console.log('Error - updateMetrics err: ', err);
         return callback(err, null);
       }
 
@@ -64,6 +65,7 @@ function clearRunway(params, callback) {
 
   dbUtil.clearFutureMetricsAndAdvice(params, function(err, rawResponse) {
     if (err) {
+      console.log('Error - updateMetrics.clearFutureMetricsAndAdvice err: ', err);
       return callback(err, null);
     }
 
@@ -101,6 +103,7 @@ function updateFatigue(params, callback) {
       });
     })
     .catch(function(err) {
+      console.log('Error - updateMetrics.updateFatigue err: ', err);
       return callback(err, null);
     });
 }
@@ -175,6 +178,7 @@ function updateMetricsForDay(params, callback) {
   },
     function(err, results) {
       if (err) {
+        console.log('Error - updateMetrics.updateMetricsForDay err: ', err);
         return callback(err, null);
       }
 
@@ -248,11 +252,12 @@ function updateMetricsForDay(params, callback) {
               params.metrics.sevenDayAverageRampRate = Math.round((results[0].averageRampRate) * 100) / 100;
             }
 
-            params.trainingDay.save(function(err) {
+            params.trainingDay.save(function(err, savedTrainingDay) {
               if (err) {
+                console.log('Error - updateMetrics.updateMetricsForDay.TDsave err: ', err);
                 return callback(err, null);
               } else {
-                return callback(null, params.trainingDay);
+                return callback(null, savedTrainingDay);
               }
             });
           })
@@ -309,6 +314,7 @@ function computeSevenDayRampRate(user, trainingDay, metricsType, callback) {
       return callback(null, rampRate);
     })
     .catch(function(err) {
+      console.log('Error - computeSevenDayRampRate.getExistingTrainingDayDocument err: ', err);
       return callback(err, 0);
     });
 }

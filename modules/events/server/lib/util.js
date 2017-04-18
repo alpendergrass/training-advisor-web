@@ -13,6 +13,96 @@ var path = require('path'),
 
 mongoose.Promise = global.Promise;
 
+var processStravaEvent = function(event) {
+  return new Promise(function(resolve, reject) {
+    // Strava activity - see if the user wants us to save it.
+    // get user by strava user id: providerData.id
+    userUtil.getUserByStravaID(event.ownerId)
+      .then(user => {
+        if (user && user.autoFetchStravaActivities) {
+          // We were getting a few events for which we found no user.
+          // Not sure how this happened.
+          return stravaUtil.fetchActivity(user, event.objectId);
+        } else {
+          console.log('skipping event.objectId: ', event.objectId);
+          event.status = 'skipped';
+          return;
+        }
+      })
+      .then(() => {
+        if (event.status !== 'skipped') {
+          event.status = 'fetched';
+        }
+
+        event.processed = moment().format();
+        console.log('processed strava webhook event.objectId: ', event.objectId);
+        return event.save();
+      })
+      .then(event => {
+        return resolve();
+      })
+      .catch(err => {
+        console.log(`strava event processing failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
+        event.status = 'error';
+        event.errorDetail = err;
+
+        event.save()
+          .then(event => {
+            return resolve();
+          })
+          .catch(err => {
+            console.log(`strava event processing error - event save failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
+            return resolve();
+          });
+      });
+  });
+};
+
+var processSendInBlueEvent = function(event) {
+  return new Promise(function(resolve, reject) {
+    User.update({ email: event.objectValue }, { $set: { emailNewsletter: false } }).exec()
+      .then(() => {
+        event.status = 'applied';
+        event.processed = moment().format();
+        console.log(`processed sendInBlue webhook event for: ${event.objectValue}`);
+        return event.save();
+      })
+      .then(event => {
+        return resolve();
+      })
+      .catch(err => {
+        console.log(`sendinblue event processing failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
+        event.status = 'error';
+        event.errorDetail = err;
+
+        event.save()
+          .then(event => {
+            return resolve();
+          })
+          .catch(err => {
+            console.log(`sendinblue event processing error - event save failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
+            return resolve();
+          });
+      });
+  });
+};
+
+var processUnrecognizedEvent = function(event) {
+  return new Promise(function(resolve, reject) {
+    event.status = 'unrecognized';
+
+    event.save()
+      .then(event => {
+        console.log(`Error: skipping unrecognized event. Event: ${JSON.stringify(event)}`);
+        return resolve();
+      })
+      .catch(err => {
+        console.log(`Error: skipping unrecognized event - save failed. Event: ${JSON.stringify(event)}`);
+        return resolve();
+      });
+  });
+};
+
 module.exports = {};
 
 module.exports.storeStravaEvent = function(data) {
@@ -76,81 +166,21 @@ module.exports.processEvents = function() {
     // console.log('processEvents starting: ', moment().format());
     dbUtil.getUnprocessedEvents()
       .then(events => {
-        // Using reduce to process sequentially in hopes of eliminating version error
-        // when processing two events on the same day for a user.
+        // Using Array.reduce to process sequentially in hopes of eliminating version error
+        // when processing two events for a user.
         events.reduce((promise, event) => {
           return promise.then(() => {
             if (event.source === 'strava' && event.objectType === 'activity' && event.aspectType === 'create') {
-            // Strava activity - see if the user wants us to save it.
-            // get user by strava user id: providerData.id
-              userUtil.getUserByStravaID(event.ownerId)
-                .then(user => {
-                  if (user && user.autoFetchStravaActivities) {
-                    // We were getting a few events for which we found no user.
-                    // Not sure how this happened.
-                    return stravaUtil.fetchActivity(user, event.objectId);
-                  } else {
-                    event.status = 'skipped';
-                    return Promise.resolve();
-                  }
-                })
-                .then(() => {
-                  if (event.status !== 'skipped') {
-                    event.status = 'fetched';
-                  }
-
-                  event.processed = moment().format();
-                  return event.save();
-                })
-                .then(event => {
-                  // console.log('processed strava webhook event: ', event);
-                })
-                .catch(err => {
-                  console.log(`strava event processing failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
-                  event.status = 'error';
-                  event.errorDetail = err;
-
-                  event.save()
-                    .then(function(event) {})
-                    .catch(function(err) {
-                      console.log(`strava event processing error - event save failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
-                    });
-                });
+              return processStravaEvent(event);
             } else if (event.source === 'sendinblue' && event.objectType === 'email_address' && event.aspectType === 'unsubscribe') {
-              User.update({ email: event.objectValue }, { $set: { emailNewsletter: false } }).exec()
-                .then(() => {
-                  event.status = 'applied';
-                  event.processed = moment().format();
-                  return event.save();
-                })
-                .then(event => {
-                  console.log(`processed sendInBlue webhook event for: ${event.objectValue}`);
-                })
-                .catch(err => {
-                  console.log(`sendinblue event processing failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
-                  event.status = 'error';
-                  event.errorDetail = err;
-
-                  event.save()
-                    .then(event => {})
-                    .catch(err => {
-                      console.log(`sendinblue event processing error - event save failed. Error: ${err}. Event: ${JSON.stringify(event)}`);
-                    });
-                });
+              return processSendInBlueEvent(event);
             } else {
-              event.status = 'unrecognized';
-
-              event.save()
-                .then(event => {
-                  console.log(`Error: skipping unrecognized event. Event: ${JSON.stringify(event)}`);
-                })
-                .catch(err => {
-                  console.log(`Error: skipping unrecognized event - save failed. Event: ${JSON.stringify(event)}`);
-                });
+              return processUnrecognizedEvent(event);
             }
           });
         }, Promise.resolve()) // Resolved promise is initial value passed into payload.reduce().
           .then(() => {
+            console.log('Done processing events.');
             return resolve();
           });
       })

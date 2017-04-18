@@ -235,10 +235,50 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
   });
 };
 
+var downloadOneOfAll = function(user, activity, replaceExisting, startDateNumeric) {
+  let processed = false;
+
+  return new Promise(function(resolve, reject) {
+    // activity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
+    let numericDate = util.toNumericDate(activity.start_date_local);
+    return dbUtil.getTrainingDayDocument(user, numericDate)
+      .then(function(trainingDay) {
+        return processActivity(activity, trainingDay, replaceExisting);
+      })
+      .then(function(processedTrainingDay) {
+        if (processedTrainingDay) {
+          processed = true;
+          return processedTrainingDay.save();
+        }
+
+        return;
+      })
+      .then(function(savedTrainingDay) {
+        if (savedTrainingDay) {
+          if (savedTrainingDay.dateNumeric < startDateNumeric) {
+            // It's possible we got activities for the day prior to our start data - timezone caution.
+            return;
+          }
+
+          // RefreshAdvice to ensure metrics are up to date thru tomorrow.
+          // TODO: couldn't we just do this once? Call it for the last day processed? Or just updateMetrics?
+          return adviceEngine.refreshAdvice(user, savedTrainingDay);
+        }
+      })
+      .then(() => {
+        return resolve(processed);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
 module.exports = {};
 
 module.exports.fetchActivity = function(user, activityId) {
   return new Promise(function(resolve, reject) {
+    console.log('Fetching Strava activity: ', activityId);
     strava.activities.get({ 'access_token': getAccessToken(user), 'id': activityId }, function(err, payload) {
       if (err) {
         return reject(new Error(`strava.activities.get access failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
@@ -262,19 +302,31 @@ module.exports.fetchActivity = function(user, activityId) {
         })
         .then(function(trainingDay) {
           if (!trainingDay) {
-            return resolve();
+            // Was resolving here which returned to caller but...
+            // .thens below were still running.
+            // Apparently I cannot resolve out of the middle of a chain of thens.
+            return;
           }
 
           return trainingDay.save();
         })
         .then(function(trainingDay) {
-          return adviceEngine.refreshAdvice(user, trainingDay);
+          if (trainingDay) {
+            return adviceEngine.refreshAdvice(user, trainingDay);
+          }
+
+          return;
         })
         .then(function(response) {
-          // We return trainingDay mainly to aid testing. Could be null.
-          return resolve(response.trainingDay);
+          // We return trainingDay mainly to aid testing.
+          if (response) {
+            return resolve(response.trainingDay);
+          }
+
+          return resolve();
         })
         .catch(function(err) {
+          console.log('fetchActivity rejecting: ', err);
           return reject(new Error(`Strava fetchActivity failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
         });
     });
@@ -325,24 +377,25 @@ module.exports.downloadActivities = function(user, trainingDay) {
             return reject(new Error(errorMsg));
           }
 
-          Promise.all(payload.map(function(stravaActivity) {
-            // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
-            var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
+          // Processing sequentially to prevent versionError here.
+          payload.reduce(function(promise, stravaActivity) {
+            return promise.then(function() {
+              var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
 
-            if (numericStartDateLocal === trainingDay.dateNumeric) {
-              return processActivity(stravaActivity, trainingDay)
-                .then(function(processedTrainingDay) {
-                  if (processedTrainingDay) {
-                    activityCount++;
-                    return Promise.resolve('processed');
-                  }
+              if (numericStartDateLocal === trainingDay.dateNumeric) {
+                return processActivity(stravaActivity, trainingDay)
+                  .then(function(processedTrainingDay) {
+                    if (processedTrainingDay) {
+                      activityCount++;
+                    }
 
-                  return Promise.resolve('notProcessed');
-                });
-            } else {
-              return Promise.resolve('notProcessed');
-            }
-          }))
+                    return;
+                  });
+              } else {
+                return;
+              }
+            });
+          }, Promise.resolve(false)) // Resolved promise is initial value passed into payload.reduce().
             .then(function(results) {
               if (activityCount < 1) {
                 statusMessage.text = 'We found no new Strava activities for the day.';
@@ -435,37 +488,17 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
           // Using Promise.all we had trainingDay save collisions.
           payload.reduce(function(promise, stravaActivity) {
             return promise.then(function() {
-              // stravaActivity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
-              let numericDate = util.toNumericDate(stravaActivity.start_date_local);
-              return dbUtil.getTrainingDayDocument(user, numericDate)
-                .then(function(trainingDay) {
-                  return processActivity(stravaActivity, trainingDay, replaceExisting);
-                })
-                .then(function(processedTrainingDay) {
-                  if (processedTrainingDay) {
+              return downloadOneOfAll(user, stravaActivity, replaceExisting, startDateNumeric)
+                .then(processed => {
+                  if (processed) {
                     activityCount++;
-                    return processedTrainingDay.save();
                   }
 
-                  return Promise.resolve();
-                })
-                .then(function(savedTrainingDay) {
-                  if (savedTrainingDay) {
-                    if (savedTrainingDay.dateNumeric < startDateNumeric) {
-                      // It's possible we got activities for the day prior to our start data - timezone caution.
-                      return Promise.resolve(savedTrainingDay);
-                    }
-
-                    // RefreshAdvice to ensure metrics are up to date thru tomorrow.
-                    // TODO: couldn't we just do this once? Call it for the last day processed? Or just updateMetrics?
-                    return adviceEngine.refreshAdvice(user, savedTrainingDay);
-                  }
-
-                  return Promise.resolve();
+                  return;
                 });
             });
           }, Promise.resolve()) // Resolved promise is initial value passed into payload.reduce().
-            .then(function(results) {
+            .then(function() {
               statusMessage.activityCount = activityCount;
 
               if (activityCount < 1) {

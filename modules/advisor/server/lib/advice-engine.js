@@ -113,12 +113,12 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
           .then(trainingDay => {
             adviceLoad.setLoadRecommendations(trainingDay, source, function(err, trainingDay) {
               if (err) {
-                console.log('setLoadRecommendations err: ', err);
+                console.log('Error - generateAdvice.setLoadRecommendations err: ', err);
                 return callback(err);
               }
               trainingDay.save(function(err) {
                 if (err) {
-                  console.log('trainingDay.save err: ', err);
+                  console.log('Error - generateAdvice.trainingDay.save err: ', err);
                   return callback(err, null);
                 } else {
                   return callback(null, trainingDay);
@@ -127,11 +127,13 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
             });
           })
           .catch(err => {
+            console.log('Error - generateAdvice.getWorkout err: ', err);
             return callback(err, null);
           });
       });
     })
     .catch(function(err) {
+      console.log('Error - generateAdvice err: ', err);
       return callback(err, null);
     });
 }
@@ -198,6 +200,7 @@ module.exports.generatePlan = function(params) {
     // TODO: Use promises below to clean this up. Yuck.
     // Replace async.eachSeries  with synchronous promises.
     // Find ".reduce(" to see where I've done it elsewhere.
+    // And see here: https://remysharp.com/2015/12/18/promise-waterfall
 
     // Get future goal days.
     dbUtil.getFuturePriorityDays(user, params.numericDate, 1, adviceConstants.maxDaysToLookAheadForSeasonEnd)
@@ -343,6 +346,11 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
   // and then advise for today (maybe) and tomorrow.
 
   return new Promise(function(resolve, reject) {
+    if (!trainingDay) {
+      console.log('Error - refreshAdvice requires trainingDay input');
+      return reject(new Error('refreshAdvice requires trainingDay input'));
+    }
+
     let tdDate = moment.tz(trainingDay.dateNumeric.toString(), user.timezone);  // toDate:  2017-02-25T13:30:00.000Z
     let today = tdUtil.getTodayInUserTimezone(user);            // 2017-02-25T13:30:00.000Z
     let tomorrow = moment(today).add(1, 'day').toDate();      //  2017-02-26T13:30:00.000Z
@@ -368,6 +376,7 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
       // updateMetrics will clear future metrics and advice starting with trainingDay.
       // Calling advise below will regenerate metrics from trainingDay until today/tomorrow.
       // TODO: perhaps we should not remove future advice here. User might want to see what was advised on a particular day
+
       if (err) {
         return reject(err);
       }
@@ -465,6 +474,7 @@ module.exports.advise = function(params, callback) {
 
   adviceMetrics.updateMetrics(metricsParams, function(err, trainingDay) {
     if (err) {
+      console.log('Error - advise.updateMetrics err: ', err);
       return callback(err);
     }
 
@@ -481,11 +491,13 @@ module.exports.advise = function(params, callback) {
 
       adviceLoad.setLoadRecommendations(trainingDay, params.source, function(err, recommendation) {
         if (err) {
+          console.log('Error - advise.setLoadRecommendations err: ', err);
           return callback(err);
         }
 
         recommendation.save(function(err) {
           if (err) {
+            console.log('Error - advise.recommendation.save err: ', err);
             return callback(err, null);
           }
 
@@ -499,6 +511,7 @@ module.exports.advise = function(params, callback) {
 
       generateAdvice(params.user, trainingDay, params.source, params.selectNewWorkout, function(err, recommendation) {
         if (err) {
+          console.log('Error - advise.generateAdvice err: ', err);
           return callback(err, null);
         }
 
