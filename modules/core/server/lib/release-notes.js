@@ -2,6 +2,21 @@
 
 var releaseNotes = [
   {
+    version: '0.9.1',
+    title: '',
+    message: 'This release was mainly focused on bug fixes and technical housekeeping. However, we did sneak in one new feature. ',
+    features: [
+      'Allow user to request latest Strava FTP from My Profile page.'
+    ],
+    fixes: [
+      'Prevent training day update collisions when doing a Strava activity sync or auto-fetch.',
+      'Suppress noise in system logs.',
+      'Extend authentication time-to-live to minimize authorization errors.',
+      'Clarify that activity elevation gain is in meters.',
+      'Take care of other messiness that we would rather not mention.'
+    ]
+  },
+  {
     version: '0.9.0',
     title: 'Expanded Workout Collection Release - 0.9.0',
     message: 'We have restructured how we store workouts to make it easier to add new ones. And we have added some new ones! We will continue to expand the collection over the coming months. We will also be collecting statistics to help us tune our workout assignment logic. ',
