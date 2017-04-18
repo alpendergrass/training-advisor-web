@@ -40,7 +40,6 @@
               </td>
               <td>
                 <span class="text-capitalize">{{ ftpLogItem.ftpSource }}</span></a></span>
-                <span ng-if="ftpLogItem.ftpSource === 'strava'"><a href="{{ 'https://www.strava.com/settings/performance' }}" class="strava-link"><br>View on Strava</a></span>
               </td>
               <td>
                 <button class="btn btn-default" title="Remove FTP" ng-click="removeFTP(ftpLogItem)">
@@ -72,12 +71,13 @@
     </div>
     <div>
       <p>
-      <a href="#" ng-show="user.providerData && user.providerData.premium" ng-click="getStravaFTP()" title="Get current FTP from Strava" >
-        <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/strava.png">
-      </a>
+        <a href="#" ng-show="user.providerData && user.providerData.premium" ng-click="getStravaFTP()" title="Get current FTP from Strava" >
+          <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/strava.png">
+        </a>
         <button class="btn btn-default" title="Manually add FTP" ng-hide="newFtp" ng-click="addFTP()">
           <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
         </button>
+        <div ng-show="user.providerData && user.providerData.premium"><a href="{{ 'https://www.strava.com/settings/performance' }}" class="strava-link" target="_blank"><strong>Strava Performance Settings</strong> <i class="material-icons md-18">open_in_new</i></a></div>
       </p>
     </div>
   </div>
