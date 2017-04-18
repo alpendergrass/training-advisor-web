@@ -24,18 +24,23 @@
             <tr style="font-weight: bold">
               <th>FTP</th>
               <th>Date</th>
+              <th>Source</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="ftpLogItem in user.ftpLog">
               <td>
-                <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="50" e-max="500" e-step="1" e-required onaftersave="updateUserProfile()">{{ ftpLogItem.ftp }}</a>
+                <a href="#" editable-number="ftpLogItem.ftp" e-name="ftp" e-min="50" e-max="500" e-step="1" e-required onaftersave="updateFTP(ftpLogItem)">{{ ftpLogItem.ftp }}</a>
               </td>
               <td>
-                <a href="#" editable-bsdate="ftpLogItem.ftpDate" onaftersave="updateUserProfile()" e-required e-readonly="true" e-show-calendar-button="true" e-datepicker-options="ftpDateOptions" e-is-open="ftpDatePickerStatus.opened" e-show-button-bar="false" e-ng-click="openFtpDatePicker($event)" e-datepicker-popup="dd MMMM yyyy">
+                <a href="#" editable-bsdate="ftpLogItem.ftpDate" onaftersave="updateFTP(ftpLogItem)" e-required e-readonly="true" e-show-calendar-button="true" e-datepicker-options="ftpDateOptions" e-is-open="ftpDatePickerStatus.opened" e-show-button-bar="false" e-ng-click="openFtpDatePicker($event)" e-datepicker-popup="dd MMMM yyyy">
                         {{ ftpLogItem.ftpDate | date:"dd MMMM yyyy" }}
                       </a>
+              </td>
+              <td>
+                <span class="text-capitalize">{{ ftpLogItem.ftpSource }}</span></a></span>
+                <span ng-if="ftpLogItem.ftpSource === 'strava'"><a href="{{ 'https://www.strava.com/settings/performance' }}" class="strava-link"><br>View on Strava</a></span>
               </td>
               <td>
                 <button class="btn btn-default" title="Remove FTP" ng-click="removeFTP(ftpLogItem)">
@@ -67,7 +72,10 @@
     </div>
     <div>
       <p>
-        <button class="btn btn-default" title="Add ftpLogItem" ng-hide="newFtp" ng-click="addFTP()">
+      <a href="#" ng-show="user.providerData && user.providerData.premium" ng-click="getStravaFTP()" title="Get current FTP from Strava" >
+        <img class="download-btn-image" ng-src="/modules/trainingdays/client/img/buttons/strava.png">
+      </a>
+        <button class="btn btn-default" title="Manually add FTP" ng-hide="newFtp" ng-click="addFTP()">
           <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
         </button>
       </p>

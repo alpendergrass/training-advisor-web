@@ -9,6 +9,7 @@ var _ = require('lodash'),
   config = require(path.resolve('./config/config')),
   coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
+  stravaUtil = require(path.resolve('./modules/trainingdays/server/lib/strava-util')),
   User = mongoose.model('User');
 
 exports.update = function(req, res) {
@@ -47,7 +48,7 @@ exports.update = function(req, res) {
       userUpdate = verified.user;
     })
     .catch(function(err) {
-      console.log(`user.update verifyUserSettings failed for user ${user.username} err: ${err}`);
+      console.log(`Error - user.update verifyUserSettings failed for user ${user.username} err: ${err}`);
     })
     .then(function() {
       // Merge updates with existing user
@@ -58,7 +59,7 @@ exports.update = function(req, res) {
 
       user.save(function(err) {
         if (err) {
-          console.log('user update save err: ', err);
+          console.log('Error - user update save err: ', err);
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });
@@ -77,6 +78,26 @@ exports.update = function(req, res) {
       return res.redirect('/trainingDay/');
     });
 };
+
+exports.getStravaFTP = function(req, res) {
+  stravaUtil.getFTP(req.user)
+    .then(user => {
+      req.login(user, function (err) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.json(user);
+        }
+      });
+    })
+    .catch(err => {
+      console.log(`Error - getStravaFTP failed for user ${req.user.username} err: ${err}`);
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    });
+};
+
 
 exports.changeProfilePicture = function(req, res) {
   var user = req.user;

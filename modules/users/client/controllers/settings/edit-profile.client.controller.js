@@ -110,6 +110,11 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     };
 
 
+    $scope.updateFTP = function(ftpItem) {
+      ftpItem.ftpSource = 'manual';
+      return $scope.updateUserProfile();
+    };
+
     $scope.removeFTP = function(ftpItem) {
       _.pull($scope.user.ftpLog, ftpItem);
       return $scope.updateUserProfile();
@@ -149,12 +154,25 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.validateFtp = function(ftp) {
       // Because control is defined as a number with max and min, invalid
       // values will not be passed. FTP likely will be null in this case.
-      if (!Number.isInteger(ftp) || ftp < 1 || ftp > 500) {
+      if (!Number.isInteger(ftp) || ftp < 50 || ftp > 500) {
         return 'Valid value 50 - 500.';
       }
 
       return;
     };
+
+    $scope.getStravaFTP = function() {
+      Users.getStravaFTP(function(response) {
+        $scope.newFtp = null;
+        Authentication.user = response;
+        initUser(Authentication.user);
+        return true;
+      }, function(response) {
+        toastr.error(response.data.message);
+        return false;
+      });
+    };
+
 
     $scope.updateUserProfile = function() {
       var user = new Users($scope.user);

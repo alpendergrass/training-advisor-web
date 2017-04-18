@@ -1146,6 +1146,65 @@ describe('strava-util Unit Tests:', function() {
 
   });
 
+
+  describe('Method getFTP', function() {
+    it('user.ftpLog should contain new FTP though autoUpdateFtpFromStrava is false', function() {
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: 456 });
+      };
+
+      user.autoUpdateFtpFromStrava = false;
+
+      return stravaUtil.getFTP(user, true)
+        .then(function(returnedUser) {
+          (returnedUser.ftpLog.length).should.equal(2);
+          (returnedUser.ftpLog[0].ftpSource).should.equal('strava');
+          (returnedUser.ftpLog[0].ftp).should.equal(456);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+    it('user.ftpLog should not contain new FTP when FTP from Strava is null', function() {
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: null });
+      };
+
+      user.autoUpdateFtpFromStrava = true;
+
+      return stravaUtil.getFTP(user, true)
+        .then(function(returnedUser) {
+          (returnedUser.ftpLog.length).should.equal(1);
+          (returnedUser.ftpLog[0].ftpSource).should.equal('manual');
+          (returnedUser.ftpLog[0].ftp).should.not.equal(null);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+    it('user.ftpLog should contain new FTP when updated FTP is fetched from Strava', function() {
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: 456 });
+      };
+
+      user.autoUpdateFtpFromStrava = true;
+
+      return stravaUtil.getFTP(user, true)
+        .then(function(returnedUser) {
+          (returnedUser.ftpLog.length).should.equal(2);
+          (returnedUser.ftpLog[0].ftpSource).should.equal('strava');
+          (returnedUser.ftpLog[0].ftp).should.equal(456);
+        },
+        function(err) {
+          throw err;
+        });
+    });
+
+  });
+
+
   afterEach(function(done) {
     TrainingDay.remove().exec(function() {
       User.remove().exec(done);

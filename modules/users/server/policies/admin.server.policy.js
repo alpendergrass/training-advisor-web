@@ -14,6 +14,9 @@ exports.invokeRolesPolicies = function () {
       resources: '/api/users',
       permissions: '*'
     }, {
+      resources: '/api/users/getStravaFTP',
+      permissions: '*'
+    }, {
       resources: '/api/users/:userId',
       permissions: '*'
     }, {

@@ -16,27 +16,29 @@ var getAccessToken = function(user) {
   return user.provider === 'strava' ? user.providerData.accessToken : user.additionalProvidersData.strava.accessToken;
 };
 
-var updateFtpFromStrava = function(user) {
+var updateFtpFromStrava = function(user, getRequestedByUser) {
   return new Promise(function(resolve, reject) {
-    if (!user.autoUpdateFtpFromStrava) {
+    if (!user.autoUpdateFtpFromStrava && !getRequestedByUser) {
       return resolve(user);
     }
 
     strava.athlete.get({ 'access_token': getAccessToken(user) }, function(err, payload) {
       if (err) {
-        return reject(new Error(`strava.athlete.get failed for user: ${user.username}, error: ${err}`));
+        return reject(new Error(`updateFtpFromStrava - strava.athlete.get failed for user: ${user.username}, error: ${err}`));
       }
 
       if (payload.errors) {
-        return reject(new Error(`strava.athlete.get returned errors for user: ${user.username}, payload: ${JSON.stringify(payload)}`));
+        return reject(new Error(`updateFtpFromStrava - strava.athlete.get returned errors for user: ${user.username}, payload: ${JSON.stringify(payload)}`));
       }
 
       // We have gotten a few null FTP values from Strava.
       if (!payload.ftp || !Number.isInteger(payload.ftp)) {
+        console.log('payload: ', payload);
         return resolve(user);
       }
 
-      if (!user.ftpLog || user.ftpLog.length < 1 || payload.ftp !== user.ftpLog[0].ftp) {
+      // If getRequestedByUser, let's use the Strava FTP even if same as current FTP.
+      if (!user.ftpLog || user.ftpLog.length < 1 || payload.ftp !== user.ftpLog[0].ftp || getRequestedByUser) {
         // With a manual FTP update, we get dateNumeric from client-side and use it to populate date.
         // Imitating that here.
         let today = util.getTodayInUserTimezone(user);
@@ -54,7 +56,7 @@ var updateFtpFromStrava = function(user) {
         user.ftpLog = _.orderBy(user.ftpLog, 'ftpDate', 'desc');
 
         // If we download ftp for same date as latest existing, replace existing.
-        if (user.ftpLog[0].ftpDateNumeric === newFtp.ftpDateNumeric) {
+        if (user.ftpLog.length > 0 && user.ftpLog[0].ftpDateNumeric === newFtp.ftpDateNumeric) {
           user.ftpLog[0] = newFtp;
         } else {
           user.ftpLog.push(newFtp);
@@ -68,9 +70,10 @@ var updateFtpFromStrava = function(user) {
           .catch(function(err) {
             return reject(err);
           });
+      } else {
+        return resolve(user);
       }
 
-      return resolve(user);
     });
 
   });
@@ -275,6 +278,19 @@ var downloadOneOfAll = function(user, activity, replaceExisting, startDateNumeri
 };
 
 module.exports = {};
+
+module.exports.getFTP = function(user) {
+  return new Promise(function(resolve, reject) {
+    updateFtpFromStrava(user, true)
+      .then(updatedUser => {
+        return resolve(updatedUser);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
 
 module.exports.fetchActivity = function(user, activityId) {
   return new Promise(function(resolve, reject) {
