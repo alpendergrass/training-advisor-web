@@ -824,7 +824,7 @@ exports.downloadAllActivities = function(req, res) {
       });
     }
 
-    let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(4, 'months'));
+    let numericLimitDate = util.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
     if (numericLimitDate < startDay.dateNumeric) {
       numericLimitDate = startDay.dateNumeric;
     }

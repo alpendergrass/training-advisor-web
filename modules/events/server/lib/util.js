@@ -180,7 +180,7 @@ module.exports.processEvents = function() {
           });
         }, Promise.resolve()) // Resolved promise is initial value passed into payload.reduce().
           .then(() => {
-            console.log('Done processing events.');
+            console.log('Finished processing events.');
             return resolve();
           });
       })
