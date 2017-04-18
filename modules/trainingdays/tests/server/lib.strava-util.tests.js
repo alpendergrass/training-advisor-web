@@ -1156,10 +1156,10 @@ describe('strava-util Unit Tests:', function() {
       user.autoUpdateFtpFromStrava = false;
 
       return stravaUtil.getFTP(user, true)
-        .then(function(returnedUser) {
-          (returnedUser.ftpLog.length).should.equal(2);
-          (returnedUser.ftpLog[0].ftpSource).should.equal('strava');
-          (returnedUser.ftpLog[0].ftp).should.equal(456);
+        .then(function(response) {
+          (response.user.ftpLog.length).should.equal(2);
+          (response.user.ftpLog[0].ftpSource).should.equal('strava');
+          (response.user.ftpLog[0].ftp).should.equal(456);
         },
         function(err) {
           throw err;
@@ -1174,10 +1174,10 @@ describe('strava-util Unit Tests:', function() {
       user.autoUpdateFtpFromStrava = true;
 
       return stravaUtil.getFTP(user, true)
-        .then(function(returnedUser) {
-          (returnedUser.ftpLog.length).should.equal(1);
-          (returnedUser.ftpLog[0].ftpSource).should.equal('manual');
-          (returnedUser.ftpLog[0].ftp).should.not.equal(null);
+        .then(function(response) {
+          (response.user.ftpLog.length).should.equal(1);
+          (response.user.ftpLog[0].ftpSource).should.equal('manual');
+          (response.user.ftpLog[0].ftp).should.not.equal(null);
         },
         function(err) {
           throw err;
@@ -1192,10 +1192,10 @@ describe('strava-util Unit Tests:', function() {
       user.autoUpdateFtpFromStrava = true;
 
       return stravaUtil.getFTP(user, true)
-        .then(function(returnedUser) {
-          (returnedUser.ftpLog.length).should.equal(2);
-          (returnedUser.ftpLog[0].ftpSource).should.equal('strava');
-          (returnedUser.ftpLog[0].ftp).should.equal(456);
+        .then(function(response) {
+          (response.user.ftpLog.length).should.equal(2);
+          (response.user.ftpLog[0].ftpSource).should.equal('strava');
+          (response.user.ftpLog[0].ftp).should.equal(456);
         },
         function(err) {
           throw err;

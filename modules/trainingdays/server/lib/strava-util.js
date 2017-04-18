@@ -18,8 +18,13 @@ var getAccessToken = function(user) {
 
 var updateFtpFromStrava = function(user, getRequestedByUser) {
   return new Promise(function(resolve, reject) {
+    let response = {
+      user: user,
+      updated: false
+    };
+
     if (!user.autoUpdateFtpFromStrava && !getRequestedByUser) {
-      return resolve(user);
+      return resolve(response);
     }
 
     strava.athlete.get({ 'access_token': getAccessToken(user) }, function(err, payload) {
@@ -34,7 +39,7 @@ var updateFtpFromStrava = function(user, getRequestedByUser) {
       // We have gotten a few null FTP values from Strava.
       if (!payload.ftp || !Number.isInteger(payload.ftp)) {
         console.log('payload: ', payload);
-        return resolve(user);
+        return resolve(response);
       }
 
       // If getRequestedByUser, let's use the Strava FTP even if same as current FTP.
@@ -65,13 +70,15 @@ var updateFtpFromStrava = function(user, getRequestedByUser) {
 
         user.save()
           .then(function(updatedUser) {
-            return resolve(updatedUser);
+            response.user = updatedUser;
+            response.updated = true;
+            return resolve(response);
           })
           .catch(function(err) {
             return reject(err);
           });
       } else {
-        return resolve(user);
+        return resolve(response);
       }
 
     });
@@ -282,8 +289,8 @@ module.exports = {};
 module.exports.getFTP = function(user) {
   return new Promise(function(resolve, reject) {
     updateFtpFromStrava(user, true)
-      .then(updatedUser => {
-        return resolve(updatedUser);
+      .then(response => {
+        return resolve(response);
       })
       .catch(err => {
         return reject(err);
@@ -307,8 +314,8 @@ module.exports.fetchActivity = function(user, activityId) {
       let numericDate = util.toNumericDate(payload.start_date_local);
 
       updateFtpFromStrava(user)
-        .then(function(user) {
-          return dbUtil.getTrainingDayDocument(user, numericDate);
+        .then(function(response) {
+          return dbUtil.getTrainingDayDocument(response.user, numericDate);
         })
         .then(function(trainingDay) {
           return processActivity(payload, trainingDay);
@@ -367,7 +374,8 @@ module.exports.downloadActivities = function(user, trainingDay) {
     console.log('Strava: Initiating downloadActivities for TacitTraining user: ', user.username);
 
     updateFtpFromStrava(user)
-      .then(function(user) {
+      .then(function(response) {
+        let user = response.user;
         // trainingDay.user = user;
         // Retrieve activities from strava.
         // By default only first 30 activities will be returned.
@@ -472,7 +480,8 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
     console.log('Strava: Initiating downloadAllActivities for TacitTraining user: ', user.username);
 
     updateFtpFromStrava(user)
-      .then(function(user) {
+      .then(function(response) {
+        let user = response.user;
         // Retrieve activities from strava.
         // By default only first 30 activities will be returned. You can use the `per_page` parameter to return up to 200.
         strava.athlete.listActivities({ 'access_token': getAccessToken(user), 'after': searchDate, 'per_page': 200 }, function(err, payload) {

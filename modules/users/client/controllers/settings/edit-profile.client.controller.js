@@ -164,7 +164,10 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
     $scope.getStravaFTP = function() {
       Users.getStravaFTP(function(response) {
         $scope.newFtp = null;
-        Authentication.user = response;
+        if (response.updated) {
+          toastr.success('Your current FTP has been retrieved from Strava.', 'FTP Updated');
+        }
+        Authentication.user = response.user;
         initUser(Authentication.user);
         return true;
       }, function(response) {

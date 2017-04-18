@@ -81,12 +81,12 @@ exports.update = function(req, res) {
 
 exports.getStravaFTP = function(req, res) {
   stravaUtil.getFTP(req.user)
-    .then(user => {
-      req.login(user, function (err) {
+    .then(response => {
+      req.login(response.user, function (err) {
         if (err) {
           res.status(400).send(err);
         } else {
-          res.json(user);
+          res.json(response);
         }
       });
     })
