@@ -167,6 +167,12 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       }
     });
 
+    $scope.$watch('user.rampRateAdjustment', function(rate, prevRate) {
+      if (rate !== prevRate) {
+        return $scope.updateUserProfile();
+      }
+    });
+
     $scope.getStravaFTP = function() {
       Users.getStravaFTP(function(response) {
         $scope.newFtp = null;

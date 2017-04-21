@@ -124,8 +124,13 @@ var UserSchema = new Schema({
     type: Number,
     min: 0,
     max: 10,
-    default: 5,
-    required: 'Please indicate recovery rate'
+    default: 5
+  },
+  rampRateAdjustment: {
+    type: Number,
+    min: -2,
+    max: 2,
+    default: 0
   },
   preferredRestDays: [{
     type: String
@@ -134,15 +139,13 @@ var UserSchema = new Schema({
     type: Number,
     min: 1,
     max: 3,
-    default: 1,
-    required: 'Please indicate level of detail'
+    default: 1
   },
   fatigueTimeConstant: {
     type: Number,
     min: 5,
     max: 9,
-    default: 7,
-    required: 'Fatigue Time Constant is required'
+    default: 7
   },
   timezone: {
     type: String

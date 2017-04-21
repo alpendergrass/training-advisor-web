@@ -15,10 +15,9 @@
     <div class="text-danger bottom-buffer" ng-show="!user.timezone"><strong>* Please select your timezone *</strong></div>
     <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile()" sort-by="offset" show-local="true" width="230px" class="small"></timezone-selector>
 
-
     <hr>
     <div>
-      <label><a tabindex="0" role="button" data-toggle="popover" data-content="Characterize how quickly you recover from hard workouts. Everyone recovers at a different rate and generally, as we age, we take longer to recover. The default setting assumes fast recovery so you should lower the setting if you feel you are not sufficiently recovered when a hard day is recommneded. ">Speed Of Recovery</a></label>
+      <label><a tabindex="0" role="button" data-toggle="popover" data-content="Characterize how quickly you recover from hard workouts. Everyone recovers at a different rate and generally, as we age, we take longer to recover. You should lower the setting if you feel you are not sufficiently recovered when a hard day is recommended. Raise it if you feel you are ready for a hard workout sooner than we advise. Note that the default setting is somewhat aggressive so do not hesitate to dial it back if you believe you are in danger of over-training.">Speed Of Recovery</a></label>
       <div layout>
         <div flex="5"></div>
         <md-slider flex ng-model="user.recoveryRate" step="1" min="0" max="10" aria-label="Set Speed of Recovery"></md-slider>
@@ -41,13 +40,12 @@
       </div>
     </div>
 
-
     <hr>
     <div>
-      <label for="rampAmbition"><a tabindex="0" role="button" data-toggle="popover" data-content="Indicate how rapidly you would like your workout volume to increase. If you feel like the daily load recommendations are increasing too rapidly, lower the setting. If you feel like you need to do more work, raise the setting. Note that the default setting is aggressive so do not hesitate to dial it back if you feel like you are in danger of over-training. Also, be aware that this setting only applies to the base and build portions of your season.">Daily Load Growth Rate</a></label>
+      <label><a tabindex="0" role="button" data-toggle="popover" data-content="Indicate how rapidly you would like your workout volume to increase. If you feel like the daily load recommendations are increasing too rapidly, lower the setting. If you believe you need to do more work to be prepared for your goal event, and you can handle the additional volume, raise the setting. Just be aware that the default setting is fairly aggressive.">Daily Load Growth Rate</a></label>
       <div layout>
         <div flex="5"></div>
-        <md-slider aria-label="Set Daily Load Growth Rate" flex ng-model="rampAmbition" step="1" min="0" max="10"></md-slider>
+        <md-slider aria-label="Set Daily Load Growth Rate" flex ng-model="user.rampRateAdjustment" step="0.5" min="-2" max="2"></md-slider>
         <div flex="5"></div>
       </div>
       <div layout>
@@ -66,10 +64,6 @@
         <div flex="5"></div>
       </div>
     </div>
-
-
-
-
 
     <hr>
     <label>Functional Threshold Power *</label>

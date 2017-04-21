@@ -225,7 +225,7 @@ function updateMetricsForDay(params, callback) {
         // daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
         // Let's break it down to make it easier to understand when I come back to it a year from now.
         percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
-        params.metrics.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
+        params.metrics.sevenDayTargetRampRate = Math.round(((3 + params.user.rampRateAdjustment) + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       }
 
