@@ -26,48 +26,18 @@ var rules = [
     }
   },
   {
-    'name': 'defaultRestRule',
-    'priority': 75,
+    'name': 'defaultLoadIsRestRule',
+    'priority': 1,
     'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        this.metrics.form <= this.adviceConstants.restDayThreshold
+      R.when(this && !this.plannedActivity.activityType
       );
     },
     'consequence': function(R) {
       this.plannedActivity.activityType = 'rest';
-      this.plannedActivity.rationale += ' defaultRestRule.';
+      this.plannedActivity.rationale += ' defaultLoadIsRestRule.';
       this.plannedActivity.advice += ` You are sufficiently fatigued that you need to rest. If you ride go very easy, just spin.
       The focus of this workout is recovery. Recovery is essential to supercompensation, the process by which you become stronger.`;
       R.stop();
-    }
-  },
-  {
-    'name': 'defaultEasyRule',
-    'priority': 73,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType &&
-        this.metrics.form <= this.adviceConstants.easyDayThreshold
-      );
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'easy';
-      this.plannedActivity.rationale += ' defaultEasyRule.';
-      this.plannedActivity.advice += ` Your form suggests you go easy today. You should do a easy endurance ride today.
- Easy endurance means you should target lower power zone 2 but if you feel tired, make this a zone 1 recovery ride.
- When in doubt, go easy. Recovery is what enables you to go faster and farther when it is time to go hard again.`;
-      R.stop();
-    }
-  },
-  {
-    'name': 'hardIsDefaultRule',
-    'priority': 1,
-    'condition': function(R) {
-      R.when(this && !this.plannedActivity.activityType);
-    },
-    'consequence': function(R) {
-      this.plannedActivity.activityType = 'hard';
-      this.plannedActivity.rationale += ' hardIsDefaultRule.';
-      R.next();
     }
   },
   {

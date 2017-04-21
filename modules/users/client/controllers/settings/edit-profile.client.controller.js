@@ -161,11 +161,19 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
       return;
     };
 
+    $scope.$watch('user.recoveryRate', function(rate, prevRate) {
+      if (rate !== prevRate) {
+        return $scope.updateUserProfile();
+      }
+    });
+
     $scope.getStravaFTP = function() {
       Users.getStravaFTP(function(response) {
         $scope.newFtp = null;
         if (response.updated) {
           toastr.success('Your current FTP has been retrieved from Strava.', 'FTP Updated');
+        } else {
+          toastr.warning('Your FTP is not available from Strava. Probably it is not set. Follow the Strava Performance Settings link to set in Strava.', 'FTP Not Updated', { timeOut: 7000 });
         }
         Authentication.user = response.user;
         initUser(Authentication.user);

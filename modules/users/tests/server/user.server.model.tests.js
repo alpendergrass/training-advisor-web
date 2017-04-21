@@ -83,9 +83,7 @@ describe('User Model Unit Tests:', function () {
       var _user1 = new User(user1);
 
       _user1.save(function () {
-        // _user1.birthYear = 1958;
         _user1.preferredRestDays = ['1', '5'];
-        // _user1.preferredSimulationDay = '4';
         _user1.save(function (err) {
           should.not.exist(err);
           _user1.remove(function (err) {

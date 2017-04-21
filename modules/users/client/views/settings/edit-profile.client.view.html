@@ -14,6 +14,63 @@
     <label for="timezone">My Timezone *</label>
     <div class="text-danger bottom-buffer" ng-show="!user.timezone"><strong>* Please select your timezone *</strong></div>
     <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile()" sort-by="offset" show-local="true" width="230px" class="small"></timezone-selector>
+
+
+    <hr>
+    <div>
+      <label><a tabindex="0" role="button" data-toggle="popover" data-content="Characterize how quickly you recover from hard workouts. Everyone recovers at a different rate and generally, as we age, we take longer to recover. The default setting assumes fast recovery so you should lower the setting if you feel you are not sufficiently recovered when a hard day is recommneded. ">Speed Of Recovery</a></label>
+      <div layout>
+        <div flex="5"></div>
+        <md-slider flex ng-model="user.recoveryRate" step="1" min="0" max="10" aria-label="Set Speed of Recovery"></md-slider>
+        <div flex="5"></div>
+      </div>
+      <div layout>
+        <div flex="5"></div>
+        <div flex="10" layout layout-align="left center">
+          <span class="md-body-1"><strong>Slow</strong></span>
+        </div>
+        <div flex></div>
+        <div flex="10" layout layout-align="center center">
+          <span class="md-body-1"><strong>Default</strong></span>
+        </div>
+        <div flex></div>
+        <div flex="10" layout="" layout-align="right center">
+          <span class="md-body-1"><strong>Fast</strong></span>
+        </div>
+        <div flex="5"></div>
+      </div>
+    </div>
+
+
+    <hr>
+    <div>
+      <label for="rampAmbition"><a tabindex="0" role="button" data-toggle="popover" data-content="Indicate how rapidly you would like your workout volume to increase. If you feel like the daily load recommendations are increasing too rapidly, lower the setting. If you feel like you need to do more work, raise the setting. Note that the default setting is aggressive so do not hesitate to dial it back if you feel like you are in danger of over-training. Also, be aware that this setting only applies to the base and build portions of your season.">Daily Load Growth Rate</a></label>
+      <div layout>
+        <div flex="5"></div>
+        <md-slider aria-label="Set Daily Load Growth Rate" flex ng-model="rampAmbition" step="1" min="0" max="10"></md-slider>
+        <div flex="5"></div>
+      </div>
+      <div layout>
+        <div flex="5"></div>
+        <div flex="10" layout layout-align="left center">
+          <span class="md-body-1"><strong>Conservative</strong></span>
+        </div>
+        <div flex></div>
+        <div flex="10" layout layout-align="center center">
+          <span class="md-body-1"><strong>Default</strong></span>
+        </div>
+        <div flex></div>
+        <div flex="10" layout="" layout-align="right center">
+          <span class="md-body-1"><strong>Aggressive</strong></span>
+        </div>
+        <div flex="5"></div>
+      </div>
+    </div>
+
+
+
+
+
     <hr>
     <label>Functional Threshold Power *</label>
     <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* Please provide FTP *</strong></div>
@@ -80,6 +137,9 @@
         <div ng-show="user.providerData && user.providerData.premium"><a href="{{ 'https://www.strava.com/settings/performance' }}" class="strava-link" target="_blank"><strong>Strava Performance Settings</strong> <i class="material-icons md-18">open_in_new</i></a></div>
       </p>
     </div>
+
+
+
   </div>
   <div class="page-header">
     <h2>Preferences</h2>

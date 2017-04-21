@@ -27,7 +27,9 @@ var rules = [
     'priority': 87,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType && this.testingIsDue &&
-        this.metrics.form > this.adviceConstants.testingEasyDayThreshold
+        this.metrics.form > this.testingDueEasyDayThreshold &&
+        !(this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'easy' &&
+        this.metricsTwoDaysPrior && this.metricsTwoDaysPrior.loadRating === 'easy')
       );
     },
     'consequence': function(R) {

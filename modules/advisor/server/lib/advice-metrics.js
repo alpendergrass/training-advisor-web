@@ -210,19 +210,20 @@ function updateMetricsForDay(params, callback) {
         priorDayFatigue = params.metrics.fatigue;
       }
 
-      //Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
-      //and decrease (linearly) to 3 by the end of build.
-      //daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
-      //Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
-
+      // Compute target ramp rates.
       if (params.trainingDay.period === 't6' || params.trainingDay.period === 'race') {
+        // Peak period: we want TSB to rise when tapering so we will let CTL decay somewhat.
         params.metrics.sevenDayTargetRampRate = adviceConstants.peakRaceTargetRampRate;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else if (params.trainingDay.period === 't0') {
         params.metrics.sevenDayTargetRampRate = adviceConstants.transitionTargetRampRate;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else {
-        //Let's break it down to make it easier to understand when I come back to it a year from now.
+        // Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
+        // and decrease (linearly) to 3 by the end of build.
+        // TODO: try messing with max and min rate to see what happens.
+        // daily ramp rate = (3 + (4 * ((days remaining in base + build) / total days in base + build))) / 7
+        // Let's break it down to make it easier to understand when I come back to it a year from now.
         percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
         params.metrics.sevenDayTargetRampRate = Math.round((3 + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
         params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;

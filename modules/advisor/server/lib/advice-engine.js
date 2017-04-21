@@ -16,13 +16,7 @@ var path = require('path'),
   adviceTest = require('./advice-test'),
   adviceDefault = require('./advice-default'),
   adviceT0 = require('./advice-t0'),
-  adviceT1 = require('./advice-t1'),
-  adviceT2 = require('./advice-t2'),
-  adviceT3 = require('./advice-t3'),
-  adviceT4 = require('./advice-t4'),
-  adviceT5 = require('./advice-t5'),
-  adviceT6 = require('./advice-t6'),
-  adviceRace = require('./advice-race'),
+  adviceInSeason = require('./advice-season'),
   workoutUtil = require('./workout-util'),
   tdUtil = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
@@ -77,6 +71,10 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
       // By period activityType rules: 2 - 9.
       // Rule priority only applies if ALL rules have (non-zero) priority. Done.
 
+      // user.recoveryRate is 0 - 10, slow to fast recovery.
+      let userThresholdAdjustment = 10 - user.recoveryRate;
+      facts.testingDueEasyDayThreshold = adviceConstants.testingDueEasyDayThreshold + userThresholdAdjustment;
+
       var R = new RuleEngine(adviceEvent.eventRules);
       R.register(adviceTest.testRules);
       R.register(adviceDefault.defaultRules);
@@ -86,26 +84,44 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
           R.register(adviceT0.t0Rules);
           break;
         case 't1':
-          R.register(adviceT1.t1Rules);
+          facts.hardDayThreshold = adviceConstants.t1HardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.t1ModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.t1EasyDayThreshold + userThresholdAdjustment;
           break;
         case 't2':
-          R.register(adviceT2.t2Rules);
+          facts.hardDayThreshold = adviceConstants.t2HardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.t2ModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.t2EasyDayThreshold + userThresholdAdjustment;
           break;
         case 't3':
-          R.register(adviceT3.t3Rules);
+          facts.hardDayThreshold = adviceConstants.t3HardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.t3ModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.t3EasyDayThreshold + userThresholdAdjustment;
           break;
         case 't4':
-          R.register(adviceT4.t4Rules);
+          facts.hardDayThreshold = adviceConstants.t4HardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.t4ModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.t4EasyDayThreshold + userThresholdAdjustment;
           break;
         case 't5':
-          R.register(adviceT5.t5Rules);
+          facts.hardDayThreshold = adviceConstants.t5HardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.t5ModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.t5EasyDayThreshold + userThresholdAdjustment;
           break;
         case 't6':
-          R.register(adviceT6.t6Rules);
+          facts.hardDayThreshold = adviceConstants.t6HardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.t6ModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.t6EasyDayThreshold + userThresholdAdjustment;
           break;
         case 'race':
-          R.register(adviceRace.raceRules);
+          facts.hardDayThreshold = adviceConstants.raceHardDayThreshold + userThresholdAdjustment;
+          facts.moderateDayThreshold = adviceConstants.raceModerateDayThreshold + userThresholdAdjustment;
+          facts.easyDayThreshold = adviceConstants.raceEasyDayThreshold + userThresholdAdjustment;
           break;
+      }
+
+      if (_.includes(['t1', 't2', 't3', 't4', 't5', 't6', 'race'], trainingDay.period)) {
+        R.register(adviceInSeason.inSeasonRules);
       }
 
       R.execute(facts, function(result) {
@@ -127,7 +143,7 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
             });
           })
           .catch(err => {
-            console.log('Error - generateAdvice.getWorkout err: ', err);
+            console.log('Error - generateAdvice err: ', err);
             return callback(err, null);
           });
       });

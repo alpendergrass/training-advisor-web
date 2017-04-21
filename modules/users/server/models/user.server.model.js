@@ -99,13 +99,6 @@ var UserSchema = new Schema({
     type: String,
     default: 'modules/users/client/img/profile/default.png'
   },
-  // birthYear: {
-  //   type: Number,
-  //   min: 1900,
-  //   max: 2099,
-  //   required: 'Please provide your birth year',
-  //   default: 1986
-  // },
   ftpLog: [{
     ftp: {
       type: Number,
@@ -127,6 +120,13 @@ var UserSchema = new Schema({
       default: ftpSources.values[0]
     }
   }],
+  recoveryRate: {
+    type: Number,
+    min: 0,
+    max: 10,
+    default: 5,
+    required: 'Please indicate recovery rate'
+  },
   preferredRestDays: [{
     type: String
   }],

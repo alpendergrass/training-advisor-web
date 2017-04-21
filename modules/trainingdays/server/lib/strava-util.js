@@ -38,7 +38,6 @@ var updateFtpFromStrava = function(user, getRequestedByUser) {
 
       // We have gotten a few null FTP values from Strava.
       if (!payload.ftp || !Number.isInteger(payload.ftp)) {
-        console.log('payload: ', payload);
         return resolve(response);
       }
 

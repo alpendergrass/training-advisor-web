@@ -54,32 +54,38 @@ module.exports.priority3EventCutOffThreshold = 9;
 module.exports.testingNagDayCount = 26;
 
 module.exports.testingEligibleFormThreshold = -1;
-module.exports.testingEasyDayThreshold = -25;
+module.exports.testingDueEasyDayThreshold = -25;
 
-module.exports.easyDayThreshold = -30;
-module.exports.restDayThreshold = -40;
+// module.exports.easyDayThreshold = -30;
+module.exports.restDayThreshold = -48;
 
-module.exports.t1HardDayThreshold = -22;
-module.exports.t2HardDayThreshold = -20;
-module.exports.t3HardDayThreshold = -18;
+module.exports.t1HardDayThreshold = -34;
+module.exports.t1ModerateDayThreshold = -38;
+module.exports.t1EasyDayThreshold = -42;
 
-module.exports.t4HardDayThreshold = -14;
-module.exports.t4ModerateDayThreshold = -16;
+module.exports.t2HardDayThreshold = -32;
+module.exports.t2ModerateDayThreshold = -36;
+module.exports.t2EasyDayThreshold = -40;
 
-module.exports.t5HardDayThreshold = -12;
-module.exports.t5ModerateDayThreshold = -16;
+module.exports.t3HardDayThreshold = -30;
+module.exports.t3ModerateDayThreshold = -34;
+module.exports.t3EasyDayThreshold = -38;
 
-module.exports.t6HardDayThreshold = -18;
+module.exports.t4HardDayThreshold = -28;
+module.exports.t4ModerateDayThreshold = -32;
+module.exports.t4EasyDayThreshold = -36;
 
-module.exports.raceHardDayThreshold = -15;
+module.exports.t5HardDayThreshold = -26;
+module.exports.t5ModerateDayThreshold = -30;
+module.exports.t5EasyDayThreshold = -34;
 
-//If form is less than or equal to this during t6 period, we recommend rest.
-//I made it one less than restNeededForTestingThreshold to get unit tests to work.
-//If we find it needs to be greater then we may need to modify or remove a test.
-module.exports.restNeededForRacingThreshold = -12;
+module.exports.t6HardDayThreshold = -30;
+module.exports.t6ModerateDayThreshold = -34;
+module.exports.t6EasyDayThreshold = -38;
 
-// //If form is less than or equal to this, we recommend an easy day if...see code.
-// module.exports.easyDaytNeededThreshold = -32;
+module.exports.raceHardDayThreshold = -20;
+module.exports.raceModerateDayThreshold = -24;
+module.exports.raceEasyDayThreshold = -28;
 
 // This is the target ramp rate we use in t6 and race periods.
 module.exports.peakRaceTargetRampRate = -3.5;
