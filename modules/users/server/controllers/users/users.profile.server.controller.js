@@ -80,13 +80,20 @@ exports.update = function(req, res) {
 };
 
 exports.getStravaFTP = function(req, res) {
+  let ftpResponse = null;
   stravaUtil.getFTP(req.user)
     .then(response => {
-      req.login(response.user, function (err) {
+      ftpResponse = response;
+      return userUtil.verifyUserSettings(response.user, req.user, true);
+    })
+    .then(function(verified) {
+      let verifiedUser = verified.user;
+
+      req.login(verifiedUser, function (err) {
         if (err) {
           res.status(400).send(err);
         } else {
-          res.json(response);
+          res.json(ftpResponse);
         }
       });
     })
