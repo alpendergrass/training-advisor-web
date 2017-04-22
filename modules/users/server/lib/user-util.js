@@ -237,7 +237,7 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
   });
 };
 
-module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, callback) {
+module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser) {
   return new Promise(function(resolve, reject) {
     let notifications = [];
 
@@ -265,11 +265,17 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, 
       notifications.push({ notificationType: 'fetchstravaftp', lookup: '' });
     }
 
-    // If latest ftp date was changed or if rest days were changed, recommend plangen.
+    // If latest ftp date was changed
+    // or if rest days were changed
+    // or recoveryRate was changed
+    // or rampRateAdjustment was changed,
+    //  recommend plangen.
     if (userBefore &&
       ((userBefore.ftpLog && userBefore.ftpLog.length > 0 && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
       !moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day')) ||
-      !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays))) {
+      !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays)) ||
+      userBefore.recoveryRate !== updatedUser.recoveryRate ||
+      userBefore.rampRateAdjustment !== updatedUser.rampRateAdjustment) {
       notifications.push({ notificationType: 'plangen', lookup: '', add: true });
     }
 
