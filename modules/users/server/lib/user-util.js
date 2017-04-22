@@ -271,11 +271,10 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser) 
     // or rampRateAdjustment was changed,
     //  recommend plangen.
     if (userBefore &&
-      ((userBefore.ftpLog && userBefore.ftpLog.length > 0 && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 &&
-      !moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day')) ||
-      !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays)) ||
-      userBefore.recoveryRate !== updatedUser.recoveryRate ||
-      userBefore.rampRateAdjustment !== updatedUser.rampRateAdjustment) {
+      ((userBefore.ftpLog && userBefore.ftpLog.length > 0 && updatedUser.ftpLog && updatedUser.ftpLog.length > 0 && !moment(userBefore.ftpLog[0].ftpDate).isSame(updatedUser.ftpLog[0].ftpDate, 'day')) ||
+      !_.isEqual(userBefore.preferredRestDays, updatedUser.preferredRestDays) ||
+      (userBefore.recoveryRate && userBefore.recoveryRate !== updatedUser.recoveryRate) ||
+      (userBefore.rampRateAdjustment && userBefore.rampRateAdjustment !== updatedUser.rampRateAdjustment))) {
       notifications.push({ notificationType: 'plangen', lookup: '', add: true });
     }
 
