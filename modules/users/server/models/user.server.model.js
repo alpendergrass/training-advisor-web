@@ -158,11 +158,11 @@ var UserSchema = new Schema({
   additionalProvidersData: {},
   autoFetchStravaActivities: {
     type: Boolean,
-    default: null
+    default: true
   },
   autoUpdateFtpFromStrava: {
     type: Boolean,
-    default: null
+    default: true
   },
   favorSufferScoreOverEstimatedPower: {
     type: Boolean,
