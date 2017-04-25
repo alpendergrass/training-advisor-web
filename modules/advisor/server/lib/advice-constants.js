@@ -44,8 +44,6 @@ module.exports.trainingPeriodLookups = [
   }
 ];
 
-module.exports.TPAutoDownloadLookbackNumberOfDays = '3';
-
 //Skip lesser event if within this many days of goal event.
 module.exports.priority2EventCutOffThreshold = 5;
 module.exports.priority3EventCutOffThreshold = 9;
@@ -56,39 +54,39 @@ module.exports.testingNagDayCount = 26;
 module.exports.testingEligibleFormThreshold = -1;
 module.exports.testingDueEasyDayThreshold = -25;
 
-// module.exports.easyDayThreshold = -30;
-module.exports.restDayThreshold = -48;
+// module.exports.restDayThreshold = -48;
 
-module.exports.t1HardDayThreshold = -34;
-module.exports.t1ModerateDayThreshold = -38;
-module.exports.t1EasyDayThreshold = -42;
+module.exports.t1HardDayThreshold = -30;
+module.exports.t1ModerateDayThreshold = -34;
+module.exports.t1EasyDayThreshold = -36;
 
-module.exports.t2HardDayThreshold = -32;
-module.exports.t2ModerateDayThreshold = -36;
-module.exports.t2EasyDayThreshold = -40;
+module.exports.t2HardDayThreshold = -28;
+module.exports.t2ModerateDayThreshold = -32;
+module.exports.t2EasyDayThreshold = -34;
 
-module.exports.t3HardDayThreshold = -30;
-module.exports.t3ModerateDayThreshold = -34;
-module.exports.t3EasyDayThreshold = -38;
+module.exports.t3HardDayThreshold = -26;
+module.exports.t3ModerateDayThreshold = -30;
+module.exports.t3EasyDayThreshold = -32;
 
-module.exports.t4HardDayThreshold = -28;
-module.exports.t4ModerateDayThreshold = -32;
-module.exports.t4EasyDayThreshold = -36;
+module.exports.t4HardDayThreshold = -24;
+module.exports.t4ModerateDayThreshold = -28;
+module.exports.t4EasyDayThreshold = -30;
 
-module.exports.t5HardDayThreshold = -26;
-module.exports.t5ModerateDayThreshold = -30;
-module.exports.t5EasyDayThreshold = -34;
+module.exports.t5HardDayThreshold = -22;
+module.exports.t5ModerateDayThreshold = -26;
+module.exports.t5EasyDayThreshold = -28;
 
-module.exports.t6HardDayThreshold = -30;
-module.exports.t6ModerateDayThreshold = -34;
-module.exports.t6EasyDayThreshold = -38;
+module.exports.t6HardDayThreshold = -10;
+module.exports.t6ModerateDayThreshold = -16;
+module.exports.t6EasyDayThreshold = -20;
 
-module.exports.raceHardDayThreshold = -20;
-module.exports.raceModerateDayThreshold = -24;
-module.exports.raceEasyDayThreshold = -28;
+module.exports.raceHardDayThreshold = -10;
+module.exports.raceModerateDayThreshold = -16;
+module.exports.raceEasyDayThreshold = -20;
 
 // This is the target ramp rate we use in t6 and race periods.
-module.exports.peakRaceTargetRampRate = -3.5;
+// We want TSB to rise when tapering so we will let CTL decay somewhat.
+module.exports.peakRaceTargetRampRate = -1;
 
 // This is the target ramp rate we use in transition periods.
 module.exports.transitionTargetRampRate = 4.0;
@@ -154,6 +152,124 @@ module.exports.loadAdviceLookups = [
     highLoadFactor: 0
   }
 ];
+
+// Use these values for generated activities used in planGen.
+module.exports.intensityEstimateLookups = [
+  {
+    activityType: 'easy',
+    period: 't1',
+    intensity: 0.65
+  }, {
+    activityType: 'easy',
+    period: 't2',
+    intensity: 0.65
+  }, {
+    activityType: 'easy',
+    period: 't3',
+    intensity: 0.65
+  }, {
+    activityType: 'easy',
+    period: 't4',
+    intensity: 0.65
+  }, {
+    activityType: 'easy',
+    period: 't5',
+    intensity: 0.65
+  }, {
+    activityType: 'easy',
+    period: 't6',
+    intensity: 0.65
+  }, {
+    activityType: 'easy',
+    period: 'race',
+    intensity: 0.65
+  }, {
+    activityType: 'moderate',
+    period: 't1',
+    intensity: 0.75
+  }, {
+    activityType: 'moderate',
+    period: 't2',
+    intensity: 0.75
+  }, {
+    activityType: 'moderate',
+    period: 't3',
+    intensity: 0.75
+  }, {
+    activityType: 'moderate',
+    period: 't4',
+    intensity: 0.80
+  }, {
+    activityType: 'moderate',
+    period: 't5',
+    intensity: 0.85
+  }, {
+    activityType: 'moderate',
+    period: 't6',
+    intensity: 0.95
+  }, {
+    activityType: 'moderate',
+    period: 'race',
+    intensity: 0.95
+  }, {
+    activityType: 'hard',
+    period: 't1',
+    intensity: 0.70
+  }, {
+    activityType: 'hard',
+    period: 't2',
+    intensity: 0.70
+  }, {
+    activityType: 'hard',
+    period: 't3',
+    intensity: 0.70
+  }, {
+    activityType: 'hard',
+    period: 't4',
+    intensity: 0.75
+  }, {
+    activityType: 'hard',
+    period: 't5',
+    intensity: 0.80
+  }, {
+    activityType: 'hard',
+    period: 't6',
+    intensity: 0.85
+  }, {
+    activityType: 'hard',
+    period: 'race',
+    intensity: 0.85
+  }, {
+    activityType: 'test',
+    period: 't1',
+    intensity: 0.90
+  }, {
+    activityType: 'test',
+    period: 't2',
+    intensity: 0.90
+  }, {
+    activityType: 'test',
+    period: 't3',
+    intensity: 0.90
+  }, {
+    activityType: 'test',
+    period: 't4',
+    intensity: 0.90
+  }, {
+    activityType: 'test',
+    period: 't5',
+    intensity: 0.90
+  }, {
+    activityType: 'test',
+    period: 't6',
+    intensity: 0.90
+  }, {
+    activityType: 'test',
+    period: 'race',
+    intensity: 0.90
+  }
+];
+
 
 module.exports.loadRatingLookups = [
   {

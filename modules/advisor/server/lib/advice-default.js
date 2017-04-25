@@ -41,6 +41,23 @@ var rules = [
     }
   },
   {
+    'name': 'defaultEasyAdviceRule',
+    'priority': -1,
+    'condition': function(R) {
+      R.when(this && this.plannedActivity.activityType &&
+       this.plannedActivity.activityType === 'easy'
+      );
+    },
+    'consequence': function(R) {
+      this.plannedActivity.activityType = 'easy';
+      this.plannedActivity.rationale += ' defaultEasyRule.';
+      this.plannedActivity.advice += ` Your form suggests you go easy today. You should do a easy endurance ride today.
+ Easy endurance means you should target lower power zone 2 but if you feel tired, make this a zone 1 recovery ride.
+ When in doubt, go easy. Recovery is what enables you to go faster and farther when it is time to go hard again.`;
+      R.stop();
+    }
+  },
+  {
     'name': 'enduranceIsDefaultAdviceRule',
     'priority': -99,
     'condition': function(R) {

@@ -167,6 +167,14 @@ function generateActivityFromAdvice(params, callback) {
   if (planActivity) {
     let load = planActivity.activityType === 'rest' ? 0 : ((planActivity.targetMaxLoad - planActivity.targetMinLoad) / 2) + planActivity.targetMinLoad;
     completedActivity.load = load;
+
+    let intensityLookup = _.find(adviceConstants.intensityEstimateLookups,
+      {
+        'activityType': planActivity.activityType,
+        'period': trainingDay.period
+      });
+    completedActivity.intensity = intensityLookup ? intensityLookup.intensity : 0;
+
     completedActivity.source = 'plangeneration';
     trainingDay.completedActivities.push(completedActivity);
 

@@ -126,12 +126,12 @@ var UserSchema = new Schema({
     max: 10,
     default: 5
   },
-  rampRateAdjustment: {
-    type: Number,
-    min: -2,
-    max: 2,
-    default: 0
-  },
+  // rampRateAdjustment: {
+  //   type: Number,
+  //   min: -2,
+  //   max: 2,
+  //   default: 0
+  // },
   preferredRestDays: [{
     type: String
   }],

@@ -8,7 +8,9 @@ var rules = [
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t1', 't2', 't3', 't4', 't5', 't6', 'race'], this.trainingDay.period) &&
-        this.metrics.form > this.hardDayThreshold
+        this.metrics.form > this.hardDayThreshold &&
+        !(this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'hard' &&
+        this.metricsTwoDaysPrior && this.metricsTwoDaysPrior.loadRating === 'hard')
       );
     },
     'consequence': function(R) {
@@ -35,13 +37,11 @@ var rules = [
   },
   {
     'name': 'seasonEasyRule',
-    'priority': 5,
+    'priority': 3,
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t1', 't2', 't3', 't4', 't5', 't6', 'race'], this.trainingDay.period) &&
-        (this.metrics.form > this.easyDayThreshold ||
-        (this.metrics.form > this.moderateDayThreshold &&
-        this.metricsOneDayPrior && this.metricsOneDayPrior.loadRating === 'moderate'))
+        this.metrics.form > this.easyDayThreshold
       );
     },
     'consequence': function(R) {

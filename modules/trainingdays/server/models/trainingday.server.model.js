@@ -185,6 +185,10 @@ var TrainingDaySchema = new Schema({
     totalLoad: {
       type: Number,
       default: 0
+    },
+    dailyIntensity: {
+      type: Number,
+      default: 0
     }
   }],
   trainingEffortFeedback: {

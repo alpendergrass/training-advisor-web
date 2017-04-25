@@ -17,16 +17,17 @@ angular.module('trainingDays')
 
       $scope.viewSeason = function() {
         var actualLoadArray,
+          actualIntensityArray,
           actualFormArray,
           actualFitnessArray,
           actualFatigueArray,
           formPointRadius,
           planLoadArray,
+          planIntensityArray,
           planFormArray,
           planFitnessArray,
           planFatigueArray,
           targetRampRateArray,
-          rampRateArray,
           actualAverageRampRateArray,
           planAverageRampRateArray,
           planLoadBackgroundColors;
@@ -97,6 +98,10 @@ angular.module('trainingDays')
           return Util.getMetrics(td, 'planned').totalLoad;
         };
 
+        var getPlanIntensity = function(td) {
+          return Util.getMetrics(td, 'planned').dailyIntensity;
+        };
+
         var getActualLoad = function(td) {
           if (moment(td.date).isAfter($scope.today, 'day')) {
             // return null;
@@ -106,10 +111,13 @@ angular.module('trainingDays')
           return Util.getMetrics(td, 'actual').totalLoad;
         };
 
+        var getActualIntensity = function(td) {
+          return Util.getMetrics(td, 'actual').dailyIntensity;
+        };
+
         var getPlanFitness = function(td) {
           return Util.getMetrics(td, 'planned').fitness;
         };
-
 
         var getActualFitness = function(td) {
           if (moment(td.date).isAfter($scope.today, 'day')) {
@@ -183,10 +191,12 @@ angular.module('trainingDays')
           $scope.chartLabels = _.flatMap($scope.season, extractDate);
 
           if ($scope.authentication.user.levelOfDetail > 2) {
+            actualIntensityArray = _.flatMap($scope.season, getActualIntensity);
+            planIntensityArray = _.flatMap($scope.season, getPlanIntensity);
             targetRampRateArray = _.flatMap($scope.season, getTargetRampRate);
             planAverageRampRateArray = _.flatMap($scope.season, getPlanAverageRampRate);
             actualAverageRampRateArray = _.flatMap($scope.season, getActualAverageRampRate);
-            $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
+            $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray, actualIntensityArray, planIntensityArray, targetRampRateArray, actualAverageRampRateArray, planAverageRampRateArray];
           } else {
             $scope.chartData = [actualLoadArray, planLoadArray, actualFitnessArray, planFitnessArray, actualFormArray, planFormArray, actualFatigueArray, planFatigueArray];
           }
@@ -254,6 +264,24 @@ angular.module('trainingDays')
               hidden: true
             },
             {
+              label: 'Intensity - Actual',
+              yAxisID: 'y-axis-2',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line',
+              hidden: true
+            },
+            {
+              label: 'Intensity - Planned',
+              yAxisID: 'y-axis-2',
+              borderWidth: 3,
+              pointRadius: 0,
+              hitRadius: 4,
+              type: 'line',
+              hidden: true
+            },
+            {
               label: 'Target Ramp Rate',
               yAxisID: 'y-axis-1',
               borderWidth: 3,
@@ -267,7 +295,8 @@ angular.module('trainingDays')
               borderWidth: 3,
               pointRadius: 0,
               hitRadius: 4,
-              type: 'line'
+              type: 'line',
+              hidden: true
             },
             {
               label: 'Average Ramp Rate - Plan',
@@ -381,22 +410,36 @@ angular.module('trainingDays')
                 display: false
               }
             }],
-            yAxes: [{
-              position: 'left',
-              id: 'y-axis-0'
-            }, {
-              position: 'right',
-              id: 'y-axis-1',
-              gridLines: {
-                display: false
-              },
-              ticks: {
-                display: false,
-                max: 13,
-                min: -2,
-                stepSize: 1
+            yAxes: [
+              {
+                position: 'left',
+                id: 'y-axis-0'
+              }, {
+                position: 'right',
+                id: 'y-axis-1',
+                gridLines: {
+                  display: false
+                },
+                ticks: {
+                  display: false,
+                  max: 13,
+                  min: -2,
+                  stepSize: 1
+                }
+              }, {
+                position: 'right',
+                id: 'y-axis-2',
+                gridLines: {
+                  display: false
+                },
+                ticks: {
+                  display: false,
+                  max: 2,
+                  min: 0,
+                  stepSize: 0.01
+                }
               }
-            }]
+            ]
           },
           tooltips: {
             callbacks: {
@@ -441,11 +484,17 @@ angular.module('trainingDays')
                 // Display planned activity type for future days.
                 if (moment(td.date).isBefore($scope.today, 'day')) {
                   text = Util.getMetrics(td, 'actual').loadRating + ' day';
+                  if ($scope.authentication.user.levelOfDetail > 2) {
+                    text += ' period: ' + td.period;
+                  }
                 } else if (!td.scheduledEventRanking && moment(td.date).isBetween($scope.today, $scope.tomorrow, 'day', '[]')) {
                   // planActivity = Util.getPlannedActivity(td, 'advised');
                   // if (planActivity) {
                   //   text = Util.mapActivityTypeToVerbiage(planActivity.activityType);
                   // }
+                  if ($scope.authentication.user.levelOfDetail > 2) {
+                    text += ' period: ' + td.period;
+                  }
                 } else if (!td.scheduledEventRanking) {
                   planActivity = Util.getPlannedActivity(td, 'plangeneration');
                   if (planActivity) {
