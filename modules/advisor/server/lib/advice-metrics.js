@@ -65,7 +65,6 @@ function clearRunway(params, callback) {
 
   dbUtil.clearFutureMetricsAndAdvice(params, function(err, rawResponse) {
     if (err) {
-      console.log('Error - updateMetrics.clearFutureMetricsAndAdvice err: ', err);
       return callback(err, null);
     }
 
@@ -103,7 +102,6 @@ function updateFatigue(params, callback) {
       });
     })
     .catch(function(err) {
-      console.log('Error - updateMetrics.updateFatigue err: ', err);
       return callback(err, null);
     });
 }
@@ -178,7 +176,6 @@ function updateMetricsForDay(params, callback) {
   },
     function(err, results) {
       if (err) {
-        console.log('Error - updateMetrics.updateMetricsForDay err: ', err);
         return callback(err, null);
       }
 
@@ -265,7 +262,6 @@ function updateMetricsForDay(params, callback) {
 
             params.trainingDay.save(function(err, savedTrainingDay) {
               if (err) {
-                console.log('Error - updateMetrics.updateMetricsForDay.TDsave err: ', err);
                 return callback(err, null);
               } else {
                 return callback(null, savedTrainingDay);
