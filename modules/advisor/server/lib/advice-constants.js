@@ -57,23 +57,23 @@ module.exports.testingDueEasyDayThreshold = -25;
 // The thresholds below will be adjusted higher for less than fastest recoverers.
 module.exports.t1HardDayThreshold = -30;
 module.exports.t1ModerateDayThreshold = -34;
-module.exports.t1EasyDayThreshold = -36;
+module.exports.t1EasyDayThreshold = -38;
 
 module.exports.t2HardDayThreshold = -30;
 module.exports.t2ModerateDayThreshold = -34;
-module.exports.t2EasyDayThreshold = -36;
+module.exports.t2EasyDayThreshold = -38;
 
 module.exports.t3HardDayThreshold = -30;
 module.exports.t3ModerateDayThreshold = -34;
-module.exports.t3EasyDayThreshold = -36;
+module.exports.t3EasyDayThreshold = -38;
 
 module.exports.t4HardDayThreshold = -28;
 module.exports.t4ModerateDayThreshold = -32;
-module.exports.t4EasyDayThreshold = -34;
+module.exports.t4EasyDayThreshold = -36;
 
 module.exports.t5HardDayThreshold = -26;
 module.exports.t5ModerateDayThreshold = -30;
-module.exports.t5EasyDayThreshold = -32;
+module.exports.t5EasyDayThreshold = -34;
 
 module.exports.t6HardDayThreshold = -12;
 module.exports.t6ModerateDayThreshold = -16;

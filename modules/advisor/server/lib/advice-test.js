@@ -36,7 +36,7 @@ var rules = [
       this.plannedActivity.activityType = 'easy';
       this.plannedActivity.rationale += 'testingDueEasyDayRule.';
       this.plannedActivity.advice += ` An easy day or rest is needed in preparation for testing. Your form is not sufficiently recovered for testing.
- Easy means a zone 1 - 2 ride. You need to be fully recovered to ensure valid test results.`;
+ Easy means a zone 1 to low zone 2 ride. You need to be fully recovered to ensure valid test results.`;
       R.stop();
     }
   },

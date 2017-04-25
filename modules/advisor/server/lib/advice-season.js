@@ -41,7 +41,8 @@ var rules = [
     'condition': function(R) {
       R.when(this && !this.plannedActivity.activityType &&
         _.includes(['t1', 't2', 't3', 't4', 't5', 't6', 'race'], this.trainingDay.period) &&
-        this.metrics.form > this.easyDayThreshold
+        (this.metrics.form > this.easyDayThreshold ||
+          (_.indexOf(this.trainingDay.user.preferredRestDays, this.tomorrowDayOfWeek) > -1))
       );
     },
     'consequence': function(R) {
