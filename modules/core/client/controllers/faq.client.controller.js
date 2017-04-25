@@ -24,7 +24,7 @@ angular.module('core').controller('FAQController',
       sectionTitle: 'The Basics',
       questions: [{
         question: 'How do I use Tacit Training on a daily basis?',
-        answer: '<p>Every day you should ask Tacit Training for advice. Tacit Training will advise you if you should ride or not and if so, what kind of ride to do. Tacit Training will also give you a suggested Training Load range for the day. While riding, you can monitor your Training Load (typically shown as TSS® - Training Stress Score®) in real-time on your head unit to stay within those parameters.</p><p>You should frequently Update Season on the My Season page to see the big picture. This will help you understand how you are progressing and what is planned for future training days.</p>'
+        answer: '<p>Every day you should ask Tacit Training for advice. Tacit Training will advise you if you should ride or not and if so, what kind of ride to do. Tacit Training will also give you a suggested Training Load range for the day. While riding, you can monitor your Training Load (typically shown as TSS® - Training Stress Score®) in real-time on your head unit to stay within those parameters.</p><p>You should frequently Update Forecast on the My Season page to see the big picture. This will help you understand how you are progressing and what is planned for future training days.</p>'
       }, {
         question: 'How do I get started? (Setting up my account)',
         answer: 'You create an account by linking to your Strava account. Click the Strava button on the sign in page, enter your Strava credentials if you are not already logged into Strava, authorize Tacit Training to access your Strava data and you are logged in.</p><p>You then need to enter some personal information on the My Profile Page. The most important bits are your time zone and your Functional Threshold Power (which we may have retrieved from Strava when you logged in) and test date. We also recommend that you enable "Strava Activity Sync" to save you from having to remember to download. Turning on "Strava FTP Sync" is handy too.</p>'
@@ -42,10 +42,10 @@ angular.module('core').controller('FAQController',
         answer: 'Tacit Training needs your Training Load for every ride you do. If you did not set up your profile to automatically fetch your ride data, on My Training Day you can download rides from Strava. You can also manually enter a ride by clicking the + button. See the Ride Data section below for more.'
       }, {
         question: 'I want the big picture! (Generating a season view)',
-        answer: 'Go to My Season and click the Update Season button. And be sure to check out the What-If Simulator. This will let you see how your season will be affected by doing or skipping specific events or workouts. The buttons to run what-if simulations are at the bottom of the Season page.'
+        answer: 'Go to My Season and click the Update Forecast button. And be sure to check out the What-If Simulator. This will let you see how your season will be affected by doing or skipping specific events or workouts. The buttons to run what-if simulations are at the bottom of the Season page.'
       }, {
         question: 'How do I use My Season?',
-        answer: '<p>Use the chart to monitor your progress and to see what is in store for you. For future days it shows a plan that uses an average of the recommended load range. For past days it will display both plan and actual ride data.</p><p>The future is based on the assumption that you will follow the advice to the letter. However, we know no one will. You should frequently update your season so that it can take into account the work you have done. It will also incorporate any events or off-days you have scheduled.</p><p>If the Update Season button is red, that means some data has changed that could affect your season. Click the button.</p>'
+        answer: '<p>Use the chart to monitor your progress and to see what is in store for you. For future days it shows a plan that uses an average of the recommended load range. For past days it will display both plan and actual ride data.</p><p>The future is based on the assumption that you will follow the advice to the letter. However, we know no one will. You should frequently update your season forecast so that it can take into account the work you have done. It will also incorporate any events or off-days you have scheduled.</p><p>If the Update Forecast button is red, that means some data has changed that could affect your season. Click the button.</p>'
       }]
     }, {
       sectionTitle: 'The Advice',
@@ -69,16 +69,16 @@ angular.module('core').controller('FAQController',
       sectionTitle: 'My Events',
       questions: [{
         question: 'I have multiple season goals. How do I set those up?',
-        answer: 'Choose Schedule Events from the Training Days menu and specify that the event is a goal. After you create a goal be sure to go My Season and click Update Season to see how your new goal impacts your season. You can create as many goal events as you like and we will help you prepare for them.'
+        answer: 'Choose Schedule Events from the Training Days menu and specify that the event is a goal. After you create a goal be sure to go My Season and click Update Forecast to see how your new goal impacts your season. You can create as many goal events as you like and we will help you prepare for them.'
       }, {
         question: 'I have intermediate events that I do not plan to peak for but would like to include in my training. How do I set those up?',
-        answer: 'Go to Training Days | Schedule Events to create intermediate events. On this page, in addition to goal event, you can create medium priority and low priority events. Be sure to update your season after you add events.'
+        answer: 'Go to Training Days | Schedule Events to create intermediate events. On this page, in addition to goal event, you can create medium priority and low priority events. Be sure to update your season forecast after you add events.'
       }, {
         question: 'I have a club race every Tuesday night from April until September and a team ride every Thursday evening. Can I set these up as recurring events?',
-        answer: 'Glad you asked! Go to Training Days | Schedule Events. Here you can create recurring medium and low priority events. After selecting a date and an event type, you can click the Repeat check-box to set up your recurring event. (Note that you cannot set up recurring Goal events.) And remember to update your season after you add events. '
+        answer: 'Glad you asked! Go to Training Days | Schedule Events. Here you can create recurring medium and low priority events. After selecting a date and an event type, you can click the Repeat check-box to set up your recurring event. (Note that you cannot set up recurring Goal events.) And remember to update your season forecast after you add events. '
       }, {
         question: 'I have days I know I will not be able to ride. How do I tell Tacit Training about those days?',
-        answer: 'In Tacit Training a scheduled day off is considered an event. Just like with riding events, you schedule your off-days by going to Training Days | Schedule Events. You can even create recurring off-days. And once again, remember to update your season after you add them. '
+        answer: 'In Tacit Training a scheduled day off is considered an event. Just like with riding events, you schedule your off-days by going to Training Days | Schedule Events. You can even create recurring off-days. And once again, remember to update your season forecast after you add them. '
       }]
     }, {
       sectionTitle: 'Ride Data',

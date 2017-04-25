@@ -82,7 +82,7 @@ var adornNotification = function(notification) {
       blocks: ''
     }, {
       notificationType: 'plangen',
-      message: 'You need to update your season.',
+      message: 'You need to update your season forecast.',
       state: 'season',
       alert: false,
       blocks: ''
