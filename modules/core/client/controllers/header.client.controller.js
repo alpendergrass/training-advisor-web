@@ -30,7 +30,7 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', '$mdD
               var releaseNotes = response.releaseNotes;
 
               if (releaseNotes[0].version === clientAppVersion) {
-                var releaseMessage = '<h5>' + releaseNotes[0].message + '</h5><p><ul>';
+                var releaseMessage = '<strong>' + releaseNotes[0].message + '</strong><p><ul>';
                 releaseNotes[0].features.forEach(function (feature) {
                   releaseMessage += '<li><strong>' + feature + '</strong></li>';
                 });

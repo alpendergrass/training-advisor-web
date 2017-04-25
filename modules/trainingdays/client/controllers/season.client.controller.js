@@ -310,7 +310,7 @@ angular.module('trainingDays')
         };
 
 
-        var loadChart = function() {
+        var loadChart = function(callback) {
 
           blockUI.start('Loading season data...');
           usSpinnerService.spin('tdSpinner');
@@ -350,6 +350,7 @@ angular.module('trainingDays')
               $scope.season = season.days.slice($scope.startX, $scope.viewLength);
 
               loadChartData();
+
             }
 
             usSpinnerService.stop('tdSpinner');
@@ -357,6 +358,10 @@ angular.module('trainingDays')
             jQuery('#season-help').focus();
 
             $scope.error = errorMessage;
+
+            if (callback) {
+              return callback();
+            }
           });
         };
 
@@ -579,7 +584,7 @@ angular.module('trainingDays')
           if (isSim) {
             blockMsg = 'Simulation is running...';
           } else {
-            blockMsg = 'Updating your season...';
+            blockMsg = 'Updating your season forecast...';
             isSim = false;
           }
           blockUI.start(blockMsg);
@@ -594,7 +599,9 @@ angular.module('trainingDays')
             usSpinnerService.stop('tdSpinner');
             // Reload user object as notifications may have been updated.
             Authentication.user = response.user;
-            loadChart();
+            loadChart(function() {
+              $scope.showNextDays();
+            });
           }, function(errorResponse) {
             blockUI.stop();
             usSpinnerService.stop('tdSpinner');

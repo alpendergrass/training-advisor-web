@@ -140,6 +140,7 @@ describe('strava-util Unit Tests:', function() {
       }
       user = newUser;
       user.providerData.accessToken = 'accessToken';
+      user.providerData.premium = true;
       user.markModified('providerData');
 
       user.save()

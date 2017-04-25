@@ -34,10 +34,10 @@
           <md-button ng-disabled="startX == 0" class='md-icon-button' ng-click='showPrevDays()' title="Show from season start" aria-label='Show from season start'>
             <i class="material-icons md-24">first_page</i>
           </md-button>
-          <md-button ng-disabled="startX == 0" class='md-icon-button' ng-click='showPrevDays(7)' title="Back 7 days" aria-label='Back 7 days'>
+          <md-button ng-disabled="startX == 0" class='md-icon-button' ng-click='showPrevDays(14)' title="Back 14 days" aria-label='Back 14 days'>
             <i class="material-icons md-24">chevron_left</i>
           </md-button>
-          <md-button ng-disabled="startX >= todayX - 1" class='md-icon-button' ng-click='showPrevDays(-7)' title="Forward 7 days" aria-label='Forward 7 days'>
+          <md-button ng-disabled="startX >= todayX - 1" class='md-icon-button' ng-click='showPrevDays(-14)' title="Forward 14 days" aria-label='Forward 14 days'>
             <i class="material-icons md-24">chevron_right</i>
           </md-button>
           <md-button ng-disabled="startX >= todayX - 1" class='md-icon-button' ng-click='showPrevDays(0)' title="Show from yesterday" aria-label='Show from yesterday'>
@@ -47,10 +47,10 @@
           <md-button ng-disabled="viewLength >= seasonLength" class='md-icon-button pull-right' ng-click='showNextDays()' title="Show thru season end" aria-label='Show thru season end'>
             <i class="material-icons md-24">last_page</i>
           </md-button>
-          <md-button ng-disabled="viewLength >= seasonLength" class='md-icon-button pull-right' ng-click='showNextDays(7)' title="Forward 7 days" aria-label='Forward 7 days'>
+          <md-button ng-disabled="viewLength >= seasonLength" class='md-icon-button pull-right' ng-click='showNextDays(14)' title="Forward 14 days" aria-label='Forward 14 days'>
             <i class="material-icons md-24">chevron_right</i>
           </md-button>
-          <md-button ng-disabled="viewLength <= todayX + 1" class='md-icon-button pull-right' ng-click='showNextDays(-7)' title="Back 7 days" aria-label='Back 7 days'>
+          <md-button ng-disabled="viewLength <= todayX + 1" class='md-icon-button pull-right' ng-click='showNextDays(-14)' title="Back 14 days" aria-label='Back 14 days'>
             <i class="material-icons md-24">chevron_left</i>
           </md-button>
           <md-button ng-disabled="viewLength <= todayX + 1" class='md-icon-button pull-right' ng-click='showNextDays(0)' title="Show thru today" aria-label='Show thru today'>

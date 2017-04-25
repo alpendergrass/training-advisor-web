@@ -23,7 +23,7 @@ var updateFtpFromStrava = function(user, getRequestedByUser) {
       updated: false
     };
 
-    if (!user.autoUpdateFtpFromStrava && !getRequestedByUser) {
+    if ((user.providerData && !user.providerData.premium) || !user.autoUpdateFtpFromStrava && !getRequestedByUser) {
       return resolve(response);
     }
 
