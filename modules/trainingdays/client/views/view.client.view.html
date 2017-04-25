@@ -198,6 +198,7 @@
       <div>user.recoveryRate: {{authentication.user.recoveryRate}}</div>
       <!-- <div>user.rampRateAdjustment: {{authentication.user.rampRateAdjustment}}</div> -->
       <div>user.workoutLog: {{authentication.user.workoutLog}} (Note: this list will not be accurate after advice refresh.)</div>
+      <div>currentWorkoutSpecs: {{trainingDay.currentWorkoutSpecs}}</div>
       <div>trainingEffortFeedback: {{trainingDay.trainingEffortFeedback}}
       <div>dateNumeric: {{trainingDay.dateNumeric}}</div>
       <div>period: {{trainingDay.period }}</div>
@@ -205,7 +206,6 @@
       <div>daysUntilNextGoalEvent: {{trainingDay.daysUntilNextGoalEvent}}</div>
       <div>daysUntilNextPriority2Event: {{trainingDay.daysUntilNextPriority2Event}}</div>
       <div>daysUntilNextPriority3Event: {{trainingDay.daysUntilNextPriority3Event}}</div>
-      <div>currentWorkoutSpecs: {{trainingDay.currentWorkoutSpecs}}</div>
       <div>
         <u>Metrics:</u><br>
         <div ng-repeat="metrics in trainingDay.metrics" class="">

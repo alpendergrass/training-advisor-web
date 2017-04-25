@@ -54,33 +54,32 @@ module.exports.testingNagDayCount = 26;
 module.exports.testingEligibleFormThreshold = -1;
 module.exports.testingDueEasyDayThreshold = -25;
 
-// module.exports.restDayThreshold = -48;
-
+// The thresholds below will be adjusted higher for less than fastest recoverers.
 module.exports.t1HardDayThreshold = -30;
 module.exports.t1ModerateDayThreshold = -34;
 module.exports.t1EasyDayThreshold = -36;
 
-module.exports.t2HardDayThreshold = -28;
-module.exports.t2ModerateDayThreshold = -32;
-module.exports.t2EasyDayThreshold = -34;
+module.exports.t2HardDayThreshold = -30;
+module.exports.t2ModerateDayThreshold = -34;
+module.exports.t2EasyDayThreshold = -36;
 
-module.exports.t3HardDayThreshold = -26;
-module.exports.t3ModerateDayThreshold = -30;
-module.exports.t3EasyDayThreshold = -32;
+module.exports.t3HardDayThreshold = -30;
+module.exports.t3ModerateDayThreshold = -34;
+module.exports.t3EasyDayThreshold = -36;
 
-module.exports.t4HardDayThreshold = -24;
-module.exports.t4ModerateDayThreshold = -28;
-module.exports.t4EasyDayThreshold = -30;
+module.exports.t4HardDayThreshold = -28;
+module.exports.t4ModerateDayThreshold = -32;
+module.exports.t4EasyDayThreshold = -34;
 
-module.exports.t5HardDayThreshold = -22;
-module.exports.t5ModerateDayThreshold = -26;
-module.exports.t5EasyDayThreshold = -28;
+module.exports.t5HardDayThreshold = -26;
+module.exports.t5ModerateDayThreshold = -30;
+module.exports.t5EasyDayThreshold = -32;
 
-module.exports.t6HardDayThreshold = -10;
+module.exports.t6HardDayThreshold = -12;
 module.exports.t6ModerateDayThreshold = -16;
 module.exports.t6EasyDayThreshold = -20;
 
-module.exports.raceHardDayThreshold = -10;
+module.exports.raceHardDayThreshold = -12;
 module.exports.raceModerateDayThreshold = -16;
 module.exports.raceEasyDayThreshold = -20;
 

@@ -198,6 +198,11 @@ describe('strava-util Unit Tests:', function() {
             stravaStub.streams.activity = function(parm, callback) {
               return callback(null, wattagePayload);
             };
+
+            stravaStub.athlete.get = function(parm, callback) {
+              return callback(null, { ftp: 456 });
+            };
+
             done();
           });
         });
@@ -295,6 +300,10 @@ describe('strava-util Unit Tests:', function() {
     });
 
     it('should return error when ftp has not been set ', function(done) {
+      stravaStub.athlete.get = function(parm, callback) {
+        return callback(null, { ftp: null });
+      };
+
       stravaStub.streams.activity = function(parm, callback) {
         return callback(null, wattagePayload);
       };
@@ -323,10 +332,6 @@ describe('strava-util Unit Tests:', function() {
     it('user.ftpLog should not contain new FTP when autoUpdateFtpFromStrava is false', function() {
       stravaStub.streams.activity = function(parm, callback) {
         return callback(null, wattagePayload);
-      };
-
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
       };
 
       user.autoUpdateFtpFromStrava = false;
@@ -367,10 +372,6 @@ describe('strava-util Unit Tests:', function() {
     it('user.ftpLog should contain new FTP when updated FTP is fetched from Strava', function() {
       stravaStub.streams.activity = function(parm, callback) {
         return callback(null, wattagePayload);
-      };
-
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
       };
 
       user.autoUpdateFtpFromStrava = true;
@@ -629,10 +630,6 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, []);
       };
 
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
-      };
-
       user.autoUpdateFtpFromStrava = false;
 
       return stravaUtil.downloadActivities(user, trainingDay)
@@ -671,10 +668,6 @@ describe('strava-util Unit Tests:', function() {
     it('user.ftpLog should contain new FTP when updated FTP is fetched from Strava', function() {
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(null, []);
-      };
-
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
       };
 
       user.autoUpdateFtpFromStrava = true;
@@ -950,10 +943,6 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, []);
       };
 
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
-      };
-
       user.autoUpdateFtpFromStrava = false;
 
       return stravaUtil.downloadAllActivities(user, downloadAllStartDateNumeric)
@@ -992,10 +981,6 @@ describe('strava-util Unit Tests:', function() {
     it('user.ftpLog should contain new FTP when updated FTP is fetched from Strava', function() {
       stravaStub.athlete.listActivities = function(parm, callback) {
         return callback(null, []);
-      };
-
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
       };
 
       user.autoUpdateFtpFromStrava = true;
@@ -1149,9 +1134,6 @@ describe('strava-util Unit Tests:', function() {
 
   describe('Method getFTP', function() {
     it('user.ftpLog should contain new FTP though autoUpdateFtpFromStrava is false', function() {
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
-      };
 
       user.autoUpdateFtpFromStrava = false;
 
@@ -1185,10 +1167,6 @@ describe('strava-util Unit Tests:', function() {
     });
 
     it('user.ftpLog should contain new FTP when updated FTP is fetched from Strava', function() {
-      stravaStub.athlete.get = function(parm, callback) {
-        return callback(null, { ftp: 456 });
-      };
-
       user.autoUpdateFtpFromStrava = true;
 
       return stravaUtil.getFTP(user, true)
