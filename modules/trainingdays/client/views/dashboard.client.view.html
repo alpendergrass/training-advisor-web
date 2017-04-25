@@ -17,7 +17,49 @@
         </md-card-content>
       </md-card>
 
-      <md-card>
+      <md-card ng-show="trainingDayYesterday">
+        <md-card-header>
+          <md-card-header-text>
+            <span class="md-title"><a ui-sref="trainingDayView({trainingDayId: trainingDayYesterday._id})">Yesterday<span ng-show="trainingDayYesterday.name"> - {{trainingDayYesterday.name}}</span></a>
+            </span>
+            <span class="md-subhead">{{yesterdayFormatted}}</span>
+          </md-card-header-text>
+        </md-card-header>
+        <md-card-content>
+          <div ng-show="trainingDayYesterday.completedActivities.length > 0">
+            <h4>Completed Rides</h4>
+            <table class="table table-bordered table-hover table-condensed">
+              <tr>
+                <th>Source</th>
+                <th>Training Load</th>
+                <th>Intensity</th>
+                <th>Elevation Gain</th>
+              </tr>
+              <tr ng-repeat="completedActivity in trainingDayYesterday.completedActivities">
+                <td>
+                  <span class="text-capitalize">{{ completedActivity.source }}</span></a></span><span class="small" ng-if="completedActivity.source !== 'manual' && completedActivity.edited"> (edited)</span>
+                  <span ng-if="completedActivity.source === 'strava'"><a href="{{ 'https://www.strava.com/activities/' + completedActivity.sourceID }}" class="strava-link"><br>View on Strava</a></span>
+                </td>
+                <td>
+                  {{completedActivity.load}}<span class="small" ng-if="completedActivity.loadIsFromEstimatedPower"> (from estimated power)</span><span class="small" ng-if="completedActivity.loadIsSufferScore"> (Suffer Score)</span>
+                </td>
+                <td>
+                  {{completedActivity.intensity}}<span class="small" ng-if="!completedActivity.intensity"> (unknown)</span>
+                </td>
+                <td>
+                  {{completedActivity.elevationGain}} m
+                </td>
+              </tr>
+            </table>
+            <label>Training Load Rating: <i>{{yesterdayMetrics.loadRating}}</i></label>
+          </div>
+          <div class="top-buffer" ng-show="trainingDayYesterday.completedActivities.length < 1">
+            No rides yesterday.
+          </div>
+        </md-card-content>
+      </md-card>
+
+      <md-card ng-show="trainingDayToday">
         <md-card-header>
           <md-card-header-text>
             <span class="md-title"><a ui-sref="trainingDayView({trainingDayId: trainingDayToday._id})">Today<span ng-show="trainingDayToday.name"> - {{trainingDayToday.name}}</span></a>
@@ -71,7 +113,7 @@
         </md-card-content>
       </md-card>
 
-      <md-card>
+      <md-card ng-show="trainingDayTomorrow">
         <md-card-header>
           <md-card-header-text>
             <span class="md-title"><a ui-sref="trainingDayView({trainingDayId: trainingDayTomorrow._id})">Tomorrow<span ng-show="trainingDayTomorrow.name"> - {{trainingDayTomorrow.name}}</span></a>

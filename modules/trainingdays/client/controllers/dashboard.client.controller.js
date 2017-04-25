@@ -15,6 +15,22 @@ angular.module('trainingDays')
 
       var today = moment().toDate();
       var tomorrow = moment().add(1, 'day').toDate();
+      var yesterday = moment().subtract(1, 'day').toDate();
+
+      TrainingDays.getDay({
+        trainingDateNumeric: Util.toNumericDate(yesterday)
+      }, function(trainingDayYesterday) {
+        trainingDayYesterday.date = moment(trainingDayYesterday.dateNumeric.toString()).toDate();
+        $scope.trainingDayYesterday = trainingDayYesterday;
+        $scope.yesterdayFormatted = moment(trainingDayYesterday.date).format('dddd, D MMMM YYYY');
+        $scope.yesterdayMetrics = Util.getMetrics($scope.trainingDayYesterday, 'actual');
+      }, function(errorResponse) {
+        if (errorResponse.data && errorResponse.data.message) {
+          $scope.error = errorResponse.data.message;
+        } else {
+          $scope.error = 'Server error prevented training day retrieval.';
+        }
+      });
 
       TrainingDays.refreshAdvice({
         trainingDateNumeric: Util.toNumericDate(today)
