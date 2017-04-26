@@ -68,12 +68,12 @@
           </md-card-header-text>
         </md-card-header>
         <md-card-content>
-          <div>
+          <div ng-show="trainingDayToday.completedActivities.length < 1">
             <h4>
               <a ui-sref="trainingDayView({trainingDayId: trainingDayToday._id})">{{plannedActivityDescriptionToday.namePhrase}}</a>
               <small>{{plannedActivityDescriptionToday.loadPhrase}}</small>
             </h4>
-            <div ng-show="trainingDayToday.completedActivities.length < 1">
+            <div>
               <p>
                 {{plannedActivityToday.advice}}
               </p>
@@ -84,7 +84,7 @@
               </div>
             </div>
           </div>
-          <div class="top-buffer-2x" ng-show="trainingDayToday.completedActivities.length > 0">
+          <div ng-show="trainingDayToday.completedActivities.length > 0">
             <h4>Completed Rides</h4>
             <table class="table table-bordered table-hover table-condensed">
               <tr>
@@ -109,6 +109,7 @@
                 </td>
               </tr>
             </table>
+            <label>Training Effort Rating: <i>{{todayMetrics.loadRating}}</i></label>
           </div>
         </md-card-content>
       </md-card>

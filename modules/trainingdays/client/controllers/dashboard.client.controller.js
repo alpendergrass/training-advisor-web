@@ -42,6 +42,7 @@ angular.module('trainingDays')
         $scope.plannedActivityToday = Util.getPlannedActivity(trainingDayToday, 'advised');
         $scope.plannedActivityDescriptionToday = Util.getPlannedActivityDescription($scope.plannedActivityToday, trainingDayToday.scheduledEventRanking);
         $scope.requestedActivityToday = Util.getPlannedActivity(trainingDayToday, 'requested');
+        $scope.todayMetrics = Util.getMetrics($scope.trainingDayToday, 'actual');
 
         var trainingDayTomorrow = response.advisedTomorrow;
         trainingDayTomorrow.date = moment(trainingDayTomorrow.dateNumeric.toString()).toDate();
