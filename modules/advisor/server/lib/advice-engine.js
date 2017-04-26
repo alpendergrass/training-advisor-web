@@ -72,7 +72,18 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
       // Rule priority only applies if ALL rules have (non-zero) priority. Done.
 
       // user.recoveryRate is 0 - 10, slow to fast recovery.
-      let userThresholdAdjustment = 10 - user.recoveryRate;
+      let recoveryRateMultiplier = 1;
+
+      if (facts.metricsOneDayPrior) {
+        if (facts.metricsOneDayPrior.loadRating === 'hard') {
+          // I don't want to see another hard day if I'm a slow recoverer.
+          recoveryRateMultiplier = 2;
+        } else if (facts.metricsOneDayPrior.loadRating === 'moderate') {
+          recoveryRateMultiplier = 1.4;
+        }
+      }
+
+      let userThresholdAdjustment = (10 - user.recoveryRate) * recoveryRateMultiplier;
       facts.testingDueEasyDayThreshold = adviceConstants.testingDueEasyDayThreshold + userThresholdAdjustment;
 
       var R = new RuleEngine(adviceEvent.eventRules);
