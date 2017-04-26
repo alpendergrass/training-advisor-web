@@ -2,6 +2,24 @@
 
 var releaseNotes = [
   {
+    version: '0.9.3',
+    title: 'Forecast Feature, Recovery Adjustment, Yesterday on Dashboard - 0.9.3',
+    message: 'Lots of goodness in this release!',
+    features: [
+      'We are highlighting our fitness prediction capabilities by relabeling our "Update Season" button to be "Update Forecast". This feature is not new but is unique to Tacit Training and we want to make sure you understand what it can do for you.',
+      'To help you tailor our recommendations to your abilities we added a "Speed Of Recovery" adjustment to My Profile page.',
+      'We added yesterday\'s rides to the dashboard.',
+      'Added Training Effort Rating for today on dashboard.',
+      'We now combine load and intensity to rate a day\'s training effort in order to provide more appropriate recommendations for subsequent days.',
+      'We are defaulting Strava activity and FTP auto-fetch to enabled for new users.',
+      'Only show auto-fetch FTP option to Strava premium members as basic Strava members can not set FTP in Strava.'
+    ],
+    fixes: [
+      'Cut down on redundant error reporting.',
+      'Remove FTP needed notification if we retrieve a valid FTP from Strava.'
+    ]
+  },
+  {
     version: '0.9.2',
     title: 'Forecast Feature, Recovery Adjustment, Yesterday on Dashboard - 0.9.2',
     message: 'Lots of goodness in this release!',
