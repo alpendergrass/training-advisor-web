@@ -7,6 +7,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
   advicePeriod = require('./advice-period'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceConstants = require('./advice-constants'),
@@ -143,7 +144,7 @@ function updateMetricsForDay(params, callback) {
         return callback(null, null);
       }
 
-      var numericPriorDate = util.toNumericDate(moment(params.trainingDay.dateNumeric.toString()).subtract(1, 'day'));
+      var numericPriorDate = coreUtil.toNumericDate(moment(params.trainingDay.dateNumeric.toString()).subtract(1, 'day'));
 
       dbUtil.getTrainingDayDocument(params.user, numericPriorDate)
         .then(function(priorTrainingDay) {
@@ -303,7 +304,7 @@ function computeSevenDayRampRate(user, trainingDay, metricsType, callback) {
   // and very jagged when comparing unlike. This is all a matter of timing. How can we smooth the line consistently?
   // Average across 7 days?
 
-  var priorDate = util.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(7, 'days')),
+  var priorDate = coreUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(7, 'days')),
     todayMetrics,
     priorDayMetrics,
     rampRate;

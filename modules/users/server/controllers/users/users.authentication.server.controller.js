@@ -2,10 +2,12 @@
 
 
 var path = require('path'),
+  _ = require('lodash'),
+  moment = require('moment-timezone'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller')),
   coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   userUtil = require(path.resolve('./modules/users/server/lib/user-util')),
-  _ = require('lodash'),
+  tdLib = require(path.resolve('./modules/trainingdays/server/lib/trainingdays')),
   mongoose = require('mongoose'),
   passport = require('passport');
 
@@ -209,9 +211,42 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
               let eventData = { category: 'User', action: 'New User Login', path: path };
               coreUtil.logAnalytics(req, pageData, eventData, user);
 
-              user.save(function(err) {
-                return done(err, user);
-              });
+              user.save()
+                .then(function(savedUser) {
+                  let req = { user: savedUser, body: {} };
+                  req.body.startingPoint = true;
+                  req.body.dateNumeric = coreUtil.toNumericDate(moment().subtract(60, 'days'));
+                  req.body.name = 'Default Start Day';
+                  req.body.actualFitness = 30;
+                  req.body.actualFatigue = 30;
+                  req.body.notes = '';
+
+                  tdLib.createTrainingDay(req, function(err, trainingDay) {
+                    if (err) {
+                      // log it then ignore.
+                      console.log('saveOAuthUserProfile create initial start day err: ', err);
+                    }
+
+                    console.log('Generated default start day for user: ', savedUser.username);
+                    return done(null, savedUser);
+                  });
+                })
+                .catch(function(err) {
+                  return done(err, user);
+                });
+
+              // user.save(function(err) {
+              //   // Create start day.
+              //   util.createTrainingDay(req, function(err, trainingDay) {
+              //     if (err) {
+              //       return res.status(400).send({
+              //         message: errorHandler.getErrorMessage(err)
+              //       });
+              //     }
+
+              //     return done(err, user);
+              //   });
+              // });
             });
           } else {
             //user exists, let's save providerData so we have the latest.

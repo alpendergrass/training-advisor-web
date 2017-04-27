@@ -10,7 +10,7 @@ var path = require('path'),
   validator = require('validator'),
   generatePassword = require('generate-password'),
   owasp = require('owasp-password-strength-test'),
-  tdUtil = require(path.resolve('./modules/trainingdays/server/lib/util'));
+  coreUtil = require(path.resolve('./modules/core/server/lib/util'));
 
 mongoose.Promise = global.Promise;
 
@@ -112,7 +112,7 @@ var UserSchema = new Schema({
     },
     ftpDateNumeric: {
       type: Number,
-      default: tdUtil.toNumericDate(moment().toDate())
+      default: coreUtil.toNumericDate(moment().toDate())
     },
     ftpSource: {
       type: String,

@@ -3,20 +3,18 @@
 var path = require('path'),
   _ = require('lodash'),
   moment = require('moment'),
-  mongoose = require('mongoose');
-
-mongoose.Promise = global.Promise;
-
-var TrainingDay = mongoose.model('TrainingDay'),
-  User = mongoose.model('User'),
+  mongoose = require('mongoose'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
   err;
 
+mongoose.Promise = global.Promise;
 
 var removeOrphanedNotifications = function(notifications) {
   // Here we will remove any notifications that are associated with training days that no longer exist.
   return new Promise(function(resolve, reject) {
     return Promise.all(notifications.map(function(notification) {
+      let TrainingDay = mongoose.model('TrainingDay');
+
       if (notification.lookup) {
         // We are assuming that the lookup is an TD ID.
         let countTDs = TrainingDay.count({ _id: notification.lookup }).exec();
@@ -129,7 +127,8 @@ module.exports = {};
 
 module.exports.updateFatigueTimeConstant = function(id, trainingEffortFeedback, callback) {
   //Adjust user.fatigueTimeConstant based on trainingDay.trainingEffortFeedback
-  var computedConstant;
+  var computedConstant,
+    User = mongoose.model('User');
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     err = new TypeError('user id is not valid');
@@ -292,6 +291,7 @@ module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser) 
 module.exports.getUserByStravaID = function(id) {
   return new Promise(function(resolve, reject) {
     // We are assuming that user.provider ==='strava'
+    let User = mongoose.model('User');
     let findUser = User.findOne({ 'providerData.id': id }).exec();
 
     findUser

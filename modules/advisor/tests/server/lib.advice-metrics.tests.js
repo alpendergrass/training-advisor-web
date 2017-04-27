@@ -7,7 +7,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
-  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
   adviceConstants = require('../../server/lib/advice-constants'),
@@ -30,7 +30,7 @@ describe('advice-metrics Unit Tests:', function () {
       params.user = newUser;
 
       trainingDate = moment().startOf('day').toDate();
-      params.numericDate = util.toNumericDate(trainingDate);
+      params.numericDate = coreUtil.toNumericDate(trainingDate);
 
       params.metricsType = 'actual';
 
@@ -207,7 +207,7 @@ describe('advice-metrics Unit Tests:', function () {
           console.log('createStartingPoint: ' + err);
         }
 
-        params.numericDate = util.toNumericDate(moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays, 'days'));
+        params.numericDate = coreUtil.toNumericDate(moment(trainingDate).add(adviceConstants.minimumNumberOfTrainingDays, 'days'));
 
         return adviceMetrics.updateMetrics(params, function (err, trainingDay) {
           should.not.exist(err);

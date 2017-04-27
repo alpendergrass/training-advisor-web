@@ -1,11 +1,12 @@
 'use strict';
 
-var moment = require('moment-timezone'),
+var path = require('path'),
+  moment = require('moment-timezone'),
   _ = require('lodash'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
-  util = require('./util'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   err;
 
 mongoose.Promise = global.Promise;
@@ -131,7 +132,7 @@ module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate
       module.exports.getTrainingDayDocument(user, currentNumeric)
         .then(function(trainingDay) {
           trainingDays.push(trainingDay);
-          currentNumeric = util.toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
+          currentNumeric = coreUtil.toNumericDate(moment(currentNumeric.toString()).add(1, 'day'));
           callback(null, trainingDay);
         })
         .catch(function(err) {
@@ -226,7 +227,7 @@ module.exports.getFuturePriorityDays = function(user, numericSearchDate, priorit
       return reject(err);
     }
 
-    var numericMaxDate = util.toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
+    var numericMaxDate = coreUtil.toNumericDate(moment(numericSearchDate.toString()).add(numberOfDaysOut, 'days'));
 
     var query = {
       user: user,
@@ -263,7 +264,7 @@ module.exports.getPriorPriorityDays = function(user, numericSearchDate, priority
     return callback(err, null);
   }
 
-  var numericMinDate = util.toNumericDate(moment(numericSearchDate.toString()).subtract(numberOfDaysBack, 'days'));
+  var numericMinDate = coreUtil.toNumericDate(moment(numericSearchDate.toString()).subtract(numberOfDaysBack, 'days'));
 
   var query = {
     user: user,
@@ -624,7 +625,7 @@ module.exports.didWeGoHardTheDayBefore = function(user, numericSearchDate, metri
     return callback(err, null);
   }
 
-  var numericYesterday = util.toNumericDate(moment(numericSearchDate.toString()).subtract(1, 'day'));
+  var numericYesterday = coreUtil.toNumericDate(moment(numericSearchDate.toString()).subtract(1, 'day'));
 
   // We need to check for the existence of completedActivities below
   // as the loadRating could be from a genPlan where the completedActivities
@@ -672,7 +673,7 @@ module.exports.computeAverageRampRate = function(user, numericSearchDate, metric
       return reject(err);
     }
 
-    let numericStartDate = util.toNumericDate(moment(numericSearchDate.toString()).subtract(7, 'days'));
+    let numericStartDate = coreUtil.toNumericDate(moment(numericSearchDate.toString()).subtract(7, 'days'));
 
     TrainingDay.aggregate([
       {
@@ -720,7 +721,7 @@ module.exports.aggregateLoad = function(user, numericEndDate) {
       return reject(err);
     }
 
-    let numericStartDate = util.toNumericDate(moment(numericEndDate.toString()).startOf('month').subtract(9, 'months'));
+    let numericStartDate = coreUtil.toNumericDate(moment(numericEndDate.toString()).startOf('month').subtract(9, 'months'));
 
     TrainingDay.aggregate([
       {

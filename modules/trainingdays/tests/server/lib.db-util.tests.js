@@ -8,7 +8,7 @@ var path = require('path'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
   testHelpers = require('./util/test-helpers'),
-  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   dbUtil = require('../../server/lib/db-util');
 
 var user, trainingDate, numericDate, tomorrowDate, numericEndDate, endDate, trainingDay, metricsParams;
@@ -24,11 +24,11 @@ describe('db-util Unit Tests:', function() {
       user = newUser;
 
       trainingDate = moment().startOf('day').toDate();
-      numericDate = util.toNumericDate(trainingDate);
+      numericDate = coreUtil.toNumericDate(trainingDate);
       tomorrowDate = moment().add(1, 'day').toDate();
-      // numericTomorrowDate = util.toNumericDate(tomorrowDate);
+      // numericTomorrowDate = coreUtil.toNumericDate(tomorrowDate);
       endDate = moment().add(2, 'days').toDate();
-      numericEndDate = util.toNumericDate(endDate);
+      numericEndDate = coreUtil.toNumericDate(endDate);
       trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
 
       metricsParams = {
@@ -598,7 +598,7 @@ describe('db-util Unit Tests:', function() {
     });
 
     // it('should return null rawResponse if trainingDate is tomorrow', function(done) {
-    //   return dbUtil.clearFutureMetricsAndAdvice(user, util.toNumericDate(moment(trainingDate).add(1, 'day')), metricsType, function(err, rawResponse) {
+    //   return dbUtil.clearFutureMetricsAndAdvice(user, coreUtil.toNumericDate(moment(trainingDate).add(1, 'day')), metricsType, function(err, rawResponse) {
     //     should.not.exist(err);
     //     should.not.exist(rawResponse);
     //     done();
@@ -606,7 +606,7 @@ describe('db-util Unit Tests:', function() {
     // });
 
     it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past trainingDate', function(done) {
-      metricsParams.numericDate = util.toNumericDate(moment(trainingDate).subtract(1, 'day'));
+      metricsParams.numericDate = coreUtil.toNumericDate(moment(trainingDate).subtract(1, 'day'));
       return dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
         should.not.exist(err);
         (rawResponse.n).should.equal(0);
@@ -639,7 +639,7 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        metricsParams.numericDate = util.toNumericDate(moment(trainingDate).subtract(2, 'days'));
+        metricsParams.numericDate = coreUtil.toNumericDate(moment(trainingDate).subtract(2, 'days'));
         dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
           should.not.exist(err);
           (rawResponse.n).should.equal(1);
@@ -663,7 +663,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          metricsParams.numericDate = util.toNumericDate(moment(trainingDate).subtract(2, 'days'));
+          metricsParams.numericDate = coreUtil.toNumericDate(moment(trainingDate).subtract(2, 'days'));
           return dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(1);
@@ -693,7 +693,7 @@ describe('db-util Unit Tests:', function() {
               console.log('makeSimDay: ' + err);
             }
 
-            metricsParams.numericDate = util.toNumericDate(moment(trainingDate).subtract(2, 'days'));
+            metricsParams.numericDate = coreUtil.toNumericDate(moment(trainingDate).subtract(2, 'days'));
             return dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
               should.not.exist(err);
               (rawResponse.n).should.equal(1);
@@ -719,7 +719,7 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          metricsParams.numericDate = util.toNumericDate(moment(trainingDate).subtract(2, 'days'));
+          metricsParams.numericDate = coreUtil.toNumericDate(moment(trainingDate).subtract(2, 'days'));
           return dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
             should.not.exist(err);
             (rawResponse.n).should.equal(0);

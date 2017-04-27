@@ -6,6 +6,7 @@ var path = require('path'),
   moment = require('moment'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   testHelpers = require(path.resolve('./modules/trainingdays/tests/server/util/test-helpers')),
@@ -29,7 +30,7 @@ describe('advice-engine Unit Tests:', function () {
       params.selectNewWorkout = true;
 
       trainingDate = new Date();
-      params.numericDate = util.toNumericDate(trainingDate);
+      params.numericDate = coreUtil.toNumericDate(trainingDate);
 
       done();
     });

@@ -17,6 +17,7 @@ var path = require('path'),
   adviceDefault = require('./advice-default'),
   adviceT0 = require('./advice-t0'),
   adviceInSeason = require('./advice-season'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   workoutUtil = require('./workout-util'),
   tdUtil = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
@@ -27,9 +28,9 @@ mongoose.Promise = global.Promise;
 
 function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
   var facts = {};
-  // var subsequentDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
-  var oneDayPriorDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
-  var twoDaysPriorDate = tdUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(2, 'days'));
+  // var subsequentDate = coreUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).add(1, 'day'));
+  var oneDayPriorDate = coreUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(1, 'day'));
+  var twoDaysPriorDate = coreUtil.toNumericDate(moment(trainingDay.dateNumeric.toString()).subtract(2, 'days'));
   var metricsType = tdUtil.setMetricsType(source);
 
   dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals)
@@ -245,7 +246,7 @@ module.exports.generatePlan = function(params) {
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
         } else {
           // We will still generate a plan without a goal but it won't be very interesting.
-          numericEffectiveGoalDate = tdUtil.toNumericDate(moment().add(3, 'months'));
+          numericEffectiveGoalDate = coreUtil.toNumericDate(moment().add(3, 'months'));
         }
 
         let metricsParams = {
@@ -271,7 +272,7 @@ module.exports.generatePlan = function(params) {
             })
             .then(function() {
               //get all training days from tomorrow thru last goal.
-              let tomorrowNumeric = tdUtil.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
+              let tomorrowNumeric = coreUtil.toNumericDate(moment(params.numericDate.toString()).add(1, 'day'));
 
               dbUtil.getTrainingDays(user, tomorrowNumeric, numericEffectiveGoalDate, function(err, trainingDays) {
                 if (err) {
@@ -322,7 +323,7 @@ module.exports.generatePlan = function(params) {
                     //We need to update metrics for last day as it will not be up to date otherwise.
                     // But if we call it for today we will clear the plannedActivity we just assigned to this day.
                     // So we call it for tomorrow.
-                    let nextDateNumeric = tdUtil.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
+                    let nextDateNumeric = coreUtil.toNumericDate(moment(trainingDays[trainingDays.length - 1].dateNumeric.toString()).add(1, 'day'));
                     metricsParams.numericDate = nextDateNumeric;
                     metricsParams.metricsType = 'planned';
 
@@ -424,7 +425,7 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
 
       if (tdDate.isSameOrBefore(today, 'day')) {
         //getAdvice for today and tomorrow.
-        adviceParams.numericDate = tdUtil.toNumericDate(today, user);
+        adviceParams.numericDate = coreUtil.toNumericDate(today, user);
 
         module.exports.advise(adviceParams, function(err, advisedToday) {
           if (err) {
@@ -432,7 +433,7 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
           }
 
           response.advisedToday = advisedToday;
-          adviceParams.numericDate = tdUtil.toNumericDate(tomorrow, user);
+          adviceParams.numericDate = coreUtil.toNumericDate(tomorrow, user);
           // selectNewWorkout only applies to the first day we are advising,
           // today or tomorrow but not both.
           adviceParams.selectNewWorkout = false;
@@ -454,7 +455,7 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
         });
       } else {
         //tdDate is tomorrow -> getAdvice for tomorrow.
-        adviceParams.numericDate = tdUtil.toNumericDate(tomorrow, user);
+        adviceParams.numericDate = coreUtil.toNumericDate(tomorrow, user);
 
         module.exports.advise(adviceParams, function(err, advisedTomorrow) {
           if (err) {

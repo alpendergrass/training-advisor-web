@@ -6,6 +6,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   err;
@@ -21,7 +22,7 @@ module.exports.createUser = function(callback) {
   let ftpLog = [{
     ftp: 250,
     ftpDate: moment(today).subtract(1, 'days'), //by default, let's make testing not due
-    ftpDateNumeric: util.toNumericDate(moment(today).subtract(1, 'days').toDate(), { timezone: timezone }),
+    ftpDateNumeric: coreUtil.toNumericDate(moment(today).subtract(1, 'days').toDate(), { timezone: timezone }),
     ftpSource: 'manual'
   }];
 
@@ -80,7 +81,7 @@ module.exports.createTrainingDayObject = function(trainingDate, user) {
 
   // Normally we get dateNumeric from client-side and use it to populate date.
   // Imitating that here.
-  let dateNumeric = util.toNumericDate(trainingDate, user);
+  let dateNumeric = coreUtil.toNumericDate(trainingDate, user);
 
   var trainingDay = new TrainingDay({
     date: moment.tz(dateNumeric.toString(), user.timezone).toDate(),

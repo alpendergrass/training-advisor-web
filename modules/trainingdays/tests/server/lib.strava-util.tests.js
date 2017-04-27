@@ -7,6 +7,7 @@ var path = require('path'),
   proxyquire = require('proxyquire').noPreserveCache(),
   User = mongoose.model('User'),
   TrainingDay = mongoose.model('TrainingDay'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   util = require(path.resolve('./modules/trainingdays/server/lib/util')),
   testHelpers = require('./util/test-helpers'),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants'));
@@ -153,7 +154,7 @@ describe('strava-util Unit Tests:', function() {
           // offset -360 for MDT.
 
           today = util.getTodayInUserTimezone(user);
-          todayNumeric = util.toNumericDate(today, user);
+          todayNumeric = coreUtil.toNumericDate(today, user);
           workoutDateOffset = moment(todayNumeric.toString()).utcOffset();
           workoutDate = moment(todayNumeric.toString()).add(workoutDateOffset, 'minutes').subtract(1, 'day').toDate();
 
@@ -170,7 +171,7 @@ describe('strava-util Unit Tests:', function() {
           };
 
           trainingDate = moment(todayNumeric.toString()).subtract(1, 'day').startOf('day').toDate();
-          downloadAllStartDateNumeric = util.toNumericDate(moment(todayNumeric.toString()).subtract(1, 'day'));
+          downloadAllStartDateNumeric = coreUtil.toNumericDate(moment(todayNumeric.toString()).subtract(1, 'day'));
 
           trainingDay = testHelpers.createTrainingDayObject(trainingDate, user);
 

@@ -6,6 +6,7 @@ var path = require('path'),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
   adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
   adviceConstants = require(path.resolve('./modules/advisor/server/lib/advice-constants')),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   util = require('./util'),
   dbUtil = require('./db-util'),
   strava = require('strava-v3'),
@@ -46,7 +47,7 @@ var updateFtpFromStrava = function(user, getRequestedByUser) {
         // With a manual FTP update, we get dateNumeric from client-side and use it to populate date.
         // Imitating that here.
         let today = util.getTodayInUserTimezone(user);
-        let ftpDateNumeric = util.toNumericDate(today, user);
+        let ftpDateNumeric = coreUtil.toNumericDate(today, user);
         let ftpDate = moment.tz(ftpDateNumeric.toString(), user.timezone).toDate();
 
         let newFtp = {
@@ -249,7 +250,7 @@ var downloadOneOfAll = function(user, activity, replaceExisting, startDateNumeri
 
   return new Promise(function(resolve, reject) {
     // activity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
-    let numericDate = util.toNumericDate(activity.start_date_local);
+    let numericDate = coreUtil.toNumericDate(activity.start_date_local);
     return dbUtil.getTrainingDayDocument(user, numericDate)
       .then(function(trainingDay) {
         return processActivity(activity, trainingDay, replaceExisting);
@@ -310,7 +311,7 @@ module.exports.fetchActivity = function(user, activityId) {
         return reject(new Error(`strava.activities.get access returned errors. username: ${user.username}, activityId: ${activityId}, message: ${payload.message}, errors: ${JSON.stringify(payload.errors)}`));
       }
 
-      let numericDate = util.toNumericDate(payload.start_date_local);
+      let numericDate = coreUtil.toNumericDate(payload.start_date_local);
 
       updateFtpFromStrava(user)
         .then(function(response) {
@@ -403,7 +404,7 @@ module.exports.downloadActivities = function(user, trainingDay) {
           // Processing sequentially to prevent versionError here.
           payload.reduce(function(promise, stravaActivity) {
             return promise.then(function() {
-              var numericStartDateLocal = util.toNumericDate(stravaActivity.start_date_local);
+              var numericStartDateLocal = coreUtil.toNumericDate(stravaActivity.start_date_local);
 
               if (numericStartDateLocal === trainingDay.dateNumeric) {
                 return processActivity(stravaActivity, trainingDay)
