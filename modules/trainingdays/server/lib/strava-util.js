@@ -189,6 +189,7 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
 
     if (replaceExisting) {
       let removeThese = _.filter(trainingDay.completedActivities, { 'sourceID': stravaActivity.id.toString(), 'edited': false });
+
       _.forEach(removeThese, function(removeThis) {
         trainingDay.completedActivities.pull(removeThis.id);
       });
@@ -259,20 +260,8 @@ var downloadOneOfAll = function(user, activity, replaceExisting, startDateNumeri
         if (processedTrainingDay) {
           processed = true;
           return processedTrainingDay.save();
-        }
-
-        return;
-      })
-      .then(function(savedTrainingDay) {
-        if (savedTrainingDay) {
-          if (savedTrainingDay.dateNumeric < startDateNumeric) {
-            // It's possible we got activities for the day prior to our start data - timezone caution.
-            return;
-          }
-
-          // RefreshAdvice to ensure metrics are up to date thru tomorrow.
-          // TODO: couldn't we just do this once? Call it for the last day processed? Or just updateMetrics?
-          return adviceEngine.refreshAdvice(user, savedTrainingDay);
+        } else {
+          return;
         }
       })
       .then(() => {
@@ -297,7 +286,6 @@ module.exports.getFTP = function(user) {
       });
   });
 };
-
 
 module.exports.fetchActivity = function(user, activityId) {
   return new Promise(function(resolve, reject) {
@@ -368,8 +356,7 @@ module.exports.downloadActivities = function(user, trainingDay) {
         title: 'Strava Download',
         created: Date.now(),
         username: user.username
-      },
-      params = {};
+      };
 
     console.log('Strava: Initiating downloadActivities for TacitTraining user: ', user.username);
 
@@ -474,8 +461,7 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
         created: Date.now(),
         username: user.username,
         activityCount: 0
-      },
-      params = {};
+      };
 
     console.log('Strava: Initiating downloadAllActivities for TacitTraining user: ', user.username);
 
@@ -532,15 +518,27 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
                 return resolve(statusMessage);
               }
 
-              if (activityCount > 1) {
-                countPhrase = activityCount + ' Strava activities';
-              } else {
-                countPhrase = 'one Strava activity';
-              }
+              let params = {
+                user: user,
+                numericDate: startDateNumeric,
+                metricsType: 'actual'
+              };
 
-              statusMessage.text = 'We downloaded ' + countPhrase + '.';
-              statusMessage.type = 'success';
-              return resolve(statusMessage);
+              dbUtil.clearFutureMetricsAndAdvice(params, function(err, rawResponse) {
+                if (err) {
+                  console.log('downloadAllActivities clearFutureMetricsAndAdvice error: ', err);
+                }
+
+                if (activityCount > 1) {
+                  countPhrase = activityCount + ' Strava activities';
+                } else {
+                  countPhrase = 'one Strava activity';
+                }
+
+                statusMessage.text = 'We downloaded ' + countPhrase + '.';
+                statusMessage.type = 'success';
+                return resolve(statusMessage);
+              });
             })
             .catch(function(err) {
               return reject(err);
