@@ -139,8 +139,7 @@ exports.oauthCallback = function(strategy) {
             console.log(`oauthCallback verifyUserSettings failed for user ${user.username} err: ${err}`);
           })
           .then(function() {
-            // We do not want to redirect to the home page after auth.
-            return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/')? sessionRedirectURL : '/dashboard');
+            return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/') ? sessionRedirectURL : '/dashboard');
           })
           .catch(function(err) {
             return res.redirect('/dashboard');
@@ -234,19 +233,6 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
                 .catch(function(err) {
                   return done(err, user);
                 });
-
-              // user.save(function(err) {
-              //   // Create start day.
-              //   util.createTrainingDay(req, function(err, trainingDay) {
-              //     if (err) {
-              //       return res.status(400).send({
-              //         message: errorHandler.getErrorMessage(err)
-              //       });
-              //     }
-
-              //     return done(err, user);
-              //   });
-              // });
             });
           } else {
             //user exists, let's save providerData so we have the latest.

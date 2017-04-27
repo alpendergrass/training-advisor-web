@@ -153,7 +153,7 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
                 toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', { allowHtml: true, timeOut: 7000 });
                 return;
               }
-              toastr.info('Strava sync started. We will notify you when completed. This could take a while. Perhaps now would be a good time for a cup of tea.', 'Strava Sync', { timeOut: 6000 });
+              toastr.info('Strava sync started. We will notify you when completed. This could take a while.', 'Strava Sync', { timeOut: 6000 });
               TrainingDays.downloadAllActivities({
                 todayNumeric: Util.toNumericDate(moment()),
                 replaceExisting: $scope.replaceExisting

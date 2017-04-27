@@ -1,10 +1,17 @@
 'use strict';
 
 angular.module('trainingDays')
-  .controller('DashboardController', ['$scope', '$location', '$compile', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment',
-    function($scope, $location, $compile, Authentication, TrainingDays, Season, Util, _, moment) {
+  .controller('DashboardController', ['$scope', '$state', '$compile', 'Authentication', 'TrainingDays', 'Season', 'Util', '_', 'moment',
+    function($scope, $state, $compile, Authentication, TrainingDays, Season, Util, _, moment) {
       $scope.authentication = Authentication;
       $scope._ = _;
+
+
+      var momentCreated = moment(Authentication.user.created);
+      // if this is a new user (created less than a few seconds ago), let's redirect to Strava sync.
+      if (momentCreated.isAfter(moment().subtract(20, 'seconds'))) {
+        $state.go('trainingDays.syncActivities');
+      }
 
       Season.getSeason(function(errorMessage, season) {
         if (season) {
