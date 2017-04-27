@@ -747,15 +747,16 @@ exports.downloadAllActivities = function(req, res) {
     stravaUtil.downloadAllActivities(req.user, numericLimitDate, replaceExisting)
       .then(function(response) {
         let syncResponse = response;
+        let notifications = [];
+        notifications.push({ notificationType: 'stravasync', lookup: '' });
 
         if (syncResponse.activityCount > 0) {
-          let notifications = [];
           notifications.push({ notificationType: 'plangen', lookup: '', add: true });
-
-          userUtil.updateNotifications(user, notifications, true)
-            .then(function(response) {})
-            .catch(function(err) {});
         }
+
+        userUtil.updateNotifications(user, notifications, true)
+          .then(function(response) {})
+          .catch(function(err) {});
         // No need to wait for updateNotifications as we are not returning user.
         return res.json(syncResponse);
       })

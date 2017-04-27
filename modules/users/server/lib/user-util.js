@@ -79,6 +79,12 @@ var adornNotification = function(notification) {
       alert: false,
       blocks: ''
     }, {
+      notificationType: 'stravasync',
+      message: 'You should do a Strava Activity Sync.',
+      state: 'trainingDays.syncActivities',
+      alert: false,
+      blocks: ''
+    }, {
       notificationType: 'plangen',
       message: 'You need to update your season forecast.',
       state: 'season',

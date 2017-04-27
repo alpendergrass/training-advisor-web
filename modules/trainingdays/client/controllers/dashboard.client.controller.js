@@ -9,7 +9,7 @@ angular.module('trainingDays')
 
       var momentCreated = moment(Authentication.user.created);
       // if this is a new user (created less than a few seconds ago), let's redirect to Strava sync.
-      if (momentCreated.isAfter(moment().subtract(20, 'seconds'))) {
+      if (momentCreated.isAfter(moment().subtract(5, 'seconds'))) {
         $state.go('trainingDays.syncActivities');
       }
 

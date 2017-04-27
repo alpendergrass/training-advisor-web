@@ -210,11 +210,15 @@ exports.saveOAuthUserProfile = function(req, providerUserProfile, done) {
               let eventData = { category: 'User', action: 'New User Login', path: path };
               coreUtil.logAnalytics(req, pageData, eventData, user);
 
-              user.save()
-                .then(function(savedUser) {
+              let notifications = [];
+              notifications.push({ notificationType: 'stravasync', lookup: '', add: true });
+
+              userUtil.updateNotifications(user, notifications, true)
+                .then(function(response) {
+                  let savedUser = response.user;
                   let req = { user: savedUser, body: {} };
                   req.body.startingPoint = true;
-                  req.body.dateNumeric = coreUtil.toNumericDate(moment().subtract(60, 'days'));
+                  req.body.dateNumeric = coreUtil.toNumericDate(moment().subtract(30, 'days'));
                   req.body.name = '';
                   req.body.actualFitness = 30;
                   req.body.actualFatigue = 30;
