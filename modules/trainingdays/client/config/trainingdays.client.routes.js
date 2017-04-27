@@ -142,7 +142,7 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
         backdrop: 'static', // click on backdrop does not close modal.
         reloadParent: true,
         url: '/syncActivities',
-        parent: 'season',
+        parent: 'dashboard',
         templateUrl: '/modules/trainingdays/client/views/partials/sync-activities.client.view.html',
         controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util', 'usSpinnerService',
           function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util, usSpinnerService) {
@@ -154,23 +154,20 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
                 return;
               }
               toastr.info('Strava sync started. We will notify you when completed. This could take a while. Perhaps now would be a good time for a cup of tea.', 'Strava Sync', { timeOut: 6000 });
-              $scope.syncUnderway = true;
-              usSpinnerService.spin('syncSpinner');
               TrainingDays.downloadAllActivities({
                 todayNumeric: Util.toNumericDate(moment()),
                 replaceExisting: $scope.replaceExisting
               }, function(response) {
                 $scope.syncUnderway = false;
-                usSpinnerService.stop('syncSpinner');
                 toastr[response.type](response.text, response.title, { timeOut: 6000 });
-                $uibModalInstance.close(response);
               }, function(errorResponse) {
                 console.log('errorResponse: ', errorResponse);
                 $scope.syncUnderway = false;
                 usSpinnerService.stop('syncSpinner');
                 toastr.error(errorResponse.data.message, { timeOut: 7000 });
-                $uibModalInstance.close('sync');
               });
+
+              $uibModalInstance.close();
             };
             $scope.cancelSync = function() {
               $uibModalInstance.dismiss('cancel');
