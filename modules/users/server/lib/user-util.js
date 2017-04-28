@@ -82,7 +82,7 @@ var adornNotification = function(notification) {
       notificationType: 'stravasync',
       message: 'You should do a Strava Activity Sync.',
       state: 'trainingDays.syncActivities',
-      alert: false,
+      alert: true,
       blocks: ''
     }, {
       notificationType: 'plangen',

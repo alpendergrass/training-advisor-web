@@ -67,7 +67,6 @@
 
     <hr>
     <label>Functional Threshold Power *</label>
-    <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* Please provide FTP *</strong></div>
     <div>
       <p>
         <table class="table table-hover">
@@ -130,6 +129,7 @@
         </button>
         <div ng-show="user.providerData && user.providerData.premium"><a href="{{ 'https://www.strava.com/settings/performance' }}" class="strava-link" target="_blank"><strong>Strava Performance Settings</strong> <i class="material-icons md-18">open_in_new</i></a></div>
       </p>
+    <div class="text-danger bottom-buffer" ng-show="user.ftpLog.length < 1"><strong>* Please provide FTP *</strong></div>
     </div>
 
 
