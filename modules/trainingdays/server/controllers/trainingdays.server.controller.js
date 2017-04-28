@@ -724,6 +724,7 @@ exports.downloadAllActivities = function(req, res) {
   let user = req.user;
   let numericToday = parseInt(req.params.todayNumeric, 10);
   let replaceExisting = JSON.parse(req.query.replaceExisting); // Converts string to boolean.
+  let syncResponse = null;
 
   dbUtil.getStartDay(user, numericToday, function(err, startDay) {
     if (err) {
@@ -739,32 +740,43 @@ exports.downloadAllActivities = function(req, res) {
       });
     }
 
-    let numericLimitDate = coreUtil.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
-    if (numericLimitDate < startDay.dateNumeric) {
-      numericLimitDate = startDay.dateNumeric;
-    }
+    let notifications = [];
+    // We remove this notification before downloadAll because this is the only way
+    // we could find to keep it from reappearing. Stupid notifications.
+    notifications.push({ notificationType: 'stravasync', lookup: '' });
 
-    stravaUtil.downloadAllActivities(req.user, numericLimitDate, replaceExisting)
+    userUtil.updateNotifications(user, notifications, true)
       .then(function(response) {
-        let syncResponse = response;
-        let notifications = [];
-        notifications.push({ notificationType: 'stravasync', lookup: '' });
-
-        if (syncResponse.activityCount > 0) {
-          notifications.push({ notificationType: 'plangen', lookup: '', add: true });
+        let numericLimitDate = coreUtil.toNumericDate(moment(numericToday.toString()).subtract(2, 'months'));
+        if (numericLimitDate < startDay.dateNumeric) {
+          numericLimitDate = startDay.dateNumeric;
         }
 
-        userUtil.updateNotifications(user, notifications, true)
-          .then(function(response) {})
-          .catch(function(err) {});
-        // No need to wait for updateNotifications as we are not returning user.
-        return res.json(syncResponse);
+        return stravaUtil.downloadAllActivities(user, numericLimitDate, replaceExisting);
+      })
+      .then(function(response) {
+        syncResponse = response;
+
+        if (syncResponse.activityCount > 0) {
+          notifications = [];
+          notifications.push({ notificationType: 'plangen', lookup: '', add: true });
+          return userUtil.updateNotifications(user, notifications, true);
+        } else {
+          return Promise.resolve({ user: user });
+        }
+      })
+      .then(function(response) {
+        return res.json({ user: response.user, message: syncResponse });
       })
       .catch(function(err) {
-        console.log('Strava downloadAllActivities err: ', err);
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
+        if (syncResponse) {
+          return res.json(syncResponse);
+        } else {
+          console.log('Strava downloadAllActivities err: ', err);
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        }
       });
   });
 };

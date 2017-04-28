@@ -1,15 +1,18 @@
 <div class="modal-header">
   <h3 class="modal-title">Sync Strava Activities</h3>
 </div>
-<div class="modal-body">
+<div ng-hide="syncAdvised" class="modal-body">
   <p>We will download all of your cycling activities from your start day (up to two months ago) through today.</p>
-  <p>To compute accurate loads we need the appropriate FTP for each day processed. For the most accurate results, if your FTP has changed in the last two months, you should provide historical FTP's on the <a ui-sref="settings.profile">My Profile</a> page before you sync.</p>
+  <p>To compute accurate loads we need the appropriate FTP for each day processed. For the most accurate results, if your FTP has changed significantly in the last two months, you should provide historical FTP's on the <a ui-sref="settings.profile">My Profile</a> page before you sync.</p>
   <div class="form-group">
     <label for="replaceExisting">
       <input type="checkbox" name="replaceExisting" ng-model="replaceExisting" id="replaceExisting">&nbsp;&nbsp;Replace previously synced activities.
     </label>
     <br/><em><small>We will not replace any activities that you edited In Tacit Training.</small></em>
   </div>
+</div>
+<div ng-show="syncAdvised" class="modal-body">
+  <p>You should sync your Strava Activities. We will download all of your Strava cycling activities up to 30 days ago through today. This process will occur in the background and we will notify you when we are finished. After the sync completes you should reload Tacit Training.</p>
 </div>
 <div class="modal-footer">
   <div class="top-buffer-4x" us-spinner="{radius: 10, width: 3, length: 6}" spinner-key="syncSpinner" style="position: relative"></div>

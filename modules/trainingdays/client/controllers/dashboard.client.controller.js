@@ -9,7 +9,7 @@ angular.module('trainingDays')
 
       var momentCreated = moment(Authentication.user.created);
       // if this is a new user (created less than a few seconds ago), let's redirect to Strava sync.
-      if (momentCreated.isAfter(moment().subtract(5, 'seconds'))) {
+      if (momentCreated.isAfter(moment().subtract(3, 'seconds'))) {
         $state.go('trainingDays.syncActivities');
       }
 
@@ -61,12 +61,7 @@ angular.module('trainingDays')
       }, function(errorResponse) {
         // TODO: what should we do if error?
         if (errorResponse.data && errorResponse.data.message) {
-          // if (errorResponse.data.message === 'Starting date for current training period was not found.') {
-          //   // We want to come back here after we create start.
-          //   $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
-          // } else {
           $scope.error = errorResponse.data.message;
-          // }
         } else {
           $scope.error = 'Server error prevented refreshAdvice.';
         }
@@ -79,12 +74,7 @@ angular.module('trainingDays')
       }, function(errorResponse) {
         // TODO: what should we do if error?
         if (errorResponse.data && errorResponse.data.message) {
-          // if (errorResponse.data.message === 'Starting date for current training period was not found.') {
-          //   // We want to come back here after we create start.
-          //   $state.go('trainingDays.createStart', { forwardTo: 'trainingDayView' });
-          // } else {
           $scope.error = errorResponse.data.message;
-          // }
         } else {
           $scope.error = 'Server error prevented events retrieval.';
         }

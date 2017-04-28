@@ -218,7 +218,6 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
           notification.blocked = _.includes(blocks, notification.notificationType);
         });
 
-
         if (!saveUser) {
           return resolve({ user: user, saved: false });
         }

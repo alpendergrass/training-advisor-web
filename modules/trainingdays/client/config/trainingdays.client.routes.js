@@ -144,26 +144,26 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
         url: '/syncActivities',
         parent: 'dashboard',
         templateUrl: '/modules/trainingdays/client/views/partials/sync-activities.client.view.html',
-        controller: ['$scope', '$uibModalInstance', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util', 'usSpinnerService',
-          function($scope, $uibModalInstance, moment, toastr, Authentication, TrainingDays, Util, usSpinnerService) {
+        controller: ['$scope', '$uibModalInstance', '_', 'moment', 'toastr', 'Authentication', 'TrainingDays', 'Util',
+          function($scope, $uibModalInstance, _, moment, toastr, Authentication, TrainingDays, Util) {
+            var notificationTypes = _.flatMap(Authentication.user.notifications, function(n) { return n.notificationType; });
+            $scope.syncAdvised = _.includes(notificationTypes, 'stravasync');
             $scope.replaceExisting = false;
-            $scope.syncUnderway = false;
+
             $scope.syncActivities = function() {
               if (Authentication.user.ftpLog.length < 1) {
                 toastr.error('You must set <a class="decorated-link" href="/settings/profile">Functional Threshold Power</a> before you can get Strava activities.', { allowHtml: true, timeOut: 7000 });
                 return;
               }
-              toastr.info('Strava sync started. We will notify you when completed. This could take a while.', 'Strava Sync', { timeOut: 6000 });
+              toastr.info('Strava sync started. We will notify you when completed.', 'Strava Sync', { timeOut: 6000 });
               TrainingDays.downloadAllActivities({
                 todayNumeric: Util.toNumericDate(moment()),
                 replaceExisting: $scope.replaceExisting
               }, function(response) {
-                $scope.syncUnderway = false;
-                toastr[response.type](response.text, response.title, { timeOut: 6000 });
+                Authentication.user = response.user;
+                toastr[response.message.type](response.message.text, response.message.title, { timeOut: 6000 });
               }, function(errorResponse) {
                 console.log('errorResponse: ', errorResponse);
-                $scope.syncUnderway = false;
-                usSpinnerService.stop('syncSpinner');
                 toastr.error(errorResponse.data.message, { timeOut: 7000 });
               });
 

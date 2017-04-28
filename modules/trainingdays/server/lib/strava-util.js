@@ -535,7 +535,7 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
                   countPhrase = 'one Strava activity';
                 }
 
-                statusMessage.text = 'We downloaded ' + countPhrase + '.';
+                statusMessage.text = 'We downloaded ' + countPhrase + '. You should reload Tacit Training.';
                 statusMessage.type = 'success';
                 return resolve(statusMessage);
               });
