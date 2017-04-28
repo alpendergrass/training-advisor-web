@@ -247,7 +247,7 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
 };
 
 var downloadOneOfAll = function(user, activity, replaceExisting, startDateNumeric) {
-  let processed = false;
+  let result = { processed: false, trainingDay: null };
 
   return new Promise(function(resolve, reject) {
     // activity.start_date_local is formatted as UTC but is a local time: 2016-09-29T10:17:15Z
@@ -258,14 +258,15 @@ var downloadOneOfAll = function(user, activity, replaceExisting, startDateNumeri
       })
       .then(function(processedTrainingDay) {
         if (processedTrainingDay) {
-          processed = true;
+          result.processed = true;
           return processedTrainingDay.save();
         } else {
           return;
         }
       })
-      .then(() => {
-        return resolve(processed);
+      .then(savedTrainingDay => {
+        result.trainingDay = savedTrainingDay;
+        return resolve(result);
       })
       .catch(err => {
         return reject(err);
@@ -453,6 +454,7 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
   return new Promise(function(resolve, reject) {
     let searchDate = moment(startDateNumeric.toString()).unix(),
       activityCount = 0,
+      lastTD = null,
       countPhrase = '',
       statusMessage = {
         type: '',
@@ -500,9 +502,10 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
           payload.reduce(function(promise, stravaActivity) {
             return promise.then(function() {
               return downloadOneOfAll(user, stravaActivity, replaceExisting, startDateNumeric)
-                .then(processed => {
-                  if (processed) {
+                .then(result => {
+                  if (result.processed) {
                     activityCount++;
+                    lastTD = result.trainingDay;
                   }
 
                   return;
@@ -528,6 +531,12 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
                 if (err) {
                   console.log('downloadAllActivities clearFutureMetricsAndAdvice error: ', err);
                 }
+
+                adviceEngine.refreshAdvice(user, lastTD)
+                  .then(response => {})
+                  .catch(err => {
+                    console.log('downloadAllActivities refreshAdvice error: ', err);
+                  });
 
                 if (activityCount > 1) {
                   countPhrase = activityCount + ' Strava activities';
