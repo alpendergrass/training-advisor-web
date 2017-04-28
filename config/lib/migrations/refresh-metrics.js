@@ -5,11 +5,10 @@ var path = require('path'),
   moment = require('moment-timezone'),
   TrainingDay = mongoose.model('TrainingDay'),
   User = mongoose.model('User'),
-  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
-  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
-  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceEngine = require(path.resolve('./modules/advisor/server/lib/advice-engine')),
-  adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics'));
+  adviceMetrics = require(path.resolve('./modules/advisor/server/lib/advice-metrics')),
+  util = require(path.resolve('./modules/trainingdays/server/lib/util')),
+  dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util'));
 
 mongoose.Promise = global.Promise;
 
@@ -71,7 +70,7 @@ function refreshMetrics(user) {
 
     console.log(`user.username: ${user.username} timezone: ${timezone} today: ${today} started: ${new Date().toString()}`);
 
-    let todayNumeric = coreUtil.toNumericDate(today);
+    let todayNumeric = util.toNumericDate(today);
 
     let metricsParams = {
       user: user,
