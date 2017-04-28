@@ -241,9 +241,9 @@ module.exports.updateNotifications = function(user, notificationUpdates, saveUse
   });
 };
 
-module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser) {
+module.exports.verifyUserSettings = function(updatedUser, userBefore, saveUser, notificationUpdates) {
   return new Promise(function(resolve, reject) {
-    let notifications = [];
+    let notifications = notificationUpdates || [];
 
     if (!updatedUser.ftpLog || updatedUser.ftpLog.length < 1) {
       notifications.push({ notificationType: 'ftp', lookup: '', add: true });

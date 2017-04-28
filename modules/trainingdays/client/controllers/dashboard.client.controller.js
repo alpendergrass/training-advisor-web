@@ -13,6 +13,7 @@ angular.module('trainingDays')
         $state.go('trainingDays.syncActivities');
       }
 
+      // getSeason in order to update notifications.
       Season.getSeason(function(errorMessage, season) {
         if (season) {
           // Reload user object as notifications may have been updated.

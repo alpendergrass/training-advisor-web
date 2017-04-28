@@ -136,7 +136,7 @@ exports.oauthCallback = function(strategy) {
             user = response.user;
           })
           .catch(function(err) {
-            console.log(`oauthCallback verifyUserSettings failed for user ${user.username} err: ${err}`);
+            console.log(`Error: oauthCallback verifyUserSettings failed for user ${user.username} err: ${err}`);
           })
           .then(function() {
             return res.redirect(redirectURL || (sessionRedirectURL && sessionRedirectURL !== '/') ? sessionRedirectURL : '/dashboard');

@@ -443,20 +443,16 @@ exports.getSeason = function(req, res) {
               message: errorHandler.getErrorMessage(err)
             });
           } else {
-            if (notifications.length > 0) {
-              userUtil.updateNotifications(user, notifications, true)
-                .then(function(response) {
-                  // We will use user in first day to refresh notifications.
-                  trainingDays[0].user = response.user;
-                  return res.json(trainingDays);
-                })
-                .catch(function(err) {
-                  console.log('updateNotifications failed in TD.getSeason: ', err);
-                  return res.json(trainingDays);
-                });
-            } else {
-              return res.json(trainingDays);
-            }
+            userUtil.verifyUserSettings(user, null, true, notifications)
+              .then(function(response) {
+                // We will use user in first day to refresh notifications.
+                trainingDays[0].user = response.user;
+                return res.json(trainingDays);
+              })
+              .catch(function(err) {
+                console.log('updateNotifications failed in TD.getSeason: ', err);
+                return res.json(trainingDays);
+              });
           }
         });
       })
