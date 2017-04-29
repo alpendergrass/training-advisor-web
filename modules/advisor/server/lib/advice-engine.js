@@ -264,8 +264,6 @@ module.exports.generatePlan = function(params) {
 
           dbUtil.copyActualMetricsToPlanned(user, params.numericDate)
             .then(function() {
-              //We call updateMetrics here to ensure we have good starting metrics.
-
               //As a precaution we remove all planning data.
               //If we errored out last time there could be some left overs.
               return dbUtil.removePlanGenerationActivities(user, params.numericDate);

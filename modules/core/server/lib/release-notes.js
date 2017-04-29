@@ -2,6 +2,19 @@
 
 var releaseNotes = [
   {
+    version: '0.9.4',
+    title: 'Easier Start Up for New Users - Version 0.9.4',
+    message: '',
+    features: [
+      'Automatically create start day for new user.',
+      'Prompt new user to sync Strava after generating start day.',
+      'Update FAQ for these changes.'
+    ],
+    fixes: [
+      'We were not consistently setting time zone alert.'
+    ]
+  },
+  {
     version: '0.9.3',
     title: 'Forecast Feature, Recovery Adjustment, Yesterday on Dashboard - 0.9.3',
     message: 'Lots of goodness in this release!',
