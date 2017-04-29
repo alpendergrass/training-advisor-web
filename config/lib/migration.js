@@ -34,13 +34,14 @@ module.exports.migrate = function() {
     migration = new Migration(migrationConfig);
 
   // migration.addAllFromPath(path.join(__dirname, './migrations/'));
-  migration.add(path.join(__dirname, './migrations/restructure-metrics.js'));
-  migration.add(path.join(__dirname, './migrations/refresh-metrics.js'));
-  migration.add(path.join(__dirname, './migrations/migration-rename-periods.js'));
-  migration.add(path.join(__dirname, './migrations/migration-rename-activity-type.js'));
-  migration.add(path.join(__dirname, './migrations/migration-restructure-ftp.js'));
-  migration.add(path.join(__dirname, './migrations/migration-add-dailyload-to-metrics.js'));
-  // List future migrations here. Leave previous in place above.
+  // migration.add(path.join(__dirname, './migrations/restructure-metrics.js'));
+  // migration.add(path.join(__dirname, './migrations/refresh-metrics.js'));
+  // migration.add(path.join(__dirname, './migrations/migration-rename-periods.js'));
+  // migration.add(path.join(__dirname, './migrations/migration-rename-activity-type.js'));
+  // migration.add(path.join(__dirname, './migrations/migration-restructure-ftp.js'));
+  // migration.add(path.join(__dirname, './migrations/migration-add-dailyload-to-metrics.js'));
+  migration.add(path.join(__dirname, './migrations/migration-add-missing-start-days.js'));
+  // List future migrations here. Leave previous in place above. Or remove from migrations collection.
 
   return new Promise(function(resolve, reject) {
     console.log('Starting migration: ', new Date().toString());

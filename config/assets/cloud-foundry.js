@@ -46,6 +46,6 @@ module.exports = {
       ]
     },
     css: 'public/dist/application-7e41a58ea8.min.css',
-    js: 'public/dist/application-20ba16986f.min.js'
+    js: 'public/dist/application-25916af14a.min.js'
   }
 };
