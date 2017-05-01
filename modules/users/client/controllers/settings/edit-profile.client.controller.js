@@ -97,7 +97,7 @@ angular.module('users').controller('EditProfileController', ['$scope', '$http', 
 
     $scope.addFTP = function() {
       $scope.newFtp = {
-        ftp: 100,
+        ftp: 150,
         ftpDate: new Date(),
         ftpSource: 'manual'
       };
