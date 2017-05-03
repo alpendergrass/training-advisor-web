@@ -22,14 +22,14 @@
   </div>
   <div ng-show="allowEventEdit">
     <h4>
-      <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::eventRankings track by s.value" onbeforesave="updateEventRanking($data)">{{showRanking()}}</a>
+      <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::util.eventRankings track by s.value" onbeforesave="updateEventRanking($data)">{{dayRanking}}</a>
       <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking === 1"><small>Estimated Load: <a href="#" editable-textarea="trainingDay.estimatedLoad" e-rows="1" e-cols="5" onbeforesave="updateEstimatedLoad($data)">{{trainingDay.estimatedLoad}}</a></small></span>
-      <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking === 1"><small>Expected Terrain: <a href="#" editable-radiolist="trainingDay.eventTerrain" e-ng-options="s.value as s.text for s in ::eventTerrains track by s.value" onbeforesave="updateEventTerrain($data)">{{showTerrain()}}</a></small></span>
+      <span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking === 1"><small>Expected Terrain: <a href="#" editable-radiolist="trainingDay.eventTerrain" e-ng-options="s.value as s.text for s in ::util.eventTerrains track by s.value" onbeforesave="updateEventTerrain($data)">{{dayTerrain}}</a></small></span>
     </h4>
   </div>
   <div ng-hide="allowEventEdit">
     <h4>
-      {{showRanking()}}<span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking === 1"> <small>Estimated Training Load: {{trainingDay.estimatedLoad}} Expected Terrain: {{showTerrain()}}</small></span>
+      {{dayRanking}}<span ng-show="trainingDay.scheduledEventRanking && trainingDay.scheduledEventRanking === 1"> <small>Estimated Training Load: {{trainingDay.estimatedLoad}} Expected Terrain: {{dayTerrain}}</small></span>
     </h4>
   </div>
 

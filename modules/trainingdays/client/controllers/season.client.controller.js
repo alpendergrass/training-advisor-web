@@ -33,6 +33,12 @@ angular.module('trainingDays')
           planLoadBackgroundColors;
 
         var setPlanLoadBackgroundColor = function(td) {
+          if (td.htmlID && td.htmlID === 'today') {
+            // Highlight today by making it stand out a bit.
+            $scope.todayID = td._id;
+            return '#FFA07A';
+          }
+
           // Highlight goal event days.
           if (td.scheduledEventRanking === 1) {
             return '#BD7E7D';
@@ -40,12 +46,6 @@ angular.module('trainingDays')
 
           if (moment(td.date).isBefore($scope.today, 'day')) {
             return '#EAF1F5';
-          }
-
-          if (td.htmlID && td.htmlID === 'today') {
-            // Highlight today by making it stand out a bit.
-            $scope.todayID = td._id;
-            return '#FFA07A';
           }
 
           if (td.isSimDay) {
@@ -656,7 +656,6 @@ angular.module('trainingDays')
         };
 
         $scope.cancelSim = function() {
-          //TODO: confirm revert if simConfigUnderway
           if ($scope.simConfigUnderway || $scope.simHasRun) {
             $scope.revertSim();
           } else {
@@ -667,7 +666,8 @@ angular.module('trainingDays')
         $scope.openSimDay = function(id) {
           var modalInstance = $uibModal.open({
             templateUrl: 'simDay.html',
-            controller: ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
+            controller: ['$scope', '$uibModalInstance', 'Util', function($scope, $uibModalInstance, Util) {
+              $scope.util = Util;
               $scope.trainingDay = TrainingDays.getSimDay({
                 trainingDayId: id
               },
@@ -682,31 +682,6 @@ angular.module('trainingDays')
                   }
                 }
               );
-              $scope.eventRankings = [
-                { value: 0, text: 'Training Day' },
-                { value: 1, text: 'Goal Event' },
-                { value: 2, text: 'Medium Priority Event' },
-                { value: 3, text: 'Low Priority Event' },
-                { value: 9, text: 'Off Day' }
-              ];
-
-              $scope.eventTerrains = [
-                { value: 1, text: 'Flat' },
-                { value: 2, text: 'Slightly Hilly' },
-                { value: 3, text: 'Hilly' },
-                { value: 4, text: 'Very Hilly' },
-                { value: 5, text: 'Mountainous' }
-              ];
-
-              $scope.showRanking = function() {
-                var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking });
-                return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : 'Training Day';
-              };
-
-              $scope.showTerrain = function() {
-                var selected = $filter('filter')($scope.eventTerrains, { value: $scope.trainingDay.eventTerrain });
-                return ($scope.trainingDay.eventTerrain && selected.length) ? selected[0].text : 'Not Specified';
-              };
 
               $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
                 // If not a goal event, zero out estimate.
@@ -725,17 +700,9 @@ angular.module('trainingDays')
               };
             }],
             resolve: {
-              trainingDay: function() {
-                return $scope.trainingDay;
-              },
-              eventRankings: function() {
-                return $scope.eventRankings;
-              },
-              showRanking: function() {
-                return $scope.showRanking;
-              },
-              showTerrain: function() {
-                return $scope.showTerrain;
+              // These values will be made available to our modal controller by being passed into the constructor.
+              Util: function() {
+                return Util;
               }
             }
           });

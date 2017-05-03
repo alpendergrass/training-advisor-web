@@ -157,15 +157,12 @@
               <a ui-sref="trainingDayView({trainingDayId: futureEvent._id})" class="list-group-item">
                 <h5 class="list-group-item-heading">{{futureEvent.date | date:'EEEE, d MMM y'}}<span ng-show="futureEvent.name"> - {{futureEvent.name}}</span></h5>
                 <small>
-                  <div ng-show="futureEvent.scheduledEventRanking">
-                    <p class="list-group-item-text"><b>
-                      <span ng-show="futureEvent.scheduledEventRanking === 1">Goal Event!</span>
-                      <span ng-show="futureEvent.scheduledEventRanking === 2">Medium Priority Event</span>
-                      <span ng-show="futureEvent.scheduledEventRanking === 3">Low Priority Event</span>
-                      <span ng-show="futureEvent.scheduledEventRanking === 9">Off Day</span>
+                    <div class="list-group-item-text"><b>
+                      {{util.getRankingDescription(futureEvent.scheduledEventRanking)}}
                       </b>
-                    </p>
-                  </div>
+                    </div>
+                    <div ng-show="futureEvent.estimatedLoad">Load Estimate: {{futureEvent.estimatedLoad}}</div>
+                    <div ng-show="futureEvent.eventTerrain">Terrain: {{util.getTerrainDescription(futureEvent.eventTerrain)}}</div>
                 </small>
               </a>
             </div>

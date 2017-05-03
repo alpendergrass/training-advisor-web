@@ -5,7 +5,7 @@ angular.module('trainingDays')
     function($scope, $state, $compile, Authentication, TrainingDays, Season, Util, _, moment) {
       $scope.authentication = Authentication;
       $scope._ = _;
-
+      $scope.util = Util;
 
       var momentCreated = moment(Authentication.user.created);
       // if this is a new user (created less than a few seconds ago), let's redirect to Strava sync.

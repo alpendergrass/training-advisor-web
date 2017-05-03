@@ -175,7 +175,7 @@
         </div>
         <div class="col-xs-7">
           <h4>
-              <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::eventRankings track by s.value">{{showRanking()}}</a>
+              <a href="#" editable-radiolist="trainingDay.scheduledEventRanking" e-ng-options="s.value as s.text for s in ::util.eventRankings track by s.value">{{util.getRankingDescription(trainingDay.scheduledEventRanking)}}</a>
           </h4>
         </div>
       </div>
@@ -197,7 +197,7 @@
         </div>
         <div class="col-xs-7">
           <h4>
-              <a href="#" editable-radiolist="trainingDay.eventTerrain" e-ng-options="s.value as s.text for s in ::eventTerrains track by s.value">{{showTerrain()}}</a>
+              <a href="#" editable-radiolist="trainingDay.eventTerrain" e-ng-options="s.value as s.text for s in ::util.eventTerrains track by s.value">{{util.getTerrainDescription(trainingDay.eventTerrain)}}</a>
           </h4>
         </div>
       </div>

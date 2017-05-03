@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('trainingDays').service('Util', ['_', 'moment',
-  function(_, moment) {
+angular.module('trainingDays').service('Util', ['$filter', '_', 'moment',
+  function($filter, _, moment) {
     var getMetrics = function(trainingDay, metricsType) {
       return _.find(trainingDay.metrics, ['metricsType', metricsType]);
     };
@@ -106,12 +106,43 @@ angular.module('trainingDays').service('Util', ['_', 'moment',
       return parseInt(dateString, 10);
     };
 
+    var eventRankings = [
+      { value: 0, text: 'Training Day' },
+      { value: 1, text: 'Goal Event' },
+      { value: 2, text: 'Medium Priority Event' },
+      { value: 3, text: 'Low Priority Event' },
+      { value: 9, text: 'Off Day' }
+    ];
+
+    var getRankingDescription = function(eventRanking) {
+      var selected = $filter('filter')(eventRankings, { value: eventRanking });
+      return selected.length ? selected[0].text : 'Training Day';
+    };
+
+    var eventTerrains = [
+      { value: 1, text: 'Flat' },
+      { value: 2, text: 'Slightly Hilly' },
+      { value: 3, text: 'Hilly' },
+      { value: 4, text: 'Very Hilly' },
+      { value: 5, text: 'Mountainous' }
+    ];
+
+    var getTerrainDescription = function(terrainRanking) {
+      var selected = $filter('filter')(eventTerrains, { value: terrainRanking });
+      return selected.length ? selected[0].text : 'Not Specified';
+    };
+
+
     return {
       getMetrics: getMetrics,
       getPlannedActivity: getPlannedActivity,
       mapActivityTypeToVerbiage: mapActivityTypeToVerbiage,
       getPlannedActivityDescription: getPlannedActivityDescription,
-      toNumericDate: toNumericDate
+      toNumericDate: toNumericDate,
+      eventRankings: eventRankings,
+      eventTerrains: eventTerrains,
+      getRankingDescription: getRankingDescription,
+      getTerrainDescription: getTerrainDescription
     };
   }
 ]);

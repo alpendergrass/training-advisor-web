@@ -4,6 +4,7 @@ angular.module('trainingDays')
   .controller('TrainingDayController', ['$scope', '$state', '$stateParams', '$compile', '$filter', 'Authentication', 'TrainingDays', 'Feedback', 'Util', '_', 'moment', 'toastr', 'usSpinnerService',
     function($scope, $state, $stateParams, $compile, $filter, Authentication, TrainingDays, Feedback, Util, _, moment, toastr, usSpinnerService) {
       $scope.authentication = Authentication;
+      $scope.util = Util;
 
       var jQuery = window.jQuery;
       angular.element(document).ready(function() {
@@ -24,22 +25,6 @@ angular.module('trainingDays')
           { value: 'test', text: 'Do a threshold power test' }
         ];
 
-        $scope.eventRankings = [
-          { value: 1, text: 'Goal Event' },
-          { value: 2, text: 'Medium Priority Event' },
-          { value: 3, text: 'Low Priority Event' },
-          { value: 9, text: 'Off Day' },
-          { value: 0, text: 'Training Day' }
-        ];
-
-        $scope.eventTerrains = [
-          { value: 1, text: 'Flat' },
-          { value: 2, text: 'Slightly Hilly' },
-          { value: 3, text: 'Hilly' },
-          { value: 4, text: 'Very Hilly' },
-          { value: 5, text: 'Mountainous' }
-        ];
-
         function prepForTDView(trainingDay) {
           trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();
           $scope.previousDay = moment(trainingDay.date).subtract(1, 'day').toDate();
@@ -50,8 +35,20 @@ angular.module('trainingDays')
           $scope.showFormAndFitness = $scope.authentication.user.levelOfDetail > 1;
           $scope.source = moment(trainingDay.date).isSameOrBefore($scope.tomorrow, 'day') ? 'advised' : 'plangeneration';
           resetViewObjects(trainingDay);
-          $scope.checkGiveFeedback($scope.trainingDay);
+          $scope.checkGiveFeedback(trainingDay);
 
+        }
+
+        function showRanking(trainingDay) {
+          if (!trainingDay) {
+            return '';
+          }
+
+          if ($scope.trainingDay.scheduledEventRanking) {
+            return Util.getRankingDescription($scope.trainingDay.scheduledEventRanking);
+          } else {
+            return $scope.plannedActivity ? Util.mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
+          }
         }
 
         function resetViewObjects(trainingDay) {
@@ -60,30 +57,13 @@ angular.module('trainingDays')
           $scope.requestedActivity = Util.getPlannedActivity(trainingDay, 'requested');
           $scope.plannedMetrics = Util.getMetrics($scope.trainingDay, 'planned');
           $scope.actualMetrics = Util.getMetrics($scope.trainingDay, 'actual');
+          $scope.dayRanking = showRanking(trainingDay);
+          $scope.dayTerrain = Util.getTerrainDescription(trainingDay.eventTerrain);
         }
 
         // Check if provider is already in use with current user
         $scope.isConnectedSocialAccount = function(provider) {
           return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
-        };
-
-        $scope.showRanking = function() {
-          if (!$scope.trainingDay) {
-            return '';
-          }
-
-          var selected = $filter('filter')($scope.eventRankings, { value: $scope.trainingDay.scheduledEventRanking }),
-            dayText = $scope.plannedActivity ? Util.mapActivityTypeToVerbiage($scope.plannedActivity.activityType) : 'Training Day';
-          return ($scope.trainingDay.scheduledEventRanking && selected.length) ? selected[0].text : dayText;
-        };
-
-        $scope.showTerrain = function() {
-          if (!$scope.trainingDay) {
-            return '';
-          }
-
-          var selected = $filter('filter')($scope.eventTerrains, { value: $scope.trainingDay.eventTerrain });
-          return ($scope.trainingDay.eventTerrain && selected.length) ? selected[0].text : 'Not Specified';
         };
 
         $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
