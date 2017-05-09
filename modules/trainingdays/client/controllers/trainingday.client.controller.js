@@ -66,14 +66,6 @@ angular.module('trainingDays')
           return $scope.authentication.user.provider === provider || ($scope.authentication.user.additionalProvidersData && $scope.authentication.user.additionalProvidersData[provider]);
         };
 
-        $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
-          // If not a goal event, zero out estimates.
-          if ($scope.trainingDay && ranking !== 1) {
-            $scope.trainingDay.estimatedLoad = 0;
-            $scope.trainingDay.eventTerrain = 0;
-          }
-        });
-
         $scope.getDay = function(date) {
           $scope.error = null;
           var dateNumeric = Util.toNumericDate(date);
@@ -103,6 +95,10 @@ angular.module('trainingDays')
 
         $scope.updateEventRanking = function(priority) {
           if ((priority >= 0 && priority <= 3) || priority === 9) {
+            if (priority !== 1 && priority !== 2 && priority !== 3) {
+              $scope.trainingDay.estimatedLoad = 0;
+              $scope.trainingDay.eventTerrain = 0;
+            }
             return $scope.update($scope.trainingDay, function(trainingDay) {
               if (trainingDay) {
                 resetViewObjects(trainingDay);

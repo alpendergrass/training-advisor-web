@@ -38,7 +38,7 @@ angular.module('trainingDays')
       }
 
       $scope.$watch('scheduledEventRanking', function(ranking) {
-        if (ranking !== '1') {
+        if (ranking !== 1 && ranking !== 2 && ranking !== 3) {
           $scope.estimatedLoad = 0;
           $scope.eventTerrain = 0;
         }

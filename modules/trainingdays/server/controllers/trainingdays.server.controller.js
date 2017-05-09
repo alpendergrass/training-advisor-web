@@ -266,6 +266,7 @@ exports.update = function(req, res) {
     let user = req.user;
 
     if (trainingDay.scheduledEventRanking === 1) {
+      // TODO: should we do this if a sim day?
       // We prefer to know terrain for goal events.
       if (trainingDay.eventTerrain) {
         notifications.push({ notificationType: 'terrain', lookup: trainingDay.id });

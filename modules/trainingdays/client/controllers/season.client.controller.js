@@ -91,7 +91,7 @@ angular.module('trainingDays')
 
         var getPlanLoad = function(td) {
           // Return estimated load for goal event if provided.
-          if (td.scheduledEventRanking === 1 && td.estimatedLoad > 0) {
+          if ((td.scheduledEventRanking === 1 || td.scheduledEventRanking === 2 || td.scheduledEventRanking === 3) && td.estimatedLoad > 0) {
             return td.estimatedLoad;
           }
 
@@ -685,7 +685,7 @@ angular.module('trainingDays')
 
               $scope.$watch('trainingDay.scheduledEventRanking', function(ranking) {
                 // If not a goal event, zero out estimate.
-                if (String(ranking) !== '1') {
+                if (String(ranking) !== '1' && String(ranking) !== '2' && String(ranking) !== '3') {
                   $scope.trainingDay.estimatedLoad = 0;
                   $scope.trainingDay.eventTerrain = 0;
                 }

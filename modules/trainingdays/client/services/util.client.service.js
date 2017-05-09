@@ -28,7 +28,8 @@ angular.module('trainingDays').service('Util', ['$filter', '_', 'moment',
           eventPhrase = 'Off Day';
           break;
         default:
-          eventPhrase = '';
+          // Shouldn't get an event activityType with no ranking.
+          eventPhrase = 'Training Day';
       }
 
       var activityTypeVerbiageLookups = [{
