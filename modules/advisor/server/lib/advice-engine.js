@@ -390,7 +390,7 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
     let tomorrow = moment(today).add(1, 'day').toDate();      //  2017-02-26T13:30:00.000Z
 
     let response = {
-      trainingDay: trainingDay,
+      trainingDay: null,
       advisedToday: null,
       advisedTomorrow: null
     };
@@ -446,6 +446,9 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
             if (trainingDay.dateNumeric === advisedToday.dateNumeric) {
               // Let's return the advised version of today.
               response.trainingDay = advisedToday;
+            } else {
+              // return trainingDay with updated metrics
+              response.trainingDay = trainingDay;
             }
 
             return resolve(response);
