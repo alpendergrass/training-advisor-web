@@ -390,7 +390,7 @@ module.exports.refreshAdvice = function(user, trainingDay, selectNewWorkout) {
     let tomorrow = moment(today).add(1, 'day').toDate();      //  2017-02-26T13:30:00.000Z
 
     let response = {
-      trainingDay: null,
+      trainingDay: trainingDay,
       advisedToday: null,
       advisedTomorrow: null
     };
