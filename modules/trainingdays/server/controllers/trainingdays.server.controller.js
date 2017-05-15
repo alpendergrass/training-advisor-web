@@ -282,6 +282,7 @@ exports.update = function(req, res) {
     }
 
     if (refreshAdvice) {
+      notifications.push({ notificationType: 'plangen', lookup: '', add: true });
       userUtil.updateNotifications(user, notifications, true)
         .then(function(response) {
           user = response.user;
