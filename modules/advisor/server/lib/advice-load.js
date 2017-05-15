@@ -33,6 +33,13 @@ module.exports.setLoadRecommendations = function(trainingDay, source, callback) 
 };
 
 function setTargetLoads(trainingDay, plannedActivity, metrics) {
+  // If user provide load estimate for an event, use that to set target.
+  if (plannedActivity.activityType === 'event' && trainingDay.scheduledEventRanking !== 9 && trainingDay.estimatedLoad) {
+    plannedActivity.targetMinLoad = Math.round(trainingDay.estimatedLoad * 0.9);
+    plannedActivity.targetMaxLoad = Math.round(trainingDay.estimatedLoad * 1.1);
+    return;
+  }
+
   metrics.rampRateAdjustmentFactor = computeRampRateAdjustment(trainingDay, plannedActivity, metrics);
 
   //We have different factors for different activity rankings. E.g., ranking of 1 is a goal event. 9 is an off day.

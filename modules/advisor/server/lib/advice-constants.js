@@ -239,6 +239,34 @@ module.exports.intensityEstimateLookups = [
     period: 'race',
     intensity: 0.85
   }, {
+    activityType: 'event',
+    period: 't1',
+    intensity: 0.80
+  }, {
+    activityType: 'event',
+    period: 't2',
+    intensity: 0.80
+  }, {
+    activityType: 'event',
+    period: 't3',
+    intensity: 0.83
+  }, {
+    activityType: 'event',
+    period: 't4',
+    intensity: 0.85
+  }, {
+    activityType: 'event',
+    period: 't5',
+    intensity: 0.90
+  }, {
+    activityType: 'event',
+    period: 't6',
+    intensity: 0.90
+  }, {
+    activityType: 'event',
+    period: 'race',
+    intensity: 0.90
+  }, {
     activityType: 'test',
     period: 't1',
     intensity: 0.90
