@@ -53,6 +53,12 @@ angular.module('trainingDays')
             return '#ffe4b3';
           }
 
+          var planActivity = Util.getPlannedActivity(td, 'plangeneration');
+
+          if (planActivity && planActivity.activityType === 'test') {
+            return '#B2DBDA';
+          }
+
           // Highlight other event days.
           if (td.scheduledEventRanking === 2) {
             return '#D1A2A1';
@@ -60,12 +66,6 @@ angular.module('trainingDays')
 
           if (td.scheduledEventRanking === 3) {
             return '#EBD1D1';
-          }
-
-          var planActivity = Util.getPlannedActivity(td, 'plangeneration');
-
-          if (planActivity && planActivity.activityType === 'test') {
-            return '#B2DBDA';
           }
 
           return '#EAF1F5';
@@ -91,7 +91,8 @@ angular.module('trainingDays')
 
         var getPlanLoad = function(td) {
           // Return estimated load for goal event if provided.
-          if ((td.scheduledEventRanking === 1 || td.scheduledEventRanking === 2 || td.scheduledEventRanking === 3) && td.estimatedLoad > 0) {
+          // But only if we are recommending that the event be done (planned activityType === 'event').
+          if ((td.scheduledEventRanking === 1 || td.scheduledEventRanking === 2 || td.scheduledEventRanking === 3) && td.estimatedLoad > 0 && Util.getMetrics(td, 'planned').activityType === 'event') {
             return td.estimatedLoad;
           }
 
@@ -500,9 +501,9 @@ angular.module('trainingDays')
                   if ($scope.authentication.user.levelOfDetail > 2) {
                     text += ' period: ' + td.period;
                   }
-                } else if (!td.scheduledEventRanking) {
+                } else { //if (!td.scheduledEventRanking) {
                   planActivity = Util.getPlannedActivity(td, 'plangeneration');
-                  if (planActivity) {
+                  if (planActivity && planActivity.activityType !== 'event') {
                     text = Util.mapActivityTypeToVerbiage(planActivity.activityType);
                     if ($scope.authentication.user.levelOfDetail > 2) {
                       text += ' period: ' + td.period;
