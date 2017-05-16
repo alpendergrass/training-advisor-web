@@ -71,17 +71,10 @@ var selectWorkout = function(workouts, trainingDay) {
         }
       })
       .then(() => {
-        if (selectedWorkout) {
-          return Workout.update({ name: selectedWorkout.name }, { $inc: { usageCount: 1 } }).exec();
-        } else {
-          return Promise.resolve();
-        }
-      })
-      .then(() => {
         return resolve(selectedWorkout);
       })
       .catch(err => {
-        console.log('selectWorkout User.findOne err: ', err);
+        console.log('Error - selectWorkout err: ', err);
         return reject(err);
       });
   });
@@ -138,8 +131,12 @@ module.exports.getWorkout = function(trainingDay, source, selectNewWorkout) {
           plannedActivity.advice += selectedWorkout.instruction;
           plannedActivity.rationale += `${selectedWorkout.name}.`;
           trainingDay.currentWorkoutSpecs.workoutName = selectedWorkout.name;
+          return Workout.update({ name: selectedWorkout.name }, { $inc: { usageCount: 1 } }).exec();
+        } else {
+          return Promise.resolve();
         }
-
+      })
+      .then(() => {
         return resolve(trainingDay);
       })
       .catch(err => {
