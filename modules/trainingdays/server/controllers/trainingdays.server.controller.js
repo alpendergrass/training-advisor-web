@@ -404,7 +404,6 @@ exports.getSeason = function(req, res) {
       notifications.push({ notificationType: 'start', lookup: '' });
     } else {
       // Set notification.
-      console.log('adding start notify: ');
       notifications.push({ notificationType: 'start', lookup: '', add: true });
       numericEffectiveStartDate = coreUtil.toNumericDate(moment(numericToday.toString()).subtract(1, 'day'));
     }

@@ -131,6 +131,11 @@ module.exports.getWorkout = function(trainingDay, source, selectNewWorkout) {
           plannedActivity.advice += selectedWorkout.instruction;
           plannedActivity.rationale += `${selectedWorkout.name}.`;
           trainingDay.currentWorkoutSpecs.workoutName = selectedWorkout.name;
+          // The following counts a workout whenever it is returned. This will result in counting a workout
+          // even if it was previously selected for the day. Originally was only counting in the selectWorkout()
+          // method but was getting suspiciously low counts. By counting here we will increment, for example,
+          // on dashboard reload.
+          // TODO: move the counting back to selectWorkout() once I understand what is happening.
           return Workout.update({ name: selectedWorkout.name }, { $inc: { usageCount: 1 } }).exec();
         } else {
           return Promise.resolve();

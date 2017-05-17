@@ -2,6 +2,22 @@
 
 var releaseNotes = [
   {
+    version: '0.9.5',
+    title: '',
+    message: '',
+    features: [
+      'Allow user to adjust target ramp rate.',
+      'Allow user to set estimated load and terrain for non-goal events.',
+      'Use non-goal event load estimates when updating season forecast.',
+      'Show estimated load and terrain for events on dashboard.',
+      'We made changes to workout usage counting.'
+    ],
+    fixes: [
+      'We were not consistently updating daily metrics after activity was added or removed.',
+      'We were not recommending forecast update after adding/changing/removing activity.'
+    ]
+  },
+  {
     version: '0.9.4',
     title: 'Easier Start Up for New Users - Version 0.9.4',
     message: '',

@@ -43,6 +43,7 @@ function determinePeriod(user, trainingDay, callback) {
           }
 
           // Note that UI logic is tied to the following error message string.
+          // TODO: we should make this msg a shared constant both client and server side.
           err = new TypeError('Starting date for current training period was not found.');
           return callback(err, null);
         });
