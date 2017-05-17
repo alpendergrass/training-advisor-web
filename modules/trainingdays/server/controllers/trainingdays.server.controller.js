@@ -176,7 +176,6 @@ exports.create = function(req, res) {
       if (notifications.length > 0) {
         userUtil.updateNotifications(user, notifications, true)
           .then(function(response) {
-            console.log('response.saved: ', response.saved);
             trainingDay.user = response.user;
             return res.json(trainingDay);
           })

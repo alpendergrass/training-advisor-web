@@ -231,7 +231,8 @@ module.exports.generatePlan = function(params) {
     var user = params.user,
       adviceParams = _.clone(params),
       savedFTPDateNumeric = user.ftpLog[0].ftpDateNumeric,
-      numericEffectiveGoalDate;
+      numericEffectiveGoalDate,
+      noGoalState = null;
 
     // TODO: Use promises below to clean this up. Yuck.
     // Replace async.eachSeries  with synchronous promises.
@@ -244,11 +245,29 @@ module.exports.generatePlan = function(params) {
         if (goalDays.length > 0) {
           //Use last goal to generate plan.
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
+          return Promise.resolve();
         } else {
-          // We will still generate a plan without a goal but it won't be very interesting.
           numericEffectiveGoalDate = coreUtil.toNumericDate(moment().add(3, 'months'));
+          // Let's pretend we have a goal in order to generate a more interesting plan.
+          // Get this day, remember settings then set this day to goal.
+          return dbUtil.getTrainingDayDocument(user, numericEffectiveGoalDate);
         }
-
+      })
+      .then(function(tempGoalDay) {
+        if (tempGoalDay) {
+          // make this a goal day.
+          noGoalState = {
+            scheduledEventRanking: tempGoalDay.scheduledEventRanking,
+            estimatedLoad: tempGoalDay.estimatedLoad
+          };
+          tempGoalDay.scheduledEventRanking = 1;
+          tempGoalDay.estimatedLoad = 0;
+          return tempGoalDay.save();
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .then(function() {
         let metricsParams = {
           user: params.user,
           numericDate: params.numericDate,
@@ -331,6 +350,23 @@ module.exports.generatePlan = function(params) {
                       }
 
                       dbUtil.removePlanGenerationCompletedActivities(user)
+                        .then(function() {
+                          if (noGoalState) {
+                            // If we faked a goal we need to restore to previous state.
+                            return TrainingDay.update({
+                              user: user,
+                              dateNumeric: numericEffectiveGoalDate,
+                              cloneOfId: null
+                            }, {
+                              $set: {
+                                scheduledEventRanking: noGoalState.scheduledEventRanking,
+                                estimatedLoad: noGoalState.estimatedLoad
+                              }
+                            });
+                          } else {
+                            return Promise.resolve();
+                          }
+                        })
                         .then(function() {
                           // We need to refresh advice for today and tomorrow because
                           // we called updateMetrics when we started which would clear
