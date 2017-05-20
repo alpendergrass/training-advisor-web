@@ -10,7 +10,8 @@ var releaseNotes = [
       'Allow user to set estimated load and terrain for non-goal events.',
       'Use non-goal event load estimates when updating season forecast.',
       'Show estimated load and terrain for events on dashboard.',
-      'We made changes to workout usage counting.'
+      'Generate useful plan even if no goal has been defined.',
+      'Modify workout usage counting to provide better insight.'
     ],
     fixes: [
       'We were not consistently updating daily metrics after activity was added or removed.',
