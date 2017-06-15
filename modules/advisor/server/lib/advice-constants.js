@@ -54,7 +54,7 @@ module.exports.testingNagDayCount = 26;
 module.exports.testingEligibleFormThreshold = -1;
 module.exports.testingDueEasyDayThreshold = -25;
 
-// The thresholds below will be adjusted higher for less than fastest recoverers.
+// The thresholds below will be adjusted base on user rate of recovery setting.
 module.exports.t1HardDayThreshold = -30;
 module.exports.t1ModerateDayThreshold = -34;
 module.exports.t1EasyDayThreshold = -38;

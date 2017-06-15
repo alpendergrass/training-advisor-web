@@ -221,10 +221,8 @@ function updateMetricsForDay(params, callback) {
       // Compute target ramp rates.
       if (params.trainingDay.period === 't6' || params.trainingDay.period === 'race') {
         params.metrics.sevenDayTargetRampRate = adviceConstants.peakRaceTargetRampRate;
-        params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else if (params.trainingDay.period === 't0') {
         params.metrics.sevenDayTargetRampRate = adviceConstants.transitionTargetRampRate;
-        params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       } else {
         // Base and build periods: for daily target fitness (CTL) ramp rate, we will start with 7/week at the beginning of training
         // and decrease (linearly) to 3 by the end of build.
@@ -233,8 +231,9 @@ function updateMetricsForDay(params, callback) {
         // Let's break it down to make it easier to understand when I come back to it a year from now.
         percentageOfTrainingTimeRemaining = (results.periodData.totalTrainingDays - results.periodData.currentDayCount) / results.periodData.totalTrainingDays;
         params.metrics.sevenDayTargetRampRate = Math.round(((3 + params.user.rampRateAdjustment) + (4 * percentageOfTrainingTimeRemaining)) * 100) / 100;
-        params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
       }
+
+      params.metrics.dailyTargetRampRate = Math.round((params.metrics.sevenDayTargetRampRate / 7) * 100) / 100;
 
       // Compute target avg daily load = (CTL Time Constant * Target CTL ramp rate) + CTLy
       // With a negative target ramp rate it seems possible that we could compute a negative number here, hence the Math.abs.

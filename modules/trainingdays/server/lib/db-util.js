@@ -34,6 +34,7 @@ function getTrainingDay(user, numericDate, callback) {
 
   query.findOne().populate('user', '-salt -password').exec(function(err, trainingDay) {
     if (err) {
+      console.log(`getTrainingDay failed for user ${user.username}, numericDate ${numericDate}`);
       return callback(err, null);
     }
 
@@ -70,6 +71,7 @@ module.exports.getTrainingDayDocument = function(user, numericDate) {
 
         newTrainingDay.save(function(err, createdTrainingDay) {
           if (err) {
+            console.log(`getTrainingDayDocument newTrainingDay.save failed for user ${user.username}, numericDate ${numericDate}`);
             return reject(err);
           }
 
@@ -136,7 +138,7 @@ module.exports.getTrainingDays = function(user, numericStartDate, numericEndDate
           callback(null, trainingDay);
         })
         .catch(function(err) {
-          console.log('err: ', err);
+          console.log(`getTrainingDays failed for user ${user.username}, numericDate ${currentNumeric}`);
           return callback(err, null);
         });
     },
