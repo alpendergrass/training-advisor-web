@@ -139,20 +139,21 @@ function generateAdvice(user, trainingDay, source, selectNewWorkout, callback) {
       R.execute(facts, function(result) {
         workoutUtil.getWorkout(trainingDay, source, selectNewWorkout)
           .then(trainingDay => {
-            adviceLoad.setLoadRecommendations(trainingDay, source, function(err, trainingDay) {
-              if (err) {
-                console.log('Error - generateAdvice.setLoadRecommendations err: ', err);
-                return callback(err);
-              }
-              trainingDay.save(function(err) {
-                if (err) {
-                  console.log('Error - generateAdvice.trainingDay.save err: ', err);
-                  return callback(err, null);
-                } else {
-                  return callback(null, trainingDay);
-                }
-              });
-            });
+            return adviceLoad.setLoadRecommendations(trainingDay, source);
+          })
+          .then(trainingDay => {
+            return trainingDay.save();
+          })
+          .then(trainingDay => {
+            if (source === 'advised' && facts.plannedActivity.activityType === 'test') {
+              user.lastTestRecommendationDateNumeric = trainingDay.dateNumeric;
+              return user.save();
+            } else {
+              return Promise.resolve(user);
+            }
+          })
+          .then(user => {
+            return callback(null, trainingDay);
           })
           .catch(err => {
             console.log('Error - generateAdvice err: ', err);
@@ -206,6 +207,7 @@ function generateActivityFromAdvice(params, callback) {
       if (planActivity.activityType === 'test') {
         // Make it look as if the user tested when recommended.
         user.ftpLog[0].ftpDateNumeric = trainingDay.dateNumeric;
+        user.lastTestRecommendationDateNumeric = trainingDay.dateNumeric;
       }
 
       return callback(null, trainingDay);
@@ -231,11 +233,12 @@ module.exports.generatePlan = function(params) {
     var user = params.user,
       adviceParams = _.clone(params),
       savedFTPDateNumeric = user.ftpLog[0].ftpDateNumeric,
+      savedLastTestRecommendationDateNumeric = user.lastTestRecommendationDateNumeric,
       numericEffectiveGoalDate,
       noGoalState = null;
 
     // TODO: Use promises below to clean this up. Yuck.
-    // Replace async.eachSeries  with synchronous promises.
+    // Replace async.eachSeries with synchronous promises.
     // Find ".reduce(" to see where I've done it elsewhere.
     // And see here: https://remysharp.com/2015/12/18/promise-waterfall
 
@@ -336,6 +339,7 @@ module.exports.generatePlan = function(params) {
                     }
 
                     user.ftpLog[0].ftpDateNumeric = savedFTPDateNumeric;
+                    user.lastTestRecommendationDateNumeric = savedLastTestRecommendationDateNumeric;
 
                     //We need to update metrics for last day as it will not be up to date otherwise.
                     // But if we call it for today we will clear the plannedActivity we just assigned to this day.
@@ -562,21 +566,17 @@ module.exports.advise = function(params, callback) {
       plannedActivity.source = params.source;
       trainingDay.plannedActivities.push(plannedActivity);
 
-      adviceLoad.setLoadRecommendations(trainingDay, params.source, function(err, recommendation) {
-        if (err) {
-          console.log('Error - advise.setLoadRecommendations err: ', err);
+      adviceLoad.setLoadRecommendations(trainingDay, params.source)
+        .then(trainingDay => {
+          return trainingDay.save();
+        })
+        .then(trainingDay => {
+          return callback(null, trainingDay);
+        })
+        .catch(err => {
+          console.log('Error - advise for requested activity err: ', err);
           return callback(err);
-        }
-
-        recommendation.save(function(err) {
-          if (err) {
-            console.log('Error - advise.recommendation.save err: ', err);
-            return callback(err, null);
-          }
-
-          return callback(null, recommendation);
         });
-      });
     } else {
       //We are advising or planning an activity.
       plannedActivity.source = params.source;

@@ -120,6 +120,10 @@ var UserSchema = new Schema({
       default: ftpSources.values[0]
     }
   }],
+  lastTestRecommendationDateNumeric: {
+    type: Number,
+    default: null
+  },
   recoveryRate: {
     type: Number,
     min: 0,

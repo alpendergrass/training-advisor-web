@@ -42,6 +42,20 @@ describe('advice-util Unit Tests:', function () {
       done();
     });
 
+    it('should return true if testing is due and not recent test recommendation', function (done) {
+      user.ftpLog[0].ftpDateNumeric = coreUtil.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate());
+      user.lastTestRecommendationDateNumeric = coreUtil.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount - 2, 'days'));
+      (adviceUtil.isTestingDue(user, trainingDay)).should.match(true);
+      done();
+    });
+
+    it('should return false if testing is due but recent test recommendation', function (done) {
+      user.ftpLog[0].ftpDateNumeric = coreUtil.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount, 'days').toDate());
+      user.lastTestRecommendationDateNumeric = coreUtil.toNumericDate(moment(trainingDate).subtract(adviceConstants.testingNagDayCount - 3, 'days'));
+      (adviceUtil.isTestingDue(user, trainingDay)).should.match(false);
+      done();
+    });
+
   });
 
   afterEach(function (done) {

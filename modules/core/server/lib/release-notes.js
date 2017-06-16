@@ -2,6 +2,17 @@
 
 var releaseNotes = [
   {
+    version: '0.9.6',
+    title: '',
+    message: '',
+    features: [
+      ''
+    ],
+    fixes: [
+      'Log additional info to help track down dup key errors.',
+    ]
+  },
+  {
     version: '0.9.5',
     title: '',
     message: '',

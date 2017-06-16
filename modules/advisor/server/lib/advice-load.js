@@ -11,25 +11,31 @@ var path = require('path'),
 
 module.exports = {};
 
-module.exports.setLoadRecommendations = function(trainingDay, source, callback) {
+// module.exports.setLoadRecommendations = function(trainingDay, source, callback) {
+module.exports.setLoadRecommendations = function(trainingDay, source) {
+  return new Promise(function(resolve, reject) {
 
-  callback = (typeof callback === 'function') ? callback : function(err, data) {};
+    // callback = (typeof callback === 'function') ? callback : function(err, data) {};
 
-  if (!trainingDay) {
-    err = new TypeError('valid trainingDay is required');
-    return callback(err, null, null);
-  }
+    if (!trainingDay) {
+      err = new TypeError('valid trainingDay is required');
+      // return callback(err, null, null);
+      return reject(err);
+    }
 
-  if (!source) {
-    err = new TypeError('valid source is required');
-    return callback(err, null, null);
-  }
+    if (!source) {
+      err = new TypeError('valid source is required');
+      // return callback(err, null, null);
+      return reject(err);
+    }
 
-  let plannedActivity = util.getPlannedActivity(trainingDay, source);
-  let metrics = util.getMetrics(trainingDay, util.setMetricsType(source));
-  setTargetLoads(trainingDay, plannedActivity, metrics);
+    let plannedActivity = util.getPlannedActivity(trainingDay, source);
+    let metrics = util.getMetrics(trainingDay, util.setMetricsType(source));
+    setTargetLoads(trainingDay, plannedActivity, metrics);
 
-  return callback(null, trainingDay);
+    // return callback(null, trainingDay);
+    return resolve(trainingDay);
+  });
 };
 
 function setTargetLoads(trainingDay, plannedActivity, metrics) {
