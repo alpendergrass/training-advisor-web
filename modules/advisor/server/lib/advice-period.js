@@ -6,6 +6,7 @@ var path = require('path'),
   async = require('async'),
   mongoose = require('mongoose'),
   TrainingDay = mongoose.model('TrainingDay'),
+  coreUtil = require(path.resolve('./modules/core/server/lib/util')),
   dbUtil = require(path.resolve('./modules/trainingdays/server/lib/db-util')),
   adviceConstants = require('./advice-constants'),
   err;
@@ -52,10 +53,20 @@ function determinePeriod(user, trainingDay, callback) {
         dbUtil.getFuturePriorityDays(user, trainingDay.dateNumeric, 1, adviceConstants.maxDaysToLookAheadForFutureGoals)
           .then(function(priorityDays) {
             if (priorityDays.length > 0) {
-              return callback(null, priorityDays);
+              return Promise.resolve(priorityDays);
+            } else {
+              // Let's pretend we have a goal in order to generate more interesting advice.
+              // Get this day, remember settings then set this day to goal.
+              let numericEffectiveGoalDate = coreUtil.toNumericDate(moment().add(adviceConstants.monthsToVirtualGoal, 'months'));
+              return dbUtil.getTrainingDayDocument(user, numericEffectiveGoalDate);
             }
-
-            return callback(null, null);
+          })
+          .then(function(goalDayOrDays) {
+            if (Array.isArray(goalDayOrDays)) {
+              return callback(null, goalDayOrDays);
+            } else {
+              return callback(null, [goalDayOrDays]);
+            }
           })
           .catch(function(err) {
             return callback(err, null);
@@ -127,14 +138,6 @@ function determinePeriod(user, trainingDay, callback) {
         periodData.daysUntilNextPriority3Event = moment(results.numericNextPriority3Date.toString()).diff(trainingDate, 'days');
       } else {
         periodData.daysUntilNextPriority3Event = 0;
-      }
-
-      if (!results.futureGoalDays) {
-        //no next goal
-        periodData.period = 't0';
-        periodData.totalTrainingDays = 0;
-        periodData.daysUntilNextGoalEvent = 0;
-        return callback(null, periodData);
       }
 
       dbUtil.getPriorPriorityDays(user, results.futureGoalDays[0].dateNumeric, 1, adviceConstants.maximumNumberOfRaceDays, function(err, priorGoalDays) {

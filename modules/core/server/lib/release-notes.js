@@ -6,7 +6,8 @@ var releaseNotes = [
     title: '',
     message: '',
     features: [
-      ''
+      'If no goal exists, we will use a virtual goal day when computing current advice.',
+      'Do not repeat testing recommendation more that a couple of times.'
     ],
     fixes: [
       'Log additional info to help track down dup key errors.',

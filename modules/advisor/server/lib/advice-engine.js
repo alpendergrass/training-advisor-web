@@ -250,7 +250,7 @@ module.exports.generatePlan = function(params) {
           numericEffectiveGoalDate = goalDays[goalDays.length - 1].dateNumeric;
           return Promise.resolve();
         } else {
-          numericEffectiveGoalDate = coreUtil.toNumericDate(moment().add(3, 'months'));
+          numericEffectiveGoalDate = coreUtil.toNumericDate(moment().add(adviceConstants.monthsToVirtualGoal, 'months'));
           // Let's pretend we have a goal in order to generate a more interesting plan.
           // Get this day, remember settings then set this day to goal.
           return dbUtil.getTrainingDayDocument(user, numericEffectiveGoalDate);

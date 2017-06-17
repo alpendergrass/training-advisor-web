@@ -44,7 +44,7 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return transition period if no goal exists', function (done) {
+    it('should return t1 period if no goal exists', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 20, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -52,7 +52,7 @@ describe('advice-period Unit Tests:', function () {
 
         return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
           should.not.exist(err);
-          (periodData.period).should.match('t0');
+          (periodData.period).should.match('t1');
           done();
         });
       });
@@ -163,7 +163,7 @@ describe('advice-period Unit Tests:', function () {
       });
     });
 
-    it('should return transition period if goal is further out than the maximum number of training days', function (done) {
+    it('should return t1 period if goal is further out than the maximum number of training days', function (done) {
       testHelpers.createStartingPoint(user, trainingDate, 0, 1, 1, function(err) {
         if (err) {
           console.log('createStartingPoint: ' + err);
@@ -176,7 +176,7 @@ describe('advice-period Unit Tests:', function () {
 
           return advicePeriod.getPeriod(user, trainingDay, function (err, periodData) {
             should.not.exist(err);
-            (periodData.period).should.match('t0');
+            (periodData.period).should.match('t1');
             done();
           });
         });

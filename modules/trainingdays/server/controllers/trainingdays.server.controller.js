@@ -433,7 +433,7 @@ exports.getSeason = function(req, res) {
           });
         } else {
           notifications.push({ notificationType: 'goal', lookup: '', add: true });
-          numericEffectiveGoalDate = coreUtil.toNumericDate(moment(numericToday.toString()).add(3, 'months'));
+          numericEffectiveGoalDate = coreUtil.toNumericDate(moment(numericToday.toString()).add(adviceConstants.monthsToVirtualGoal, 'months'));
         }
 
         dbUtil.getTrainingDays(user, numericEffectiveStartDate, numericEffectiveGoalDate, function(err, trainingDays) {

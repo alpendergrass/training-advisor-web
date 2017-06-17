@@ -15,6 +15,7 @@ module.exports.midSeasonTransitionNumberOfDays = 5;
 
 module.exports.maxDaysToLookAheadForFutureGoals = module.exports.maximumNumberOfTrainingDays + module.exports.maximumNumberOfRaceDays;
 module.exports.maxDaysToLookAheadForSeasonEnd = 366;
+module.exports.monthsToVirtualGoal = 4;
 
 module.exports.trainingPeriodLookups = [
   {
