@@ -11,88 +11,86 @@ var path = require('path'),
 
 mongoose.Promise = global.Promise;
 
-function getTrainingDay(user, numericDate, callback) {
-  if (!user) {
-    err = new TypeError('getTrainingDay valid user is required');
-    return callback(err, null);
-  }
-
-  if (!numericDate) {
-    err = new TypeError('numericDate is required to getTrainingDay');
-    return callback(err, null);
-  }
-
-  if (!moment(numericDate.toString()).isValid()) {
-    err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
-    return callback(err, null);
-  }
-
-  var query = TrainingDay
-    .where('user').equals(user)
-    .where('dateNumeric').equals(numericDate)
-    .where('cloneOfId').equals(null);
-
-  query.findOne().populate('user', '-salt -password').exec(function(err, trainingDay) {
-    if (err) {
-      console.log(`getTrainingDay failed for user ${user.username}, numericDate ${numericDate}`);
-      return callback(err, null);
-    }
-
-    return callback(null, trainingDay);
-  });
-}
-
 module.exports = {};
 
 module.exports.getTrainingDayDocument = function(user, numericDate) {
   //If requested training day does not exist it will be created and returned.
   //This should be the only place in the app where a new training day is created from scratch.
   return new Promise(function(resolve, reject) {
-    getTrainingDay(user, numericDate, function(err, trainingDay) {
-      if (err) {
-        return reject(err);
-      }
+    if (!user) {
+      err = new TypeError('getTrainingDayDocument valid user is required');
+      return reject(err);
+    }
 
-      if (!trainingDay) {
-        var newTrainingDay = new TrainingDay(),
-          timezone = user.timezone || 'America/New_York',
-          plannedMetrics = {
-            metricsType: 'planned'
-          },
-          actualMetrics = {
-            metricsType: 'actual',
-          };
+    if (!numericDate) {
+      err = new TypeError('numericDate is required to getTrainingDayDocument');
+      return reject(err);
+    }
 
-        newTrainingDay.dateNumeric = numericDate;
-        newTrainingDay.date = moment.tz(numericDate.toString(), timezone).toDate();
-        newTrainingDay.user = user;
-        newTrainingDay.metrics.push(plannedMetrics);
-        newTrainingDay.metrics.push(actualMetrics);
+    if (!moment(numericDate.toString()).isValid()) {
+      err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
+      return reject(err);
+    }
 
-        newTrainingDay.save(function(err, createdTrainingDay) {
-          if (err) {
-            console.log(`getTrainingDayDocument newTrainingDay.save failed for user ${user.username}, numericDate ${numericDate}`);
-            return reject(err);
-          }
+    let timezone = user.timezone || 'America/New_York';
+    let tdDate = moment.tz(numericDate.toString(), timezone).toDate();
+    let metrics = [{
+      metricsType: 'planned'
+    },{
+      metricsType: 'actual',
+    }];
 
-          return resolve(createdTrainingDay);
-        });
-      } else {
+    var getTrainingDay = TrainingDay.findOneAndUpdate(
+      {
+        user: user,
+        dateNumeric: numericDate,
+        cloneOfId: null
+      }, {
+        $setOnInsert: { date: tdDate, metrics: metrics }
+      }, {
+        new: true, upsert: true
+      }).populate('user', '-salt -password').exec();
+
+    getTrainingDay
+      .then(trainingDay => {
         return resolve(trainingDay);
-      }
-    });
+      })
+      .catch(err => {
+        console.log(`getTrainingDayDocument failed for user ${user.username}, numericDate ${numericDate}`);
+        return reject(err);
+      });
   });
 };
 
 module.exports.getExistingTrainingDayDocument = function(user, numericDate) {
   return new Promise(function(resolve, reject) {
-    getTrainingDay(user, numericDate, function(err, trainingDay) {
-      if (err) {
-        return reject(err);
-      }
+    if (!user) {
+      err = new TypeError('getExistingTrainingDayDocument valid user is required');
+      return reject(err);
+    }
 
-      return resolve(trainingDay);
-    });
+    if (!numericDate) {
+      err = new TypeError('numericDate is required to getExistingTrainingDayDocument');
+      return reject(err);
+    }
+
+    if (!moment(numericDate.toString()).isValid()) {
+      err = new TypeError('numericDate ' + numericDate + ' is not a valid date');
+      return reject(err);
+    }
+
+    var query = TrainingDay
+      .where('user').equals(user)
+      .where('dateNumeric').equals(numericDate)
+      .where('cloneOfId').equals(null);
+
+    query.findOne().populate('user', '-salt -password').exec()
+      .then(trainingDay => {
+        return resolve(trainingDay);
+      })
+      .catch(err => {
+        return reject(err);
+      });
   });
 };
 

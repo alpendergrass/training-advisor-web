@@ -212,7 +212,6 @@ var processActivity = function(stravaActivity, trainingDay, replaceExisting) {
           if (trainingDay.user.ftpLog.length < 1) {
             return reject(new Error(`user ftp is not set, strava activity processing aborted. username: ${trainingDay.user.username}. stravaActivity.id: ${stravaActivity.id.toString()}`));
           }
-
           let ftp = util.getFTP(trainingDay.user, trainingDay.dateNumeric);
 
           // IF = NP/FTP
@@ -536,17 +535,18 @@ module.exports.downloadAllActivities = function(user, startDateNumeric, replaceE
                   .then(response => {})
                   .catch(err => {
                     console.log('downloadAllActivities refreshAdvice error: ', err);
+                  })
+                  .then(() => {
+                    if (activityCount > 1) {
+                      countPhrase = activityCount + ' Strava activities';
+                    } else {
+                      countPhrase = 'one Strava activity';
+                    }
+
+                    statusMessage.text = 'We downloaded ' + countPhrase + '. You should reload Tacit Training.';
+                    statusMessage.type = 'success';
+                    return resolve(statusMessage);
                   });
-
-                if (activityCount > 1) {
-                  countPhrase = activityCount + ' Strava activities';
-                } else {
-                  countPhrase = 'one Strava activity';
-                }
-
-                statusMessage.text = 'We downloaded ' + countPhrase + '. You should reload Tacit Training.';
-                statusMessage.type = 'success';
-                return resolve(statusMessage);
               });
             })
             .catch(function(err) {

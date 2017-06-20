@@ -41,53 +41,76 @@ describe('db-util Unit Tests:', function() {
     });
   });
 
+  // *** Testing promises ***
+  // fetchActivity() returns a promise.
+  //
+  // If we are not calling other methods first, we can simply return our fetchActivity() promise
+  // and mocha will handle promise as expected.
+  // But note that we still need our done() callback if we are calling other async (e.g. helper)
+  // functions to set up our test prior to running our function under test.
+  //
+  // In our then() we provide both success and error handlers to handle output from our test.
+  // If we are using done, we also provide a catch() handler to handle errors thrown by our
+  // assertions in our then() function.
+
   describe('Method getTrainingDayDocument', function() {
-    it('should return error if no user', function(done) {
-      dbUtil.getTrainingDayDocument(null, null)
-        .catch(function(err) {
-          should.exist(err);
+    it('should return error if no user', function() {
+      return dbUtil.getTrainingDayDocument(null, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('valid user is required');
-          done();
         });
     });
 
-    it('should return error if null trainingDate', function(done) {
-      dbUtil.getTrainingDayDocument(user, null)
-        .catch(function(err) {
-          should.exist(err);
+    it('should return error if null trainingDate', function() {
+      return dbUtil.getTrainingDayDocument(user, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('numericDate is required to getTrainingDay');
-          done();
         });
     });
 
-    it('should return error if invalid trainingDate', function(done) {
-      dbUtil.getTrainingDayDocument(user, 'asdf')
-        .catch(function(err) {
-          should.exist(err);
+    it('should return error if invalid trainingDate', function() {
+      return dbUtil.getTrainingDayDocument(user, 'asdf')
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('not a valid date');
-          done();
         });
     });
 
-    it('should return new trainingDay doc if none exists for trainingDate', function(done) {
-      dbUtil.getTrainingDayDocument(user, numericDate)
+    it('should return new trainingDay doc if none exists for trainingDate', function() {
+      return dbUtil.getTrainingDayDocument(user, numericDate)
         .then(function(trainingDay) {
           should.exist(trainingDay);
-          done();
+        },
+        function(err) {
+          throw err;
         });
     });
 
     it('should return existing trainingDay doc if one exists for trainingDate', function(done) {
-      testHelpers.createTrainingDay(user, trainingDate, null, function(err) {
+      testHelpers.createTrainingDay(user, trainingDate, null, function(err, newTrainingDay) {
         if (err) {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.getTrainingDayDocument(user, numericDate)
+        return dbUtil.getTrainingDayDocument(user, numericDate)
           .then(function(trainingDay) {
             should.exist(trainingDay);
             (trainingDay.name).should.match(/Existing trainingDay/);
             done();
+          },
+          function(err) {
+            // throw err;
+            done(err);
+          }).catch(function (err) {
+            done(err);
           });
       });
     });
@@ -103,12 +126,18 @@ describe('db-util Unit Tests:', function() {
             console.log('makeSimDay: ' + err);
           }
 
-          dbUtil.getTrainingDayDocument(user, numericDate)
+          return dbUtil.getTrainingDayDocument(user, numericDate)
             .then(function(trainingDay) {
               should.exist(trainingDay);
               (trainingDay._id).should.match(simDay._id);
               (trainingDay.isSimDay).should.match(true);
               done();
+            },
+            function(err) {
+              // throw err;
+              done(err);
+            }).catch(function (err) {
+              done(err);
             });
         });
       });
@@ -117,38 +146,40 @@ describe('db-util Unit Tests:', function() {
   });
 
   describe('Method getExistingTrainingDayDocument', function() {
-    it('should return error if no user', function(done) {
-      dbUtil.getExistingTrainingDayDocument(null, null)
-        .catch(function(err) {
-          should.exist(err);
+    it('should return error if no user', function() {
+      return dbUtil.getExistingTrainingDayDocument(null, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('valid user is required');
-          done();
         });
     });
 
-    it('should return error if null trainingDate', function(done) {
-      dbUtil.getExistingTrainingDayDocument(user, null)
-        .catch(function(err) {
-          should.exist(err);
-          (err.message).should.containEql('numericDate is required to getTrainingDay');
-          done();
+    it('should return error if null trainingDate', function() {
+      return dbUtil.getExistingTrainingDayDocument(user, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
+          (err.message).should.containEql('numericDate is required');
         });
     });
 
-    it('should return error if invalid trainingDate', function(done) {
-      dbUtil.getExistingTrainingDayDocument(user, 'asdf')
-        .catch(function(err) {
-          should.exist(err);
+    it('should return error if invalid trainingDate', function() {
+      return dbUtil.getExistingTrainingDayDocument(user, 'asdf')
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('not a valid date');
-          done();
         });
     });
 
-    it('should return null if no trainingDay doc exists for trainingDate', function(done) {
-      dbUtil.getExistingTrainingDayDocument(user, numericDate)
+    it('should return null if no trainingDay doc exists for trainingDate', function() {
+      return dbUtil.getExistingTrainingDayDocument(user, numericDate)
         .then(function(trainingDay) {
           should.not.exist(trainingDay);
-          done();
         });
     });
 
@@ -158,11 +189,17 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.getExistingTrainingDayDocument(user, numericDate)
+        return dbUtil.getExistingTrainingDayDocument(user, numericDate)
           .then(function(trainingDay) {
             should.exist(trainingDay);
             (trainingDay.name).should.match(/Existing trainingDay/);
             done();
+          },
+          function(err) {
+            // throw err;
+            done(err);
+          }).catch(function (err) {
+            done(err);
           });
       });
     });
@@ -178,13 +215,19 @@ describe('db-util Unit Tests:', function() {
             console.log('makeSimDay: ' + err);
           }
 
-          dbUtil.getExistingTrainingDayDocument(user, numericDate)
+          return dbUtil.getExistingTrainingDayDocument(user, numericDate)
             .then(function(trainingDay) {
               should.exist(trainingDay);
               (trainingDay.name).should.match(/Existing trainingDay/);
               (trainingDay._id).should.match(simDay._id);
               (trainingDay.isSimDay).should.match(true);
               done();
+            },
+            function(err) {
+              // throw err;
+              done(err);
+            }).catch(function (err) {
+              done(err);
             });
         });
       });
@@ -344,38 +387,46 @@ describe('db-util Unit Tests:', function() {
   });
 
   describe('Method getFuturePriorityDays', function() {
-    it('should return error if no user', function(done) {
-      dbUtil.getFuturePriorityDays(null, null, null, null)
-        .catch(function(err) {
+    it('should return error if no user', function() {
+      return dbUtil.getFuturePriorityDays(null, null, null, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           should.exist(err);
           (err.message).should.containEql('valid user is required');
-          done();
         });
     });
 
-    it('should return error if missing trainingDate', function(done) {
-      dbUtil.getFuturePriorityDays(user, null, null, null)
-        .catch(function(err) {
+    it('should return error if missing trainingDate', function() {
+      return dbUtil.getFuturePriorityDays(user, null, null, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           should.exist(err);
           (err.message).should.containEql('numericSearchDate is required');
-          done();
         });
     });
 
-    it('should return error if invalid trainingDate', function(done) {
-      dbUtil.getFuturePriorityDays(user, 'asdf', null, null)
-        .catch(function(err) {
+    it('should return error if invalid trainingDate', function() {
+      return dbUtil.getFuturePriorityDays(user, 'asdf', null, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           should.exist(err);
           (err.message).should.containEql('is not a valid date');
-          done();
         });
     });
 
-    it('should return empty array if no priority days exist', function(done) {
-      dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
+    it('should return empty array if no priority days exist', function() {
+      return dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
         .then(function(priorityDays) {
           priorityDays.should.have.length(0);
-          done();
+        },
+        function(err) {
+          throw err;
         });
     });
 
@@ -385,10 +436,15 @@ describe('db-util Unit Tests:', function() {
           console.log('createGoalEvent: ' + err);
         }
 
-        dbUtil.getFuturePriorityDays(user, numericDate, 2, 11)
+        return dbUtil.getFuturePriorityDays(user, numericDate, 2, 11)
           .then(function(priorityDays) {
             priorityDays.should.have.length(0);
             done();
+          },
+          function(err) {
+            done(err);
+          }).catch(function (err) {
+            done(err);
           });
       });
     });
@@ -399,11 +455,16 @@ describe('db-util Unit Tests:', function() {
           console.log('createGoalEvent: ' + err);
         }
 
-        dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
+        return dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
           .then(function(priorityDays) {
             priorityDays.should.have.length(1);
             (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
             done();
+          },
+          function(err) {
+            done(err);
+          }).catch(function (err) {
+            done(err);
           });
       });
     });
@@ -419,13 +480,18 @@ describe('db-util Unit Tests:', function() {
             console.log('makeSimDay: ' + err);
           }
 
-          dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
+          return dbUtil.getFuturePriorityDays(user, numericDate, 1, 10)
             .then(function(priorityDays) {
               priorityDays.should.have.length(1);
               (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
               (priorityDays[0]._id).should.match(simDay._id);
               (priorityDays[0].isSimDay).should.match(true);
               done();
+            },
+            function(err) {
+              done(err);
+            }).catch(function (err) {
+              done(err);
             });
         });
       });
@@ -442,12 +508,18 @@ describe('db-util Unit Tests:', function() {
             console.log('createGoalEvent: ' + err);
           }
 
-          dbUtil.getFuturePriorityDays(user, numericDate, 1, 20)
+          return dbUtil.getFuturePriorityDays(user, numericDate, 1, 20)
             .then(function(priorityDays) {
               priorityDays.should.have.length(2);
               (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
               (priorityDays[1].date.toString()).should.be.equal(newGoalDay2.date.toString());
               done();
+            },
+            function(err) {
+              // throw err;
+              done(err);
+            }).catch(function (err) {
+              done(err);
             });
         });
       });
@@ -464,12 +536,17 @@ describe('db-util Unit Tests:', function() {
             console.log('createGoalEvent: ' + err);
           }
 
-          dbUtil.getFuturePriorityDays(user, numericDate, null, 20)
+          return dbUtil.getFuturePriorityDays(user, numericDate, null, 20)
             .then(function(priorityDays) {
               priorityDays.should.have.length(2);
               (priorityDays[0].date.toString()).should.be.equal(newGoalDay.date.toString());
               (priorityDays[1].date.toString()).should.be.equal(newPriority2Day.date.toString());
               done();
+            },
+            function(err) {
+              done(err);
+            }).catch(function (err) {
+              done(err);
             });
         }, 2); // <-- note sneaky last (optional) parm to createGoalEvent
       });
@@ -597,14 +674,6 @@ describe('db-util Unit Tests:', function() {
       });
     });
 
-    // it('should return null rawResponse if trainingDate is tomorrow', function(done) {
-    //   return dbUtil.clearFutureMetricsAndAdvice(user, coreUtil.toNumericDate(moment(trainingDate).add(1, 'day')), metricsType, function(err, rawResponse) {
-    //     should.not.exist(err);
-    //     should.not.exist(rawResponse);
-    //     done();
-    //   });
-    // });
-
     it('should return match count of 0 and modified count of 0 if no trainingDay docs exist past trainingDate', function(done) {
       metricsParams.numericDate = coreUtil.toNumericDate(moment(trainingDate).subtract(1, 'day'));
       return dbUtil.clearFutureMetricsAndAdvice(metricsParams, function(err, rawResponse) {
@@ -731,112 +800,45 @@ describe('db-util Unit Tests:', function() {
     });
   });
 
-  // describe('Method clearPlanningData', function() {
-  //   it('should return error if no user', function(done) {
-  //     dbUtil.clearPlanningData(null, null)
-  //       .catch(function(err) {
-  //         (err.message).should.containEql('valid user is required');
-  //         done();
-  //       });
-  //   });
-
-  //   it('should return error if missing date', function(done) {
-  //     dbUtil.clearPlanningData(user, null)
-  //       .catch(function(err) {
-  //         (err.message).should.containEql('numericDate is required');
-  //         done();
-  //       });
-  //   });
-
-  //   it('should return error if invalid date', function(done) {
-  //     dbUtil.clearPlanningData(user, 'erty')
-  //       .catch(function(err) {
-  //         (err.message).should.containEql('not a valid date');
-  //         done();
-  //       });
-  //   });
-
-  //   it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
-  //     dbUtil.clearPlanningData(user, numericDate)
-  //       .then(function(rawResponse) {
-  //         (rawResponse.n).should.equal(0);
-  //         (rawResponse.nModified).should.equal(0);
-  //         done();
-  //       });
-  //   });
-
-  //   it('should return match count of 1 and modified count of 0 if one clean trainingDay exists', function(done) {
-  //     testHelpers.createTrainingDay(user, trainingDate, null, function(err, testTD) {
-  //       if (err) {
-  //         console.log('createTrainingDay error: ' + err);
-  //       }
-
-  //       dbUtil.clearPlanningData(user, numericDate)
-  //         .then(function(rawResponse) {
-  //           (rawResponse.n).should.equal(1);
-  //           (rawResponse.nModified).should.equal(0);
-  //           done();
-  //         });
-  //     });
-  //   });
-
-  //   it('should return match count of 1 and modified count of 1 if one dirty trainingDay exists', function(done) {
-  //     var completedActivities = [{
-  //       load: 999,
-  //       source: 'plangeneration'
-  //     }];
-
-  //     testHelpers.createTrainingDay(user, trainingDate, completedActivities, function(err, testTD) {
-  //       if (err) {
-  //         console.log('createTrainingDay error: ' + err);
-  //       }
-
-  //       dbUtil.clearPlanningData(user, numericDate)
-  //         .then(function(rawResponse) {
-  //           (rawResponse.n).should.equal(1);
-  //           (rawResponse.nModified).should.equal(1);
-  //           done();
-  //         });
-  //     });
-  //   });
-
-  // });
-
   describe('Method removePlanGenerationActivities', function() {
-    it('should return error if no user', function(done) {
-      dbUtil.removePlanGenerationActivities(null, null)
-        .catch(function(err) {
+    it('should return error if no user', function() {
+      return dbUtil.removePlanGenerationActivities(null, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('valid user is required');
-          done();
         });
     });
 
-    it('should return error if missing date', function(done) {
-      dbUtil.removePlanGenerationActivities(user, null)
-        .catch(function(err) {
+    it('should return error if missing date', function() {
+      return dbUtil.removePlanGenerationActivities(user, null)
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('numericDate is required');
-          done();
         });
     });
 
-    it('should return error if invalid date', function(done) {
-      dbUtil.removePlanGenerationActivities(user, 'erty')
-        .catch(function(err) {
+    it('should return error if invalid date', function() {
+      return dbUtil.removePlanGenerationActivities(user, 'erty')
+        .then(function(result) {
+          throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
+        },
+        function(err) {
           (err.message).should.containEql('not a valid date');
-          done();
         });
     });
 
-    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function(done) {
-      dbUtil.removePlanGenerationActivities(user, numericDate)
+    it('should return match count of 0 and modified count of 0 if no trainingDay docs exist', function() {
+      return dbUtil.removePlanGenerationActivities(user, numericDate)
         .then(function(rawResponse) {
           (rawResponse.n).should.equal(0);
           (rawResponse.nModified).should.equal(0);
-          done();
         },
         function(err) {
-          // should.not.exist(err);
-          done(err);
+          throw err;
         });
     });
 
@@ -846,14 +848,15 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanGenerationActivities(user, numericDate)
+        return dbUtil.removePlanGenerationActivities(user, numericDate)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(0);
             (rawResponse.nModified).should.equal(0);
             done();
           },
           function(err) {
-            // should.not.exist(err);
+            done(err);
+          }).catch(function (err) {
             done(err);
           });
       });
@@ -865,14 +868,16 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanGenerationActivities(user, numericDate)
+        return dbUtil.removePlanGenerationActivities(user, numericDate)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(0);
             done();
           },
           function(err) {
-            // should.not.exist(err);
+            // throw err;
+            done(err);
+          }).catch(function (err) {
             done(err);
           });
       });
@@ -889,14 +894,16 @@ describe('db-util Unit Tests:', function() {
           console.log('createTrainingDay error: ' + err);
         }
 
-        dbUtil.removePlanGenerationActivities(user, numericDate)
+        return dbUtil.removePlanGenerationActivities(user, numericDate)
           .then(function(rawResponse) {
             (rawResponse.n).should.equal(1);
             (rawResponse.nModified).should.equal(1);
             done();
           },
           function(err) {
-            // should.not.exist(err);
+            // throw err;
+            done(err);
+          }).catch(function (err) {
             done(err);
           });
       });
@@ -919,14 +926,16 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          dbUtil.removePlanGenerationActivities(user, numericDate)
+          return dbUtil.removePlanGenerationActivities(user, numericDate)
             .then(function(rawResponse) {
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
               done();
             },
             function(err) {
-              // should.not.exist(err);
+              // throw err;
+              done(err);
+            }).catch(function (err) {
               done(err);
             });
         });
@@ -955,14 +964,16 @@ describe('db-util Unit Tests:', function() {
             console.log('updateTrainingDay: ' + err);
           }
 
-          dbUtil.removePlanGenerationActivities(user, numericDate)
+          return dbUtil.removePlanGenerationActivities(user, numericDate)
             .then(function(rawResponse) {
               (rawResponse.n).should.equal(1);
               (rawResponse.nModified).should.equal(1);
               done();
             },
             function(err) {
-              // should.not.exist(err);
+              // throw err;
+              done(err);
+            }).catch(function (err) {
               done(err);
             });
         });
@@ -1005,34 +1016,6 @@ describe('db-util Unit Tests:', function() {
         });
       });
     });
-
-    // it('should return false if yesterday was a hard day but no completedActivities', function(done) {
-    //   var yesterday = moment(trainingDate).subtract(1, 'days');
-    //   testHelpers.createTrainingDay(user, yesterday, null, function(err, createdTrainingDay) {
-    //     if (err) {
-    //       console.log('createTrainingDay: ' + err);
-    //     }
-
-    //     let metrics = _.find(createdTrainingDay.metrics, ['metricsType', 'actual']);
-    //     metrics.loadRating = 'hard';
-
-    //     testHelpers.updateTrainingDay(createdTrainingDay, function(err) {
-    //       if (err) {
-    //         console.log('updateTrainingDay: ' + err);
-    //       }
-
-    //       return dbUtil.didWeGoHardTheDayBefore(user, trainingDay.dateNumeric, 'actual', function(err, wentHard) {
-    //         if (err) {
-    //           console.log('didWeGoHardTheDayBefore: ' + err);
-    //         }
-
-    //         should.not.exist(err);
-    //         (wentHard).should.match(false);
-    //         done();
-    //       });
-    //     });
-    //   });
-    // });
 
     it('should return false if yesterday was not a hard day', function(done) {
       var completedActivities = [{

@@ -310,11 +310,12 @@ describe('strava-util Unit Tests:', function() {
         return callback(null, wattagePayload);
       };
 
-      startingPoint.user.ftpLog = [];
+      user.ftpLog = [];
 
-      testHelpers.updateTrainingDay(startingPoint, function(err) {
+      user.save(function (err) {
         if (err) {
-          console.log('updateTrainingDay: ' + err);
+          console.log('user save error: ' + err);
+          done(err);
         }
 
         return stravaUtil.fetchActivity(user, activityID) //.should.be.rejected();

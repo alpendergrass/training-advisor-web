@@ -147,7 +147,7 @@ module.exports.updateFatigueTimeConstant = function(id, trainingEffortFeedback, 
     }
 
     if (!user) {
-      return callback(new Error('Failed to load user ' + id), null);
+      return callback(new Error('updateFatigueTimeConstant - Failed to load user ' + id), null);
     }
 
     if (trainingEffortFeedback === null || trainingEffortFeedback === 0) {

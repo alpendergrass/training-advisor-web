@@ -156,9 +156,9 @@ module.exports.updateTrainingDay = function(trainingDay, callback) {
   trainingDay.save(function (err) {
     if (err) {
       console.log('updateTrainingDay save error: ' + err);
-      return callback(err);
+      return callback(err, null);
     }
-    return callback(null);
+    return callback(null, trainingDay);
   });
 };
 
