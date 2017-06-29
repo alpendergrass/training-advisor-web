@@ -2,6 +2,17 @@
 
 var releaseNotes = [
   {
+    version: '0.9.7',
+    title: '',
+    message: '',
+    features: [
+      'After creating event redirect to dashboard.'
+    ],
+    fixes: [
+      'Fix dup key errors.',
+    ]
+  },
+  {
     version: '0.9.6',
     title: '',
     message: '',
