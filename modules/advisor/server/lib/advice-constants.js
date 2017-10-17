@@ -312,6 +312,6 @@ module.exports.loadRatingLookups = [
   }
 ];
 
-module.exports.smallClimbingDay = 200; //meters at least.
-module.exports.moderateClimbingDay = 400; //meters at least.
-module.exports.bigClimbingDay = 800; //meters at least.
+module.exports.smallClimbingDay = 300; //meters at least.
+module.exports.moderateClimbingDay = 500; //meters at least.
+module.exports.bigClimbingDay = 900; //meters at least.

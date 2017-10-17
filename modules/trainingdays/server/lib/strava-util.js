@@ -98,9 +98,9 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
     // If not stravaActivity.device_watts then this is a ride without a power meter
     // so we will use their estimated power to compute weightedAverageWatts.
     if (stravaActivity.device_watts) {
-      activityTypes = 'time,watts';
+      activityTypes = 'time,velocity_smooth,watts';
     } else {
-      activityTypes = 'time,watts_calc';
+      activityTypes = 'time,velocity_smooth,watts_calc';
     }
 
     strava.streams.activity({ 'access_token': getAccessToken(user), 'id': stravaActivity.id, 'types': activityTypes }, function(err, payload) {
@@ -108,6 +108,7 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
         return reject(new Error(`strava.streams.activity failed. username: ${user.username}, stravaActivity: ${stravaActivity}, err: ${err}`));
       }
 
+      // Create wattage array
       let wattageElement;
 
       if (stravaActivity.device_watts) {
@@ -126,6 +127,15 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
         return resolve(0);
       }
 
+      // Create velocity array
+      let velocityElement = _.find(payload, ['type', 'velocity_smooth']);
+      let velocityArray;
+
+      if (!_.isUndefined(velocityElement)) {
+        velocityArray = velocityElement.data;
+      }
+
+      // Create timestamp array
       let times = _.find(payload, ['type', 'time']).data;
 
       // Normalized power formula from Training and Racing With a Power Meter, 2nd edition, pg. 120:
@@ -141,18 +151,24 @@ var getWeightedAverageWatts = function(user, stravaActivity) {
       let rollingAverages = [];
 
       for (var i = 1; i < wattageArray.length; i++) {
-        // From Stravistix: if not a trainer ride, only use samples where velocity is greater than 3.5 Kph - not sure why.
-        // Seems to me that if anything perhaps I should drop zero power recs but the general consensus is to include zeros.
-        duration = (times[i] - times[i - 1]);
-        accumulatedTime += duration;
-        accumulatedPower += wattageArray[i];
-        sampleCount++;
+        // From Stravistix: if not a trainer ride, only use samples where velocity is greater than 3.5 Kph.
+        // This velocity check is to prevent including zero power recs when rider is not moving but we still have data -
+        // e.g., auto-pause is turned off so clock does not stop.
+        // I'm not sure why he uses 3.5 kph but I guess we will too.
+        // I experimented with values from 0.1 - 5.0 and it made little difference.
+        // velocity_smooth: float meters per second - Multiply by 3.6 to convert to kph.
+        if (stravaActivity.trainer || !velocityArray || (velocityArray[i] * 3.6) > 3.5) {
+          duration = (times[i] - times[i - 1]);
+          accumulatedTime += duration;
+          accumulatedPower += wattageArray[i];
+          sampleCount++;
 
-        if (accumulatedTime >= 30) {
-          rollingAverages.push(Math.pow((accumulatedPower / sampleCount), 4));
-          accumulatedTime = 0;
-          accumulatedPower = 0;
-          sampleCount = 0;
+          if (accumulatedTime >= 30) {
+            rollingAverages.push(Math.pow((accumulatedPower / sampleCount), 4));
+            accumulatedTime = 0;
+            accumulatedPower = 0;
+            sampleCount = 0;
+          }
         }
       }
 

@@ -2,13 +2,14 @@
   <div class="page-header">
     <div class="row">
       <div class="col-md-4">
-        <h1>Users - {{users.length}}</h1>
+        <h1>Users - {{listData.total}}</h1>
       </div>
       <div class="col-md-4" style="margin-top: 2em">
         <input class="form-control col-md-4" type="text" ng-model="search" placeholder="Search" ng-change="figureOutItemsToDisplay()" />
       </div>
     </div>
   </div>
+  <ul uib-pagination boundary-links="true" max-size="8" items-per-page="itemsPerPage" total-items="filterLength" ng-model="currentPage" ng-change="pageChanged()"></ul>
   <table class="table table-hover">
   <tr>
     <th ng-click="sortBy('firstName')">First Name</th>

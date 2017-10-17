@@ -2,6 +2,25 @@
 
 var releaseNotes = [
   {
+    version: '0.9.9',
+    title: '',
+    message: '',
+    features: [
+    ],
+    fixes: [
+      'When computing weighted average watts, we now ignore power recs when rider is not moving. Bug was causing us to underestimate weighted average watts resulting in a low load computation.'
+    ]
+  },
+  {
+    version: '0.9.8',
+    title: '',
+    message: '',
+    features: [
+      'Adjust thresholds for recommending climbing workouts.'
+    ],
+    fixes: []
+  },
+  {
     version: '0.9.7',
     title: '',
     message: '',

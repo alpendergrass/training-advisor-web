@@ -1,6 +1,5 @@
 'use strict';
 
-
 var path = require('path'),
   mongoose = require('mongoose');
 
@@ -8,6 +7,9 @@ mongoose.Promise = global.Promise;
 
 var User = mongoose.model('User'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
+
+//Add mongoose middleware for pagination and filtering.
+require('mongoose-middleware').initialize(mongoose);
 
 
 // Show the current user
@@ -39,6 +41,8 @@ exports.update = function (req, res) {
 exports.delete = function (req, res) {
   var user = req.model;
 
+
+  //TODO: should remove all related docs also.
   user.remove(function (err) {
     if (err) {
       return res.status(400).send({
@@ -74,9 +78,56 @@ exports.list = function (req, res) {
   });
 };
 
+exports.listSome = function (req, res) {
+  let begin = parseInt(req.query.begin, 10);
+  let sort = req.query.sort;
+  let filter = req.query.filter;
+
+
+  let options = {
+    filters : {
+      field : ['firstName', 'lastName', 'email', 'username', 'loginCount', 'lastLogin', 'updated', 'created', 'roles'],
+      // mandatory : {
+      //   contains : {
+      //     home : 'seattle'
+      //   },
+      //   exact : {
+      //     name : 'Hamish'
+      //   },
+      //   lessThan : {
+      //     birthday : new Date(2014, 1, 1)
+      //   }
+      // },
+      // optional : {
+      //   contains : {
+      //     'features.color' : ['brindle', 'black', 'white']
+      //   }
+      // }
+    },
+    sort : '-created',
+    start : begin,
+    count : 50
+  };
+
+  User
+    .find({}, '-salt -password')
+    .page(options)
+    .then((users) => {
+      res.json(users);
+    })
+    .catch((err) => {
+      console.log('listSome err: ', err);
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    });
+
+};
+
 // User middleware
 exports.userByID = function (req, res, next, id) {
   if (!mongoose.Types.ObjectId.isValid(id)) {
+    console.log('User is invalid - id: ', id);
     return res.status(400).send({
       message: 'User is invalid'
     });

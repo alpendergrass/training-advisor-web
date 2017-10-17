@@ -14,6 +14,7 @@ var User = mongoose.model('User');
  */
 exports.userByID = function (req, res, next, id) {
   if (!mongoose.Types.ObjectId.isValid(id)) {
+    console.log('User is invalid - id: ', id);
     return res.status(400).send({
       message: 'User is invalid'
     });

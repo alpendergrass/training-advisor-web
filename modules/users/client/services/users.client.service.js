@@ -27,6 +27,11 @@ angular.module('users.admin').factory('Admin', ['$resource',
       impersonate: {
         method: 'GET',
         url: 'api/users/impersonate/:userId'
+      },
+      listSome: {
+        method: 'GET',
+        url: 'api/users/listSome',
+        params: { begin: 0, sort: '', filter: '' }
       }
     });
   }
