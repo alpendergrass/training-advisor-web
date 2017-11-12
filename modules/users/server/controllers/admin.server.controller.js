@@ -82,35 +82,30 @@ exports.listSome = function (req, res) {
   let begin = parseInt(req.query.begin, 10);
   let sort = req.query.sort;
   let filter = req.query.filter;
+  let count = 2; //50
+  console.log('filter: ', filter);
 
 
   let options = {
     filters : {
       field : ['firstName', 'lastName', 'email', 'username', 'loginCount', 'lastLogin', 'updated', 'created', 'roles'],
-      // mandatory : {
-      //   contains : {
-      //     home : 'seattle'
-      //   },
-      //   exact : {
-      //     name : 'Hamish'
-      //   },
-      //   lessThan : {
-      //     birthday : new Date(2014, 1, 1)
-      //   }
-      // },
-      // optional : {
-      //   contains : {
-      //     'features.color' : ['brindle', 'black', 'white']
-      //   }
-      // }
+      keyword : {
+        fields : ['firstName', 'lastName', 'email', 'username'],
+        term : filter
+      }
     },
     sort : '-created',
     start : begin,
-    count : 2 //50
+    count : count
   };
 
+  console.log('options: ', options);
+
   User
-    .find({}, '-salt -password')
+    .find()
+    .field(options)
+    .keyword(options)
+    .order(options)
     .page(options)
     .then((users) => {
       res.json(users);

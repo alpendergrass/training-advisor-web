@@ -19,23 +19,24 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     //   $scope.buildPager();
     // });
 
-    $scope.buildPager = function () {
+    $scope.initPage = function () {
       // $scope.pagedItems = [];
       $scope.itemsPerPage = 2; //50;
       $scope.currentPage = 1;
+      $scope.filter = '';
       $scope.figureOutItemsToDisplay();
     };
 
     $scope.figureOutItemsToDisplay = function () {
-      //TODO: move listSome call to here.
-
       var begin = (($scope.currentPage - 1) * $scope.itemsPerPage);
       // var end = begin + $scope.itemsPerPage;
       // $scope.pagedItems = $scope.filteredItems.slice(begin, end);
 
       Admin.listSome({
-        begin: begin
+        begin: begin,
+        filter: $scope.filter
       }, function (listData) {
+        console.log('listData: ', listData);
         $scope.totalUsers = listData.total;
         $scope.usersSorted = $scope.users = listData.results;
         // $scope.filteredItems = $filter('filter')($scope.usersSorted, {
@@ -63,6 +64,6 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
       // $scope.figureOutItemsToDisplay();
     };
 
-    $scope.buildPager();
+    $scope.initPage();
   }
 ]);
