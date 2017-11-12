@@ -5,10 +5,10 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     $scope.moment = moment;
 
     $scope.initPage = function () {
-      $scope.itemsPerPage = 2; //50;
+      $scope.itemsPerPage = 50;
       $scope.currentPage = 1;
       $scope.filter = '';
-      $scope.sort = '-created'
+      $scope.sort = '-created';
       $scope.propertyName = null;
       $scope.reverse = true;
       $scope.getUserChunk();
@@ -22,7 +22,6 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
         filter: $scope.filter,
         sort: $scope.sort
       }, function (listData) {
-        console.log('listData: ', listData);
         $scope.totalUsers = listData.total;
         $scope.usersSorted = $scope.users = listData.results;
         $scope.filterLength = listData.total; //$scope.filteredItems.length;
@@ -34,9 +33,7 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     };
 
     $scope.sortBy = function(propertyName) {
-      console.log('propertyName: ', propertyName);
       $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : true;
-      console.log('$scope.reverse: ', $scope.reverse);
       $scope.propertyName = propertyName;
       $scope.sort = $scope.reverse ? '-' + propertyName : propertyName;
       $scope.getUserChunk();

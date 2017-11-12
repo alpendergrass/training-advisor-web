@@ -6,6 +6,7 @@ var path = require('path'),
 mongoose.Promise = global.Promise;
 
 var User = mongoose.model('User'),
+  TrainingDay = mongoose.model('TrainingDay'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 //Add mongoose middleware for pagination and filtering.
@@ -41,14 +42,23 @@ exports.update = function (req, res) {
 exports.delete = function (req, res) {
   var user = req.model;
 
-
-  //TODO: should remove all related docs also.
-  user.remove(function (err) {
+  //Remove all related TDs also.
+  TrainingDay.remove({
+    user: user
+  }, function(err) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     }
+
+    user.remove(function (err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      }
+    });
 
     res.json(user);
   });
@@ -82,9 +92,7 @@ exports.listSome = function (req, res) {
   let begin = parseInt(req.query.begin, 10);
   let sort = req.query.sort;
   let filter = req.query.filter;
-  let count = 2; //50
-  console.log('filter: ', filter);
-
+  let count = 50; // This number must be in sync with the client - modules/users/client/controllers/admin/list-users.client.controller.js
 
   let options = {
     filters : {
@@ -98,8 +106,6 @@ exports.listSome = function (req, res) {
     start : begin,
     count : count
   };
-
-  console.log('options: ', options);
 
   User
     .find()
