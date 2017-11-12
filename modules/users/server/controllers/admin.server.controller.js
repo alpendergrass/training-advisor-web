@@ -94,7 +94,7 @@ exports.listSome = function (req, res) {
         term : filter
       }
     },
-    sort : '-created',
+    sort : sort,
     start : begin,
     count : count
   };

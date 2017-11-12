@@ -5,7 +5,7 @@
         <h1>Users - {{totalUsers}}</h1>
       </div>
       <div class="col-md-4" style="margin-top: 2em">
-        <input class="form-control col-md-4" type="text" ng-model="filter" placeholder="Search" ng-change="figureOutItemsToDisplay()" />
+        <input class="form-control col-md-4" type="text" ng-model="filter" placeholder="Search" ng-change="getUserChunk()" />
       </div>
     </div>
   </div>
@@ -22,7 +22,6 @@
     <th ng-click="sortBy('created')">Created</th>
     <th ng-click="sortBy('roles')">Roles</th>
   </tr>
-    <!-- <tr ng-repeat="user in pagedItems | orderBy:propertyName:reverse" > -->
     <tr ng-repeat="user in usersSorted" >
       <td><a ui-sref="admin.user({userId: user._id})">{{user.firstName}}</a></td>
       <td><a ui-sref="admin.user({userId: user._id})">{{user.lastName}}</a></td>
