@@ -106,7 +106,7 @@ exports.listSome = function (req, res) {
     },
     sort : '-created',
     start : begin,
-    count : 50
+    count : 2 //50
   };
 
   User

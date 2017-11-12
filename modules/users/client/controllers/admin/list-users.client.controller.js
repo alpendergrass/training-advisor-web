@@ -6,13 +6,13 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     $scope.propertyName = null;
     $scope.reverse = true;
 
-    Admin.listSome({
-      begin: 0
-    }, function (listData) {
-      $scope.listData = listData;
-      $scope.usersSorted = $scope.users = listData.results;
-      $scope.buildPager();
-    });
+    // Admin.listSome({
+    //   begin: 0
+    // }, function (listData) {
+    //   $scope.listData = listData;
+    //   $scope.usersSorted = $scope.users = listData.results;
+    //   $scope.buildPager();
+    // });
 
     // Admin.query(function (data) {
     //   $scope.usersSorted = $scope.users = data;
@@ -20,21 +20,36 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
     // });
 
     $scope.buildPager = function () {
-      $scope.pagedItems = [];
-      $scope.itemsPerPage = 50;
+      // $scope.pagedItems = [];
+      $scope.itemsPerPage = 2; //50;
       $scope.currentPage = 1;
       $scope.figureOutItemsToDisplay();
     };
 
     $scope.figureOutItemsToDisplay = function () {
-      $scope.filteredItems = $filter('filter')($scope.usersSorted, {
-        $: $scope.search
-      });
-      $scope.filterLength = $scope.listData.total;
-      // $scope.filterLength = $scope.filteredItems.length;
+      //TODO: move listSome call to here.
+
       var begin = (($scope.currentPage - 1) * $scope.itemsPerPage);
-      var end = begin + $scope.itemsPerPage;
-      $scope.pagedItems = $scope.filteredItems.slice(begin, end);
+      // var end = begin + $scope.itemsPerPage;
+      // $scope.pagedItems = $scope.filteredItems.slice(begin, end);
+
+      Admin.listSome({
+        begin: begin
+      }, function (listData) {
+        $scope.totalUsers = listData.total;
+        $scope.usersSorted = $scope.users = listData.results;
+        // $scope.filteredItems = $filter('filter')($scope.usersSorted, {
+        //   $: $scope.search
+        // });
+        $scope.filterLength = listData.total; //$scope.filteredItems.length;
+      });
+
+
+
+
+
+      // $scope.filterLength = $scope.listData.total;
+      // // $scope.filterLength = $scope.filteredItems.length;
     };
 
     $scope.pageChanged = function () {
@@ -45,7 +60,9 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
       $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : false;
       $scope.propertyName = propertyName;
       $scope.usersSorted = orderByFilter($scope.users, $scope.propertyName, $scope.reverse);
-      $scope.figureOutItemsToDisplay();
+      // $scope.figureOutItemsToDisplay();
     };
+
+    $scope.buildPager();
   }
 ]);
