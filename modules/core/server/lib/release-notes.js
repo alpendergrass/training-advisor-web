@@ -2,6 +2,18 @@
 
 var releaseNotes = [
   {
+    version: '0.9.10',
+    title: '',
+    message: '',
+    features: [
+      'Added user admin enhancements.',
+      'Periodically scrub database to remove stale training data.'
+    ],
+    fixes: [
+      'Fixed a bug that was preventing even distribution of workout assignments.'
+    ]
+  },
+  {
     version: '0.9.9',
     title: '',
     message: '',

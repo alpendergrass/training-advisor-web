@@ -217,13 +217,12 @@ angular.module('trainingDays')
         };
 
         $scope.advise = function() {
-          // For normal users only call getAdvice if the user want an alternative activity.
+          // For normal users only call getAdvice if the user wants an alternative activity (e.g., easy instead of hard).
           // Allow super user to request advice for any day.
           if ($scope.alternateActivity || ($scope.authentication.user.levelOfDetail > 2 && !moment($scope.trainingDay.date).isBetween($scope.yesterday, $scope.dayAfterTomorrow, 'day'))) {
             TrainingDays.getAdvice({
               trainingDateNumeric: Util.toNumericDate($scope.trainingDay.date),
               alternateActivity: $scope.alternateActivity,
-              // selectNewWorkout: !$scope.alternateActivity ? true : false
               selectNewWorkout: false
             }, function(trainingDay) {
               trainingDay.date = moment(trainingDay.dateNumeric.toString()).toDate();

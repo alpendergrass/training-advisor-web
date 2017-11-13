@@ -114,12 +114,13 @@ module.exports.getWorkout = function(trainingDay, source, selectNewWorkout) {
       };
     }
 
-    Workout.find(query).sort({ name: 1 }).exec()
+    Workout.find(query).exec()
       .then(workouts => {
-        if (!selectNewWorkout && workouts.length > 0) {
+        if (!selectNewWorkout && trainingDay.currentWorkoutSpecs.workoutName && workouts.length > 0) {
           return Promise.resolve(workouts[0]);
         } else if (workouts.length > 0) {
-          return selectWorkout(workouts, trainingDay);
+          // shuffle the order of the workouts to improve distribution of selected workouts.
+          return selectWorkout(_.shuffle(workouts), trainingDay);
         } else {
           return Promise.resolve(null);
         }
