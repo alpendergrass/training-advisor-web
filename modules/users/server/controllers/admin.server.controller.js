@@ -12,10 +12,24 @@ var User = mongoose.model('User'),
 //Add mongoose middleware for pagination and filtering.
 require('mongoose-middleware').initialize(mongoose);
 
-
 // Show the current user
 exports.read = function (req, res) {
-  res.json(req.model);
+  // get user TD rec count.
+  let TrainingDay = mongoose.model('TrainingDay');
+  let countTDs = TrainingDay.count({ user: req.model._id }).exec();
+
+  countTDs
+    .then(count => {
+      let userStats = {};
+      userStats.tdRecCount = count;
+      req.model.userStats = userStats;
+      res.json(req.model);
+    })
+    .catch(function(err) {
+      return res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    });
 };
 
 exports.update = function (req, res) {
