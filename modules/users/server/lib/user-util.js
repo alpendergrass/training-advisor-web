@@ -129,6 +129,20 @@ var adornNotification = function(notification) {
   return notification;
 };
 
+var removeTrainingDays = function(user) {
+  return new Promise((resolve, reject) => {
+    let TrainingDay = mongoose.model('TrainingDay');
+
+    TrainingDay.remove({ user: user })
+      .then(() => {
+        return resolve();
+      })
+      .catch(err => {
+        return reject(err);
+      });
+  });
+};
+
 module.exports = {};
 
 module.exports.updateFatigueTimeConstant = function(id, trainingEffortFeedback, callback) {
@@ -304,6 +318,41 @@ module.exports.getUserByStravaID = function(id) {
       })
       .catch(function(err) {
         reject(err);
+      });
+  });
+};
+
+module.exports.scrubInactiveUsers = function() {
+  return new Promise((resolve, reject) => {
+    console.log('scrubInactiveUsers starting: ', moment().format());
+    let purgeDate = moment().subtract(6, 'months').toDate();
+    let User = mongoose.model('User');
+    let getUsers = User.find({ loginCount: { $lt: 3 }, $or: [ { lastLogin: { $lt: purgeDate } }, { lastLogin: null } ] }).sort('-created').exec();
+
+    getUsers
+      .then(users => {
+        // We are using reduce function here to process each user sequentially.
+        users.reduce((promise, user) => {
+          return promise.then(results => {
+            return removeTrainingDays(user)
+              .then(result => {
+                results.push(result);
+                return results;
+              });
+          });
+        }, Promise.resolve([]))  // Resolved promise is initial value passed into payload.reduce().
+        .then(results => {
+          console.log('scrubInactiveUsers completed: ', moment().format());
+          return resolve();
+        })
+        .catch(err => {
+          console.log('scrubInactiveUsers removeTrainingDays failed: ', err);
+          reject(err);
+        });
+      })
+      .catch(err => {
+        console.log('scrubInactiveUsers getUsers failed: ', err);
+        return reject(err);
       });
   });
 };
