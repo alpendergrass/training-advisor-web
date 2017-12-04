@@ -21,4 +21,3 @@ applications:
     RUN_MIGRATIONS: true
     GOOGLE_ANALYTICS_TRACKING_ID: UA-91105738-1
     GOOGLE_ANALYTICS_HOST: http://www.tacittraining.com/
-

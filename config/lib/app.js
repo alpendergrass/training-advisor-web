@@ -50,7 +50,7 @@ module.exports.init = function init(callback) {
     var instanceIndex = process.env.CF_INSTANCE_INDEX || 0;
 
     if (instanceIndex > 0) {
-      console.log(chalk.green('Skipping scheduling of processEvents job - not running on first instance.'));
+      console.log(chalk.green('Skipping scheduling of scheduled jobs - not running on first instance.'));
     } else {
       var eventsUtil = require(path.resolve('./modules/events/server/lib/util')),
         userUtil = require(path.resolve('./modules/users/server/lib/user-util')),

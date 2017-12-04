@@ -325,7 +325,7 @@ module.exports.getUserByStravaID = function(id) {
 module.exports.scrubInactiveUsers = function() {
   return new Promise((resolve, reject) => {
     console.log('scrubInactiveUsers starting: ', moment().format());
-    let purgeDate = moment().subtract(6, 'months').toDate();
+    let purgeDate = moment().subtract(2, 'months').toDate();
     let User = mongoose.model('User');
     let getUsers = User.find({ loginCount: { $lt: 3 }, $or: [ { lastLogin: { $lt: purgeDate } }, { lastLogin: null } ] }).sort('-created').exec();
 
