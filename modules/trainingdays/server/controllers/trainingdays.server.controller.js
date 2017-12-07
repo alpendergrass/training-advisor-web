@@ -696,7 +696,6 @@ exports.downloadActivities = function(req, res) {
         return res.json(response);
       })
       .catch(function(err) {
-        console.log('Strava downloadActivities err: ', err);
         let statusCode = 400;
         let message = errorHandler.getErrorMessage(err);
 
@@ -768,7 +767,6 @@ exports.downloadAllActivities = function(req, res) {
         if (syncResponse) {
           return res.json(syncResponse);
         } else {
-          console.log('Strava downloadAllActivities err: ', err);
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });

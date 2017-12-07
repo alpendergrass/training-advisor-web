@@ -304,6 +304,7 @@ module.exports.getFTP = function(user) {
 };
 
 module.exports.fetchActivity = function(user, activityId) {
+  // fetchActivity is called in response to a Strava web hook event.
   return new Promise(function(resolve, reject) {
     console.log('Fetching Strava activity: ', activityId);
     strava.activities.get({ 'access_token': getAccessToken(user), 'id': activityId }, function(err, payload) {
@@ -353,7 +354,6 @@ module.exports.fetchActivity = function(user, activityId) {
           return resolve();
         })
         .catch(function(err) {
-          console.log('fetchActivity rejecting: ', err);
           return reject(new Error(`Strava fetchActivity failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
         });
     });

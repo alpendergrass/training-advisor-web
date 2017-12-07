@@ -3,9 +3,9 @@
 module.exports = {
   tests: {
     client: ['modules/*/tests/client/**/*.js'],
-    // server: ['modules/*/tests/server/*.js'],
+    server: ['modules/*/tests/server/*.js'],
     // server: ['modules/core/tests/server/**/*.js'],
-    server: ['modules/events/tests/server/**/*.js'],
+    // server: ['modules/events/tests/server/**/*.js'],
     // server: ['modules/trainingdays/tests/server/**/*.js'],
     // server: ['modules/trainingdays/tests/server/routes.tests.js'],
     // server: ['modules/trainingdays/tests/server/lib.db-util.tests.js'],

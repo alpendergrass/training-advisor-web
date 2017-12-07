@@ -9,7 +9,7 @@ var releaseNotes = [
       'Allow new aspect types for Strava activity web hooks.'
     ],
     fixes: [
-      ''
+      'Suppress superfluous Strava processing error messages.'
     ]
   },
   {
