@@ -34,6 +34,25 @@ describe('util Unit Tests:', function() {
         });
     });
 
+    it('should not return event if unimplemented aspect_type.', function(done) {
+      let newEvent = {
+        owner_id: 13408,
+        object_id: 795663388,
+        object_type: 'activity',
+        aspect_type: 'update',
+        event_time: 1297286541
+      };
+
+      util.storeStravaEvent(newEvent)
+        .then(function(event) {
+          should.not.exist(event);
+          done();
+        })
+        .catch(function(err) {
+          done(err);
+        });
+    });
+
     it('should return error if unrecognized event data.', function(done) {
       let newEvent = {
         owner_id: 13408,
@@ -49,7 +68,7 @@ describe('util Unit Tests:', function() {
         })
         .catch(function(err) {
           should.exist(err);
-          (err.message).should.containEql('unrecognized webhook data');
+          (err.message).should.containEql('unrecognized webhook object_type');
           done();
         });
     });

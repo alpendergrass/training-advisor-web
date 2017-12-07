@@ -107,28 +107,34 @@ module.exports = {};
 
 module.exports.storeStravaEvent = function(data) {
   return new Promise(function(resolve, reject) {
-    if (data.object_type === 'activity' && data.aspect_type === 'create') {
-      let event = new EventModel({
-        source: 'strava',
-        ownerId: data.owner_id,
-        objectId: data.object_id,
-        objectType: data.object_type,
-        aspectType: data.aspect_type,
-        eventTime: moment.unix(data.event_time),
-        eventData: JSON.stringify(data)
-      });
-
-      event.save()
-        .then(function(event) {
-          resolve(event);
-        })
-        .catch(function(err) {
-          console.log(`strava webhook event save failed. Error: ${err}. Data: ${JSON.stringify(data)}`);
-          reject(err);
+    if (data.object_type === 'activity') {
+      if (data.aspect_type === 'create') {
+        let event = new EventModel({
+          source: 'strava',
+          ownerId: data.owner_id,
+          objectId: data.object_id,
+          objectType: data.object_type,
+          aspectType: data.aspect_type,
+          eventTime: moment.unix(data.event_time),
+          eventData: JSON.stringify(data)
         });
+
+        event.save()
+          .then(function(event) {
+            resolve(event);
+          })
+          .catch(function(err) {
+            console.log(`strava webhook event save failed. Error: ${err}. Data: ${JSON.stringify(data)}`);
+            reject(err);
+          });
+      } else {
+        // aspect_type must be update or delete.
+        console.log('unimplemented webhook aspect_type: ', data);
+        resolve();
+      }
     } else {
-      console.log('unrecognized webhook data: ', data);
-      reject(new Error(`storeStravaEvent: unrecognized webhook data ${JSON.stringify(data)}.`));
+      console.log('unrecognized webhook object_type: ', data);
+      reject(new Error(`storeStravaEvent: unrecognized webhook object_type ${JSON.stringify(data)}.`));
     }
   });
 };

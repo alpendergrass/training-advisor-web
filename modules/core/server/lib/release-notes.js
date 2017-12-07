@@ -2,6 +2,17 @@
 
 var releaseNotes = [
   {
+    version: '0.9.11',
+    title: '',
+    message: '',
+    features: [
+      'Allow new aspect types for Strava activity web hooks.'
+    ],
+    fixes: [
+      ''
+    ]
+  },
+  {
     version: '0.9.10',
     title: '',
     message: '',
