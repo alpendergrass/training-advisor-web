@@ -2,6 +2,16 @@
 
 var releaseNotes = [
   {
+    version: '0.9.12',
+    title: '',
+    message: '',
+    features: [
+    ],
+    fixes: [
+      'Clean up obsolete authentication code.'
+    ]
+  },
+  {
     version: '0.9.11',
     title: '',
     message: '',
