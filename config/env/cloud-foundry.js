@@ -38,16 +38,6 @@ module.exports = {
     clientSecret: getCred('training-advisor-strava', 'secret') || 'APP_SECRET',
     callbackURL: '/api/auth/strava/callback'
   },
-  // facebook: {
-  //   clientID: getCred('mean-facebook', 'id') || 'APP_ID',
-  //   clientSecret: getCred('mean-facebook', 'secret') || 'APP_SECRET',
-  //   callbackURL: '/api/auth/facebook/callback'
-  // },
-  // twitter: {
-  //   clientID: getCred('mean-twitter', 'key') || 'CONSUMER_KEY',
-  //   clientSecret: getCred('mean-twitter', 'secret') || 'CONSUMER_SECRET',
-  //   callbackURL: '/api/auth/twitter/callback'
-  // },
   // google: {
   //   clientID: getCred('mean-google', 'id') || 'APP_ID',
   //   clientSecret: getCred('mean-google', 'secret') || 'APP_SECRET',

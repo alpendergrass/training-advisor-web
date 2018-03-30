@@ -282,10 +282,8 @@ describe('User server routes tests', function () {
     });
   });
 
-  //TODO: write tests for Strava login (?).
-
   it('forgot password should return 400 for no username provided', function (done) {
-    var provider = 'facebook';
+    var provider = 'strava';
     user.provider = provider;
     user.roles = ['user'];
 
@@ -309,7 +307,7 @@ describe('User server routes tests', function () {
   });
 
   it('forgot password should return 400 for non-local provider set for the user object', function (done) {
-    var provider = 'facebook';
+    var provider = 'strava';
     user.provider = provider;
     user.roles = ['user'];
 

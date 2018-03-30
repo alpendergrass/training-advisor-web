@@ -48,6 +48,10 @@ build/
 *.sublime-project
 *.sublime-workspace
 
+# VS Code editor
+# ==============
+.vscode/
+
 # Eclipse project files
 # =====================
 .project
