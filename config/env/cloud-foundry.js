@@ -39,8 +39,8 @@ module.exports = {
     callbackURL: '/api/auth/strava/callback'
   },
   // google: {
-  //   clientID: getCred('mean-google', 'id') || 'APP_ID',
-  //   clientSecret: getCred('mean-google', 'secret') || 'APP_SECRET',
+  //   clientID: getCred('training-advisor-google', 'id') || 'APP_ID',
+  //   clientSecret: getCred('training-advisor-google', 'secret') || 'APP_SECRET',
   //   callbackURL: '/api/auth/google/callback'
   // },
   mailer: {

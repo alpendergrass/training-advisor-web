@@ -86,28 +86,6 @@ var validateSecureMode = function (config) {
 };
 
 /**
- * Validate Session Secret parameter is not set to default in production
- */
-var validateSessionSecret = function (config, testing) {
-
-  if (process.env.NODE_ENV !== 'production') {
-    return true;
-  }
-
-  if (config.sessionSecret === 'MEAN') {
-    if (!testing) {
-      console.log(chalk.red('+ WARNING: It is strongly recommended that you change sessionSecret config while running in production!'));
-      console.log(chalk.red('  Please add `sessionSecret: process.env.SESSION_SECRET || \'super amazing secret\'` to '));
-      console.log(chalk.red('  `config/env/production.js` or `config/env/local.js`'));
-      console.log();
-    }
-    return false;
-  } else {
-    return true;
-  }
-};
-
-/**
  * Initialize global configuration files
  */
 var initGlobalConfigFolders = function (config, assets) {
@@ -181,7 +159,7 @@ var initGlobalConfig = function () {
   // Merge config files
   var config = _.merge(defaultConfig, environmentConfig);
 
-  // read package.json for MEAN.JS project information
+  // read package.json for project information
   var pkg = require(path.resolve('./package.json'));
   config.trainingAdvisor = pkg;
 
@@ -201,13 +179,9 @@ var initGlobalConfig = function () {
   // Validate Secure SSL mode can be used
   validateSecureMode(config);
 
-  // Validate session secret
-  validateSessionSecret(config);
-
   // Expose configuration utilities
   config.utils = {
-    getGlobbedPaths: getGlobbedPaths,
-    validateSessionSecret: validateSessionSecret
+    getGlobbedPaths: getGlobbedPaths
   };
 
   return config;
