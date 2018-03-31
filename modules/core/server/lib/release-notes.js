@@ -2,6 +2,16 @@
 
 var releaseNotes = [
   {
+    version: '0.9.13',
+    title: '',
+    message: '',
+    features: [
+      'Open source the app.'
+    ],
+    fixes: [
+    ]
+  },
+  {
     version: '0.9.12',
     title: '',
     message: '',
