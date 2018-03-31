@@ -3,7 +3,8 @@
 .nodemonignore
 .sass-cache/
 npm-debug.log
-node_modules/
+# vendor node modules.
+# node_modules/
 # I need to upload angular-timezone-selector because I am using a fork of the bowerfied version.
 # this one: https://github.com/j-w-miller/angular-timezone-selector
 # 3/31/18 To get around a problem with creating a symlink when we push I am populating public/lib locally (in gulpfile) and then pushing. 
