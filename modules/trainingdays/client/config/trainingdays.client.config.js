@@ -45,11 +45,11 @@ angular.module('trainingDays').run(['Menus',
       roles: ['user']
     });
 
-    Menus.addSubMenuItem('topbar', 'trainingDays', {
-      title: 'My Calendar',
-      state: 'trainingDays.calendar',
-      roles: ['user']
-    });
+    // Menus.addSubMenuItem('topbar', 'trainingDays', {
+    //   title: 'My Calendar',
+    //   state: 'trainingDays.calendar',
+    //   roles: ['user']
+    // });
 
     // *** admin only below ***
 

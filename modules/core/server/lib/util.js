@@ -21,7 +21,6 @@ module.exports.logAnalytics = function(req, pageData, eventData, user) {
       if (!pageData.title) {
         // If we are not passed a page title, we will use the last node of referer.
         // req.headers.referer: "http://localhost:3000/season"
-        // req.headers.referer: "http://localhost:3000/trainingDays/calendar"
         // req.headers.referer: "http://www.tacittraining.com/season"
         pageData.title = _.startCase(req.headers.referer.replace(/^\w+\:{1}\/{2}[\w.:]+\/?\w*\/{1}/, ''));
       }

@@ -95,13 +95,13 @@ angular.module('trainingDays').config(['$stateProvider', 'modalStateProvider',
         url: '/trainingDays',
         template: '<ui-view/>'
       })
-      .state('trainingDays.calendar', {
-        url: '/calendar',
-        templateUrl: 'modules/trainingDays/client/views/calendar.client.view.html',
-        data: {
-          roles: ['user', 'admin']
-        }
-      })
+      // .state('trainingDays.calendar', {
+      //   url: '/calendar',
+      //   templateUrl: 'modules/trainingDays/client/views/calendar.client.view.html',
+      //   data: {
+      //     roles: ['user', 'admin']
+      //   }
+      // })
       .state('trainingDays.list', {
         url: '/list',
         templateUrl: 'modules/trainingDays/client/views/list.client.view.html',

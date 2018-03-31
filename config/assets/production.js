@@ -37,7 +37,6 @@ module.exports = {
         'public/lib/angular-aria/angular-aria.min.js',
         'public/lib/angular-sanitize/angular-sanitize.min.js',
         'public/lib/angular-material/angular-material.min.js',
-        'public/lib/material-calendar/dist/angular-material-calendar.min.js',
         'public/lib/chart.js/dist/Chart.min.js',
         'public/lib/angular-chart.js/dist/angular-chart.min.js',
         'public/lib/angular-local-storage/dist/angular-local-storage.min.js',
@@ -46,6 +45,6 @@ module.exports = {
       ]
     },
     css: 'public/dist/application-7e41a58ea8.min.css',
-    js: 'public/dist/application-52c5210e3e.min.js'
+    js: 'public/dist/application-75ad81ebd7.min.js'
   }
 };

@@ -39,7 +39,6 @@ module.exports = {
         'public/lib/angular-aria/angular-aria.js',
         'public/lib/angular-sanitize/angular-sanitize.js',
         'public/lib/angular-material/angular-material.js',
-        'public/lib/material-calendar/dist/angular-material-calendar.js',
         'public/lib/chart.js/dist/Chart.js',
         'public/lib/angular-chart.js/dist/angular-chart.js',
         'public/lib/angular-local-storage/dist/angular-local-storage.js',

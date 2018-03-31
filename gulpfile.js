@@ -146,6 +146,11 @@ gulp.task('clean', function () {
   return del('public/dist');
 });
 
+gulp.task('clientlib', function () {
+  return gulp.src('node_modules/@bower_components/**')
+    .pipe(gulp.dest('public/lib'))
+  });
+
 // Set files names back to non-hash prior to renaming in revreplace task.
 gulp.task('prep', ['clean'], function () {
   return gulp.src(['./config/assets/production.js', './config/assets/cloud-foundry.js'])
@@ -298,7 +303,7 @@ gulp.task('protractor', ['webdriver_update'], function () {
 
 // Lint CSS and JavaScript files.
 gulp.task('lint', function (done) {
-  runSequence('less', 'sass', ['csslint', 'eslint', 'jshint'], done);
+  runSequence('less', 'sass', ['csslint', 'eslint', 'jshint'], 'clientlib', done);
 });
 
 // Lint project files and minify them into two production files.
