@@ -2,6 +2,17 @@
 
 var releaseNotes = [
   {
+    version: '0.9.14',
+    title: '',
+    message: '',
+    features: [
+    ],
+    fixes: [
+      'Use maintained timezone selector version, fix display.',
+      'Batch imported completed rides not consistenly displayed on season graph.'
+    ]
+  },
+  {
     version: '0.9.13',
     title: '',
     message: '',

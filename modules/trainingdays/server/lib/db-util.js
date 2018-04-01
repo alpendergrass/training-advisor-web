@@ -48,7 +48,9 @@ module.exports.getTrainingDayDocument = function(user, numericDate) {
       }, {
         $setOnInsert: { date: tdDate, metrics: metrics }
       }, {
-        new: true, upsert: true
+        new: true, 
+        upsert: true,
+        setDefaultsOnInsert: true
       }).populate('user', '-salt -password').exec();
 
     getTrainingDay
@@ -372,7 +374,7 @@ module.exports.clearFutureMetricsAndAdvice = function(params, callback) {
     TrainingDay.update({
       user: params.user,
       dateNumeric: { $gte: params.numericDate },
-      startingPoint: false,
+      startingPoint: { $ne: true },
       cloneOfId: null,
       'metrics.metricsType': params.metricsType,
     }, {
