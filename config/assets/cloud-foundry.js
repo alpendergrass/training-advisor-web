@@ -8,6 +8,7 @@ module.exports = {
         'public/lib/bootstrap/dist/css/bootstrap-theme.min.css',
         'public/lib/angular-xeditable/dist/css/xeditable.min.css',
         'public/lib/angular-toastr/dist/angular-toastr.min.css',
+        'public/lib/chosen/chosen.css',
         'public/lib/angular-timezone-selector/dist/angular-timezone-selector.min.css',
         'public/lib/angular-block-ui/dist/angular-block-ui.min.css',
         'public/lib/angular-material/angular-material.min.css'
@@ -45,6 +46,6 @@ module.exports = {
       ]
     },
     css: 'public/dist/application-7e41a58ea8.min.css',
-    js: 'public/dist/application-6d8f66da72.min.js'
+    js: 'public/dist/application-dfd05686d2.min.js'
   }
 };

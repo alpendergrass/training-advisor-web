@@ -75,7 +75,7 @@
     "@bower_components/angular-resource": "angular/bower-angular-resource#~1.5",
     "@bower_components/angular-sanitize": "angular/bower-angular-sanitize#~1.5",
     "@bower_components/angular-spinner": "Attrash-Islam/bower-angular-spinner#~1.0",
-    "@bower_components/angular-timezone-selector": "mishguruorg/angular-timezone-selector#^1.6.0",
+    "@bower_components/angular-timezone-selector": "colebowl/angular-timezone-selector#^1.7.0",
     "@bower_components/angular-toastr": "Foxandxss/angular-toastr#~2.1",
     "@bower_components/angular-ui-router": "angular-ui/angular-ui-router-bower#~0.2",
     "@bower_components/angular-ui-utils": "angular-ui/ui-utils#bower",

@@ -10,6 +10,7 @@ module.exports = {
         'public/lib/bootstrap/dist/css/bootstrap-theme.css',
         'public/lib/angular-xeditable/dist/css/xeditable.css',
         'public/lib/angular-toastr/dist/angular-toastr.css',
+        'public/lib/chosen/chosen.css',
         'public/lib/angular-timezone-selector/dist/angular-timezone-selector.css',
         'public/lib/angular-block-ui/dist/angular-block-ui.css',
         'public/lib/angular-material/angular-material.css'

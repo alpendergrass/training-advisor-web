@@ -13,8 +13,7 @@
     <hr>
     <label for="timezone">My Timezone *</label>
     <div class="text-danger bottom-buffer" ng-show="!user.timezone"><strong>* Please select your timezone *</strong></div>
-    <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile()" sort-by="offset" show-local="true" width="230px" class="small"></timezone-selector>
-
+    <timezone-selector name="timezone" id="timezone" ng-model="user.timezone" ng-change="updateUserProfile()" sort-by="offset" show-local="true" width="300px"></timezone-selector>
     <hr>
     <div>
       <label><a tabindex="0" role="button" data-toggle="popover" data-content="Characterize how quickly you recover from hard workouts. Everyone recovers at a different rate and generally, as we age, we take longer to recover. You should lower the setting if you feel you are not sufficiently recovered when a hard day is recommended. Raise it if you feel you are ready for a hard workout sooner than we advise. Note that the default setting is somewhat aggressive so do not hesitate to dial it back if you believe you are in danger of over-training.">Speed Of Recovery</a></label>

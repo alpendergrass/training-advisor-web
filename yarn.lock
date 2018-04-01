@@ -53,9 +53,9 @@
   version "0.0.0"
   resolved "https://codeload.github.com/Attrash-Islam/bower-angular-spinner/tar.gz/9f2dfbb76c60835271ff0243ce8234933aa2919b"
 
-"@bower_components/angular-timezone-selector@mishguruorg/angular-timezone-selector#^1.6.0":
-  version "1.2.1"
-  resolved "https://codeload.github.com/mishguruorg/angular-timezone-selector/tar.gz/1ce01447bc7cfd3ae3f6aee8c816e4e51567316d"
+"@bower_components/angular-timezone-selector@colebowl/angular-timezone-selector#^1.7.0":
+  version "1.7.0"
+  resolved "https://codeload.github.com/colebowl/angular-timezone-selector/tar.gz/ec16c11650abcb375d7c4b6c80525ab2f86d602e"
   dependencies:
     grunt-autoprefixer "^3.0.3"
     grunt-contrib-copy "^0.8.0"
@@ -5366,8 +5366,8 @@ nodemailer@^2.6.4:
     socks "1.1.9"
 
 nodemon@^1.10.2:
-  version "1.17.2"
-  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.17.2.tgz#17c0062629610e03dd01241c576f1c4068da9fdd"
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.17.3.tgz#3b0bbc2ee05ccb43b1aef15ba05c63c7bc9b8530"
   dependencies:
     chokidar "^2.0.2"
     debug "^3.1.0"
