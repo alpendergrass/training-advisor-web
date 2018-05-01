@@ -739,31 +739,8 @@ module.exports.aggregateLoad = function(user, numericEndDate) {
             $year: '$date'
           },
           week: {
-            $week: '$date'
-            // $week$ starts on Sunday, $isoWeek starts on Monday.
-            // $isoWeek: '$date' // isoWeek requires mongo 3.4+. 3/21/17: mLab is at 3.2.10
-            // In the meantime we need dayOfWeek  and the following two projections to make the adjustment.
+            $isoWeek: '$date' // isoWeek requires mongo 3.4+. 3/21/17: mLab is at 3.2.10
           },
-          dayOfWeek: {
-            $dayOfWeek: '$date'
-          },
-          _id: 1,
-          metrics: 1
-        }
-      }, {
-        $project: {
-          year: 1,
-          week: { $cond:[ { $eq: ['$dayOfWeek', 1] }, { $subtract:['$week', 1] }, '$week'] },
-          _id: 1,
-          metrics: 1
-        }
-      }, {
-        $project: {
-          // We have to adjust year and week if week is 0.
-          // This seems to work for 2017 however "An ISO week-numbering year (also called ISO year informally) has 52 or 53 full weeks."
-          // TODO: We need to implement $isoWeek above before the end of 2017.
-          year: { $cond:[ { $eq: ['$week', 0] }, { $subtract:['$year', 1] }, '$year'] },
-          week: { $cond:[ { $eq: ['$week', 0] }, 52, '$week'] },
           _id: 1,
           metrics: 1
         }
