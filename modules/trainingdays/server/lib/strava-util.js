@@ -312,6 +312,10 @@ module.exports.fetchActivity = function(user, activityId) {
         return reject(new Error(`strava.activities.get access failed. username: ${user.username}, activityId: ${activityId}, err: ${err}`));
       }
 
+      if (!payload) {
+        return reject(new Error(`strava.activities.get access failed. No payload returned. username: ${user.username}, activityId: ${activityId}`));
+      }
+
       if (payload.errors) {
         return reject(new Error(`strava.activities.get access returned errors. username: ${user.username}, activityId: ${activityId}, message: ${payload.message}, errors: ${JSON.stringify(payload.errors)}`));
       }
